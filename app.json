@@ -1,4 +1,11 @@
 {
   "name": "CM_App",
-  "displayName": "CM_App"
+  "scheme": "college_matcher",
+  "displayName": "CM_App",
+    "web": {
+      "bundler": "metro"
+    },
+  "plugins": [
+    "expo-router"
+  ]
 }
