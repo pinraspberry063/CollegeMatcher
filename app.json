@@ -1,6 +1,7 @@
 {
   "name": "CM_App",
   "scheme": "college_matcher",
+  "entryPoint": "./App.jsx",
   "displayName": "CM_App",
     "web": {
       "bundler": "metro"
