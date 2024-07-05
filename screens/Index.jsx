@@ -1,5 +1,6 @@
 import React from 'react';
 // import type {PropsWithChildren} from 'react';
+import TabBar from '../components/TabBar'
 import {
   SafeAreaView,
   ScrollView,
@@ -37,6 +38,8 @@ const index = ( {navigation} ) => {
           <Text style={styles.subtitle}>Let colleges find you today!</Text>
         
       </SafeAreaView>
+      
+      <TabBar/>
     </View>
   );
 };
