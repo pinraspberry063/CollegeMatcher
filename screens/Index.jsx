@@ -2,7 +2,6 @@ import React from 'react';
 import { Button } from 'react-native-elements';
 import {
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -10,7 +9,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import TabBar from '../components/TabBar';
 
-const index = ({ navigation }) => {
+const Index = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
@@ -27,10 +26,16 @@ const index = ({ navigation }) => {
         <Text style={styles.subtitle}>Let colleges find you today!</Text>
       </SafeAreaView>
 
-      <View style={styles.loginButtonContainer}>
+      <View style={styles.buttonContainer}>
         <Button
           title="Login"
           onPress={() => { navigation.navigate('Login') }}
+          buttonStyle={styles.button}
+        />
+        <Button
+          title="Create Account"
+          onPress={() => { navigation.navigate('AccountCreation') }}
+          buttonStyle={styles.button}
         />
       </View>
 
@@ -59,10 +64,14 @@ const styles = StyleSheet.create({
     right: 0,
     height: 20,
   },
-  loginButtonContainer: {
+  buttonContainer: {
     alignItems: 'center',
     marginTop: 20,
   },
+  button: {
+    marginVertical: 10,
+    width: 200,
+  },
 });
 
-export default index;
+export default Index;
