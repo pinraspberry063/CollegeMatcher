@@ -4,7 +4,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import axios from 'axios';
 
 
-const data = [
+const stateData = [
     { label: 'TX', value: '1' },
     { label: 'LA', value: '2' },
     { label: 'CL', value: '3' },
@@ -14,9 +14,11 @@ const data = [
     { label: 'KT', value: '7' },
     { label: 'MS', value: '8' },
   ];
+
   const DropdownComponent = () => {
     const [value, setValue] = useState(null);
 
+    //// waiting for access
     // useEffect(() => {
     //   var config = {
     //     method: 'get',
@@ -34,12 +36,12 @@ const data = [
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={data}
+          data={stateData}
           search
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder="Select item"
+          placeholder="Select"
           searchPlaceholder="Search..."
           value={value}
           onChange={item => {
@@ -56,15 +58,17 @@ const data = [
   const styles = StyleSheet.create({
     container:{
       flex:1, 
-      paddingTop: 100,
-      alignContent: 'center'
+      paddingTop: 0,
+      alignContent: 'left'
     },
     dropdown: {
       margin: 16,
       height: 50,
+      width: 400,
       backgroundColor: 'white',
       borderRadius: 12,
-      padding: 12,
+      //padding: 12,
+      paddingLeft: 20,
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
