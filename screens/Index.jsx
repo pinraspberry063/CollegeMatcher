@@ -9,6 +9,7 @@ import {
   Text,
   // useColorScheme,
   View,
+  Button
 } from 'react-native';
 import { Icon } from 'react-native-elements'
 
@@ -38,6 +39,16 @@ const index = ( {navigation} ) => {
           <Text style={styles.subtitle}>Let colleges find you today!</Text>
         
       </SafeAreaView>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          style={styles.button}
+          onPress={() => {navigation.push('Quiz')}}
+          title="Take the Quiz"
+          color="#841584"
+          accessibilityLabel="Take the quiz to be matched with colleges automatically"
+        />
+      </View>
       
       <TabBar/>
     </View>
@@ -63,6 +74,13 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     height: 20,
+  },
+  buttonContainer:{
+    alignItems: 'center',
+    paddingTop: 300
+  },
+  button: {
+    width: '50%'
   }
   
 });

@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Home from '../screens/Index';
 import Settings from '../screens/Settings';
 import SetDetail from '../screens/SetDetail';
+import Quiz from '../screens/Quiz';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ const NavStack = () => {
                 <HomeStack.Screen name="Home" component={Home} />
                 <HomeStack.Screen name="Settings" component={Settings} />
                 <HomeStack.Screen name="SetDetail" component={SetDetail} />
+                <HomeStack.Screen name="Quiz" component={Quiz} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
