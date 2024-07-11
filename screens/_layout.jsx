@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 
+import {Stack} from 'expo-router';
+
 // import {
 //   Colors,
 //   DebugInstructions,
@@ -18,11 +20,9 @@ import {
 //   ReloadInstructions,
 // } from 'react-native/Libraries/NewAppScreen';
 
-const App = () => {
+const RootLayout = () => {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Hello World!</Text>
-    </View>
+    <Stack.Screen name="index" options= {{}} />
   );
 };
 
@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default RootLayout;
