@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native'
-import React, { useState } from 'react'
-import DropdownComponent from '../components/DropdownComp'
+import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import DropdownComponent from '../components/DropdownComp';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { db } from '../config/firebaseConfig';
+import { collection, addDoc, getDocs, doc, setDoc } from 'firebase/firestore';
 
 const Quiz = ({ navigation }) => {
-
     const stateData = [
         { label: 'Alabama', value: '1' },
         { label: 'Alaska', value: '2' },
@@ -133,100 +134,165 @@ const Quiz = ({ navigation }) => {
     ];
 
     const distanceData = [
-        { label: '0-50 miles', value: '1' },
-        { label: '50-200 miles', value: '2' },
-        { label: '200-500 miles', value: '3' },
-        { label: '500+ miles', value: '4' },
+        { label: '0-50 miles', value: '0-50 miles' },
+        { label: '50-200 miles', value: '50-200 miles' },
+        { label: '200-500 miles', value: '200-500 miles' },
+        { label: '500+ miles', value: '500+ miles' },
     ];
 
     const tuitionData = [
-        { label: '$0 - $10,000', value: '1' },
-        { label: '$10,000 - $20,000', value: '2' },
-        { label: '$20,000 - $30,000', value: '3' },
-        { label: '$30,000 - $40,000', value: '4' },
-        { label: '$40,000+', value: '5' },
+        { label: '$0 - $10,000', value: '$0 - $10,000' },
+        { label: '$10,000 - $20,000', value: '$10,000 - $20,000' },
+        { label: '$20,000 - $30,000', value: '$20,000 - $30,000' },
+        { label: '$30,000 - $40,000', value: '$30,000 - $40,000' },
+        { label: '$40,000+', value: '$40,000+' },
     ];
 
     const religiousAffiliationData = [
-        { label: 'N/A', value: '1' },
-        { label: 'American Methodist Episcopal', value: '2' },
-        { label: 'African Methodist Episcopal Zion', value: '3' },
-        { label: 'American Baptist', value: '4' },
-        { label: 'American Evangelical Lutheran', value: '5' },
-        { label: 'Assemblies of God Church', value: '6' },
-        { label: 'Baptist', value: '7' },
-        { label: 'Brethren Church', value: '8' },
-        { label: 'Christ and Missionary Alliance', value: '9' },
-        { label: 'Christian', value: '10' },
-        { label: 'Christian Methodist', value: '11' },
-        { label: 'Christian Reformed', value: '12' },
-        { label: 'Church of God', value: '13' },
-        { label: 'Church of Nazarene', value: '14' },
-        { label: 'Church of Christ', value: '15' },
-        { label: 'Cumberland Presbyterian', value: '16' },
-        { label: 'Episcopal Reformed', value: '17' },
-        { label: 'Evangelical', value: '18' },
-        { label: 'Evangelical Covenant', value: '19' },
-        { label: 'Evangelical Free Church of American', value: '20' },
-        { label: 'Evangelical Lutheran', value: '21' },
-        { label: 'Free Methodist', value: '22' },
-        { label: 'Free Will Baptist', value: '23' },
-        { label: 'General Baptist', value: '24' },
-        { label: 'Greek Orthodox', value: '25' },
-        { label: 'Interdenominational', value: '26' },
-        { label: 'Jewish', value: '27' },
-        { label: 'Mennonite Brethren', value: '28' },
-        { label: 'Mennonite', value: '29' },
-        { label: 'Missionary', value: '30' },
-        { label: 'Moravian', value: '31' },
-        { label: 'Multiple Protestant Denomination', value: '32' },
-        { label: 'Non-Denominational', value: '33' },
-        { label: 'North American Baptist', value: '34' },
-        { label: 'Original Free Will Baptist', value: '35' },
-        { label: 'Other Protestant', value: '36' },
-        { label: 'Pentecostal Holiness', value: '37' },
-        { label: 'Plymouth Brethren', value: '38' },
-        { label: 'Presbyterian', value: '39' },
-        { label: 'Protestant Episcopal', value: '40' },
-        { label: 'Reformed Church in America', value: '41' },
-        { label: 'Reformed Presbyterian', value: '42' },
-        { label: 'Roman Catholic', value: '43' },
-        { label: 'Seventh Day Adventist', value: '44' },
-        { label: 'Southern Baptist', value: '45' },
-        { label: 'Church of Jesus Christ of Latter-Day Saints', value: '46' },
-        { label: 'Undenominational', value: '47' },
-        { label: 'Unitarian Universalist', value: '48' },
-        { label: 'United Brethren', value: '49' },
-        { label: 'United Methodist', value: '50' },
-        { label: 'Wesleyan', value: '51' },
-        { label: 'Wisconsin Evangelical Lutheran', value: '52' },
+        { label: 'N/A', value: 'N/A' },
+        { label: 'American Methodist Episcopal', value: 'American Methodist Episcopal' },
+        { label: 'African Methodist Episcopal Zion', value: 'African Methodist Episcopal Zion' },
+        { label: 'American Baptist', value: 'American Baptist' },
+        { label: 'American Evangelical Lutheran', value: 'American Evangelical Lutheran' },
+        { label: 'Assemblies of God Church', value: 'Assemblies of God Church' },
+        { label: 'Baptist', value: 'Baptist' },
+        { label: 'Brethren Church', value: 'Brethren Church' },
+        { label: 'Christ and Missionary Alliance', value: 'Christ and Missionary Alliance' },
+        { label: 'Christian', value: 'Christian' },
+        { label: 'Christian Methodist', value: 'Christian Methodist' },
+        { label: 'Christian Reformed', value: 'Christian Reformed' },
+        { label: 'Church of God', value: 'Church of God' },
+        { label: 'Church of Nazarene', value: 'Church of Nazarene' },
+        { label: 'Church of Christ', value: 'Church of Christ' },
+        { label: 'Cumberland Presbyterian', value: 'Cumberland Presbyterian' },
+        { label: 'Episcopal Reformed', value: 'Episcopal Reformed' },
+        { label: 'Evangelical', value: 'Evangelical' },
+        { label: 'Evangelical Covenant', value: 'Evangelical Covenant' },
+        { label: 'Evangelical Free Church of American', value: 'Evangelical Free Church of American' },
+        { label: 'Evangelical Lutheran', value: 'Evangelical Lutheran' },
+        { label: 'Free Methodist', value: 'Free Methodist' },
+        { label: 'Free Will Baptist', value: 'Free Will Baptist' },
+        { label: 'General Baptist', value: 'General Baptist' },
+        { label: 'Greek Orthodox', value: 'Greek Orthodox' },
+        { label: 'Interdenominational', value: 'Interdenominational' },
+        { label: 'Jewish', value: 'Jewish' },
+        { label: 'Mennonite Brethren', value: 'Mennonite Brethren' },
+        { label: 'Mennonite', value: 'Mennonite' },
+        { label: 'Missionary', value: 'Missionary' },
+        { label: 'Moravian', value: 'Moravian' },
+        { label: 'Multiple Protestant Denomination', value: 'Multiple Protestant Denomination' },
+        { label: 'Non-Denominational', value: 'Non-Denominational' },
+        { label: 'North American Baptist', value: 'North American Baptist' },
+        { label: 'Original Free Will Baptist', value: 'Original Free Will Baptist' },
+        { label: 'Other Protestant', value: 'Other Protestant' },
+        { label: 'Pentecostal Holiness', value: 'Pentecostal Holiness' },
+        { label: 'Plymouth Brethren', value: 'Plymouth Brethren' },
+        { label: 'Presbyterian', value: 'Presbyterian' },
+        { label: 'Protestant Episcopal', value: 'Protestant Episcopal' },
+        { label: 'Reformed Church in America', value: 'Reformed Church in America' },
+        { label: 'Reformed Presbyterian', value: 'Reformed Presbyterian' },
+        { label: 'Roman Catholic', value: 'Roman Catholic' },
+        { label: 'Seventh Day Adventist', value: 'Seventh Day Adventist' },
+        { label: 'Southern Baptist', value: 'Southern Baptist' },
+        { label: 'Church of Jesus Christ of Latter-Day Saints', value: 'Church of Jesus Christ of Latter-Day Saints' },
+        { label: 'Undenominational', value: 'Undenominational' },
+        { label: 'Unitarian Universalist', value: 'Unitarian Universalist' },
+        { label: 'United Brethren', value: 'United Brethren' },
+        { label: 'United Methodist', value: 'United Methodist' },
+        { label: 'Wesleyan', value: 'Wesleyan' },
+        { label: 'Wisconsin Evangelical Lutheran', value: 'Wisconsin Evangelical Lutheran' },
     ];
 
     const sizeData = [
-        { label: 'Small', value: '1' },
-        { label: 'Medium', value: '2' },
-        { label: 'Large', value: '3' },
-        { label: 'N/A', value: '4' },
+        { label: 'Small', value: 'Small' },
+        { label: 'Medium', value: 'Medium' },
+        { label: 'Large', value: 'Large' },
+        { label: 'N/A', value: 'N/A' },
     ];
 
     const typeOfAreaData = [
-        { label: 'City: Small', value: '1' },
-        { label: 'City: Midsize', value: '2' },
-        { label: 'City: Large', value: '3' },
-        { label: 'Suburb: Small', value: '4' },
-        { label: 'Suburb: Midsize', value: '5' },
-        { label: 'Suburb: Large', value: '6' },
-        { label: 'Rural: Fringe', value: '7' },
-        { label: 'Rural: Distant', value: '8' },
-        { label: 'Town: Fringe', value: '9' },
-        { label: 'Town: Distant', value: '10' },
-        { label: 'N/A', value: '11' },
+        { label: 'City: Small', value: 'City: Small' },
+        { label: 'City: Midsize', value: 'City: Midsize' },
+        { label: 'City: Large', value: 'City: Large' },
+        { label: 'Suburb: Small', value: 'Suburb: Small' },
+        { label: 'Suburb: Midsize', value: 'Suburb: Midsize' },
+        { label: 'Suburb: Large', value: 'Suburb: Large' },
+        { label: 'Rural: Fringe', value: 'Rural: Fringe' },
+        { label: 'Rural: Distant', value: 'Rural: Distant' },
+        { label: 'Town: Fringe', value: 'Town: Fringe' },
+        { label: 'Town: Distant', value: 'Town: Distant' },
+        { label: 'N/A', value: 'N/A' },
     ];
 
     const [gpa, setGpa] = useState('');
     const [satScore, setSatScore] = useState('');
     const [actScore, setActScore] = useState('');
+    const [distanceFromCollege, setDistanceFromCollege] = useState('');
+    const [major, setMajor] = useState('');
+    const [tuitionCost, setTuitionCost] = useState('');
+    const [religiousAffiliation, setReligiousAffiliation] = useState('');
+    const [sportCollege, setSportCollege] = useState('');
+    const [stateChoice, setStateChoice] = useState('');
+    const [collegeDiversity, setCollegeDiversity] = useState('');
+    const [size, setSize] = useState('');
+    const [schoolClassification, setSchoolClassification] = useState('');
+    const [urbanizationLevel, setUrbanizationLevel] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    useEffect(() => {
+        const saveCurrentPageData = async () => {
+            const docRef = doc(db, 'Quiz', 'user1');
+            const currentData = {
+                gpa,
+                sat: satScore,
+                act: actScore,
+                distance_from_college: distanceFromCollege,
+                major,
+                tuition_cost: tuitionCost,
+                religious_affiliation: religiousAffiliation,
+                sport_college: sportCollege,
+                state_choice: stateChoice,
+                college_diversity: collegeDiversity,
+                size,
+                school_classification: schoolClassification,
+                urbanization_level: urbanizationLevel,
+            };
+            await setDoc(docRef, currentData, { merge: true });
+        };
+
+        if (currentPage > 1) {
+            saveCurrentPageData();
+        }
+    }, [currentPage]);
+
+    const handleSubmit = async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "Quiz"));
+            const docCount = querySnapshot.size;
+            const newDocId = `user${docCount + 1}`;
+
+            await addDoc(collection(db, "Quiz"), {
+                gpa,
+                distance_from_college: distanceFromCollege,
+                major,
+                tuition_cost: tuitionCost,
+                sat: satScore,
+                act: actScore,
+                religious_affiliation: religiousAffiliation,
+                sport_college: sportCollege,
+                state_choice: stateChoice,
+                college_diversity: collegeDiversity,
+                size,
+                school_classification: schoolClassification,
+                urbanization_level: urbanizationLevel,
+                userId: newDocId
+            });
+            alert("Quiz submitted successfully!");
+            navigation.pop();
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        }
+    };
 
     const renderPageOne = () => (
         <View>
@@ -239,13 +305,13 @@ const Quiz = ({ navigation }) => {
             />
 
             <Text style={styles.text}>How far from home do you want your college to be?</Text>
-            <DropdownComponent data={distanceData} />
+            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistanceFromCollege} />
 
             <Text style={styles.text}>What do you plan to study?</Text>
-            <DropdownComponent data={majorData} />
+            <DropdownComponent data={majorData} value={major} onChange={setMajor} />
 
             <Text style={styles.text}>How much are you willing to pay for tuition?</Text>
-            <DropdownComponent data={tuitionData} />
+            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuitionCost} />
 
             <Text style={styles.text}>SAT score?</Text>
             <TextInput
@@ -268,26 +334,26 @@ const Quiz = ({ navigation }) => {
     const renderPageTwo = () => (
         <View>
             <Text style={styles.text}>Do you wish to attend a college of a specific religious affiliation?</Text>
-            <DropdownComponent data={religiousAffiliationData} />
+            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffiliation} />
 
             <Text style={styles.text}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
-                { label: 'Yes', value: '1' },
-                { label: 'No', value: '2' },
-            ]} />
+                { label: 'Yes', value: 'Yes' },
+                { label: 'No', value: 'No' },
+            ]} value={sportCollege} onChange={setSportCollege} />
 
             <Text style={styles.text}>Are you looking to attend college in a specific state?</Text>
-            <DropdownComponent data={stateData} />
+            <DropdownComponent data={stateData} value={stateChoice} onChange={setStateChoice} />
 
             <Text style={styles.text}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
-                { label: 'Neutral', value: '1' },
-                { label: 'Important', value: '2' },
-                { label: 'Very Important', value: '3' },
-            ]} />
+                { label: 'Neutral', value: 'Neutral' },
+                { label: 'Important', value: 'Important' },
+                { label: 'Very Important', value: 'Very Important' },
+            ]} value={collegeDiversity} onChange={setCollegeDiversity} />
 
             <Text style={styles.text}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} />
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
         </View>
     );
 
@@ -295,16 +361,16 @@ const Quiz = ({ navigation }) => {
         <View>
             <Text style={styles.text}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
-                { label: 'Public', value: '1' },
-                { label: 'Private', value: '2' },
-            ]} />
+                { label: 'Public', value: 'Public' },
+                { label: 'Private', value: 'Private' },
+            ]} value={schoolClassification} onChange={setSchoolClassification} />
 
             <Text style={styles.text}>Are you looking for a college in a specific type of area?</Text>
-            <DropdownComponent data={typeOfAreaData} />
+            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setUrbanizationLevel} />
 
             <View style={styles.buttonContainer}>
                 <Button
-                    onPress={() => navigation.pop()}
+                    onPress={handleSubmit}
                     title="Submit"
                 />
             </View>
@@ -318,14 +384,6 @@ const Quiz = ({ navigation }) => {
                 {currentPage === 2 && renderPageTwo()}
                 {currentPage === 3 && renderPageThree()}
                 <View style={styles.buttonContainer}>
-                    
-                    {currentPage < 3 && (
-                        <Button
-                            style={styles.button}
-                            onPress={() => setCurrentPage(currentPage + 1)}
-                            title="Next"
-                        />
-                    )}
                     {currentPage > 1 && (
                         <Button
                             style={styles.button}
@@ -333,19 +391,26 @@ const Quiz = ({ navigation }) => {
                             title="Back"
                         />
                     )}
+                    {currentPage < 3 && (
+                        <Button
+                            style={styles.button}
+                            onPress={() => setCurrentPage(currentPage + 1)}
+                            title="Next"
+                        />
+                    )}
                 </View>
             </SafeAreaView>
         </ScrollView>
-    )
-}
+    );
+};
 
-export default Quiz
+export default Quiz;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 20,
-        paddingHorizontal: 16
+        paddingHorizontal: 16,
     },
     textInput: {
         height: 40,
@@ -360,9 +425,9 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         paddingTop: 30,
-        margin:10
+        margin: 10,
     },
     button: {
-        marginTop:20
-    }
+        marginTop: 20,
+    },
 });
