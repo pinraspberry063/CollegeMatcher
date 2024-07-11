@@ -318,16 +318,19 @@ const Quiz = ({ navigation }) => {
                 {currentPage === 2 && renderPageTwo()}
                 {currentPage === 3 && renderPageThree()}
                 <View style={styles.buttonContainer}>
-                    {currentPage > 1 && (
-                        <Button
-                            onPress={() => setCurrentPage(currentPage - 1)}
-                            title="Back"
-                        />
-                    )}
+                    
                     {currentPage < 3 && (
                         <Button
+                            style={styles.button}
                             onPress={() => setCurrentPage(currentPage + 1)}
                             title="Next"
+                        />
+                    )}
+                    {currentPage > 1 && (
+                        <Button
+                            style={styles.button}
+                            onPress={() => setCurrentPage(currentPage - 1)}
+                            title="Back"
                         />
                     )}
                 </View>
@@ -342,7 +345,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 20,
-        paddingHorizontal: 16,
+        paddingHorizontal: 16
     },
     textInput: {
         height: 40,
@@ -356,6 +359,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
     },
     buttonContainer: {
-        marginVertical: 20,
+        paddingTop: 30,
+        margin:10
     },
+    button: {
+        marginTop:20
+    }
 });

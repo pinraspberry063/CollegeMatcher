@@ -54,9 +54,9 @@ import axios from 'axios';
       alignContent: 'left'
     },
     dropdown: {
-      margin: 16,
+      margin: 3,
       height: 50,
-      width: 400,
+      width: 375,
       backgroundColor: 'white',
       borderRadius: 12,
       //padding: 12,
