@@ -11,7 +11,7 @@ import {
   View,
   Button
 } from 'react-native';
-import { Icon } from 'react-native-elements'
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 // import {
 //   Colors,
@@ -25,12 +25,13 @@ const index = ( {navigation} ) => {
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
-        <Icon 
+        <Ionicons 
         raised
         name='settings-outline'
-        type='ionicon'
-        onPress = {() => {navigation.navigate('Settings')}}
-        / >
+        //type='ionicon'
+        size= {40}
+        onPress = {() => {navigation.push('Settings')}}
+        />
       </View>
       
       <SafeAreaView style={styles.titleContainer}>
@@ -50,7 +51,7 @@ const index = ( {navigation} ) => {
         />
       </View>
       
-      <TabBar/>
+
     </View>
   );
 };
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: 200
+    paddingTop: 300
   },
   title: {
     fontSize: 50,
@@ -80,7 +81,8 @@ const styles = StyleSheet.create({
     paddingTop: 300
   },
   button: {
-    width: '50%'
+    width: '50%',
+    margin: 10
   }
   
 });

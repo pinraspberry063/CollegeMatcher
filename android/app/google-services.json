@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927238517919",
+    "project_id": "collegematcher-46019",
+    "storage_bucket": "collegematcher-46019.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927238517919:android:0109f3299db0f46c5cdeaa",
+        "android_client_info": {
+          "package_name": "com.cm_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNY9QgiSZgEyY4soyUEkcPNjA6JCDF8AU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
