@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    height: 20,
+  
   },
   buttonContainer:{
     alignItems: 'center',
