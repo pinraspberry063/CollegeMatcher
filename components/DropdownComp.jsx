@@ -3,20 +3,9 @@ import React , {useState, useEffect} from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import axios from 'axios';
 
-
-const stateData = [
-    { label: 'TX', value: '1' },
-    { label: 'LA', value: '2' },
-    { label: 'CL', value: '3' },
-    { label: 'TN', value: '4' },
-    { label: 'NY', value: '5' },
-    { label: 'MN', value: '6' },
-    { label: 'KT', value: '7' },
-    { label: 'MS', value: '8' },
-  ];
-
-  const DropdownComponent = () => {
+  const DropdownComponent = ({data}) => {
     const [value, setValue] = useState(null);
+    const [isFocus, setIsFocus] = useState(false);
 
     //// waiting for access
     // useEffect(() => {
@@ -36,16 +25,19 @@ const stateData = [
           selectedTextStyle={styles.selectedTextStyle}
           inputSearchStyle={styles.inputSearchStyle}
           iconStyle={styles.iconStyle}
-          data={stateData}
+          data={data}
           search
           maxHeight={300}
           labelField="label"
           valueField="value"
-          placeholder="Select"
+          placeholder={!isFocus ? 'Select' : '...'}
           searchPlaceholder="Search..."
           value={value}
+          onFocus={() => setIsFocus(true)}
+          onBlur={() => setIsFocus(false)}
           onChange={item => {
             setValue(item.value);
+            setIsFocus(false);
           }}
           
         />

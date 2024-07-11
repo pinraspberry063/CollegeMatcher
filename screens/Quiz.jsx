@@ -5,6 +5,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Quiz = ({navigation}) => {
 
+    const stateData = [
+        { label: 'TX', value: '1' },
+        { label: 'LA', value: '2' },
+        { label: 'CL', value: '3' },
+        { label: 'TN', value: '4' },
+        { label: 'NY', value: '5' },
+        { label: 'MN', value: '6' },
+        { label: 'KT', value: '7' },
+        { label: 'MS', value: '8' },
+      ];
+
+    const majorData = [
+        {label: 'Accounting', value: '1'},
+        {label: 'Aerospace Engineering', value: '2'},
+        {label: 'Agriculture', value: '3'},
+        {label: 'Anatomy', value: '4'},
+        {label: 'English', value: '5'},
+        {label: 'Entrepreneurship', value: '6'},
+        {label: 'Environmetal Science', value: '7'},
+        {label: 'Fashion', value: '8'},
+        {label: 'Law', value: '9'},
+        {label: 'Music Industry', value: '10'},
+        {label: 'Information Technology', value: '11'},
+
+
+    ]
+
     const [gpa, setGpa] = useState('');
     return (
         <View style={styles.container}>
@@ -22,8 +49,7 @@ const Quiz = ({navigation}) => {
             
             <View style = {styles.dropdownContainer}>
                 <Text style={styles.text}>In what state so you wish to attend College?</Text>
-                <DropdownComponent/>
-                
+                <DropdownComponent name= "PrefState" data={stateData}/>
             </View>
             <View style={styles.buttonContainer}>
                 <Button style={styles.button}
