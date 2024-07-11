@@ -28,8 +28,8 @@ const index = ( {navigation} ) => {
         raised
         name='settings-outline'
         type='ionicon'
-        onPress = {() => {navigation.navigate('Settings')}}
-        / >
+        onPress = {() => {navigation.push('Settings')}}
+        />
       </View>
       
       <SafeAreaView style={styles.titleContainer}>
@@ -39,7 +39,7 @@ const index = ( {navigation} ) => {
         
       </SafeAreaView>
       
-      <TabBar/>
+
     </View>
   );
 };

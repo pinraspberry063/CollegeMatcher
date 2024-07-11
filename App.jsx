@@ -1,14 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import Navigator from './routes/homeStack';
+import NavStack from './routes/homeStack';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from './screens/Index'
 const Tab = createBottomTabNavigator();
 
-const App = (route) => {
+const App = () => {
   return (
-    <Navigator />
+    <NavStack />
   //   <Navigator> 
   //     <Tab.Navigator
   //       screenOptions={({ route }) => ({
@@ -37,6 +37,6 @@ const App = (route) => {
   )
 }
 
-export default registerRootComponent(App)
+export default registerRootComponent(App);
 
 const styles = StyleSheet.create({})
