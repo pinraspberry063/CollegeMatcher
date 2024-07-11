@@ -4,7 +4,7 @@ import { Button } from 'react-native-elements';
 //import ProfileImagePicker from '../components/ProfileImageComp';
 import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
 
-const SetDetail = ({route, navigation}) => {
+const Account = ({route, navigation}) => {
         const [url, seturl] = useState();
 
         useEffect(() => {
@@ -38,13 +38,14 @@ const SetDetail = ({route, navigation}) => {
     
 }
 
-export default SetDetail
+export default Account
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignContent: 'center',
-        marginTop: 10
+        marginTop: 10,
+        backgroundColor:'#fff'
         
     },
     profile: {

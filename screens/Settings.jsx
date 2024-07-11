@@ -35,7 +35,7 @@ const settings = ({navigation}) => {
       <FlatList
         data={setting}
         renderItem={({item}) => (
-          <TouchableOpacity onPress={() => navigation.navigate('SetDetail', item)}>
+          <TouchableOpacity onPress={() => navigation.navigate('Account', item)}>
             <Text style={styles.item}>{item.title}</Text>
           </TouchableOpacity>
         )}

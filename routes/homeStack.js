@@ -2,7 +2,7 @@ import {createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Home from '../screens/Index';
 import Settings from '../screens/Settings';
-import SetDetail from '../screens/SetDetail';
+import Account from '../screens/AccSettings';
 import Quiz from '../screens/Quiz';
 import Picker from '../components/ProfileImageComp'
 
@@ -22,7 +22,7 @@ const NavStack = () => {
 
                 <HomeStack.Screen name="Home" component={Home} />
                 <HomeStack.Screen name="Settings" component={Settings} />
-                <HomeStack.Screen name="SetDetail" component={SetDetail} />
+                <HomeStack.Screen name="Account" component={Account} />
                 <HomeStack.Screen name="Quiz" component={Quiz} />
                 <HomeStack.Screen name="Picker" component={Picker} />
             </HomeStack.Navigator>
