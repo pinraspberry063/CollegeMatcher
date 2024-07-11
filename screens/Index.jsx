@@ -10,7 +10,7 @@ import {
   // useColorScheme,
   View,
 } from 'react-native';
-import { Icon } from 'react-native-elements'
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 // import {
 //   Colors,
@@ -24,10 +24,11 @@ const index = ( {navigation} ) => {
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
-        <Icon 
+        <Ionicons 
         raised
         name='settings-outline'
-        type='ionicon'
+        //type='ionicon'
+        size= {40}
         onPress = {() => {navigation.push('Settings')}}
         />
       </View>
@@ -50,7 +51,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: 200
+    paddingTop: 300
   },
   title: {
     fontSize: 50,
@@ -62,7 +63,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    height: 20,
+    margin: 10
+  
   }
   
 });
