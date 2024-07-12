@@ -25,7 +25,7 @@ const index = ( {navigation} ) => {
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
-        <Ionicons 
+        <Ionicons
         raised
         name='settings-outline'
         //type='ionicon'
@@ -50,8 +50,23 @@ const index = ( {navigation} ) => {
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
       </View>
-      
 
+
+
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Login"
+          onPress={() => { navigation.navigate('Login') }}
+          buttonStyle={styles.button}
+        />
+        <Button
+          title="Create Account"
+          onPress={() => { navigation.navigate('AccountCreation') }}
+          buttonStyle={styles.button}
+        />
+      </View>
+
+      <TabBar />
     </View>
   );
 };
@@ -75,7 +90,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-  
+
   },
   buttonContainer:{
     alignItems: 'center',
@@ -86,6 +101,16 @@ const styles = StyleSheet.create({
     margin: 10
   }
   
+    height: 20,
+  },
+  buttonContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  button: {
+    marginVertical: 10,
+    width: 200,
+  },
 });
 
 export default index;

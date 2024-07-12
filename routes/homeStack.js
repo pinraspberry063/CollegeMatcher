@@ -5,6 +5,8 @@ import Settings from '../screens/Settings';
 import Account from '../screens/AccSettings';
 import Quiz from '../screens/Quiz';
 import Picker from '../components/ProfileImageComp'
+import Login from '../screens/Login'
+import AccountCreation from '../screens/AccountCreation'
 
 const HomeStack = createNativeStackNavigator();
 
@@ -25,6 +27,8 @@ const NavStack = () => {
                 <HomeStack.Screen name="Account" component={Account} />
                 <HomeStack.Screen name="Quiz" component={Quiz} />
                 <HomeStack.Screen name="Picker" component={Picker} />
+                <HomeStack.Screen name="Login" component={Login} />
+                <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
