@@ -239,26 +239,27 @@ const Quiz = ({ navigation }) => {
     const [urbanizationLevel, setUrbanizationLevel] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
+    const collectionRef = collection(db, 'Quiz');
     useEffect(() => {
         const saveCurrentPageData = async () => {
-            const docRef = doc(db, 'Quiz', 'user1');
-            const currentData = {
-                gpa,
+            const docRef = await addDoc(collectionRef, {
+                gpa: gpa,
                 sat: satScore,
                 act: actScore,
                 distance_from_college: distanceFromCollege,
-                major,
+                major: major,
                 tuition_cost: tuitionCost,
                 religious_affiliation: religiousAffiliation,
                 sport_college: sportCollege,
                 state_choice: stateChoice,
                 college_diversity: collegeDiversity,
-                size,
+                size: size,
                 school_classification: schoolClassification,
                 urbanization_level: urbanizationLevel,
-            };
-            await setDoc(docRef, currentData, { merge: true });
-        };
+            })
+
+            //await setDoc(docRef, currentData, { merge: true });
+        }
 
         if (currentPage > 1) {
             saveCurrentPageData();
@@ -267,11 +268,11 @@ const Quiz = ({ navigation }) => {
 
     const handleSubmit = async () => {
         try {
-            const querySnapshot = await getDocs(collection(db, "Quiz"));
+            const querySnapshot = await getDocs(collectionRef);
             const docCount = querySnapshot.size;
             const newDocId = `user${docCount + 1}`;
 
-            await addDoc(collection(db, "Quiz"), {
+            await addDoc(collectionRef, {
                 gpa,
                 distance_from_college: distanceFromCollege,
                 major,
