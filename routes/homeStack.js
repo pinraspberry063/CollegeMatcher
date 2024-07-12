@@ -9,9 +9,9 @@ import Preferences from '../screens/Preferences';
 
 const HomeStack = createNativeStackNavigator();
 
-const NavStack = () => {
+const NavStack = ({theme}) => {
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={theme}>
             <HomeStack.Navigator 
             screenOptions={{
                 headerMode: "screen",

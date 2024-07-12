@@ -1,12 +1,24 @@
 import { StyleSheet, Text, View, TouchableOpacity, Switch } from 'react-native'
-import React from 'react'
+import React, {useState, useContext} from 'react'
+import {EventRegister} from 'react-native-event-listeners'
+import themeContext from '../theme/themeContext'
+
 
 const Preferences = () => {
+  const theme = useContext(themeContext);
+  const [darkMode, setDarkMode] = useState(false);
   return (
-    <View styles={styles.container}>
-      <TouchableOpacity>
-        <Text style={styles.item}>Dark Mode</Text>
-        <Switch/>
+    <View styles={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+      <TouchableOpacity styles={[styles.container, {backgroundColor: theme.background}]}>
+        <Text style={[styles.item, {color: theme.color}]}>Dark Mode</Text>
+        <Switch
+          value={darkMode}
+          onValueChange={(value) => {
+            setDarkMode(value);
+            EventRegister.emit('Change Theme', value)
+
+          }}
+        />
         </TouchableOpacity>
     </View>
   )

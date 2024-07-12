@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native'
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
+import themeContext from '../theme/themeContext'
 
 const Quiz = ({ navigation }) => {
-
+    const theme = useContext(themeContext);
     const stateData = [
         { label: 'Alabama', value: '1' },
         { label: 'Alaska', value: '2' },
@@ -230,34 +231,34 @@ const Quiz = ({ navigation }) => {
 
     const renderPageOne = () => (
         <View>
-            <Text style={styles.text}>What is your GPA?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>What is your GPA?</Text>
             <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {borderColor: theme.color}]}
                 value={gpa}
                 onChangeText={setGpa}
                 placeholder='Ex: 3.6...'
             />
 
-            <Text style={styles.text}>How far from home do you want your college to be?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>How far from home do you want your college to be?</Text>
             <DropdownComponent data={distanceData} />
 
-            <Text style={styles.text}>What do you plan to study?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>What do you plan to study?</Text>
             <DropdownComponent data={majorData} />
 
-            <Text style={styles.text}>How much are you willing to pay for tuition?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>How much are you willing to pay for tuition?</Text>
             <DropdownComponent data={tuitionData} />
 
-            <Text style={styles.text}>SAT score?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>SAT score?</Text>
             <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {borderColor: theme.color}]}
                 value={satScore}
                 onChangeText={setSatScore}
                 placeholder='Ex: 1200...'
             />
 
-            <Text style={styles.text}>ACT score?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>ACT score?</Text>
             <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, {borderColor: theme.color}]}
                 value={actScore}
                 onChangeText={setActScore}
                 placeholder='Ex: 25...'
@@ -267,39 +268,39 @@ const Quiz = ({ navigation }) => {
 
     const renderPageTwo = () => (
         <View>
-            <Text style={styles.text}>Do you wish to attend a college of a specific religious affiliation?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Do you wish to attend a college of a specific religious affiliation?</Text>
             <DropdownComponent data={religiousAffiliationData} />
 
-            <Text style={styles.text}>Are you looking for a school with sporting events?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
                 { label: 'Yes', value: '1' },
                 { label: 'No', value: '2' },
             ]} />
 
-            <Text style={styles.text}>Are you looking to attend college in a specific state?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Are you looking to attend college in a specific state?</Text>
             <DropdownComponent data={stateData} />
 
-            <Text style={styles.text}>Are you looking for a diverse college?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
                 { label: 'Neutral', value: '1' },
                 { label: 'Important', value: '2' },
                 { label: 'Very Important', value: '3' },
             ]} />
 
-            <Text style={styles.text}>What size college are you looking for?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>What size college are you looking for?</Text>
             <DropdownComponent data={sizeData} />
         </View>
     );
 
     const renderPageThree = () => (
         <View>
-            <Text style={styles.text}>Are you looking for a Public or Private college?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
                 { label: 'Public', value: '1' },
                 { label: 'Private', value: '2' },
             ]} />
 
-            <Text style={styles.text}>Are you looking for a college in a specific type of area?</Text>
+            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a college in a specific type of area?</Text>
             <DropdownComponent data={typeOfAreaData} />
 
             <View style={styles.buttonContainer}>
