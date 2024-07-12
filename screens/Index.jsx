@@ -40,6 +40,18 @@ const index = ( {navigation} ) => {
           <Text style={styles.subtitle}>Let colleges find you today!</Text>
         
       </SafeAreaView>
+          <View style={styles.buttonContainer2}>
+            <Button
+              title="Login"
+              onPress={() => { navigation.navigate('Login') }}
+              buttonStyle={styles.button2}
+            />
+            <Button
+              title="Create Account"
+              onPress={() => { navigation.navigate('AccountCreation') }}
+              buttonStyle={styles.button2}
+            />
+          </View>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -48,21 +60,6 @@ const index = ( {navigation} ) => {
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
-        />
-      </View>
-
-
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Login"
-          onPress={() => { navigation.navigate('Login') }}
-          buttonStyle={styles.button}
-        />
-        <Button
-          title="Create Account"
-          onPress={() => { navigation.navigate('AccountCreation') }}
-          buttonStyle={styles.button}
         />
       </View>
 
@@ -94,20 +91,18 @@ const styles = StyleSheet.create({
   },
   buttonContainer:{
     alignItems: 'center',
-    paddingTop: 300
+    paddingTop: 200
   },
   button: {
     width: '50%',
     margin: 10
-  }
-  
-    height: 20,
   },
-  buttonContainer: {
+
+  buttonContainer2: {
     alignItems: 'center',
     marginTop: 20,
   },
-  button: {
+  button2: {
     marginVertical: 10,
     width: 200,
   },
