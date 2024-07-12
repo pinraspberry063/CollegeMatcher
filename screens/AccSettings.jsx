@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View, Image } from 'react-native'
-import React, { useEffect , useState} from 'react'
+import React, { useEffect , useState, useContext} from 'react'
 import { Button } from 'react-native-elements';
 //import ProfileImagePicker from '../components/ProfileImageComp';
 import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
+import themeContext from '../theme/themeContext'
 
 const Account = ({route, navigation}) => {
+        const theme = useContext(themeContext);
         const [url, seturl] = useState();
 
         useEffect(() => {
@@ -17,7 +19,7 @@ const Account = ({route, navigation}) => {
         }, []);
         return (
             
-            <View style={styles.container}>
+            <View style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
         
                 <Image
                 style={styles.profile}

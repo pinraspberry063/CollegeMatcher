@@ -28,6 +28,7 @@ const index = ( {navigation} ) => {
     <View style={styles.container}>
       <View style={styles.icon}>
         <Ionicons
+        color = {theme.color}
         raised
         name='settings-outline'
         //type='ionicon'

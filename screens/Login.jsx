@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import firebase from '../Firebase/firebase.js';
+import themeContext from '../theme/themeContext'
 
 const MAX_ATTEMPTS = 5;
 
 const Login = ({ navigation }) => {
+  const theme = useContext(themeContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ const Login = ({ navigation }) => {
         setLoading(false);
         setAttempts(0); // Reset attempts on successful login
         Alert.alert('Login Successful');
-        navigation.navigate('Quiz');
+        navigation.navigate('Home');
       })
       .catch((error) => {
         setLoading(false);
@@ -56,26 +58,29 @@ const Login = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={[styles.title, {color: theme.color}]}>Login</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
         placeholder="Email"
+        placeholderTextColor={theme.color}
         value={email}
         onChangeText={setEmail}
       />
       <View style={styles.passwordContainer}>
         <TextInput
-          style={[styles.input, styles.passwordInput]}
+          style={[styles.input, styles.passwordInput, {borderColor: theme.color, color: theme.color}]}
           placeholder="Password"
+          placeholderTextColor={theme.color}
           secureTextEntry={!showPassword}
           value={password}
+          
           onChangeText={setPassword}
         />
         <TouchableOpacity
           onPress={() => setShowPassword(!showPassword)}
           style={styles.toggleButton}
         >
-          <Text>{showPassword ? 'Hide' : 'Show'}</Text>
+          <Text style={{color: theme.color}}>{showPassword ? 'Hide' : 'Show'}</Text>
         </TouchableOpacity>
       </View>
       {loading ? (

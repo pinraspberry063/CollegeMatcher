@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 // import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -19,9 +19,10 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import themeContext from '../theme/themeContext'
 
 const settings = ({navigation}) => {
-
+  const theme = useContext(themeContext);
 
   return (
     <View style={styles.container}>
@@ -29,27 +30,27 @@ const settings = ({navigation}) => {
 
           <TouchableOpacity onPress={() => navigation.push('Account')}>
 
-            <Text style={styles.item}>Account</Text>
+            <Text style={[styles.item, {color: theme.color}]}>Account</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.push('Preferences')}>
 
-            <Text style={styles.item}>Preferences</Text>
+            <Text style={[styles.item, {color: theme.color}]}>Preferences</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => console.log("Favorited Colleges")}>
 
-            <Text style={styles.item}>Favorited Colleges</Text>
+            <Text style={[styles.item, {color: theme.color}]}>Favorited Colleges</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => console.log("Saved MAKK Chats")}>
 
-            <Text style={styles.item}>Saved MAKK Chats</Text>
+            <Text style={[styles.item, {color: theme.color}]}>Saved MAKK Chats</Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => console.log("Privacy")}>
 
-            <Text style={styles.item}>Privacy</Text>
+            <Text style={[styles.item, {color: theme.color}]}>Privacy</Text>
           </TouchableOpacity>
 
 

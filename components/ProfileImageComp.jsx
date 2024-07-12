@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Button, Image } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
+import themeContext from '../theme/themeContext'
 
 export default function ProfileImagePicker({navigation}) {
+  const theme = useContext(themeContext);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [transferred, setTransferred] = useState(0);
@@ -66,13 +68,13 @@ export default function ProfileImagePicker({navigation}) {
    
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
       <Button style={styles.selectButton} 
       onPress={selectImage}
       title= "Select Image"/>
        
       
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, {backgroundColor: theme.background}]}>
         {image !== null ? (
           <Image source={{ uri: image.uri }} style={styles.imageBox} />
         ) : null}

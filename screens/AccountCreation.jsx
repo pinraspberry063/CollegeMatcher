@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import firebase from '../Firebase/firebase.js';
+import themeContext from '../theme/themeContext'
 
 const AccountCreation = ({ navigation }) => {
+  const theme = useContext(themeContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +20,7 @@ const AccountCreation = ({ navigation }) => {
       .then((userCredential) => {
         setLoading(false);
         Alert.alert('Account Created');
-        navigation.navigate('Quiz');
+        navigation.push('Home');
       })
       .catch((error) => {
         setLoading(false);
@@ -28,16 +30,18 @@ const AccountCreation = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
+      <Text style={[styles.title, {color: theme.color }]}>Create Account</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, {borderColor: theme.color,color: theme.color }]}
         placeholder="Email"
+        placeholderTextColor={theme.color}
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
         placeholder="Password"
+        placeholderTextColor={theme.color}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
