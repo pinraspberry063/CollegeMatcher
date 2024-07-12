@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 // import type {PropsWithChildren} from 'react';
 import TabBar from '../components/TabBar'
 import {
@@ -12,6 +12,7 @@ import {
   Button
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import themeContext from '../theme/themeContext'
 
 // import {
 //   Colors,
@@ -22,6 +23,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 // } from 'react-native/Libraries/NewAppScreen';
 
 const index = ( {navigation} ) => {
+  const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
@@ -36,8 +38,8 @@ const index = ( {navigation} ) => {
       
       <SafeAreaView style={styles.titleContainer}>
         
-          <Text style={styles.title}>College Matcher</Text>
-          <Text style={styles.subtitle}>Let colleges find you today!</Text>
+          <Text style={[styles.title, {color: theme.color}]}>College Matcher</Text>
+          <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
         
       </SafeAreaView>
           <View style={styles.buttonContainer2}>
@@ -55,15 +57,15 @@ const index = ( {navigation} ) => {
 
       <View style={styles.buttonContainer}>
         <Button
-          style={styles.button}
+          style={[styles.button, {textShadowColor: theme.color}]}
           onPress={() => {navigation.push('Quiz')}}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
       </View>
+      
 
-      <TabBar />
     </View>
   );
 };
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-
+    backgroundColor: 'light'
   },
   buttonContainer:{
     alignItems: 'center',

@@ -7,12 +7,13 @@ import Quiz from '../screens/Quiz';
 import Picker from '../components/ProfileImageComp'
 import Login from '../screens/Login'
 import AccountCreation from '../screens/AccountCreation'
+import Preferences from '../screens/Preferences';
 
 const HomeStack = createNativeStackNavigator();
 
-const NavStack = () => {
+const NavStack = ({theme}) => {
     return (
-        <NavigationContainer>
+        <NavigationContainer theme={theme}>
             <HomeStack.Navigator 
             screenOptions={{
                 headerMode: "screen",
@@ -27,6 +28,7 @@ const NavStack = () => {
                 <HomeStack.Screen name="Account" component={Account} />
                 <HomeStack.Screen name="Quiz" component={Quiz} />
                 <HomeStack.Screen name="Picker" component={Picker} />
+                <HomeStack.Screen name="Preferences" component={Preferences} />
                 <HomeStack.Screen name="Login" component={Login} />
                 <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
             </HomeStack.Navigator>
