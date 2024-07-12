@@ -7,130 +7,130 @@ import { collection, addDoc, getDocs, doc, setDoc } from 'firebase/firestore';
 
 const Quiz = ({ navigation }) => {
     const stateData = [
-        { label: 'Alabama', value: '1' },
-        { label: 'Alaska', value: '2' },
-        { label: 'Arizona', value: '3' },
-        { label: 'Arkansas', value: '4' },
-        { label: 'California', value: '5' },
-        { label: 'Colorado', value: '6' },
-        { label: 'Connecticut', value: '7' },
-        { label: 'Delaware', value: '8' },
-        { label: 'Florida', value: '9' },
-        { label: 'Georgia', value: '10' },
-        { label: 'Hawaii', value: '11' },
-        { label: 'Idaho', value: '12' },
-        { label: 'Illinois', value: '13' },
-        { label: 'Indiana', value: '14' },
-        { label: 'Iowa', value: '15' },
-        { label: 'Kansas', value: '16' },
-        { label: 'Kentucky', value: '17' },
-        { label: 'Louisiana', value: '18' },
-        { label: 'Maine', value: '19' },
-        { label: 'Maryland', value: '20' },
-        { label: 'Massachusetts', value: '21' },
-        { label: 'Michigan', value: '22' },
-        { label: 'Minnesota', value: '23' },
-        { label: 'Mississippi', value: '24' },
-        { label: 'Missouri', value: '25' },
-        { label: 'Montana', value: '26' },
-        { label: 'Nebraska', value: '27' },
-        { label: 'Nevada', value: '28' },
-        { label: 'New Hampshire', value: '29' },
-        { label: 'New Jersey', value: '30' },
-        { label: 'New Mexico', value: '31' },
-        { label: 'New York', value: '32' },
-        { label: 'North Carolina', value: '33' },
-        { label: 'North Dakota', value: '34' },
-        { label: 'Ohio', value: '35' },
-        { label: 'Oklahoma', value: '36' },
-        { label: 'Oregon', value: '37' },
-        { label: 'Pennsylvania', value: '38' },
-        { label: 'Rhode Island', value: '39' },
-        { label: 'South Carolina', value: '40' },
-        { label: 'South Dakota', value: '41' },
-        { label: 'Tennessee', value: '42' },
-        { label: 'Texas', value: '43' },
-        { label: 'Utah', value: '44' },
-        { label: 'Vermont', value: '45' },
-        { label: 'Virginia', value: '46' },
-        { label: 'Washington', value: '47' },
-        { label: 'West Virginia', value: '48' },
-        { label: 'Wisconsin', value: '49' },
-        { label: 'Wyoming', value: '50' },
-        { label: 'Puerto Rico', value: '51' },
+        { label: 'Alabama', value: 'Alabama' },
+        { label: 'Alaska', value: 'Alaska' },
+        { label: 'Arizona', value: 'Arizona' },
+        { label: 'Arkansas', value: 'Arkansas' },
+        { label: 'California', value: 'California' },
+        { label: 'Colorado', value: 'Colorado' },
+        { label: 'Connecticut', value: 'Connecticut' },
+        { label: 'Delaware', value: 'Delaware' },
+        { label: 'Florida', value: 'Florida' },
+        { label: 'Georgia', value: 'Georgia' },
+        { label: 'Hawaii', value: 'Hawaii' },
+        { label: 'Idaho', value: 'Idaho' },
+        { label: 'Illinois', value: 'Illinois' },
+        { label: 'Indiana', value: 'Indiana' },
+        { label: 'Iowa', value: 'Iowa' },
+        { label: 'Kansas', value: 'Kansas' },
+        { label: 'Kentucky', value: 'Kentucky' },
+        { label: 'Louisiana', value: 'Louisiana' },
+        { label: 'Maine', value: 'Maine' },
+        { label: 'Maryland', value: 'Maryland' },
+        { label: 'Massachusetts', value: 'Massachusetts' },
+        { label: 'Michigan', value: 'Michigan' },
+        { label: 'Minnesota', value: 'Minnesota' },
+        { label: 'Mississippi', value: 'Mississippi' },
+        { label: 'Missouri', value: 'Missouri' },
+        { label: 'Montana', value: 'Montana' },
+        { label: 'Nebraska', value: 'Nebraska' },
+        { label: 'Nevada', value: 'Nevada' },
+        { label: 'New Hampshire', value: 'New Hampshire' },
+        { label: 'New Jersey', value: 'New Jersey' },
+        { label: 'New Mexico', value: 'New Mexico' },
+        { label: 'New York', value: 'New York' },
+        { label: 'North Carolina', value: 'North Carolina' },
+        { label: 'North Dakota', value: 'North Dakota' },
+        { label: 'Ohio', value: 'Ohio' },
+        { label: 'Oklahoma', value: 'Oklahoma' },
+        { label: 'Oregon', value: 'Oregon' },
+        { label: 'Pennsylvania', value: 'Pennsylvania' },
+        { label: 'Rhode Island', value: 'Rhode Island' },
+        { label: 'South Carolina', value: 'South Carolina' },
+        { label: 'South Dakota', value: 'South Dakota' },
+        { label: 'Tennessee', value: 'Tennessee' },
+        { label: 'Texas', value: 'Texas' },
+        { label: 'Utah', value: 'Utah' },
+        { label: 'Vermont', value: 'Vermont' },
+        { label: 'Virginia', value: 'Virginia' },
+        { label: 'Washington', value: 'Washington' },
+        { label: 'West Virginia', value: 'West Virginia' },
+        { label: 'Wisconsin', value: 'Wisconsin' },
+        { label: 'Wyoming', value: 'Wyoming' },
+        { label: 'Puerto Rico', value: 'Puerto Rico' },
     ];
 
     const majorData = [
-        { label: 'Aerospace Engineering', value: '1' },
-        { label: 'Accounting', value: '2' },
-        { label: 'Agriculture', value: '3' },
-        { label: 'Architecture', value: '4' },
-        { label: 'Biology', value: '5' },
-        { label: 'Biomedical Engineering', value: '6' },
-        { label: 'Biomedical Science', value: '7' },
-        { label: 'Business Administration', value: '8' },
-        { label: 'Business Management', value: '9' },
-        { label: 'Civil Engineering', value: '10' },
-        { label: 'Chemical Engineering', value: '11' },
-        { label: 'Chemistry', value: '12' },
-        { label: 'Communications', value: '13' },
-        { label: 'Communication Technology', value: '14' },
-        { label: 'Computer Information Systems', value: '15' },
-        { label: 'Computer Engineering', value: '16' },
-        { label: 'Computer Science', value: '17' },
-        { label: 'Construction Management', value: '18' },
-        { label: 'Construction Trades', value: '19' },
-        { label: 'Criminal Justice', value: '20' },
-        { label: 'Culinary', value: '21' },
-        { label: 'Ecology', value: '22' },
-        { label: 'Economics', value: '23' },
-        { label: 'Education', value: '24' },
-        { label: 'Engineering Technologies', value: '25' },
-        { label: 'Electrical Engineering', value: '26' },
-        { label: 'English', value: '27' },
-        { label: 'Entrepreneurship', value: '28' },
-        { label: 'Environmental Engineering', value: '29' },
-        { label: 'Environmental Protections', value: '30' },
-        { label: 'Environmental Sciences', value: '31' },
-        { label: 'Ethnic Studies', value: '32' },
-        { label: 'Fashion', value: '33' },
-        { label: 'Finance', value: '34' },
-        { label: 'Fitness Studies', value: '35' },
-        { label: 'Foreign Language', value: '36' },
-        { label: 'Forestry', value: '37' },
-        { label: 'General Studies', value: '38' },
-        { label: 'History', value: '39' },
-        { label: 'Human Resources', value: '40' },
-        { label: 'Human Sciences', value: '41' },
-        { label: 'Industrial Engineering', value: '42' },
-        { label: 'Interdisciplinary Studies', value: '43' },
-        { label: 'Journalism', value: '44' },
-        { label: 'Legal Studies', value: '45' },
-        { label: 'Liberal Arts', value: '46' },
-        { label: 'Marketing', value: '47' },
-        { label: 'Mathematics', value: '48' },
-        { label: 'Mechanic and Repair Technologies', value: '49' },
-        { label: 'Mechanical Engineering', value: '50' },
-        { label: 'Multidisciplinary Studies', value: '51' },
-        { label: 'Musical Studies', value: '52' },
-        { label: 'Natural Resource Management', value: '53' },
-        { label: 'Performing Arts', value: '54' },
-        { label: 'Philosophy', value: '55' },
-        { label: 'Psychology', value: '56' },
-        { label: 'Physical Sciences', value: '57' },
-        { label: 'Political Science', value: '58' },
-        { label: 'Precision Production', value: '59' },
-        { label: 'Protective Services', value: '60' },
-        { label: 'Public Administration', value: '61' },
-        { label: 'Religious Studies', value: '62' },
-        { label: 'Religious Vocations', value: '63' },
-        { label: 'Social Services', value: '64' },
-        { label: 'Social Sciences', value: '65' },
-        { label: 'Sociology', value: '66' },
-        { label: 'Statistics', value: '67' },
-        { label: 'Supply Chain', value: '68' },
-        { label: 'Theology', value: '69' },
-        { label: 'Visual Arts', value: '70' },
+        { label: 'Aerospace Engineering', value: 'Aerospace Engineering' },
+        { label: 'Accounting', value: 'Accounting' },
+        { label: 'Agriculture', value: 'Agriculture' },
+        { label: 'Architecture', value: 'Architecture' },
+        { label: 'Biology', value: 'Biology' },
+        { label: 'Biomedical Engineering', value: 'Biomedical Engineering' },
+        { label: 'Biomedical Science', value: 'Biomedical Science' },
+        { label: 'Business Administration', value: 'Business Administration' },
+        { label: 'Business Management', value: 'Business Management' },
+        { label: 'Civil Engineering', value: 'Civil Engineering' },
+        { label: 'Chemical Engineering', value: 'Chemical Engineering' },
+        { label: 'Chemistry', value: 'Chemistry' },
+        { label: 'Communications', value: 'Communication' },
+        { label: 'Communication Technology', value: 'Communication Technology' },
+        { label: 'Computer Information Systems', value: 'Computer Information Systems' },
+        { label: 'Computer Engineering', value: 'Computer Engineering' },
+        { label: 'Computer Science', value: 'Computer Science' },
+        { label: 'Construction Management', value: 'Construction Management' },
+        { label: 'Construction Trades', value: 'Construction Trades' },
+        { label: 'Criminal Justice', value: 'Criminal Justice' },
+        { label: 'Culinary', value: 'Culinary' },
+        { label: 'Ecology', value: 'Ecology' },
+        { label: 'Economics', value: 'Economics' },
+        { label: 'Education', value: 'Education' },
+        { label: 'Engineering Technologies', value: 'Engineering Technology' },
+        { label: 'Electrical Engineering', value: 'Electrical Engineering' },
+        { label: 'English', value: 'English' },
+        { label: 'Entrepreneurship', value: 'Entrepreneurship' },
+        { label: 'Environmental Engineering', value: 'Environmental Engineering' },
+        { label: 'Environmental Protections', value: 'Environmental Protections' },
+        { label: 'Environmental Sciences', value: 'Environmental Sciences' },
+        { label: 'Ethnic Studies', value: 'Ethnic Studies' },
+        { label: 'Fashion', value: 'Fashion' },
+        { label: 'Finance', value: 'Finance' },
+        { label: 'Fitness Studies', value: 'Fitness Studies' },
+        { label: 'Foreign Language', value: 'Foreign Language' },
+        { label: 'Forestry', value: 'Forestry' },
+        { label: 'General Studies', value: 'General Studies' },
+        { label: 'History', value: 'History' },
+        { label: 'Human Resources', value: 'Human Resources' },
+        { label: 'Human Sciences', value: 'Human Sciences' },
+        { label: 'Industrial Engineering', value: 'Industrial Engineering' },
+        { label: 'Interdisciplinary Studies', value: 'Interdisciplinary Studies' },
+        { label: 'Journalism', value: 'Journalism' },
+        { label: 'Legal Studies', value: 'Legal Studies' },
+        { label: 'Liberal Arts', value: 'Liberal Arts' },
+        { label: 'Marketing', value: 'Marketing' },
+        { label: 'Mathematics', value: 'Mathematics' },
+        { label: 'Mechanic and Repair Technologies', value: 'Mechanic and Repair Technologies' },
+        { label: 'Mechanical Engineering', value: 'Mechanical Engineering' },
+        { label: 'Multidisciplinary Studies', value: 'Multidisciplinary Studies' },
+        { label: 'Musical Studies', value: 'Musical Studies' },
+        { label: 'Natural Resource Management', value: 'Natural Resource Management' },
+        { label: 'Performing Arts', value: 'Performing Arts' },
+        { label: 'Philosophy', value: 'Philosophy' },
+        { label: 'Psychology', value: 'Psychology' },
+        { label: 'Physical Sciences', value: 'Physical Sciences' },
+        { label: 'Political Science', value: 'Political Science' },
+        { label: 'Precision Production', value: 'Precision Production' },
+        { label: 'Protective Services', value: 'Protective Services' },
+        { label: 'Public Administration', value: 'Public Administration' },
+        { label: 'Religious Studies', value: 'Religious Studies' },
+        { label: 'Religious Vocations', value: 'Religious Vocations' },
+        { label: 'Social Services', value: 'Social Services' },
+        { label: 'Social Sciences', value: 'Social Sciences' },
+        { label: 'Sociology', value: 'Sociology' },
+        { label: 'Statistics', value: 'Statistics' },
+        { label: 'Supply Chain', value: 'Supply Chain' },
+        { label: 'Theology', value: 'Theology' },
+        { label: 'Visual Arts', value: 'Visual Arts' },
     ];
 
     const distanceData = [
@@ -240,45 +240,16 @@ const Quiz = ({ navigation }) => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const collectionRef = collection(db, 'Quiz');
-    useEffect(() => {
-        const saveCurrentPageData = async () => {
-            const docRef = await addDoc(collectionRef, {
-                gpa: gpa,
-                sat: satScore,
-                act: actScore,
-                distance_from_college: distanceFromCollege,
-                major: major,
-                tuition_cost: tuitionCost,
-                religious_affiliation: religiousAffiliation,
-                sport_college: sportCollege,
-                state_choice: stateChoice,
-                college_diversity: collegeDiversity,
-                size: size,
-                school_classification: schoolClassification,
-                urbanization_level: urbanizationLevel,
-            })
-
-            //await setDoc(docRef, currentData, { merge: true });
-        }
-
-        if (currentPage > 1) {
-            saveCurrentPageData();
-        }
-    }, [currentPage]);
 
     const handleSubmit = async () => {
         try {
-            const querySnapshot = await getDocs(collectionRef);
-            const docCount = querySnapshot.size;
-            const newDocId = `user${docCount + 1}`;
-
             await addDoc(collectionRef, {
                 gpa,
+                sat: satScore,
+                act: actScore,
                 distance_from_college: distanceFromCollege,
                 major,
                 tuition_cost: tuitionCost,
-                sat: satScore,
-                act: actScore,
                 religious_affiliation: religiousAffiliation,
                 sport_college: sportCollege,
                 state_choice: stateChoice,
@@ -286,7 +257,6 @@ const Quiz = ({ navigation }) => {
                 size,
                 school_classification: schoolClassification,
                 urbanization_level: urbanizationLevel,
-                userId: newDocId
             });
             alert("Quiz submitted successfully!");
             navigation.pop();
@@ -304,16 +274,12 @@ const Quiz = ({ navigation }) => {
                 onChangeText={setGpa}
                 placeholder='Ex: 3.6...'
             />
-
             <Text style={styles.text}>How far from home do you want your college to be?</Text>
             <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistanceFromCollege} />
-
             <Text style={styles.text}>What do you plan to study?</Text>
             <DropdownComponent data={majorData} value={major} onChange={setMajor} />
-
             <Text style={styles.text}>How much are you willing to pay for tuition?</Text>
             <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuitionCost} />
-
             <Text style={styles.text}>SAT score?</Text>
             <TextInput
                 style={styles.textInput}
@@ -321,7 +287,6 @@ const Quiz = ({ navigation }) => {
                 onChangeText={setSatScore}
                 placeholder='Ex: 1200...'
             />
-
             <Text style={styles.text}>ACT score?</Text>
             <TextInput
                 style={styles.textInput}
@@ -336,23 +301,19 @@ const Quiz = ({ navigation }) => {
         <View>
             <Text style={styles.text}>Do you wish to attend a college of a specific religious affiliation?</Text>
             <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffiliation} />
-
             <Text style={styles.text}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
                 { label: 'Yes', value: 'Yes' },
-                { label: 'No', value: 'No' },
+                { label: 'No', value: 'No' }
             ]} value={sportCollege} onChange={setSportCollege} />
-
             <Text style={styles.text}>Are you looking to attend college in a specific state?</Text>
             <DropdownComponent data={stateData} value={stateChoice} onChange={setStateChoice} />
-
             <Text style={styles.text}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
                 { label: 'Neutral', value: 'Neutral' },
                 { label: 'Important', value: 'Important' },
-                { label: 'Very Important', value: 'Very Important' },
+                { label: 'Very Important', value: 'Very Important' }
             ]} value={collegeDiversity} onChange={setCollegeDiversity} />
-
             <Text style={styles.text}>What size college are you looking for?</Text>
             <DropdownComponent data={sizeData} value={size} onChange={setSize} />
         </View>
@@ -363,12 +324,10 @@ const Quiz = ({ navigation }) => {
             <Text style={styles.text}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
                 { label: 'Public', value: 'Public' },
-                { label: 'Private', value: 'Private' },
+                { label: 'Private', value: 'Private' }
             ]} value={schoolClassification} onChange={setSchoolClassification} />
-
             <Text style={styles.text}>Are you looking for a college in a specific type of area?</Text>
             <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setUrbanizationLevel} />
-
             <View style={styles.buttonContainer}>
                 <Button
                     onPress={handleSubmit}
