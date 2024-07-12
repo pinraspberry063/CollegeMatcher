@@ -4,7 +4,8 @@ import Home from '../screens/Index';
 import Settings from '../screens/Settings';
 import Account from '../screens/AccSettings';
 import Quiz from '../screens/Quiz';
-import Picker from '../components/ProfileImageComp'
+import Picker from '../components/ProfileImageComp';
+import Preferences from '../screens/Preferences';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -25,6 +26,7 @@ const NavStack = () => {
                 <HomeStack.Screen name="Account" component={Account} />
                 <HomeStack.Screen name="Quiz" component={Quiz} />
                 <HomeStack.Screen name="Picker" component={Picker} />
+                <HomeStack.Screen name="Preferences" component={Preferences} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );

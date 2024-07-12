@@ -21,25 +21,39 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 const settings = ({navigation}) => {
-  
-  const [setting, setSettings] = useState([
-    {title: 'Account', key: '1'},
-    {title: 'Favorited Colleges', key: '2'},
-    {title: 'Account type', key: '3'},
-    {title: 'Preferences', key: '4'},
-  ]);
 
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={setting}
-        renderItem={({item}) => (
-          <TouchableOpacity onPress={() => navigation.navigate('Account', item)}>
-            <Text style={styles.item}>{item.title}</Text>
+      <ScrollView>
+
+          <TouchableOpacity onPress={() => navigation.push('Account')}>
+
+            <Text style={styles.item}>Account</Text>
           </TouchableOpacity>
-        )}
-      />
+
+          <TouchableOpacity onPress={() => navigation.push('Preferences')}>
+
+            <Text style={styles.item}>Preferences</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => console.log("Favorited Colleges")}>
+
+            <Text style={styles.item}>Favorited Colleges</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => console.log("Saved MAKK Chats")}>
+
+            <Text style={styles.item}>Saved MAKK Chats</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => console.log("Privacy")}>
+
+            <Text style={styles.item}>Privacy</Text>
+          </TouchableOpacity>
+
+
+      </ScrollView>
     </View>
   );
 };
