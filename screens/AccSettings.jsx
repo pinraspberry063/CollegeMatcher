@@ -12,7 +12,7 @@ const Account = ({route, navigation}) => {
         useEffect(() => {
             const func = async () => {
                 const storage = getStorage();
-                const reference = ref(storage, "/profile");
+                const reference = ref(storage, "./assets/profile");
                 await getDownloadURL(reference).then((x)=> {seturl(x);})
             }
             func();

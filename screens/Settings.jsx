@@ -21,7 +21,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import themeContext from '../theme/themeContext'
 
-const settings = ({navigation}) => {
+const Settings = ({navigation}) => {
   const theme = useContext(themeContext);
 
   return (
@@ -70,4 +70,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default settings;
+export default Settings;
