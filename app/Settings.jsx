@@ -28,12 +28,12 @@ const Settings = ({navigation}) => {
     <View style={styles.container}>
       <ScrollView>
 
-          <TouchableOpacity onPress={() => navigation.push('Account')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Account')}>
 
             <Text style={[styles.item, {color: theme.color}]}>Account</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.push('Preferences')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
 
             <Text style={[styles.item, {color: theme.color}]}>Preferences</Text>
           </TouchableOpacity>

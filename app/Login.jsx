@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import firebase from '../Firebase/firebase.js';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext.js'
 
 const MAX_ATTEMPTS = 5;
 

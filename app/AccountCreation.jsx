@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import firebase from '../Firebase/firebase.js';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext.js'
 
 const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -20,7 +20,7 @@ const AccountCreation = ({ navigation }) => {
       .then((userCredential) => {
         setLoading(false);
         Alert.alert('Account Created');
-        navigation.push('Home');
+        navigation.navigate('Home');
       })
       .catch((error) => {
         setLoading(false);

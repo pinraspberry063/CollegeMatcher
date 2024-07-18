@@ -5,6 +5,7 @@ import { Button } from 'react-native-elements';
 import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
 import themeContext from '../theme/themeContext'
 
+
 const Account = ({route, navigation}) => {
         const theme = useContext(themeContext);
         const [url, seturl] = useState();

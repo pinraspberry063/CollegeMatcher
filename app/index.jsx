@@ -13,28 +13,27 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext'
+import Settings from './Settings';
+import Account from './AccSettings';
+import Quiz from './Quiz';
+import Login from './Login'
+import AccountCreation from './AccountCreation'
+import Preferences from './Preferences';
+import {Link, Redirect} from 'expo-router';
 
-// import {
-//   Colors,
-//   DebugInstructions,
-//   Header,
-//   LearnMoreLinks,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
-
-const Index = ( {navigation} ) => {
+const Home = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
-        <Ionicons
-        color = {theme.color}
-        raised
-        name='settings-outline'
-        //type='ionicon'
-        size= {40}
-        onPress = {() => {navigation.push('Settings')}}
-        />
+          <Ionicons
+          color = {theme.color}
+          raised
+          name='settings-outline'
+          //type='ionicon'
+          size= {40}
+          onPress={()=> {navigation.navigate('Settings')}}
+          />
       </View>
       
       <SafeAreaView style={styles.titleContainer}>
@@ -59,7 +58,7 @@ const Index = ( {navigation} ) => {
       <View style={styles.buttonContainer}>
         <Button
           style={[styles.button, {textShadowColor: theme.color}]}
-          onPress={() => {navigation.push('Quiz')}}
+          onPress={() => {navigation.navigate('Quiz')}}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
@@ -111,4 +110,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Index;
+export default Home
+
+export {
+  Login, 
+  AccountCreation,
+  Account, 
+  Preferences,
+  Quiz,
+  Settings
+
+}
