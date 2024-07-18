@@ -22,7 +22,7 @@ import themeContext from '../theme/themeContext'
 //   ReloadInstructions,
 // } from 'react-native/Libraries/NewAppScreen';
 
-const index = ( {navigation} ) => {
+const Index = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
@@ -111,4 +111,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default index;
+export default Index;
