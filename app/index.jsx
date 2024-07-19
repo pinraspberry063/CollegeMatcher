@@ -26,15 +26,17 @@ const Home = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
-      <View style={styles.icon}>
-          <Ionicons
-          color = {theme.color}
-          raised
-          name='settings-outline'
-          //type='ionicon'
-          size= {40}
-          onPress={()=> {navigation.navigate('Settings')}}
-          />
+      <View style={styles.topNav}>
+        <View style={styles.icon}>
+            <Ionicons
+            color = {theme.color}
+            raised
+            name='settings-outline'
+            //type='ionicon'
+            size= {40}
+            onPress={()=> {navigation.navigate('Settings')}}
+            />
+        </View>
       </View>
       
       <SafeAreaView style={styles.titleContainer}>
@@ -54,9 +56,6 @@ const Home = ( {navigation} ) => {
         />
       </View>
 
-    
-      
-
     </View>
   );
 };
@@ -64,6 +63,10 @@ const Home = ( {navigation} ) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  topNav: {
+    height: '5%',
+    backgroundColor: 'grey'
   },
   titleContainer: {
     alignItems: 'center',
@@ -80,7 +83,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: 'light'
   },
   buttonContainer:{
     alignItems: 'center',

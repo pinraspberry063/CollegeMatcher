@@ -25,9 +25,10 @@ export default Launch
 const styles = StyleSheet.create({
 
     buttonContainer2: {
+        flex:1, 
         alignItems: 'center',
-        marginTop: 20,
-      },
+        justifyContent: 'center'
+    },
     button2: {
     marginVertical: 10,
     width: 200,
