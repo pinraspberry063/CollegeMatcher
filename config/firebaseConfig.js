@@ -1,6 +1,6 @@
 import firebase from 'firebase/compat/app';
-import 'firebase/auth';
 import {getFirestore} from 'firebase/firestore';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 
 const firebaseConfig = {
@@ -12,7 +12,6 @@ const firebaseConfig = {
   appId: "1:927238517919:android:0109f3299db0f46c5cdeaa"
 };
 const db = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
-
 export default { db};
 
  
