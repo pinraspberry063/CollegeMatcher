@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import firebase from '../Firebase/firebase.js';
+import { db } from '../config/firebase.js';
 import themeContext from '../theme/themeContext'
 
 const AccountCreation = ({ navigation }) => {
@@ -16,7 +16,7 @@ const AccountCreation = ({ navigation }) => {
     }
 
     setLoading(true);
-    firebase.auth().createUserWithEmailAndPassword(email, password)
+    db.auth().createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
         setLoading(false);
         Alert.alert('Account Created');
