@@ -20,7 +20,7 @@ const AccountCreation = ({ navigation }) => {
       .then((userCredential) => {
         setLoading(false);
         Alert.alert('Account Created');
-        navigation.navigate('Home');
+        navigation.navigate('Main');
       })
       .catch((error) => {
         setLoading(false);

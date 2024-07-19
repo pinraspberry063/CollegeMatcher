@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native'
 import React, { useState, useContext } from 'react'
-import DropdownComponent from '../components/DropdownComp'
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
+import DropdownComponent from '../components/DropdownComp';
 
 const Quiz = ({ navigation }) => {
     const theme = useContext(themeContext);
@@ -305,7 +306,11 @@ const Quiz = ({ navigation }) => {
 
             <View style={styles.buttonContainer}>
                 <Button
-                    onPress={() => navigation.pop()}
+                    onPress={() => 
+                        {
+                            navigation.navigate('Home');
+                            setCurrentPage(1);
+                        }}
                     title="Submit"
                 />
             </View>

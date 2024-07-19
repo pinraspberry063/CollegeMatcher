@@ -2,7 +2,7 @@
   "expo": {
     "name": "CM_App",
     "scheme": "mycollegematcher",
-    "entryPoint": "./app",
+    "entryPoint": "./App.jsx",
     "displayName": "CM_App",
       "web": {
         "bundler": "metro"

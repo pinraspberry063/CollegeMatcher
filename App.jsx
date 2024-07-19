@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, {useState, useEffect} from 'react'
-import NavStack from './routes/homeStack';
 import { DarkTheme, DefaultTheme , NavigationContainer} from '@react-navigation/native';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,10 +9,13 @@ import themeContext from './theme/themeContext'
 import theme from './theme/theme'
 import  Quiz from './app/Quiz'
 import Settings from './app/Settings'
-import Index from './app'
+import Home, { AccountCreation, Login } from './app/index'
 import Account from './app/AccSettings'
+import Picker from './app/ProfileImageComp'
+import {createNativeStackNavigator } from '@react-navigation/native-stack';
+import Launch from './app/Launch';
+import Preferences from './app/Preferences';
 
-const Tab = createBottomTabNavigator();
 const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
@@ -26,8 +28,45 @@ const screenOptions = {
     height: 60, 
     background: "#fff"
   }
-
 }
+const HomeStack = createNativeStackNavigator();
+const HomeStackScreen = () => (
+  <HomeStack.Navigator screenOptions={screenOptions}>
+    <HomeStack.Screen name="Home" component={Home} />
+    <HomeStack.Screen name="Settings" component={Settings} />
+    <HomeStack.Screen name="Account" component={Account} />
+    <HomeStack.Screen name="Picker" component={Picker} />
+    <HomeStack.Screen name="Preferences" component={Preferences} />
+  </HomeStack.Navigator>
+)
+
+const QuizStack = createNativeStackNavigator();
+const QuizStackScreen = () => (
+  <QuizStack.Navigator>
+    <QuizStack.Screen name="Quiz" component={Quiz} />
+  </QuizStack.Navigator>
+)
+
+
+const Tab = createBottomTabNavigator();
+const TabScreen = () => (
+  <Tab.Navigator screenOptions={screenOptions}>
+    <Tab.Screen name="Home" component={HomeStackScreen} />
+    <Tab.Screen name="Quiz" component={QuizStackScreen} />
+  </Tab.Navigator>
+)
+
+const RootStack = createNativeStackNavigator();
+const LaunchStack = createNativeStackNavigator();
+const LaunchStackScreen = () => (
+  <LaunchStack.Navigator screenOptions={screenOptions}> 
+    <LaunchStack.Screen name="Launch" component={Launch} />
+    <LaunchStack.Screen name="Login" component={Login} />
+    <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
+  </LaunchStack.Navigator>
+)
+
+
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -45,18 +84,15 @@ const App = () => {
 
     
     <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-      {/* <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-        <Tab.Navigator screenOptions={screenOptions}>
-          <Tab.Screen name="Home" component={Index} />
-          <Tab.Screen name="Quiz" component={Quiz} />
-          <Tab.Screen name="Account" component={Account} />
-          <Tab.Screen name="Settings" component={Settings} />
-        </Tab.Navigator>
-
-      </ NavigationContainer> */}
-      <NavStack/>
+      <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+        <RootStack.Navigator screenOptions={screenOptions}>
+          <RootStack.Screen name="Launch" component={LaunchStackScreen}/>
+          <RootStack.Screen name="Main" component={TabScreen}/>
+        </RootStack.Navigator>
+        
+      </ NavigationContainer>
     </themeContext.Provider>
-
+  
   )
 }
 

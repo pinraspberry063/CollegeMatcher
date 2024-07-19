@@ -21,6 +21,7 @@ import AccountCreation from './AccountCreation'
 import Preferences from './Preferences';
 import {Link, Redirect} from 'expo-router';
 
+
 const Home = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
@@ -42,18 +43,6 @@ const Home = ( {navigation} ) => {
           <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
         
       </SafeAreaView>
-          <View style={styles.buttonContainer2}>
-            <Button
-              title="Login"
-              onPress={() => { navigation.navigate('Login') }}
-              buttonStyle={styles.button2}
-            />
-            <Button
-              title="Create Account"
-              onPress={() => { navigation.navigate('AccountCreation') }}
-              buttonStyle={styles.button2}
-            />
-          </View>
 
       <View style={styles.buttonContainer}>
         <Button
@@ -64,6 +53,8 @@ const Home = ( {navigation} ) => {
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
       </View>
+
+    
       
 
     </View>
