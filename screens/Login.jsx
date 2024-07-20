@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
-import firebase from '../Firebase/firebase.js';
+import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext'
 
 const MAX_ATTEMPTS = 5;
@@ -27,7 +27,7 @@ const Login = ({ navigation }) => {
      }
 
     setLoading(true);
-    firebase.auth().signInWithEmailAndPassword(email, password)
+    auth().signInWithEmailAndPassword(email, password)
       .then((userCredential) => {
         setLoading(false);
         setAttempts(0); // Reset attempts on successful login
@@ -47,7 +47,7 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    firebase.auth().sendPasswordResetEmail(email)
+    auth().sendPasswordResetEmail(email)
       .then(() => {
         Alert.alert('Password Reset', 'A password reset email has been sent to your email address.');
       })
