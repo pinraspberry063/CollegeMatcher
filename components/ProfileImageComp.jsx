@@ -15,7 +15,7 @@ export default function Picker({navigation}) {
   const user = auth().currentUser;
 
   const navigateToAccountSettings = () => {
-    navigation.pop();
+    navigation.navigate("Account");
   }
   const uploadImage = async () => {
     const { uri } = image;
