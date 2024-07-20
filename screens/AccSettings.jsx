@@ -2,18 +2,29 @@ import { StyleSheet, Text, View, Image } from 'react-native'
 import React, { useEffect , useState, useContext} from 'react'
 import { Button } from 'react-native-elements';
 //import ProfileImagePicker from '../components/ProfileImageComp';
+import auth from '@react-native-firebase/auth';
 import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
 import themeContext from '../theme/themeContext'
 
 const Account = ({route, navigation}) => {
         const theme = useContext(themeContext);
         const [url, seturl] = useState();
-
+        const user = auth().currentUser;
         useEffect(() => {
             const func = async () => {
                 const storage = getStorage();
-                const reference = ref(storage, "/profile");
-                await getDownloadURL(reference).then((x)=> {seturl(x);})
+                const reference = ref(storage, "images/" + user.uid + "/profile");
+
+                await getDownloadURL(reference)
+                    .then((x)=> {seturl(x);})
+                    .catch((error)=> {
+                        
+                        getDownloadURL(ref(storage, "profile.jpg"))
+                        .then((x)=> {seturl(x);})
+                    })
+                
+                
+                
             }
             func();
         }, []);
