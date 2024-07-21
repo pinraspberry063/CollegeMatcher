@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+// import matchColleges from '../utils/matchingAlgorithm';
 
 const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
@@ -222,8 +223,10 @@ const Quiz = ({ navigation }) => {
         { label: 'Suburb: Large', value: 'Suburb: Large' },
         { label: 'Rural: Fringe', value: 'Rural: Fringe' },
         { label: 'Rural: Distant', value: 'Rural: Distant' },
+        { label: 'Rural: Remote', value: 'Rural: Remote' },
         { label: 'Town: Fringe', value: 'Town: Fringe' },
         { label: 'Town: Distant', value: 'Town: Distant' },
+        { label: 'Town: Remote', value: 'Town: Remote' },
         { label: 'N/A', value: 'N/A' },
     ];
 
