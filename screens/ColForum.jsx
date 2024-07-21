@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, getFirestore, Timestamp, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot } from 'firebase/firestore';
 
 const firestore = getFirestore(db);
 
@@ -15,31 +15,48 @@ const ColForum = ({ navigation }) => {
   const [newPostCreatedBy, setNewPostCreatedBy] = useState({});
   const theme = useContext(themeContext);
 
+  const collegeName = 'Louisiana Tech University';
+
   useEffect(() => {
-    const threadsRef = collection(firestore, 'Forums', 'Louisiana Tech University', 'threads');
+    const checkAndCreateCollegeDoc = async () => {
+      try {
+        const collegeDocRef = doc(firestore, 'Forums', collegeName);
+        const collegeDocSnap = await getDoc(collegeDocRef);
 
-    const unsubscribe = onSnapshot(threadsRef, async (threadsSnapshot) => {
-      const threadsList = [];
+        if (!collegeDocSnap.exists()) {
+          await setDoc(collegeDocRef, {});
+        }
 
-      for (const threadDoc of threadsSnapshot.docs) {
-        const threadData = threadDoc.data();
-        const threadId = threadDoc.id;
+        const threadsRef = collection(firestore, 'Forums', collegeName, 'threads');
 
-        const postsRef = collection(firestore, 'Forums', 'Louisiana Tech University', 'threads', threadId, 'posts');
-        const postsSnapshot = await getDocs(postsRef);
-        const postsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
+        const unsubscribe = onSnapshot(threadsRef, async (threadsSnapshot) => {
+          const threadsList = [];
 
-        threadsList.push({
-          id: threadId,
-          ...threadData,
-          posts: postsList,
+          for (const threadDoc of threadsSnapshot.docs) {
+            const threadData = threadDoc.data();
+            const threadId = threadDoc.id;
+
+            const postsRef = collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts');
+            const postsSnapshot = await getDocs(postsRef);
+            const postsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
+
+            threadsList.push({
+              id: threadId,
+              ...threadData,
+              posts: postsList,
+            });
+          }
+
+          setThreads(threadsList);
         });
+
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error fetching threads: ', error);
       }
+    };
 
-      setThreads(threadsList);
-    });
-
-    return () => unsubscribe();
+    checkAndCreateCollegeDoc();
   }, []);
 
   const handleAddThread = async () => {
@@ -50,7 +67,7 @@ const ColForum = ({ navigation }) => {
         createdAt: Timestamp.now(),
       };
 
-      await addDoc(collection(firestore, 'Forums', 'Louisiana Tech University', 'threads'), newThread);
+      await addDoc(collection(firestore, 'Forums', collegeName, 'threads'), newThread);
       setNewThreadTitle('');
       setNewThreadCreatedBy('');
       // Navigate away and back to reload the page
@@ -71,7 +88,7 @@ const ColForum = ({ navigation }) => {
         createdAt: Timestamp.now(),
       };
 
-      await addDoc(collection(firestore, 'Forums', 'Louisiana Tech University', 'threads', threadId, 'posts'), newPost);
+      await addDoc(collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts'), newPost);
       setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
       setNewPostCreatedBy(prev => ({ ...prev, [threadId]: '' }));
       // Navigate away and back to reload the page
