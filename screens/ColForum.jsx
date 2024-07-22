@@ -15,7 +15,7 @@ const ColForum = ({ navigation }) => {
   const [newPostCreatedBy, setNewPostCreatedBy] = useState({});
   const theme = useContext(themeContext);
 
-  const collegeName = 'Louisiana Tech University';
+  const collegeName = 'Test';
 
   useEffect(() => {
     const checkAndCreateCollegeDoc = async () => {
@@ -48,6 +48,7 @@ const ColForum = ({ navigation }) => {
           }
 
           setThreads(threadsList);
+
         });
 
         return () => unsubscribe();
@@ -71,10 +72,10 @@ const ColForum = ({ navigation }) => {
       setNewThreadTitle('');
       setNewThreadCreatedBy('');
       // Navigate away and back to reload the page
-      navigation.navigate('Index');
+      navigation.navigate('Load');
       setTimeout(() => {
         navigation.navigate('ColForum');
-      }, 100);
+      }, 500);
     } catch (error) {
       console.error('Error adding new thread: ', error);
     }
@@ -92,10 +93,10 @@ const ColForum = ({ navigation }) => {
       setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
       setNewPostCreatedBy(prev => ({ ...prev, [threadId]: '' }));
       // Navigate away and back to reload the page
-      navigation.navigate('Index');
+      navigation.navigate('Load');
       setTimeout(() => {
         navigation.navigate('ColForum');
-      }, 100);
+      }, 500);
     } catch (error) {
       console.error('Error adding new post: ', error);
     }
