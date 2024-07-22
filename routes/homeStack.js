@@ -8,6 +8,7 @@ import Picker from '../components/ProfileImageComp'
 import Login from '../screens/Login'
 import AccountCreation from '../screens/AccountCreation'
 import Preferences from '../screens/Preferences';
+import MakkAI from '../screens/MakkAI';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -31,6 +32,7 @@ const NavStack = ({theme}) => {
                 <HomeStack.Screen name="Preferences" component={Preferences} />
                 <HomeStack.Screen name="Login" component={Login} />
                 <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
+                <HomeStack.Screen name="MakkAI" component={MakkAI} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
