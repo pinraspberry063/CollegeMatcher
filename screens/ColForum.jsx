@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
 
 const firestore = getFirestore(db);
 
@@ -15,9 +15,12 @@ const ColForum = ({ navigation }) => {
   const [newPostCreatedBy, setNewPostCreatedBy] = useState({});
   const theme = useContext(themeContext);
 
-  const collegeName = 'Test';
+  const collegeName = 'Louisiana Tech University';
 
   useEffect(() => {
+    const unsubscribeThreads = [];
+    const unsubscribePosts = [];
+
     const checkAndCreateCollegeDoc = async () => {
       try {
         const collegeDocRef = doc(firestore, 'Forums', collegeName);
@@ -28,16 +31,20 @@ const ColForum = ({ navigation }) => {
         }
 
         const threadsRef = collection(firestore, 'Forums', collegeName, 'threads');
+        const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
 
-        const unsubscribe = onSnapshot(threadsRef, async (threadsSnapshot) => {
+        const unsubscribe = onSnapshot(threadsQuery, async (threadsSnapshot) => {
           const threadsList = [];
+          const postsUnsubscribes = [];
 
           for (const threadDoc of threadsSnapshot.docs) {
             const threadData = threadDoc.data();
             const threadId = threadDoc.id;
 
             const postsRef = collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts');
-            const postsSnapshot = await getDocs(postsRef);
+            const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
+
+            const postsSnapshot = await getDocs(postsQuery);
             const postsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
 
             threadsList.push({
@@ -45,19 +52,36 @@ const ColForum = ({ navigation }) => {
               ...threadData,
               posts: postsList,
             });
+
+            // Set up real-time updates for posts in this thread
+            const postUnsubscribe = onSnapshot(postsQuery, (postsSnapshot) => {
+              const updatedPostsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
+              setThreads(prevThreads => prevThreads.map(t => t.id === threadId ? { ...t, posts: updatedPostsList } : t));
+            });
+
+            postsUnsubscribes.push(postUnsubscribe);
           }
 
           setThreads(threadsList);
-
+          // Unsubscribe from previous posts listeners
+          unsubscribePosts.forEach(unsub => unsub());
+          unsubscribePosts.length = 0;
+          unsubscribePosts.push(...postsUnsubscribes);
         });
 
-        return () => unsubscribe();
+        unsubscribeThreads.push(unsubscribe);
       } catch (error) {
         console.error('Error fetching threads: ', error);
       }
     };
 
     checkAndCreateCollegeDoc();
+
+    return () => {
+      // Unsubscribe from all listeners on unmount
+      unsubscribeThreads.forEach(unsub => unsub());
+      unsubscribePosts.forEach(unsub => unsub());
+    };
   }, []);
 
   const handleAddThread = async () => {
@@ -71,11 +95,6 @@ const ColForum = ({ navigation }) => {
       await addDoc(collection(firestore, 'Forums', collegeName, 'threads'), newThread);
       setNewThreadTitle('');
       setNewThreadCreatedBy('');
-      // Navigate away and back to reload the page
-      navigation.navigate('Load');
-      setTimeout(() => {
-        navigation.navigate('ColForum');
-      }, 500);
     } catch (error) {
       console.error('Error adding new thread: ', error);
     }
@@ -92,11 +111,6 @@ const ColForum = ({ navigation }) => {
       await addDoc(collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts'), newPost);
       setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
       setNewPostCreatedBy(prev => ({ ...prev, [threadId]: '' }));
-      // Navigate away and back to reload the page
-      navigation.navigate('Load');
-      setTimeout(() => {
-        navigation.navigate('ColForum');
-      }, 500);
     } catch (error) {
       console.error('Error adding new post: ', error);
     }
