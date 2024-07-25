@@ -1,12 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, TouchableOpacity } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext';
+import { UserContext } from '../components/UserContext';
 
 const MAX_ATTEMPTS = 5;
 
 const Login = ({ navigation }) => {
   const theme = useContext(themeContext);
+  const { setUser } = useContext(UserContext); // Use the setUser function from context
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,6 @@ const Login = ({ navigation }) => {
 
     if (attempts >= MAX_ATTEMPTS) {
        setIsLocked(true); // Lock the user out
-       //Alert.alert('Account Locked', 'You have reached the maximum number of login attempts. Please contact support.');
        return;
      }
 
@@ -31,6 +32,7 @@ const Login = ({ navigation }) => {
       .then((userCredential) => {
         setLoading(false);
         setAttempts(0); // Reset attempts on successful login
+        setUser(userCredential.user); // Set the logged in user in context
         Alert.alert('Login Successful');
         navigation.navigate('Home');
       })
@@ -73,7 +75,6 @@ const Login = ({ navigation }) => {
           placeholderTextColor={theme.color}
           secureTextEntry={!showPassword}
           value={password}
-          
           onChangeText={setPassword}
         />
         <TouchableOpacity

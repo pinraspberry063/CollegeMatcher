@@ -75,6 +75,16 @@ const Index = ( {navigation} ) => {
                 accessibilityLabel="Visit the forum for your commited college and interact with others!"
               />
             </View>
+
+            <View style={styles.msgContainer}>
+                <Button
+                    style={[styles.button, {textShadowColor: theme.color}]}
+                    onPress={() => {navigation.navigate('Message')}}
+                    title="Contact a Recruiter"
+                    color="#841584"
+                    accessibilityLabel="Contact a recruiter from your college of interest"
+                />
+            </View>
       
 
     </View>
@@ -123,6 +133,10 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       marginTop: 25,
     },
+  msgContainer: {
+      alignItems: 'center',
+      marginTop: 25,
+  },
 });
 
 export default Index;
