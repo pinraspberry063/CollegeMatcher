@@ -66,14 +66,14 @@ const Index = ( {navigation} ) => {
         />
       </View>
 
-      <View style={styles.messagingContainer}>
-                    <Button
-                      style={[styles.button, {textShadowColor: theme.color}]}
-                      onPress={() => {navigation.navigate('Message')}}
-                      title="Message"
-                      color="#841584"
-                      accessibilityLabel="Contact a recruiter for your committed college!"
-                    />
+      <View style={styles.colForumContainer}>
+              <Button
+                style={[styles.button, {textShadowColor: theme.color}]}
+                onPress={() => {navigation.navigate('ColForum')}}
+                title="Visit College Forum"
+                color="#841584"
+                accessibilityLabel="Visit the forum for your commited college and interact with others!"
+              />
             </View>
       
 
@@ -119,10 +119,9 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 200,
   },
-  messagingContainer: {
+  colForumContainer: {
       alignItems: 'center',
-      marginVertical: 50,
-      width: 450,
+      marginTop: 25,
     },
 });
 
