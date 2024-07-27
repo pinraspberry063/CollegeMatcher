@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import matchColleges from '../src/utils/matchingAlgorithm';
 // import matchColleges from '../utils/matchingAlgorithm';
 
 const firestore = getFirestore(db);
@@ -247,35 +248,40 @@ const Quiz = ({ navigation }) => {
 
     const collectionref = collection(firestore, 'Quiz');
 
+    const answers = {
+        gpa: gpa,
+        sat: satScore,
+        act: actScore,
+        distance_from_college: distanceFromCollege,
+        major: major,
+        tuition_cost: tuitionCost,
+        religious_affiliation: religiousAffiliation,
+        sport_college: sportCollege,
+        state_choice: stateChoice,
+        college_diversity: collegeDiversity,
+        size: size,
+        school_classification: schoolClassification,
+        urbanization_level: urbanizationLevel,
+        // userId: newDocId
+    }
+
     const handleSubmit = async () => {
         try {
             // const querySnapshot = await getDocs(collectionref);
             // const docCount = querySnapshot.size;
             // const newDocId = `user${docCount + 1}`;
 
-            await addDoc(collectionref, {
-                gpa: gpa,
-                sat: satScore,
-                act: actScore,
-                distance_from_college: distanceFromCollege,
-                major: major,
-                tuition_cost: tuitionCost,
-                religious_affiliation: religiousAffiliation,
-                sport_college: sportCollege,
-                state_choice: stateChoice,
-                college_diversity: collegeDiversity,
-                size: size,
-                school_classification: schoolClassification,
-                urbanization_level: urbanizationLevel,
-                // userId: newDocId
-            });
+            await addDoc(collectionref, answers);
             alert("Quiz submitted successfully!");
             
         } catch (error) {
             console.error("Error adding document: ", error);
             
         }
-        navigation.pop()
+        const results = matchColleges(answers);
+        const top5 = results[0];
+        const ID = results[1];
+        navigation.push("Results", { top5: top5, ID: ID});
     };
     
 

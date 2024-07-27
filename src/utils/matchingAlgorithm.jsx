@@ -1,11 +1,13 @@
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebaseConfig';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { db } from '../../config/firebaseConfig';
+import { useState } from 'react';
 
 const matchColleges = async (studentPreferences) => {
     const firestore = getFirestore(db);
     const collegeDataRef = collection(firestore, 'CompleteColleges');
     const querySnapshot = await getDocs(collegeDataRef);
     const colleges = querySnapshot.docs.map(doc => doc.data());
+    const [docID , setDocID] = useState('02dcrQ4lgTkagUahHTVE');
 
     const tuitionRanges = {
         '$0 - $10,000': [0, 10000],
@@ -35,7 +37,7 @@ const matchColleges = async (studentPreferences) => {
     };
 
     const rangeOrder = ['$0 - $10,000', '$10,000 - $20,000', '$20,000 - $30,000', '$30,000 - $40,000', '$40,000+'];
-    const selectedTuitionRangeIndex = rangeOrder.indexOf(studentPreferences.tuitionCost);
+    const selectedTuitionRangeIndex = rangeOrder.indexOf(studentPreferences.tuition_cost);
 
     const scores = colleges.map(college => {
         let score = 0;
@@ -71,7 +73,7 @@ const matchColleges = async (studentPreferences) => {
 
         // Tuition Cost Matching
         const tuition = parseFloat(college.tuition23);
-        const [minTuition, maxTuition] = tuitionRanges[studentPreferences.tuitionCost] || [0, Infinity];
+        const [minTuition, maxTuition] = tuitionRanges[studentPreferences.tuition_cost] || [0, Infinity];
         const isInMainRange = tuition >= minTuition && tuition <= maxTuition;
         const isInNextClosestRange = selectedTuitionRangeIndex > 0 && selectedTuitionRangeIndex < rangeOrder.length - 1 &&
                                      (tuitionRanges[rangeOrder[selectedTuitionRangeIndex - 1]].includes(tuition) ||
@@ -101,11 +103,11 @@ const matchColleges = async (studentPreferences) => {
         }
 
         // Religious Affiliation Matching
-        if (studentPreferences.religiousAffiliation === 'NA') {
+        if (studentPreferences.religious_affiliation === 'NA') {
             if (college.religious_affiliation === 'Not applicable') {
                 score += 20;
             }
-        } else if (college.religious_affiliation === studentPreferences.religiousAffiliation) {
+        } else if (college.religious_affiliation === studentPreferences.religious_affiliation) {
             score += 20;
         }
 
@@ -125,18 +127,18 @@ const matchColleges = async (studentPreferences) => {
         }
 
         // Type of Institution Matching
-        if (studentPreferences.schoolClassification === 'Private') {
+        if (studentPreferences.school_classification === 'Private') {
             if (college.school_classification === 'Private not-for-profit' || college.school_classification === 'Private for-profit') {
                 score += 20;
             }
-        } else if (college.school_classification === studentPreferences.schoolClassification) {
+        } else if (college.school_classification === studentPreferences.school_classification) {
             score += 20;
         }
 
         // Urbanization Level Matching
-        if (studentPreferences.urbanizationLevel === 'N/A') {
+        if (studentPreferences.urbanization_level === 'N/A') {
             score += 20;
-        } else if (college.ubanization_level === studentPreferences.urbanizationLevel) {
+        } else if (college.ubanization_level === studentPreferences.urbanization_level) {
             score += 20;
         }
 
@@ -150,18 +152,18 @@ const matchColleges = async (studentPreferences) => {
         score += 20;
 
         // Sport College Matching
-        if (studentPreferences.sportCollege === 'Yes') {
+        if (studentPreferences.sport_college === 'Yes') {
             if (college.school_NCAA === 'Yes' || college.school_NAIA === 'Yes' || college.school_NJCAA === 'Yes') {
                 score += 20;
             }
-        } else if (studentPreferences.sportCollege === 'No') {
+        } else if (studentPreferences.sport_college === 'No') {
             if (college.school_NCAA === 'No' && college.school_NAIA === 'No' && college.school_NJCAA === 'No') {
                 score += 20;
             }
         }
 
         // ACT Score Matching
-        const actScore = parseFloat(studentPreferences.actScore);
+        const actScore = parseFloat(studentPreferences.act);
         const actComposite25 = parseFloat(college.act_Composite25);
         const actComposite50 = parseFloat(college.act_Composite50);
         const actComposite75 = parseFloat(college.act_Composite75);
@@ -195,7 +197,7 @@ const matchColleges = async (studentPreferences) => {
         }
 
         // SAT Score Matching
-        const satScore = parseFloat(studentPreferences.satScore);
+        const satScore = parseFloat(studentPreferences.sat);
         const satTotal = parseFloat(college.sat_Total);
         if (isNaN(satTotal)) {
             score += 5;
@@ -212,14 +214,27 @@ const matchColleges = async (studentPreferences) => {
     });
 
     scores.sort((a, b) => b.score - a.score);
-    const top5Colleges = scores.slice(0, 5).map(s => ({ name: s.college.shool_name, score: s.score }));
+    const top5Colleges = scores.slice(0, 5).map((s) => ({ name: s.college.shool_name, score: s.score }));
     const resultsRef = collection(firestore, 'Results');
-    await addDoc(resultsRef, {
-        userPreferences: studentPreferences,
-        top5Colleges
-    });
+    
+    try {
+      
+        const resultDoc = await addDoc(resultsRef, {
+            userPreferences: studentPreferences,
+            top5Colleges,
+            
+        });
+        setDocID(resultDoc.id)
 
-    return top5Colleges;
+        alert("Algo submitted successfully!");
+        
+    } catch (error) {
+        console.error("Error adding document: ", error);
+        
+    }
+    
+    console.log(top5Colleges)
+    return [top5Colleges, docID];
 };
 
 export default matchColleges;

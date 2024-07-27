@@ -1,23 +1,34 @@
-import React from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native';
+import {db} from '../config/firebaseConfig';
+import matchColleges from '../src/utils/matchingAlgorithm';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 
-const Results = () => {
+const Results = ({navigation}) => {
     const [colleges, setColleges] = useState([]);
+ 
+    const top5 = navigation.getParam(top5)
+    useEffect (() =>
+    {
+        setColleges(top5)
+    })
 
-    useEffect(() => {
-        const fetchResults = async () => {
-            const firestore = getFirestore(db);
-            const resultsRef = collection(firestore, 'Results');
-            const querySnapshot = await getDocs(resultsRef);
-            setColleges(querySnapshot.docs.map(doc => doc.data()));
-        };
-        fetchResults();
-    }, []);
+    
+
+    // useEffect(() => {
+    //     const fetchResults = async () => {
+    //         const firestore = getFirestore(db);
+    //         const resultsRef = collection(firestore, 'Results');
+    //         const querySnapshot = await getDocs(resultsRef);
+    //         setColleges(querySnapshot.docs.map(doc => doc.data().top5colleges));
+    //     };
+    //     fetchResults();
+    // }, []);
 
     return (
         <ScrollView style={styles.container}>
-            {colleges.map((college, index) => (
-                <View key={index} style={styles.collegeContainer}>
+            {colleges.map((college) => (
+                <View style={styles.collegeContainer}>
                     <Text style={styles.collegeName}>{college.name}</Text>
                     <Text>Match Score: {college.score}</Text>
                 </View>

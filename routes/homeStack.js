@@ -8,7 +8,7 @@ import Picker from '../components/ProfileImageComp'
 import Login from '../screens/Login'
 import AccountCreation from '../screens/AccountCreation'
 import Preferences from '../screens/Preferences';
-
+import Results from '../screens/Results';
 const HomeStack = createNativeStackNavigator();
 
 const NavStack = ({theme}) => {
@@ -31,6 +31,7 @@ const NavStack = ({theme}) => {
                 <HomeStack.Screen name="Preferences" component={Preferences} />
                 <HomeStack.Screen name="Login" component={Login} />
                 <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
+                <HomeStack.Screen name="Results" component={Results} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
