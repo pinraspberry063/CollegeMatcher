@@ -4,16 +4,18 @@ import { Button, Image } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
+import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext'
 
-export default function ProfileImagePicker({navigation}) {
+export default function Picker({navigation}) {
   const theme = useContext(themeContext);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [transferred, setTransferred] = useState(0);
-  
+  const user = auth().currentUser;
+
   const navigateToAccountSettings = () => {
-    navigation.pop();
+    navigation.navigate("Account");
   }
   const uploadImage = async () => {
     const { uri } = image;
@@ -22,7 +24,7 @@ export default function ProfileImagePicker({navigation}) {
     setUploading(true);
     setTransferred(0);
     const task = storage()
-      .ref(filename)
+      .ref("images/" + user.uid + "/" + filename)
       .putFile(uploadUri);
     // set progress state
     task.on('state_changed', snapshot => {

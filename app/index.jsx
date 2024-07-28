@@ -13,28 +13,30 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext'
+import Settings from './Settings';
+import Account from './AccSettings';
+import Quiz from './Quiz';
+import Login from './Login'
+import AccountCreation from './AccountCreation'
+import Preferences from './Preferences';
+import {Link, Redirect} from 'expo-router';
 
-// import {
-//   Colors,
-//   DebugInstructions,
-//   Header,
-//   LearnMoreLinks,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
 
-const Index = ( {navigation} ) => {
+const Home = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
-      <View style={styles.icon}>
-        <Ionicons
-        color = {theme.color}
-        raised
-        name='settings-outline'
-        //type='ionicon'
-        size= {40}
-        onPress = {() => {navigation.push('Settings')}}
-        />
+      <View style={styles.topNav}>
+        <View style={styles.icon}>
+            <Ionicons
+            color = {theme.color}
+            raised
+            name='settings-outline'
+            //type='ionicon'
+            size= {40}
+            onPress={()=> {navigation.navigate('Settings')}}
+            />
+        </View>
       </View>
       
       <SafeAreaView style={styles.titleContainer}>
@@ -43,48 +45,26 @@ const Index = ( {navigation} ) => {
           <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
         
       </SafeAreaView>
-          <View style={styles.buttonContainer2}>
-            <Button
-              title="Login"
-              onPress={() => { navigation.navigate('Login') }}
-              buttonStyle={styles.button2}
-            />
-            <Button
-              title="Create Account"
-              onPress={() => { navigation.navigate('AccountCreation') }}
-              buttonStyle={styles.button2}
-            />
-          </View>
 
       <View style={styles.buttonContainer}>
         <Button
           style={[styles.button, {textShadowColor: theme.color}]}
-          onPress={() => {navigation.push('Quiz')}}
+          onPress={() => {navigation.navigate('Quiz')}}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
       </View>
 
-      <View style={styles.colForumContainer}>
+      {/* <View style={styles.colForumContainer}>
               <Button
                 style={[styles.button, {textShadowColor: theme.color}]}
-                onPress={() => {navigation.navigate('ColForum')}}
+                onPress={() => {navigation.navigate('Forum')}}
                 title="Visit College Forum"
                 color="#841584"
                 accessibilityLabel="Visit the forum for your commited college and interact with others!"
               />
-            </View>
-
-            <View style={styles.msgContainer}>
-                <Button
-                    style={[styles.button, {textShadowColor: theme.color}]}
-                    onPress={() => {navigation.navigate('Message')}}
-                    title="Contact a Recruiter"
-                    color="#841584"
-                    accessibilityLabel="Contact a recruiter from your college of interest"
-                />
-            </View>
+            </View> */}
       
 
     </View>
@@ -94,6 +74,10 @@ const Index = ( {navigation} ) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  topNav: {
+    height: '5%',
+    backgroundColor: 'grey'
   },
   titleContainer: {
     alignItems: 'center',
@@ -110,7 +94,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: 'light'
   },
   buttonContainer:{
     alignItems: 'center',
@@ -133,10 +116,16 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       marginTop: 25,
     },
-  msgContainer: {
-      alignItems: 'center',
-      marginTop: 25,
-  },
 });
 
-export default Index;
+export default Home
+
+export {
+  Login, 
+  AccountCreation,
+  Account, 
+  Preferences,
+  Quiz,
+  Settings
+
+}
