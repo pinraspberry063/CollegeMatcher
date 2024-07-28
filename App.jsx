@@ -21,7 +21,7 @@ const App = () => {
       EventRegister.removeAllListeners(listener)
     }
   }, [darkMode])
-  return ( 
+  return (
     <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
       <NavStack theme={darkMode === true ? DarkTheme : DefaultTheme}/>
     </themeContext.Provider>

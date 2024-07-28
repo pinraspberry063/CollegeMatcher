@@ -9,13 +9,14 @@ import Login from '../screens/Login'
 import AccountCreation from '../screens/AccountCreation'
 import Preferences from '../screens/Preferences';
 import ColForum from '../screens/ColForum';
+import PhoneVerification from '../screens/PhoneVerification';
 
 const HomeStack = createNativeStackNavigator();
 
 const NavStack = ({theme}) => {
     return (
         <NavigationContainer theme={theme}>
-            <HomeStack.Navigator 
+            <HomeStack.Navigator
             screenOptions={{
                 headerMode: "screen",
                 headerTitleAlign: "center",
@@ -33,6 +34,7 @@ const NavStack = ({theme}) => {
                 <HomeStack.Screen name="Login" component={Login} />
                 <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
                 <HomeStack.Screen name="ColForum" component={ColForum} />
+                <HomeStack.Screen name="PhoneVerification" component={PhoneVerification} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
