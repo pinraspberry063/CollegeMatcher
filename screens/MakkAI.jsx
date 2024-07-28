@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { collection, addDoc, getDocs, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import themeContext from '../theme/themeContext';
 
@@ -65,15 +65,15 @@ const MakkAI = () => {
   };
 
   const getAIResponse = async (message) => {
-    // const API_KEY = 'API_KEY';
-    const model = 'davinci';
-    const apiUrl = `https://api.openai.com/v1/engines/${model}/completions`;
+    // const API_KEY = '';
+    const apiUrl = `https://api.openai.com/v1/chat/completions`;
 
     try {
       const response = await axios.post(
         apiUrl,
         {
-          prompt: message,
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: message }],
           max_tokens: 150,
         },
         {
@@ -83,9 +83,13 @@ const MakkAI = () => {
           },
         }
       );
-      return response.data.choices[0].text.trim();
+      if (response.data && response.data.choices && response.data.choices[0]) {
+        return response.data.choices[0].message.content.trim();
+      } else {
+        return "Sorry, I couldn't process your request.";
+      }
     } catch (error) {
-      console.error("Error fetching AI response: ", error);
+      console.error("Error fetching AI response: ", error.response ? error.response.data : error.message);
       return "Sorry, I couldn't process your request.";
     }
   };
