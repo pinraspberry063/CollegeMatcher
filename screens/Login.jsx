@@ -20,13 +20,10 @@ const Login = ({ navigation }) => {
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '927238517919-18hao19445rig737pl1hdbico3qttmhv.apps.googleusercontent.com',
+      webClientId: '927238517919-c3vu6r24d30repq25jl1t6j7eoiqkb9a.apps.googleusercontent.com',
     });
   }, []);
 
-  useEffect(() => {
-    FacebookSDK.initializeAsync();
-  }, []);
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
