@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } f
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext'
 
-const AccountCreation = ({ navigation }) => {
+const AccountCreation = ({ navigation}) => {
   const theme = useContext(themeContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

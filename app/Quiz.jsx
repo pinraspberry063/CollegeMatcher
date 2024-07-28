@@ -4,6 +4,7 @@ import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
+import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 
 const firestore = getFirestore(db);
@@ -242,6 +243,7 @@ const Quiz = ({ navigation }) => {
     const [schoolClassification, setType] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
+
     const collectionref = collection(firestore, 'Quiz');
 
     const handleSubmit = async () => {
@@ -264,7 +266,7 @@ const Quiz = ({ navigation }) => {
                 size: size,
                 school_classification: schoolClassification,
                 urbanization_level: urbanizationLevel,
-                // userId: newDocId
+                userId: auth().currentUser
             });
             alert("Quiz submitted successfully!");
             
