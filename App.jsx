@@ -15,6 +15,7 @@ import Picker from './app/ProfileImageComp'
 import {createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
+import ColForum from './app/ColForum';
 
 
 const screenOptions = {
@@ -46,6 +47,12 @@ const QuizStackScreen = () => (
   <QuizStack.Navigator>
     <QuizStack.Screen name="Quiz" component={Quiz} />
   </QuizStack.Navigator>
+)
+const ForumStack = createNativeStackNavigator();
+const ForumStackScreen = () => (
+  <ForumStack.Navigator>
+    <ForumStack.Screen name="Forum" component={ColForum} />
+  </ForumStack.Navigator>
 )
 
 const icons = {
@@ -80,6 +87,7 @@ const TabScreen = () => (
       >
     <Tab.Screen name="Home" component={HomeStackScreen} />
     <Tab.Screen name="Quiz" component={QuizStackScreen} />
+    <Tab.Screen name="Forum" component={ForumStackScreen} />
   </Tab.Navigator>
 )
 

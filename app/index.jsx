@@ -56,6 +56,17 @@ const Home = ( {navigation} ) => {
         />
       </View>
 
+      {/* <View style={styles.colForumContainer}>
+              <Button
+                style={[styles.button, {textShadowColor: theme.color}]}
+                onPress={() => {navigation.navigate('Forum')}}
+                title="Visit College Forum"
+                color="#841584"
+                accessibilityLabel="Visit the forum for your commited college and interact with others!"
+              />
+            </View> */}
+      
+
     </View>
   );
 };
@@ -101,6 +112,10 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 200,
   },
+  colForumContainer: {
+      alignItems: 'center',
+      marginTop: 25,
+    },
 });
 
 export default Home

@@ -3,45 +3,38 @@ import React , {useState, useEffect} from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import axios from 'axios';
 
-  const DropdownComponent = ({data}) => {
-    const [value, setValue] = useState(null);
-    const [isFocus, setIsFocus] = useState(false);
+  const DropdownComponent = ({data, value, onChange}) => {
+    const [selectedValue, setSelectedValue] = useState(value);
 
-    //// waiting for access
-    // useEffect(() => {
-    //   var config = {
-    //     method: 'get',
-    //     url: 'https://api.countrystatecity.in/v1/states',
-    //     headers: {
-    //       'X-CSCAPI-KEY': 'API_KEY'
-    //     }
-    //   };
-    // })
+    useEffect(() => {
+        setSelectedValue(value);
+    }, [value]);
+
+    const handleSelect = (item) => {
+        setSelectedValue(item.value);
+        if (onChange) {
+            onChange(item.value);
+        }
+    };
+
     return (
       <View style={styles.container}>
-        <Dropdown
-          style={styles.dropdown}
-          placeholderStyle={styles.placeholderStyle}
-          selectedTextStyle={styles.selectedTextStyle}
-          inputSearchStyle={styles.inputSearchStyle}
-          iconStyle={styles.iconStyle}
-          data={data}
-          search
-          maxHeight={300}
-          labelField="label"
-          valueField="value"
-          placeholder={!isFocus ? 'Select' : '...'}
-          searchPlaceholder="Search..."
-          value={value}
-          onFocus={() => setIsFocus(true)}
-          onBlur={() => setIsFocus(false)}
-          onChange={item => {
-            setValue(item.value);
-            setIsFocus(false);
-          }}
-          
-        />
-      </View>
+            <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={data}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select"
+                searchPlaceholder="Search..."
+                value={selectedValue}
+                onChange={handleSelect}
+            />
+        </View>
     );
   };
 
