@@ -32,7 +32,7 @@ const Login = ({ navigation }) => {
         setLoading(false);
         setAttempts(0); // Reset attempts on successful login
         Alert.alert('Login Successful');
-        navigation.navigate('Home');
+        navigation.navigate('Main');
       })
       .catch((error) => {
         setLoading(false);
