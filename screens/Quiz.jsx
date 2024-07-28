@@ -6,7 +6,6 @@ import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
-// import matchColleges from '../utils/matchingAlgorithm';
 
 const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
