@@ -3,12 +3,14 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, To
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 
 const MAX_ATTEMPTS = 5;
 
 const Login = ({ navigation }) => {
   const theme = useContext(themeContext);
-  const { setUser } = useContext(UserContext); // Use the setUser function from context
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,9 +25,9 @@ const Login = ({ navigation }) => {
     }
 
     if (attempts >= MAX_ATTEMPTS) {
-       setIsLocked(true); // Lock the user out
-       return;
-     }
+      setIsLocked(true); // Lock the user out
+      return;
+    }
 
     setLoading(true);
     auth().signInWithEmailAndPassword(email, password)
@@ -33,14 +35,30 @@ const Login = ({ navigation }) => {
         setLoading(false);
         setAttempts(0); // Reset attempts on successful login
         setUser(userCredential.user); // Set the logged in user in context
-        Alert.alert('Login Successful');
-        navigation.navigate('Home');
+        checkIsRecruiter(userCredential.user.uid); // Check if the user is a recruiter
       })
       .catch((error) => {
         setLoading(false);
         setAttempts(attempts + 1);
         Alert.alert('Login Failed', error.message);
       });
+  };
+
+  const checkIsRecruiter = async (uid) => {
+    const firestore = getFirestore(db);
+    const usersRef = collection(firestore, 'Users');
+    const userQuery = query(usersRef, where('User_UID', '==', uid));
+
+    const querySnapshot = await getDocs(userQuery);
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const data = userDoc.data();
+      if (data.IsRecruiter) {
+        navigation.navigate('RecConvs');
+      } else {
+        navigation.navigate('Home');
+      }
+    }
   };
 
   const handleForgotPassword = () => {
@@ -60,9 +78,9 @@ const Login = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, {color: theme.color}]}>Login</Text>
+      <Text style={[styles.title, { color: theme.color }]}>Login</Text>
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Email"
         placeholderTextColor={theme.color}
         value={email}
@@ -70,7 +88,7 @@ const Login = ({ navigation }) => {
       />
       <View style={styles.passwordContainer}>
         <TextInput
-          style={[styles.input, styles.passwordInput, {borderColor: theme.color, color: theme.color}]}
+          style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: theme.color }]}
           placeholder="Password"
           placeholderTextColor={theme.color}
           secureTextEntry={!showPassword}
@@ -81,7 +99,7 @@ const Login = ({ navigation }) => {
           onPress={() => setShowPassword(!showPassword)}
           style={styles.toggleButton}
         >
-          <Text style={{color: theme.color}}>{showPassword ? 'Hide' : 'Show'}</Text>
+          <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
         </TouchableOpacity>
       </View>
       {loading ? (

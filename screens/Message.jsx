@@ -3,10 +3,10 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDocs, where, setDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 
-const Message = ({ navigation }) => {
+const Message = ({ route, navigation }) => {
   const theme = useContext(themeContext);
   const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([]);
@@ -14,49 +14,60 @@ const Message = ({ navigation }) => {
   const [recruiterUID, setRecruiterUID] = useState(null);
   const [documentID, setDocumentID] = useState(null);
   const [isRecruiter, setIsRecruiter] = useState(false);
+  const [usernames, setUsernames] = useState({});
+
+  const conversationId = route.params?.conversationId; // Safely get conversationId from route params
 
   useEffect(() => {
-    if (user) {
-      const firestore = getFirestore(db);
-      const messagingRef = collection(firestore, 'Messaging');
+    const firestore = getFirestore(db);
+    const fetchConversation = async () => {
+      if (!user) return;
 
-      // Query to find the document with the current user's UID as User_UID or Recruiter_UID
-      const userQuery = query(messagingRef, where('User_UID', '==', user.uid));
-      const recruiterQuery = query(messagingRef, where('Recruiter_UID', '==', user.uid));
+      let conversationDocRef;
+      if (conversationId) {
+        conversationDocRef = doc(firestore, 'Messaging', conversationId);
+      } else {
+        // Scan all collections in "Messaging" for a document with the current user's UID incase no conversationID was found
+        const messagingRef = collection(firestore, 'Messaging');
+        const userQuery = query(messagingRef, where('User_UID', '==', user.uid));
+        const userSnapshot = await getDocs(userQuery);
 
-      getDocs(userQuery).then((userSnapshot) => {
         if (!userSnapshot.empty) {
           const userDoc = userSnapshot.docs[0];
-          const data = userDoc.data();
-          setRecruiterUID(data.Recruiter_UID);
-          setDocumentID(userDoc.id);
-          setIsRecruiter(false); // This user is not the recruiter
-
-          // Set up a listener for messages
-          setupMessageListener(firestore, userDoc.id);
+          conversationDocRef = userDoc.ref;
         } else {
-          getDocs(recruiterQuery).then((recruiterSnapshot) => {
-            if (!recruiterSnapshot.empty) {
-              const recruiterDoc = recruiterSnapshot.docs[0];
-              const data = recruiterDoc.data();
-              console.log('User Document Data (Recruiter_UID match):', data); // Debugging log
-              setRecruiterUID(data.User_UID); // The other party is the user
-              setDocumentID(recruiterDoc.id);
-              setIsRecruiter(true); // This user is the recruiter
+          console.warn('No conversation found for the current user');
+          return;
+        }
+      }
 
-              // Set up a listener for messages
-              setupMessageListener(firestore, recruiterDoc.id);
-            } else {
-              console.warn('No matching document found! Creating a new one.');
-              createNewDocument(firestore);
-            }
+      getDoc(conversationDocRef).then((docSnap) => {
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          if (data.User_UID === user.uid) {
+            setRecruiterUID(data.Recruiter_UID);
+            setIsRecruiter(false);
+          } else if (data.Recruiter_UID === user.uid) {
+            setRecruiterUID(data.User_UID);
+            setIsRecruiter(true);
+          }
+          setDocumentID(conversationDocRef.id);
+
+          // Fetch usernames
+          fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
+            // Set up listener for messages
+            setupMessageListener(firestore, conversationDocRef.id);
           });
+        } else {
+          console.warn('No matching conversation found!');
         }
       }).catch((error) => {
-        console.error('Error fetching document:', error);
+        console.error('Error fetching conversation:', error);
       });
-    }
-  }, [user]);
+    };
+
+    fetchConversation();
+  }, [user, conversationId]);
 
   const setupMessageListener = (firestore, docId) => {
     const messagesRef = collection(firestore, 'Messaging', docId, 'conv');
@@ -73,18 +84,23 @@ const Message = ({ navigation }) => {
     return () => unsubscribe();
   };
 
-  const createNewDocument = async (firestore) => {
-    const newDocRef = doc(collection(firestore, 'Messaging'));
-    const newDocData = {
-      User_UID: user.uid,
-      Recruiter_UID: '', // Placeholder for recruiter UID, will be updated later
-    };
-    await setDoc(newDocRef, newDocData);
-    setDocumentID(newDocRef.id);
-    setRecruiterUID(''); // Placeholder value
+  const fetchUsernames = async (uids, firestore) => {
+    const usersRef = collection(firestore, 'Users');
+    const usernameMap = {};
 
-    // Set up a listener for messages
-    setupMessageListener(firestore, newDocRef.id);
+    for (const uid of uids) {
+      const userQuery = query(usersRef, where('User_UID', '==', uid));
+      const userSnapshot = await getDocs(userQuery);
+      if (!userSnapshot.empty) {
+        const userDoc = userSnapshot.docs[0];
+        usernameMap[uid] = userDoc.data().Username;
+      } else {
+        console.log(`No user found for UID: ${uid}`); // Debugging log
+      }
+    }
+
+    setUsernames(usernameMap);
+    console.log('Set usernames:', usernameMap); // Debugging log
   };
 
   const handleSend = async () => {
@@ -102,11 +118,16 @@ const Message = ({ navigation }) => {
     }
   };
 
+  if (!conversationId && !documentID) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.title}>No conversation selected</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <SafeAreaView style={styles.titleContainer}>
-        <Text style={[styles.title, { color: theme.color }]}>Message</Text>
-      </SafeAreaView>
       <ScrollView style={styles.messagesContainer}>
         {messages.map((message) => (
           <View
@@ -119,7 +140,7 @@ const Message = ({ navigation }) => {
             ]}
           >
             <Text style={styles.messageSender}>
-              {(message.sender_UID === user.uid && !isRecruiter) || (message.sender_UID === recruiterUID && isRecruiter) ? 'You' : 'Recruiter'}
+              {usernames[message.sender_UID] || 'Unknown'}
             </Text>
             <Text style={styles.messageContent}>{message.content}</Text>
           </View>
@@ -140,10 +161,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  titleContainer: {
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 20,
   },
+
   title: {
     fontSize: 50,
     fontWeight: 'bold',
@@ -157,6 +180,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     padding: 10,
     borderRadius: 10,
+    maxWidth: '75%',
   },
   userMessage: {
     backgroundColor: '#d1e7dd',

@@ -10,6 +10,7 @@ import AccountCreation from '../screens/AccountCreation'
 import Preferences from '../screens/Preferences';
 import ColForum from '../screens/ColForum';
 import Message from '../screens/Message';
+import RecConvs from '../screens/RecConvs';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -35,6 +36,7 @@ const NavStack = ({theme}) => {
                 <HomeStack.Screen name="AccountCreation" component={AccountCreation} />
                 <HomeStack.Screen name="ColForum" component={ColForum} />
                 <HomeStack.Screen name="Message" component={Message} />
+                <HomeStack.Screen name="RecConvs" component={RecConvs} />
             </HomeStack.Navigator>
         </NavigationContainer>
     );
