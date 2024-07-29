@@ -88,7 +88,7 @@ const icons = {
   Quiz: 'magnify',
   Forum: 'forum',
   Messages: 'message',
-  AI: 'ai'
+  AI: 'head'
 }
 
 const Tab = createBottomTabNavigator();
