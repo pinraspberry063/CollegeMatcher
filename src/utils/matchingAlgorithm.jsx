@@ -7,7 +7,8 @@ const matchColleges = async (studentPreferences) => {
     const collegeDataRef = collection(firestore, 'CompleteColleges');
     const querySnapshot = await getDocs(collegeDataRef);
     const colleges = querySnapshot.docs.map(doc => doc.data());
-    
+
+    const maxScore = 290;
 
     const tuitionRanges = {
         '$0 - $10,000': [0, 10000],
@@ -210,7 +211,8 @@ const matchColleges = async (studentPreferences) => {
                 }
             }
         }
-        return { college, score };
+        const finalScore = Math.round((score / maxScore) * 100);
+        return { college, score: finalScore };
     });
 
     scores.sort((a, b) => b.score - a.score);
