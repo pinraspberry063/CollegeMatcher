@@ -277,10 +277,9 @@ const Quiz = ({ navigation }) => {
             console.error("Error adding document: ", error);
             
         }
-        const results = matchColleges(answers);
-        const top5 = results[0];
-        const ID = results[1];
-        navigation.push("Results", { top5: top5, ID: ID});
+        const results = matchColleges(answers).top5Colleges;
+        console.log("RESULTS: " + results)
+        navigation.navigate("Results", { top5: results});
     };
     
 

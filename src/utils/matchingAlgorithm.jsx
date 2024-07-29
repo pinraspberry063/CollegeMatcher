@@ -7,7 +7,7 @@ const matchColleges = async (studentPreferences) => {
     const collegeDataRef = collection(firestore, 'CompleteColleges');
     const querySnapshot = await getDocs(collegeDataRef);
     const colleges = querySnapshot.docs.map(doc => doc.data());
-    const [docID , setDocID] = useState('02dcrQ4lgTkagUahHTVE');
+    
 
     const tuitionRanges = {
         '$0 - $10,000': [0, 10000],
@@ -219,12 +219,11 @@ const matchColleges = async (studentPreferences) => {
     
     try {
       
-        const resultDoc = await addDoc(resultsRef, {
+        await addDoc(resultsRef, {
             userPreferences: studentPreferences,
             top5Colleges,
             
         });
-        setDocID(resultDoc.id)
 
         alert("Algo submitted successfully!");
         
@@ -233,8 +232,8 @@ const matchColleges = async (studentPreferences) => {
         
     }
     
-    console.log(top5Colleges)
-    return [top5Colleges, docID];
+    
+    return {top5Colleges};
 };
 
 export default matchColleges;

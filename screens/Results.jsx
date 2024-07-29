@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
 
 const Results = ({ route }) => {
-    const { top5 } = route.params;
-
+    const top5  = route.params.top5;
+    console.log("top5: " + top5);
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <Text style={styles.collegeName}>{item.name}</Text>
@@ -17,7 +17,7 @@ const Results = ({ route }) => {
             <FlatList
                 data={top5}
                 renderItem={renderItem}
-                keyExtractor={(item, index) => index.toString()}
+                // keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
