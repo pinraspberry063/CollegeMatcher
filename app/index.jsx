@@ -38,12 +38,12 @@ const Home = ( {navigation} ) => {
             />
         </View>
       </View>
-      
+
       <SafeAreaView style={styles.titleContainer}>
-        
+
           <Text style={[styles.title, {color: theme.color}]}>College Matcher</Text>
           <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
-        
+
       </SafeAreaView>
 
       <View style={styles.buttonContainer}>
@@ -55,17 +55,6 @@ const Home = ( {navigation} ) => {
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
       </View>
-
-      {/* <View style={styles.colForumContainer}>
-              <Button
-                style={[styles.button, {textShadowColor: theme.color}]}
-                onPress={() => {navigation.navigate('Forum')}}
-                title="Visit College Forum"
-                color="#841584"
-                accessibilityLabel="Visit the forum for your commited college and interact with others!"
-              />
-            </View> */}
-      
 
     </View>
   );
@@ -112,18 +101,15 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 200,
   },
-  colForumContainer: {
-      alignItems: 'center',
-      marginTop: 25,
-    },
+
 });
 
 export default Home
 
 export {
-  Login, 
+  Login,
   AccountCreation,
-  Account, 
+  Account,
   Preferences,
   Quiz,
   Settings

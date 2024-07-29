@@ -13,24 +13,42 @@ const RecConvs = ({ navigation }) => {
   const [usernames, setUsernames] = useState({});
 
   useEffect(() => {
-    const fetchConversations = async () => {
+    const checkRecruiterStatus = async () => {
       if (user) {
         const firestore = getFirestore(db);
-        const messagingRef = collection(firestore, 'Messaging');
-        const recruiterQuery = query(messagingRef, where('Recruiter_UID', '==', user.uid));
+        const usersRef = collection(firestore, 'Users');
+        const userQuery = query(usersRef, where('User_UID', '==', user.uid));
 
-        console.log('Fetching conversations for recruiter:', user.uid); // Debugging log
-        const querySnapshot = await getDocs(recruiterQuery);
-        console.log('Query snapshot size:', querySnapshot.size); // Debugging log
-
-        const convs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        console.log('Fetched conversations:', convs); // Debugging log
-        setConversations(convs);
-
-        // Fetch usernames for User_UIDs
-        const userUIDs = convs.map(conv => conv.User_UID);
-        fetchUsernames(userUIDs);
+        const userSnapshot = await getDocs(userQuery);
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+          if (!userData.IsRecruiter) {
+            // Redirect to Messages screen if the user is not a recruiter
+            navigation.navigate('Message');
+          } else {
+            // Fetch conversations if the user is a recruiter
+            fetchConversations();
+          }
+        }
       }
+    };
+
+    const fetchConversations = async () => {
+      const firestore = getFirestore(db);
+      const messagingRef = collection(firestore, 'Messaging');
+      const recruiterQuery = query(messagingRef, where('Recruiter_UID', '==', user.uid));
+
+      console.log('Fetching conversations for recruiter:', user.uid); // Debugging log
+      const querySnapshot = await getDocs(recruiterQuery);
+      console.log('Query snapshot size:', querySnapshot.size); // Debugging log
+
+      const convs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('Fetched conversations:', convs); // Debugging log
+      setConversations(convs);
+
+      // Fetch usernames for User_UIDs
+      const userUIDs = convs.map(conv => conv.User_UID);
+      fetchUsernames(userUIDs);
     };
 
     const fetchUsernames = async (userUIDs) => {
@@ -50,7 +68,7 @@ const RecConvs = ({ navigation }) => {
       setUsernames(usernameMap);
     };
 
-    fetchConversations();
+    checkRecruiterStatus();
   }, [user]);
 
   return (

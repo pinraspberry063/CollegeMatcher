@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -55,8 +55,8 @@ const Message = ({ route, navigation }) => {
 
           // Fetch usernames
           fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
-            // Set up listener for messages
-            setupMessageListener(firestore, conversationDocRef.id);
+          // Set up listener for messages
+          setupMessageListener(firestore, conversationDocRef.id);
           });
         } else {
           console.warn('No matching conversation found!');
@@ -69,6 +69,7 @@ const Message = ({ route, navigation }) => {
     fetchConversation();
   }, [user, conversationId]);
 
+    // Listener is used to display the ordered messages from the database.
   const setupMessageListener = (firestore, docId) => {
     const messagesRef = collection(firestore, 'Messaging', docId, 'conv');
     const q = query(messagesRef, orderBy('order'));
@@ -84,6 +85,7 @@ const Message = ({ route, navigation }) => {
     return () => unsubscribe();
   };
 
+    // Fetch the usernames of the users to be used in messaging.
   const fetchUsernames = async (uids, firestore) => {
     const usersRef = collection(firestore, 'Users');
     const usernameMap = {};
@@ -103,6 +105,7 @@ const Message = ({ route, navigation }) => {
     console.log('Set usernames:', usernameMap); // Debugging log
   };
 
+    // Handle the sending of messages.
   const handleSend = async () => {
     if (newMessage.trim() && user && documentID) {
       const firestore = getFirestore(db);
@@ -146,13 +149,17 @@ const Message = ({ route, navigation }) => {
           </View>
         ))}
       </ScrollView>
-      <TextInput
-        style={styles.input}
-        value={newMessage}
-        onChangeText={setNewMessage}
-        placeholder="Type your message..."
-      />
-      <Button title="Send" onPress={handleSend} />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.input}
+          value={newMessage}
+          onChangeText={setNewMessage}
+          placeholder="Type your message..."
+        />
+        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <Text style={styles.sendButtonText}>Send</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -166,7 +173,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   title: {
     fontSize: 50,
     fontWeight: 'bold',
@@ -196,13 +202,30 @@ const styles = StyleSheet.create({
   messageContent: {
     marginTop: 5,
   },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 80,
+  },
   input: {
+    flex: 1,
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
-    margin: 20,
     backgroundColor: '#fff',
+  },
+  sendButton: {
+    marginLeft: 10,
+    backgroundColor: '#841584',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
