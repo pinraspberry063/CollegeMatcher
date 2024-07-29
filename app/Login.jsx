@@ -177,6 +177,7 @@ const Login = ({ navigation }) => {
 
   const handleGoogleLogin = async () => {
     try {
+      await GoogleSignin.signOut(); // Ensures user is prompted to pick account
       await GoogleSignin.hasPlayServices();
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
