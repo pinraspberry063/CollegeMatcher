@@ -61,7 +61,7 @@ const Login = ({ navigation }) => {
             await AsyncStorage.removeItem('emailForSignIn');
             console.log('User signed in successfully');
             Alert.alert('Success', 'You have been signed in successfully!');
-            navigation.navigate('Home');
+            navigation.navigate('Main');
           } catch (error) {
             console.error('Error signing in with email link:', error);
             Alert.alert('Error', 'Failed to sign in: ' + error.message);
@@ -184,7 +184,7 @@ const Login = ({ navigation }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
       console.log('User signed in successfully:', userCredential.user.displayName);
       Alert.alert('Google Login Successful');
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       Alert.alert('Google Login Failed', error.message);
@@ -204,7 +204,7 @@ const Login = ({ navigation }) => {
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
       await auth().signInWithCredential(facebookCredential);
       Alert.alert('Facebook Login Successful');
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } catch (error) {
       Alert.alert('Facebook Login Failed', error.message);
     }
@@ -216,7 +216,7 @@ const Login = ({ navigation }) => {
       const twitterCredential = auth.TwitterAuthProvider.credential(authToken, authTokenSecret);
       await auth().signInWithCredential(twitterCredential);
       Alert.alert('Twitter Login Successful');
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } catch (error) {
       Alert.alert('Twitter Login Failed', error.message);
     }

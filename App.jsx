@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, { useState, useEffect } from 'react'
-import NavStack from './routes/homeStack';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -13,15 +12,20 @@ import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Quiz from './app/Quiz'
 import Settings from './app/Settings'
-import Home, { AccountCreation, Login } from './app/index'
+import Home from './app/index'
 import Account from './app/AccSettings'
 import Picker from './app/ProfileImageComp'
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
 import ColForum from './app/ColForum';
 import Message from './app/Message';
 import RecConvs from './app/RecConvs';
+import MakkAI from './app/MakkAI';
+import Login from './app/Login';
+import AccountCreation from './app/AccountCreation';
+import Results from './app/Results';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -45,6 +49,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker} />
     <HomeStack.Screen name="Preferences" component={Preferences} />
+    <HomeStack.Screen name="MakkAI" component={MakkAI} />
   </HomeStack.Navigator>
 )
 
@@ -60,6 +65,8 @@ const QuizStack = createNativeStackNavigator();
 const QuizStackScreen = () => (
   <QuizStack.Navigator screenOptions={screenOptions}>
     <QuizStack.Screen name="Quiz" component={Quiz} />
+    <QuizStack.Screen name="Results" component={Results} />
+
   </QuizStack.Navigator>
 )
 
@@ -69,12 +76,19 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="Forum" component={ColForum} />
   </ForumStack.Navigator>
 )
+const AIStack = createNativeStackNavigator();
+const AIStackScreen = () => (
+  <AIStack.Navigator screenOptions={screenOptions}>
+    <AIStack.Screen name="MakkAI" component={MakkAI} />
+  </AIStack.Navigator>
+)
 
 const icons = {
   Home: 'home',
   Quiz: 'magnify',
   Forum: 'forum',
-  Messages: 'message'
+  Messages: 'message',
+  AI: 'ai'
 }
 
 const Tab = createBottomTabNavigator();
@@ -107,6 +121,7 @@ const TabScreen = () => (
     <Tab.Screen name="Quiz" component={QuizStackScreen} />
     <Tab.Screen name="Forum" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
+    <Tab.Screen name="AI" component={AIStackScreen} />
   </Tab.Navigator>
 )
 
