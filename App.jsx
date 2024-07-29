@@ -8,6 +8,9 @@ import { EventRegister } from 'react-native-event-listeners'
 import { UserProvider } from './components/UserContext';
 import themeContext from './theme/themeContext'
 import theme from './theme/theme'
+import dynamicLinks from '@react-native-firebase/dynamic-links';
+import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Quiz from './app/Quiz'
 import Settings from './app/Settings'
 import Home, { AccountCreation, Login } from './app/index'
@@ -128,6 +131,42 @@ const App = () => {
       EventRegister.removeAllListeners(listener)
     }
   }, [darkMode])
+
+  useEffect(() => {
+    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+    // Check for the initial dynamic link if the app was opened with one
+    dynamicLinks()
+      .getInitialLink()
+      .then(link => {
+        if (link) {
+          handleDynamicLink(link);
+        }
+      });
+    return () => unsubscribe();
+  }, []);
+
+const handleDynamicLink = async (link) => {
+  if (link.url) {
+    console.log('Received dynamic link:', link.url);
+    if (auth().isSignInWithEmailLink(link.url)) {
+      try {
+        const email = await AsyncStorage.getItem('emailForSignIn');
+        console.log('Retrieved email for sign-in:', email);
+        if (email) {
+          const result = await auth().signInWithEmailLink(email, link.url);
+          console.log('Sign-in result:', result);
+          await AsyncStorage.removeItem('emailForSignIn');
+          console.log('User signed in successfully:', result.user.email);
+          navigation.navigate('Home');
+        } else {
+          console.log('No email found for sign-in');
+        }
+      } catch (error) {
+        console.error('Error signing in with email link:', error);
+      }
+    }
+  }
+};
 
   return (
     <UserProvider>
