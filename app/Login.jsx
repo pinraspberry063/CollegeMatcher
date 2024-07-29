@@ -146,11 +146,14 @@ const Login = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await auth().signInWithEmailAndPassword(email, password);
-      setLoading(false);
-      setAttempts(0);
-      setUser(userCredential.user); // Set the logged in user in context
-      checkIsRecruiter(userCredential.user.uid); // Check if the user is a recruiter
+      await auth().signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        setLoading(false);
+        setAttempts(0);
+        setUser(userCredential.user); // Set the logged in user in context
+        checkIsRecruiter(userCredential.user.uid); // Check if the user is a recruiter
+        navigation.navigate('Main')
+      })
     } catch (error) {
       setLoading(false);
       setAttempts(attempts + 1);

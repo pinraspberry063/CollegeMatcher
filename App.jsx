@@ -44,7 +44,7 @@ const screenOptions = {
 const HomeStack = createNativeStackNavigator();
 const HomeStackScreen = () => (
   <HomeStack.Navigator screenOptions={screenOptions}>
-    <HomeStack.Screen name="Home" component={Home} />
+    <HomeStack.Screen name="Index" component={Home} />
     <HomeStack.Screen name="Settings" component={Settings} />
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker} />
@@ -85,7 +85,7 @@ const AIStackScreen = () => (
 
 const icons = {
   Home: 'home',
-  Quiz: 'magnify',
+  QuizStack: 'magnify',
   Forum: 'forum',
   Messages: 'message',
   AI: 'head'
@@ -118,7 +118,7 @@ const TabScreen = () => (
     })}
   >
     <Tab.Screen name="Home" component={HomeStackScreen} />
-    <Tab.Screen name="Quiz" component={QuizStackScreen} />
+    <Tab.Screen name="QuizStack" component={QuizStackScreen} />
     <Tab.Screen name="Forum" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
@@ -129,7 +129,7 @@ const RootStack = createNativeStackNavigator();
 const LaunchStack = createNativeStackNavigator();
 const LaunchStackScreen = () => (
   <LaunchStack.Navigator screenOptions={screenOptions}>
-    <LaunchStack.Screen name="Launch" component={Launch} />
+    <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
   </LaunchStack.Navigator>
