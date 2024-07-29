@@ -78,6 +78,9 @@ android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
+    buildFeatures {
+        buildConfig true
+    }
 
     namespace "com.cm_app"
     defaultConfig {
@@ -86,6 +89,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [
+                appAuthRedirectScheme: 'com.cm_app'
+        ]
     }
     signingConfigs {
         debug {
@@ -116,6 +122,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.android.gms:play-services-auth:latest.release")
     implementation("com.facebook.android:facebook-login:16.3.0")
+    implementation ("com.google.firebase:firebase-dynamic-links")
     implementation ("com.facebook.android:facebook-android-sdk:latest.release")
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-database")
