@@ -13,49 +13,65 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext'
-import Settings from './Settings';
-import Account from './AccSettings';
-import Quiz from './Quiz';
-import Login from './Login'
-import AccountCreation from './AccountCreation'
-import Preferences from './Preferences';
-import {Link, Redirect} from 'expo-router';
 
+// import {
+//   Colors,
+//   DebugInstructions,
+//   Header,
+//   LearnMoreLinks,
+//   ReloadInstructions,
+// } from 'react-native/Libraries/NewAppScreen';
 
-const Home = ( {navigation} ) => {
+const Index = ( {navigation} ) => {
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
-      <View style={styles.topNav}>
-        <View style={styles.icon}>
-            <Ionicons
-            color = {theme.color}
-            raised
-            name='settings-outline'
-            //type='ionicon'
-            size= {40}
-            onPress={()=> {navigation.navigate('Settings')}}
-            />
-        </View>
+      <View style={styles.icon}>
+        <Ionicons
+        color = {theme.color}
+        raised
+        name='settings-outline'
+        //type='ionicon'
+        size= {40}
+        onPress = {() => {navigation.push('Settings')}}
+        />
       </View>
-
+      
       <SafeAreaView style={styles.titleContainer}>
-
+        
           <Text style={[styles.title, {color: theme.color}]}>College Matcher</Text>
           <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
-
+        
       </SafeAreaView>
+          <View style={styles.buttonContainer2}>
+            <Button
+              title="Login"
+              onPress={() => { navigation.navigate('Login') }}
+              buttonStyle={styles.button2}
+            />
+            <Button
+              title="Create Account"
+              onPress={() => { navigation.navigate('AccountCreation') }}
+              buttonStyle={styles.button2}
+            />
+          </View>
 
       <View style={styles.buttonContainer}>
         <Button
           style={[styles.button, {textShadowColor: theme.color}]}
-          onPress={() => {navigation.navigate('Quiz')}}
+          onPress={() => {navigation.push('Quiz')}}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
+        <Button
+          style={[styles.button, { textShadowColor: theme.color }]}
+          onPress={() => { navigation.push('MakkAI'); }}
+          title="MAKK AI"
+          color="#841584"
+          accessibilityLabel="Chat with MAKK AI"
+        />
       </View>
-
     </View>
   );
 };
@@ -63,10 +79,6 @@ const Home = ( {navigation} ) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  topNav: {
-    height: '5%',
-    backgroundColor: 'grey'
   },
   titleContainer: {
     alignItems: 'center',
@@ -83,6 +95,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     right: 0,
+    backgroundColor: 'light'
   },
   buttonContainer:{
     alignItems: 'center',
@@ -101,17 +114,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 200,
   },
-
 });
 
-export default Home
-
-export {
-  Login,
-  AccountCreation,
-  Account,
-  Preferences,
-  Quiz,
-  Settings
-
-}
+export default Index;
