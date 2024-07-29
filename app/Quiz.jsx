@@ -6,6 +6,7 @@ import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import matchColleges from '../src/utils/matchingAlgorithm';
 
 const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
@@ -246,35 +247,40 @@ const Quiz = ({ navigation }) => {
 
     const collectionref = collection(firestore, 'Quiz');
 
+    
+
     const handleSubmit = async () => {
+        const answers = {
+            gpa: gpa,
+            sat: satScore,
+            act: actScore,
+            distance_from_college: distanceFromCollege,
+            major: major,
+            tuition_cost: tuitionCost,
+            religious_affiliation: religiousAffiliation,
+            sport_college: sportCollege,
+            state_choice: stateChoice,
+            college_diversity: collegeDiversity,
+            size: size,
+            school_classification: schoolClassification,
+            urbanization_level: urbanizationLevel,
+            userId: auth().currentUser.uid
+        }
+
         try {
             // const querySnapshot = await getDocs(collectionref);
             // const docCount = querySnapshot.size;
             // const newDocId = `user${docCount + 1}`;
 
-            await addDoc(collectionref, {
-                gpa: gpa,
-                sat: satScore,
-                act: actScore,
-                distance_from_college: distanceFromCollege,
-                major: major,
-                tuition_cost: tuitionCost,
-                religious_affiliation: religiousAffiliation,
-                sport_college: sportCollege,
-                state_choice: stateChoice,
-                college_diversity: collegeDiversity,
-                size: size,
-                school_classification: schoolClassification,
-                urbanization_level: urbanizationLevel,
-                userId: auth().currentUser
-            });
+            await addDoc(collectionref, answers);
             alert("Quiz submitted successfully!");
             
         } catch (error) {
             console.error("Error adding document: ", error);
             
         }
-        navigation.pop()
+        const result = ( await matchColleges(answers)).top5Colleges;
+        navigation.navigate("Results", {top5: result});
     };
     
 

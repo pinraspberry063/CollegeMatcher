@@ -43,7 +43,7 @@ const Index = ( {navigation} ) => {
           <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
         
       </SafeAreaView>
-          <View style={styles.buttonContainer2}>
+          {/* <View style={styles.buttonContainer2}>
             <Button
               title="Login"
               onPress={() => { navigation.navigate('Login') }}
@@ -54,7 +54,7 @@ const Index = ( {navigation} ) => {
               onPress={() => { navigation.navigate('AccountCreation') }}
               buttonStyle={styles.button2}
             />
-          </View>
+          </View> */}
 
       <View style={styles.buttonContainer}>
         <Button
@@ -64,13 +64,13 @@ const Index = ( {navigation} ) => {
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
-        <Button
+        {/* <Button
           style={[styles.button, { textShadowColor: theme.color }]}
           onPress={() => { navigation.push('MakkAI'); }}
           title="MAKK AI"
           color="#841584"
           accessibilityLabel="Chat with MAKK AI"
-        />
+        /> */}
       </View>
     </View>
   );
