@@ -4,8 +4,8 @@ import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
+import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
-import matchColleges from '../src/utils/matchingAlgorithm';
 
 const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
@@ -223,10 +223,8 @@ const Quiz = ({ navigation }) => {
         { label: 'Suburb: Large', value: 'Suburb: Large' },
         { label: 'Rural: Fringe', value: 'Rural: Fringe' },
         { label: 'Rural: Distant', value: 'Rural: Distant' },
-        { label: 'Rural: Remote', value: 'Rural: Remote' },
         { label: 'Town: Fringe', value: 'Town: Fringe' },
         { label: 'Town: Distant', value: 'Town: Distant' },
-        { label: 'Town: Remote', value: 'Town: Remote' },
         { label: 'N/A', value: 'N/A' },
     ];
 
@@ -245,24 +243,8 @@ const Quiz = ({ navigation }) => {
     const [schoolClassification, setType] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
-    const collectionref = collection(firestore, 'Quiz');
 
-    const answers = {
-        gpa: gpa,
-        sat: satScore,
-        act: actScore,
-        distance_from_college: distanceFromCollege,
-        major: major,
-        tuition_cost: tuitionCost,
-        religious_affiliation: religiousAffiliation,
-        sport_college: sportCollege,
-        state_choice: stateChoice,
-        college_diversity: collegeDiversity,
-        size: size,
-        school_classification: schoolClassification,
-        urbanization_level: urbanizationLevel,
-        // userId: newDocId
-    }
+    const collectionref = collection(firestore, 'Quiz');
 
     const handleSubmit = async () => {
         try {
@@ -270,16 +252,29 @@ const Quiz = ({ navigation }) => {
             // const docCount = querySnapshot.size;
             // const newDocId = `user${docCount + 1}`;
 
-            await addDoc(collectionref, answers);
+            await addDoc(collectionref, {
+                gpa: gpa,
+                sat: satScore,
+                act: actScore,
+                distance_from_college: distanceFromCollege,
+                major: major,
+                tuition_cost: tuitionCost,
+                religious_affiliation: religiousAffiliation,
+                sport_college: sportCollege,
+                state_choice: stateChoice,
+                college_diversity: collegeDiversity,
+                size: size,
+                school_classification: schoolClassification,
+                urbanization_level: urbanizationLevel,
+                userId: auth().currentUser
+            });
             alert("Quiz submitted successfully!");
             
         } catch (error) {
             console.error("Error adding document: ", error);
             
         }
-        const results = (await matchColleges(answers)).top5Colleges;
-        console.log("RESULTS: " + results)
-        navigation.navigate("Results", { top5: results});
+        navigation.pop()
     };
     
 

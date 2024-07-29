@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app';
 import {getFirestore} from 'firebase/firestore';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
-
+import '@react-native-firebase/dynamic-links';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNY9QgiSZgEyY4soyUEkcPNjA6JCDF8AU",
@@ -14,4 +14,3 @@ const firebaseConfig = {
 const db = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
 export default { db};
 
- 

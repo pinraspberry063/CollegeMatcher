@@ -64,9 +64,14 @@ const Index = ( {navigation} ) => {
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
+        <Button
+          style={[styles.button, { textShadowColor: theme.color }]}
+          onPress={() => { navigation.push('MakkAI'); }}
+          title="MAKK AI"
+          color="#841584"
+          accessibilityLabel="Chat with MAKK AI"
+        />
       </View>
-      
-
     </View>
   );
 };
