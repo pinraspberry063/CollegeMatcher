@@ -49,7 +49,6 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker} />
     <HomeStack.Screen name="Preferences" component={Preferences} />
-    <HomeStack.Screen name="MakkAI" component={MakkAI} />
   </HomeStack.Navigator>
 )
 
