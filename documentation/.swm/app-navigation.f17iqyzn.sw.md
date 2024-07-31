@@ -6,8 +6,8 @@ title: App Navigation
 ---
 
 Navigation Stack For Home Page:\
--- Handles navigation away from the homepage&nbsp;\
--- Includes the top navigation bar (Settings)
+&nbsp;&nbsp;&nbsp;&nbsp;-- Handles navigation away from the homepage&nbsp;\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Includes the top navigation bar (Settings)
 
 ```
 const HomeStack = createNativeStackNavigator();
@@ -31,11 +31,11 @@ const HomeStackScreen = () => (
 ---
 
 Navigation Stack for Quiz:\
--- Handles navigation from the "Take the Quiz" button on the home page\
--- Also handles navigation from the "QuizStack" tab on the Bottom Tab Bar\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Handles navigation from the "Take the Quiz" button on the home page\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Also handles navigation from the "QuizStack" tab on the Bottom Tab Bar\
 \
-PLAN:&nbsp;\
--- to make the "Take the Quiz button only appear on the HomePage so when the quiz&nbsp;
+TODO:\
+&nbsp;&nbsp;&nbsp;&nbsp;-- to make the "Take the Quiz button only appear on the HomePage so when the quiz&nbsp;
 
 ```javascript
 const QuizStack = createNativeStackNavigator();
@@ -57,8 +57,8 @@ const QuizStackScreen = () => (
 ---
 
 Navigation Stack For Forums Page:\
--- handles naviagtion from the "Forum" tab on the Bottom Tab Bar\
--- "Reddit style" page
+&nbsp;&nbsp;&nbsp;&nbsp;-- handles naviagtion from the "Forum" tab on the Bottom Tab Bar\
+&nbsp;&nbsp;&nbsp;&nbsp;-- "Reddit style" page
 
 ```javascript
 const ForumStack = createNativeStackNavigator();
@@ -78,7 +78,7 @@ const ForumStackScreen = () => (
 ---
 
 Navigation Stack For MAKK AI:\
--- handles navigation from the "AI" Tab in Bottom Navigation Bar
+&nbsp;&nbsp;&nbsp;&nbsp;-- handles navigation from the "AI" Tab in Bottom Navigation Bar
 
 ```javascript
 const AIStack = createNativeStackNavigator();
