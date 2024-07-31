@@ -1,24 +1,11 @@
 import React, {useState, useContext} from 'react';
-// import type {PropsWithChildren} from 'react';
 import {
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  FlatList,
-  // useColorScheme,
   View,
 } from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import themeContext from '../theme/themeContext'
 
 const Settings = ({navigation}) => {
