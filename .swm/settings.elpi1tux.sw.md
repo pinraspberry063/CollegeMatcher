@@ -11,9 +11,9 @@ Settings Page:\
 -- Favorited Colleges --> Not Yet Implemented\
 -- Privacy --> Not yet Implemented\
 \
-TODO:&nbsp;\
+Plan:&nbsp;\
 &nbsp;&nbsp;&nbsp;&nbsp;-- Retake the College Matcher Quiz Option\
-&nbsp;&nbsp;&nbsp;&nbsp;-- Modify the Navigation so that Settings is accessed through the user account page
+&nbsp;&nbsp;&nbsp;&nbsp;-- Modify the Navigation so that Settings is accessed through the&nbsp;
 
 ```javascript
 const Settings = ({navigation}) => {

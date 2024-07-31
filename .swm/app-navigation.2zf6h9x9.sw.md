@@ -1,15 +1,11 @@
 ---
 title: App Navigation
 ---
-<SwmSnippet path="App.jsx" line="44">
-
----
-
 Navigation Stack For Home Page:\
 &nbsp;&nbsp;&nbsp;&nbsp;-- Handles navigation away from the homepage&nbsp;\
 &nbsp;&nbsp;&nbsp;&nbsp;-- Includes the top navigation bar (Settings)
 
-```
+```javascript
 const HomeStack = createNativeStackNavigator();
 const HomeStackScreen = () => (
   <HomeStack.Navigator screenOptions={screenOptions}>
@@ -20,13 +16,10 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Preferences" component={Preferences} />
   </HomeStack.Navigator>
 )
+
 ```
 
 ---
-
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="63">
 
 ---
 
@@ -46,13 +39,10 @@ const QuizStackScreen = () => (
 
   </QuizStack.Navigator>
 )
+
 ```
 
 ---
-
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="72">
 
 ---
 
@@ -67,13 +57,10 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="Forum" component={ColForum} />
   </ForumStack.Navigator>
 )
+
 ```
 
 ---
-
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="78">
 
 ---
 
@@ -87,19 +74,16 @@ const AIStackScreen = () => (
     <AIStack.Screen name="MakkAI" component={MakkAI} />
   </AIStack.Navigator>
 )
+
 ```
 
 ---
 
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="85">
-
 ---
 
 Icons For Bottom Tab Navigator:\
--- stores the "MaterialCommunityIcon" references for the Tabs in the Bottom Tab Navigator&nbsp;\
--- Can search for Icons here: <https://expo.github.io/vector-icons/>\
+&nbsp;&nbsp;&nbsp;&nbsp;-- stores the "MaterialCommunityIcon" references for the Tabs in the Bottom Tab Navigator&nbsp;\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Can search for Icons here: [https://expo.github.io/vector-icons/](https://expo.github.io/vector-icons/%EF%BF%BC)\
 &nbsp;&nbsp;&nbsp;&nbsp;-- use "MaterialCommunityIcon" filter
 
 ```javascript
@@ -110,19 +94,16 @@ const icons = {
   Messages: 'message',
   AI: 'head'
 }
+
 ```
 
 ---
 
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="93">
-
 ---
 
 Bottom Tab Navigator:\
---  references Stack Navigators to redirect to pages represented by Tabs\
--- default setting: header not shown
+&nbsp;&nbsp;&nbsp;&nbsp;-- references Stack Navigators to redirect to pages represented by Tabs\
+&nbsp;&nbsp;&nbsp;&nbsp;-- default setting: header not shown
 
 ```javascript
 const Tab = createBottomTabNavigator();
@@ -158,21 +139,18 @@ const TabScreen = () => (
     <Tab.Screen name="AI" component={AIStackScreen} />
   </Tab.Navigator>
 )
+
 ```
 
 ---
 
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="127">
-
 ---
 
 Navigation Stack for Root Navigation:\
--- Handles Navigation from Login page to Home Page\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Handles Navigation from Login page to Home Page\
 \
-Note:&nbsp;\
--- "Launch" page is the first page you see when launching the app\
+NOTE:&nbsp;\
+&nbsp;&nbsp;&nbsp;&nbsp;-- "Launch" page is the first page you see when launching the app\
 &nbsp;&nbsp;&nbsp;&nbsp;-- prompts user to login or create an account
 
 ```javascript
@@ -185,13 +163,10 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
   </LaunchStack.Navigator>
 )
+
 ```
 
 ---
-
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="140">
 
 ---
 
@@ -206,18 +181,18 @@ Event Regestration to Handle DarkMode Preferences of the App
       EventRegister.removeAllListeners(listener)
     }
   }, [darkMode])
+
 ```
 
 ---
 
-</SwmSnippet>
-
-<SwmSnippet path="/App.jsx" line="63">
-
 ---
 
-hasn't been taken by a new user.\
--- have an option to retake the quiz in user settings
+Button or tab redirects to the quiz page if it hasn't been taken by a new user.\
+\
+TODO:\
+&nbsp;&nbsp;&nbsp;&nbsp;-- have an option to retake the quiz in user settings\
+&nbsp;&nbsp;&nbsp;&nbsp;-- Have the button disappear if the user has already taken the quiz
 
 ```javascript
 const QuizStack = createNativeStackNavigator();
@@ -228,13 +203,10 @@ const QuizStackScreen = () => (
 
   </QuizStack.Navigator>
 )
+
 ```
 
 ---
-
-</SwmSnippet>
-
-<SwmSnippet path="App.jsx" line="55">
 
 ---
 
@@ -242,7 +214,7 @@ Navigation Stack For DMs:\
 -- Handles navigation away from the DMs page (RecConvs)\
 -- base page is the DMs page accessed from the Bottom Navigation Bar
 
-```
+```javascript
 const MessageStack = createNativeStackNavigator();
 const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
@@ -251,9 +223,5 @@ const MessageStackScreen = () => (
   </MessageStack.Navigator>
 )
 ```
-
----
-
-</SwmSnippet>
 
 <SwmMeta version="3.0.0" repo-id="Z2l0aHViJTNBJTNBQ29sbGVnZU1hdGNoZXIlM0ElM0FwaW5yYXNwYmVycnkwNjM=" repo-name="CollegeMatcher"><sup>Powered by [Swimm](https://app.swimm.io/)</sup></SwmMeta>
