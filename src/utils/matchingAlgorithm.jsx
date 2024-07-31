@@ -216,14 +216,14 @@ const matchColleges = async (studentPreferences) => {
     });
 
     scores.sort((a, b) => b.score - a.score);
-    const top5Colleges = scores.slice(0, 5).map((s) => ({ name: s.college.shool_name, score: s.score }));
+    const top100Colleges = scores.slice(0, 100).map((s) => ({ name: s.college.shool_name, score: s.score }));
     const resultsRef = collection(firestore, 'Results');
     
     try {
       
         await addDoc(resultsRef, {
             userPreferences: studentPreferences,
-            top5Colleges,
+            top100Colleges,
             
         });
 
@@ -235,7 +235,7 @@ const matchColleges = async (studentPreferences) => {
     }
     
     
-    return {top5Colleges};
+    return {top100Colleges};
 };
 
 export default matchColleges;

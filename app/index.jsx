@@ -1,26 +1,13 @@
 import React, {useContext} from 'react';
-// import type {PropsWithChildren} from 'react';
-import TabBar from '../components/TabBar'
 import {
   SafeAreaView,
-  ScrollView,
-  // StatusBar,
   StyleSheet,
   Text,
-  // useColorScheme,
   View,
   Button
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext'
-
-// import {
-//   Colors,
-//   DebugInstructions,
-//   Header,
-//   LearnMoreLinks,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
 
 const Index = ( {navigation} ) => {
   const theme = useContext(themeContext);
@@ -59,7 +46,7 @@ const Index = ( {navigation} ) => {
       <View style={styles.buttonContainer}>
         <Button
           style={[styles.button, {textShadowColor: theme.color}]}
-          onPress={() => {navigation.push('Quiz')}}
+          onPress={() => {navigation.push('QuizButton')}}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"

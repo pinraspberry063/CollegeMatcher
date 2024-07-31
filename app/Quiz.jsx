@@ -279,8 +279,8 @@ const Quiz = ({ navigation }) => {
             console.error("Error adding document: ", error);
             
         }
-        const result = ( await matchColleges(answers)).top5Colleges;
-        navigation.navigate("Results", {top5: result});
+        const result = ( await matchColleges(answers)).top100Colleges;
+        navigation.navigate("Results", {top100: result});
     };
     
 
