@@ -17,11 +17,16 @@ const AccountCreation = ({ navigation}) => {
 
     setLoading(true);
     auth().createUserWithEmailAndPassword(email, password)
-        setLoading(false);
-        Alert.alert('Account Created');
-        navigation.navigate('Main');
-        setLoading(false);
-        Alert.alert('Account Creation Failed', error.message);
+        .then(() => {
+            setLoading(false);
+            Alert.alert('Account Created');
+            navigation.navigate('Main');
+            })
+        .catch((error) => {
+             setLoading(false);
+             Alert.alert('Account Creation Failed');
+            }
+       )
 
   };
 
