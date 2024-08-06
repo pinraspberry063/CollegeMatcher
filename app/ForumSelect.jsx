@@ -5,39 +5,75 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
+
 
 const ForumSelect = ({ route, navigation }) => {
   const { collegeName } = route.params;
   const [subgroups, setSubgroups] = useState([]);
   const [newSubgroupName, setNewSubgroupName] = useState('');
-  const [newSubgroupCreatedBy, setNewSubgroupCreatedBy] = useState('');
+  const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      fetchUsername(user.uid);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchSubgroups = async () => {
-      const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
-      const subgroupsSnapshot = await getDocs(subgroupsRef);
-      const subgroupsList = subgroupsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setSubgroups(subgroupsList);
+      try {
+        const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
+        const subgroupsSnapshot = await getDocs(subgroupsRef);
+        const subgroupsList = subgroupsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setSubgroups(subgroupsList);
+      } catch (error) {
+        console.error('Error fetching subgroups:', error);
+      }
     };
 
     fetchSubgroups();
   }, [collegeName]);
 
+  const fetchUsername = async (uid) => {
+    try {
+      const usersRef = collection(firestore, 'Users');
+      const q = query(usersRef, where('User_UID', '==', uid));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        setUsername(userDoc.data().Username);
+      } else {
+        console.error('No user found with the given UID.');
+      }
+    } catch (error) {
+      console.error('Error fetching username:', error);
+    }
+  };
+
   const handleAddSubgroup = async () => {
-    if (newSubgroupName.trim() && newSubgroupCreatedBy.trim()) {
-      const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
-      const newSubgroup = { forumName: newSubgroupName.trim(), createdBy: newSubgroupCreatedBy.trim() };
-      const docRef = await addDoc(subgroupsRef, newSubgroup);
-      setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
-      setNewSubgroupName('');
-      setNewSubgroupCreatedBy('');
+    if (newSubgroupName.trim() && username) {
+      try {
+        const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
+        const newSubgroup = {
+          forumName: newSubgroupName.trim(),
+          createdBy: username, // Automatically set to the user's username
+          createdAt: Timestamp.now()
+        };
+        const docRef = await addDoc(subgroupsRef, newSubgroup);
+        setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
+        setNewSubgroupName('');
+      } catch (error) {
+        console.error('Error adding new subgroup:', error);
+      }
     }
   };
 
@@ -66,12 +102,6 @@ const ForumSelect = ({ route, navigation }) => {
             placeholder="New Subgroup Name"
             value={newSubgroupName}
             onChangeText={setNewSubgroupName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Created By"
-            value={newSubgroupCreatedBy}
-            onChangeText={setNewSubgroupCreatedBy}
           />
           <Button title="Add Subgroup" onPress={handleAddSubgroup} color={theme.buttonColor} />
         </View>

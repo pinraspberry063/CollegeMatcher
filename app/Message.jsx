@@ -55,8 +55,8 @@ const Message = ({ route, navigation }) => {
 
           // Fetch usernames
           fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
-          // Set up listener for messages
-          setupMessageListener(firestore, conversationDocRef.id);
+            // Set up listener for messages
+            setupMessageListener(firestore, conversationDocRef.id);
           });
         } else {
           console.warn('No matching conversation found!');

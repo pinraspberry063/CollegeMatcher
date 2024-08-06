@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
 
