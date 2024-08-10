@@ -28,6 +28,7 @@ import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
+import FollowedForums from './app/FollowedForums';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -77,6 +78,7 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="ColForumSelector" component={ColForumSelector} />
     <ForumStack.Screen name="Forum" component={ColForum} />
     <ForumStack.Screen name="ForumSelect" component={ForumSelect} />
+    <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
   </ForumStack.Navigator>
 );
 

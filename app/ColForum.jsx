@@ -10,13 +10,12 @@ import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
 
-
 const ColForum = ({ route, navigation }) => {
   const { collegeName, forumName } = route.params;
   const [threads, setThreads] = useState([]);
   const [newThreadTitle, setNewThreadTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState({});
-  const { user } = useContext(UserContext); // Access the user context
+  const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
 
@@ -84,7 +83,7 @@ const ColForum = ({ route, navigation }) => {
         const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
         const newThread = {
           title: newThreadTitle.trim(),
-          createdBy: username, // Automatically set to the user's username
+          createdBy: username,
           createdAt: Timestamp.now()
         };
         await addDoc(threadsRef, newThread);
@@ -102,7 +101,7 @@ const ColForum = ({ route, navigation }) => {
         const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
         const newPost = {
           content: newPostContent[threadId].trim(),
-          createdBy: username, // Automatically set to the user's username
+          createdBy: username,
           createdAt: Timestamp.now()
         };
         await addDoc(postsRef, newPost);

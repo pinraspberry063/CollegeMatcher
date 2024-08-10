@@ -1,12 +1,11 @@
-// The screen that displays the different colleges' forums that the user can navigate to.
+// The screen that displays the different colleges' forums that the user can navigate to. Leads user to ForumSelect screen.
 
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { UserContext } from '../components/UserContext';
+import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
 
 const firestore = getFirestore(db);
 
@@ -30,6 +29,10 @@ const ColForumSelector = ({ navigation }) => {
     navigation.navigate('ForumSelect', { collegeName });
   };
 
+  const handleFollowedForumsNavigation = () => {
+    navigation.navigate('FollowedForums');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -42,6 +45,13 @@ const ColForumSelector = ({ navigation }) => {
             />
           </View>
         ))}
+        <View style={styles.followedForumsButtonContainer}>
+          <Button
+            title="View Followed Forums"
+            onPress={handleFollowedForumsNavigation}
+            color={theme.buttonColor}
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -54,6 +64,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: 16,
+  },
+  followedForumsButtonContainer: {
+    marginTop: 20,
+    padding: 10,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    borderWidth: 1,
   },
 });
 
