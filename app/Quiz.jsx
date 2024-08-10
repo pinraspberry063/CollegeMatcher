@@ -5,12 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, setDoc ,query, where,  getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 
-const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
     const theme = useContext(themeContext);
+
     const stateData = [
         { label: 'Alabama', value: 'Alabama' },
         { label: 'Alaska', value: 'Alaska' },
@@ -66,76 +66,76 @@ const Quiz = ({ navigation }) => {
     ];
 
     const majorData = [
-        { label: 'Aerospace Engineering', value: 'Aerospace Engineering' },
-        { label: 'Accounting', value: 'Accounting' },
-        { label: 'Agriculture', value: 'Agriculture' },
-        { label: 'Architecture', value: 'Architecture' },
-        { label: 'Biology', value: 'Biology' },
-        { label: 'Biomedical Engineering', value: 'Biomedical Engineering' },
-        { label: 'Biomedical Science', value: 'Biomedical Science' },
-        { label: 'Business Administration', value: 'Business Administration' },
-        { label: 'Business Management', value: 'Business Management' },
-        { label: 'Civil Engineering', value: 'Civil Engineering' },
-        { label: 'Chemical Engineering', value: 'Chemical Engineering' },
-        { label: 'Chemistry', value: 'Chemistry' },
-        { label: 'Communications', value: 'Communication' },
-        { label: 'Communication Technology', value: 'Communication Technology' },
-        { label: 'Computer Information Systems', value: 'Computer Information Systems' },
-        { label: 'Computer Engineering', value: 'Computer Engineering' },
-        { label: 'Computer Science', value: 'Computer Science' },
-        { label: 'Construction Management', value: 'Construction Management' },
-        { label: 'Construction Trades', value: 'Construction Trades' },
-        { label: 'Criminal Justice', value: 'Criminal Justice' },
-        { label: 'Culinary', value: 'Culinary' },
-        { label: 'Ecology', value: 'Ecology' },
-        { label: 'Economics', value: 'Economics' },
-        { label: 'Education', value: 'Education' },
-        { label: 'Engineering Technologies', value: 'Engineering Technology' },
-        { label: 'Electrical Engineering', value: 'Electrical Engineering' },
-        { label: 'English', value: 'English' },
-        { label: 'Entrepreneurship', value: 'Entrepreneurship' },
-        { label: 'Environmental Engineering', value: 'Environmental Engineering' },
-        { label: 'Environmental Protections', value: 'Environmental Protections' },
-        { label: 'Environmental Sciences', value: 'Environmental Sciences' },
-        { label: 'Ethnic Studies', value: 'Ethnic Studies' },
-        { label: 'Fashion', value: 'Fashion' },
-        { label: 'Finance', value: 'Finance' },
-        { label: 'Fitness Studies', value: 'Fitness Studies' },
-        { label: 'Foreign Language', value: 'Foreign Language' },
-        { label: 'Forestry', value: 'Forestry' },
-        { label: 'General Studies', value: 'General Studies' },
-        { label: 'History', value: 'History' },
-        { label: 'Human Resources', value: 'Human Resources' },
-        { label: 'Human Sciences', value: 'Human Sciences' },
-        { label: 'Industrial Engineering', value: 'Industrial Engineering' },
-        { label: 'Interdisciplinary Studies', value: 'Interdisciplinary Studies' },
-        { label: 'Journalism', value: 'Journalism' },
-        { label: 'Legal Studies', value: 'Legal Studies' },
-        { label: 'Liberal Arts', value: 'Liberal Arts' },
-        { label: 'Marketing', value: 'Marketing' },
-        { label: 'Mathematics', value: 'Mathematics' },
-        { label: 'Mechanic and Repair Technologies', value: 'Mechanic and Repair Technologies' },
-        { label: 'Mechanical Engineering', value: 'Mechanical Engineering' },
-        { label: 'Multidisciplinary Studies', value: 'Multidisciplinary Studies' },
-        { label: 'Musical Studies', value: 'Musical Studies' },
-        { label: 'Natural Resource Management', value: 'Natural Resource Management' },
-        { label: 'Performing Arts', value: 'Performing Arts' },
-        { label: 'Philosophy', value: 'Philosophy' },
-        { label: 'Psychology', value: 'Psychology' },
-        { label: 'Physical Sciences', value: 'Physical Sciences' },
-        { label: 'Political Science', value: 'Political Science' },
-        { label: 'Precision Production', value: 'Precision Production' },
-        { label: 'Protective Services', value: 'Protective Services' },
-        { label: 'Public Administration', value: 'Public Administration' },
-        { label: 'Religious Studies', value: 'Religious Studies' },
-        { label: 'Religious Vocations', value: 'Religious Vocations' },
-        { label: 'Social Services', value: 'Social Services' },
-        { label: 'Social Sciences', value: 'Social Sciences' },
-        { label: 'Sociology', value: 'Sociology' },
-        { label: 'Statistics', value: 'Statistics' },
-        { label: 'Supply Chain', value: 'Supply Chain' },
-        { label: 'Theology', value: 'Theology' },
-        { label: 'Visual Arts', value: 'Visual Arts' },
+        { label: 'Aerospace Engineering', value: 'Aerospace Engineering' , categories:['EngineeringDegrees'] },
+        { label: 'Accounting', value: 'Accounting' , categories: ['BusinessManagmentMarketingDegrees']},
+        { label: 'Agriculture', value: 'Agriculture', categories: ['AgriculturalDegrees'] },
+        { label: 'Architecture', value: 'Architecture',  categories:['ArchitectureDegrees']},
+        { label: 'Biology', value: 'Biology', categories:['Biological_and_BiomedicalSciencesDegrees'] },
+        { label: 'Biomedical Engineering', value: 'Biomedical Engineering', categories:['Biological_and_BiomedicalSciencesDegrees']},
+        { label: 'Biomedical Science', value: 'Biomedical Science', categories:['Biological_and_BiomedicalSciencesDegrees'] },
+        { label: 'Business Administration', value: 'Business Administration',categories: ['BusinessManagmentMarketingDegrees'] },
+        { label: 'Business Management', value: 'Business Management', categories: ['BusinessManagmentMarketingDegrees'] },
+        { label: 'Civil Engineering', value: 'Civil Engineering', categories:['EngineeringDegrees'] },
+        { label: 'Chemical Engineering', value: 'Chemical Engineering', categories:['EngineeringDegrees'] },
+        { label: 'Chemistry', value: 'Chemistry', categories: ['PhysicalSciencesDegrees'] },
+        { label: 'Communications', value: 'Communication', categories:['CommunicationTechnologiesDegrees' ] },
+        { label: 'Communication Technology', value: 'Communication Technology', categories:['CommunicationTechnologiesDegrees'] },
+        { label: 'Computer Information Systems', value: ['Computer Information Systems' ] },
+        { label: 'Computer Engineering', value: 'Computer Engineering', categories:['Computer_and_ComputerInfoScienciesDegrees']},
+        { label: 'Computer Science', value: 'Computer Science' , categories:['Computer_and_ComputerInfoScienciesDegrees']},
+        { label: 'Construction Management', value: 'Construction Management' , categories:['ConstructionTradesDegrees']},
+        { label: 'Construction Trades', value: 'Construction Trades' , categories:['ConstructionTradesDegrees']},
+        { label: 'Criminal Justice', value: 'Criminal Justice' , categories:['LegalStudiesDegrees']},
+        { label: 'Culinary', value: 'Culinary' , categories:['CulinaryDegrees']},
+        { label: 'Ecology', value: 'Ecology' , categories: ['Biological_and_BiomedicalSciencesDegrees']},
+        { label: 'Economics', value: 'Economics' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Education', value: 'Education' , categories:['EducationsDegrees']},
+        { label: 'Engineering Technologies', value: 'Engineering Technology', categories:['EngineeringDegrees'] },
+        { label: 'Electrical Engineering', value: 'Electrical Engineering', categories:['EngineeringDegrees'] },
+        { label: 'English', value: 'English' , categories:['EnglishDegrees']},
+        { label: 'Entrepreneurship', value: 'Entrepreneurship' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Environmental Engineering', value: 'Environmental Engineering', categories: ['EngineeringDegrees']},
+        { label: 'Environmental Protections', value: 'Environmental Protections', categories: ['naturalResourceAndConservationDegrees'] },
+        { label: 'Environmental Sciences', value: 'Environmental Sciences', categories:['naturalResourceAndConservationDegrees']},
+        { label: 'Ethnic Studies', value: 'Ethnic Studies' , categories:['Ethinc_Cultural_GenderStudiesDegrees']},
+        { label: 'Fashion', value: 'Fashion', categories: ['Visual_and_PerformingArtsDegrees', 'Communication_and_JournalismDegrees']},
+        { label: 'Finance', value: 'Finance' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Fitness Studies', value: 'Fitness Studies' , categories:['Parks_Recreation_Leisure_and_FitnessStudiesDegrees']},
+        { label: 'Foreign Language', value: 'Foreign Language', categories:['ForeignLanguagesDegrees']},
+        { label: 'Forestry', value: 'Forestry' , categories:['naturalResourceAndConservationDegrees']},
+        { label: 'General Studies', value: 'General Studies' , categories:['LiberalArts_and_GeneralStudiesDegrees']},
+        { label: 'History', value: 'History' , categories:['HistoryDegrees']},
+        { label: 'Human Resources', value: 'Human Resources' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Human Sciences', value: 'Human Sciences', categories:['HumanSciencesDegrees']},
+        { label: 'Industrial Engineering', value: 'Industrial Engineering' , categories:['EngineeringDegrees']},
+        { label: 'Interdisciplinary Studies', value: 'Interdisciplinary Studies' , categories:['Multi_InterdisciplinaryStudiesDegrees']},
+        { label: 'Journalism', value: 'Journalism' , categories:['Communication_and_JournalismDegrees']},
+        { label: 'Legal Studies', value: 'Legal Studies' , categories:['LegalStudiesDegrees']},
+        { label: 'Liberal Arts', value: 'Liberal Arts' , categories:['LiberalArts_and_GeneralStudiesDegrees']},
+        { label: 'Marketing', value: 'Marketing' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Mathematics', value: 'Mathematics' , categories:['Math_and_StatsDegrees']},
+        { label: 'Mechanic and Repair Technologies', value: 'Mechanic and Repair Technologies' , categories:['Mechanic_and_RepairTechnologiesDegrees']},
+        { label: 'Mechanical Engineering', value: 'Mechanical Engineering', categories:['EngineeringDegrees'] },
+        { label: 'Multidisciplinary Studies', value: 'Multidisciplinary Studies' , categories:['Multi_InterdisciplinaryStudiesDegrees']},
+        { label: 'Musical Studies', value: 'Musical Studies' , categories:['Visual_and_PerformingArtsDegrees']},
+        { label: 'Natural Resource Management', value: 'Natural Resource Management' , categories:['naturalResourceAndConservationDegrees']},
+        { label: 'Performing Arts', value: 'Performing Arts' , categories:['Visual_and_PerformingArtsDegrees']},
+        { label: 'Philosophy', value: 'Philosophy' , categories:['Philosophy_and_ReligiousStudiesDegrees', 'Theology_and_ReligiousVocationsDegrees']},
+        { label: 'Psychology', value: 'Psychology' , categories:['PsychologyDegrees']},
+        { label: 'Physical Sciences', value: 'Physical Sciences', categories: ['PhysicalSciencesDegrees']},
+        { label: 'Political Science', value: 'Political Science', categories: ['SocialSciencesDegrees']},
+        { label: 'Precision Production', value: 'Precision Production' , categories:['PrecisionProductionDegrees']},
+        { label: 'Protective Services', value: 'Protective Services' , categories:['HomelandSecurity_LawEnforcement_Firefighting_and_RelatedProtectiveServicesDegrees']},
+        { label: 'Public Administration', value: 'Public Administration', categories: ['PublicAdmin_and_SocialServiceDegrees']},
+        { label: 'Religious Studies', value: 'Religious Studies' , categories:['Philosophy_and_ReligiousStudiesDegrees']},
+        { label: 'Religious Vocations', value: 'Religious Vocations' , categories:['Philosophy_and_ReligiousStudiesDegrees']},
+        { label: 'Social Services', value: 'Social Services' , categories:['PublicAdmin_and_SocialServiceDegrees']},
+        { label: 'Social Sciences', value: 'Social Sciences', categories: ['SocialSciencesDegrees']},
+        { label: 'Sociology', value: 'Sociology' , categories:['SocialSciencesDegrees']},
+        { label: 'Statistics', value: 'Statistics' , categories:['Math_and_StatsDegrees']},
+        { label: 'Supply Chain', value: 'Supply Chain' , categories:['BusinessManagmentMarketingDegrees']},
+        { label: 'Theology', value: 'Theology' , categories:['Theology_and_ReligiousVocationsDegrees', 'Philosophy_and_ReligiousStudiesDegrees']},
+        { label: 'Visual Arts', value: 'Visual Arts' , categories:['Visual_and_PerformingArtsDegrees']},
     ];
 
     const distanceData = [
@@ -244,9 +244,6 @@ const Quiz = ({ navigation }) => {
     const [schoolClassification, setType] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
 
-
-    const collectionref = collection(firestore, 'Quiz');
-
     
 
     const handleSubmit = async () => {
@@ -264,23 +261,15 @@ const Quiz = ({ navigation }) => {
             size: size,
             school_classification: schoolClassification,
             urbanization_level: urbanizationLevel,
+            categories: majorData.find(entry =>entry.label == major).categories,
             userId: auth().currentUser.uid
         }
 
-        try {
-            // const querySnapshot = await getDocs(collectionref);
-            // const docCount = querySnapshot.size;
-            // const newDocId = `user${docCount + 1}`;
-
-            await addDoc(collectionref, answers);
-            alert("Quiz submitted successfully!");
-            
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            
-        }
         const result = ( await matchColleges(answers)).top100Colleges;
         navigation.navigate("Results", {top100: result});
+        alert("Quiz submitted successfully!");
+            
+        
     };
     
 

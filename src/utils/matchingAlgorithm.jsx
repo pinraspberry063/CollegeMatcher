@@ -1,6 +1,7 @@
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import { useState } from 'react';
+import auth from '@react-native-firebase/auth';
 
 const matchColleges = async (studentPreferences) => {
     const firestore = getFirestore(db);
@@ -216,16 +217,21 @@ const matchColleges = async (studentPreferences) => {
     });
 
     scores.sort((a, b) => b.score - a.score);
-    const top100Colleges = scores.slice(0, 100).map((s) => ({ name: s.college.shool_name, score: s.score }));
-    const resultsRef = collection(firestore, 'Results');
+    const top100Colleges = scores.slice(0, 50).map((s) => ({ name: s.college.shool_name, score: s.score, id: s.college.school_id }));
+    const resultsRef = collection(firestore, 'Users')
+    const resultDoc = query(resultsRef, where('User_UID', '==', auth().currentUser.uid));
+    const docID = (await getDocs(resultDoc)).docs[0].ref;
+    // const docRef = doc(firestore, "Users", docID);
+    // const doc = await getDocs(docRef);
     
     try {
       
-        await addDoc(resultsRef, {
+        await setDoc(docID,
+        {
             userPreferences: studentPreferences,
-            top100Colleges,
+            top100Colleges: top100Colleges,
             
-        });
+        }, {merge: true});
 
         alert("Algo submitted successfully!");
         

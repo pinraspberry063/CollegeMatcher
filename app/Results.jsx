@@ -1,20 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
 import DropdownComponent from '../components/DropdownComp';
+import { db } from '../config/firebaseConfig';
+import auth from '@react-native-firebase/auth';
 
 
 
-const Results = ({ route }) => {
+
+const Results = ({ route, navigation }) => {
+    
     const top100  = route.params.top100;
+    
+    // const screen = route.params.screen;
+    
+    // const firestore = getFirestore(db);
+    // const resultsRef = collection(firestore, 'Users')
+    // const resultDoc = query(resultsRef, where('User_UID', '==', auth().currentUser.uid));
+    // const docID = (await getDocs(resultDoc)).docs[0].ref;
+    // const savedData = docID.top100Colleges;
+    
     const [numResults, setNumResults] = useState(5);
-    const [page, setPage] = useState('results');
     
     const renderItem = ({ item }) => (
         <View style={styles.card}>
-            <Text style={styles.collegeName}>{item.name}</Text>
-            <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
+            <TouchableOpacity
+            onPress={() => navigation.push('Details', {college: item.name, id: item.id})}
+            >
+                <Text style={styles.collegeName}>{item.name}</Text>
+                <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
+            </TouchableOpacity>
         </View>
     );
+    
+
     const numResultsData = [
         { label: '5', value: 5 },
         { label: '10', value: 10 },
@@ -23,30 +42,27 @@ const Results = ({ route }) => {
         { label: '100', value: 100 }
         
     ];
-    const resultpage = () => (
-        <View style={styles.container}>
-            <Text style={styles.title}>Top {numResults} College Matches</Text>
-            <DropdownComponent style={styles.dropdown} data={numResultsData} value={numResults} onChange={setNumResults} />
-            <FlatList
-                data={top100.slice(0,numResults)}
-                renderItem={renderItem}
-                // keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={styles.list}
-            />
-        </View>
 
-    )
 
     return (
-        <SafeAreaView style={styles.safeaArea}>{page === 'results' && resultpage()}</SafeAreaView>
+            
+                <View style={styles.container}>
+                    <Text style={styles.title}>Top College Matches</Text>
+                    <FlatList
+                        data={top100}
+                        renderItem={renderItem}
+                        // keyExtractor={(item, index) => index.toString()}
+                        contentContainerStyle={styles.list}
+                    />
+                </View>
+            
+       
     );
 }
 
 const styles = StyleSheet.create({
-    safeaArea: {
-        flex:1
-    },
     container: {
+        flex:1,
         backgroundColor: '#fff',
         padding: 20,
     },
@@ -87,4 +103,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Results;
+export default Results

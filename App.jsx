@@ -26,7 +26,15 @@ import MakkAI from './app/MakkAI';
 import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
+import Details from './app/Details';
+import { db } from './config/firebaseConfig';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where, getDoc} from 'firebase/firestore';
 
+
+
+
+
+const firestore = getFirestore(db);
 const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
@@ -40,6 +48,9 @@ const screenOptions = {
     background: "#fff"
   }
 }
+
+
+
 
 const HomeStack = createNativeStackNavigator();
 const HomeStackScreen = () => (
@@ -66,9 +77,22 @@ const QuizStackScreen = () => (
   <QuizStack.Navigator screenOptions={screenOptions}>
     <QuizStack.Screen name="Quiz" component={Quiz} />
     <QuizStack.Screen name="Results" component={Results} />
+    <QuizStack.Screen name="Details" component={Details} />
 
   </QuizStack.Navigator>
 )
+const ResultStack = createNativeStackNavigator();
+const ResultStackScreen = ({route}) => {
+  const Top100 = route.params.Top100;
+  console.log("Top100" + Top100);
+  return (
+    <ResultStack.Navigator screenOptions={screenOptions}>
+      <ResultStack.Screen name="Results" initialParams={{top100: Top100}} component={Results}  />
+      <ResultStack.Screen name="Details" component={Details} />
+
+    </ResultStack.Navigator>
+  )
+}
 
 const ForumStack = createNativeStackNavigator();
 const ForumStackScreen = () => (
@@ -92,8 +116,42 @@ const icons = {
 }
 
 const Tab = createBottomTabNavigator();
-const TabScreen = () => (
-  <Tab.Navigator
+const TabScreen = () => {
+  
+  const [topColleges, setTopColleges] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const user = auth().currentUser.uid;
+
+  useEffect(() => {
+    const checkQuiz = async() => {
+
+      const usersRef = collection(firestore, 'Users');
+      const userQuery = query(usersRef, where('User_UID', '==', auth().currentUser.uid));
+      try {
+        const querySnapshot = await getDocs(userQuery);
+      
+        if (!querySnapshot.empty) {
+          const firstDoc = querySnapshot.docs[0];
+          const collegeData = firstDoc.data();
+          const top100 = collegeData.top100Colleges;
+      
+          setTopColleges(top100);
+          setIsLoading(false);
+        } else {
+          console.log('No matching document found.');
+        }
+      } catch (error) {
+        console.error('Error retrieving document:', error);
+      }
+    }
+    checkQuiz();
+  },[topColleges, isLoading])
+  
+  if(isLoading){
+    return <View><Text>Loading</Text></View>
+  }
+  return (
+    <Tab.Navigator
     screenOptions={({ route }) => ({
       tabBarIcon: ({ color, size }) => {
         return (
@@ -117,13 +175,15 @@ const TabScreen = () => (
       }
     })}
   >
-    <Tab.Screen name="Home" component={HomeStackScreen} />
-    <Tab.Screen name="QuizStack" component={QuizStackScreen} />
+    <Tab.Screen name="Home" component={HomeStackScreen}/>
+    <Tab.Screen name="QuizStack" initialParams={{Top100: topColleges}} component={ResultStackScreen} />
+    {/* <Tab.Screen name="QuizStack" component={(quizTaken)? ResultStackScreen:QuizStackScreen} params={(quizTaken)?{top100: Top100}:{}} /> */}
     <Tab.Screen name="Forum" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
   </Tab.Navigator>
-)
+  )
+}
 
 const RootStack = createNativeStackNavigator();
 const LaunchStack = createNativeStackNavigator();
@@ -137,6 +197,8 @@ const LaunchStackScreen = () => (
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [takenQuiz, setTakenQuiz] = useState(false);
+  const [topColleges, setTopColleges] = useState([]);
 
   useEffect(() => {
     const listener = EventRegister.addEventListener('Change Theme', (data) => {
@@ -146,6 +208,12 @@ const App = () => {
       EventRegister.removeAllListeners(listener)
     }
   }, [darkMode])
+
+ 
+
+ // Dependency on data
+
+  
 
   useEffect(() => {
     const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
@@ -159,6 +227,8 @@ const App = () => {
       });
     return () => unsubscribe();
   }, []);
+
+  
 
 const handleDynamicLink = async (link) => {
   if (link.url) {
@@ -182,6 +252,9 @@ const handleDynamicLink = async (link) => {
     }
   }
 };
+
+
+
 
   return (
     <UserProvider>

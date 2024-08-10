@@ -10,6 +10,7 @@ import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import { TwitterAuthProvider } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
+import { EventRegister } from 'react-native-event-listeners';
 
 const MAX_ATTEMPTS = 5;
 
@@ -151,7 +152,8 @@ const Login = ({ navigation }) => {
         setLoading(false);
         setAttempts(0);
         setUser(userCredential.user); // Set the logged in user in context
-        checkIsRecruiter(userCredential.user.uid); // Check if the user is a recruiter
+        checkIsRecruiter(userCredential.user.uid); 
+        EventRegister.emit('login', auth().currentUser.uid);// Check if the user is a recruiter
         navigation.navigate('Main')
       })
     } catch (error) {

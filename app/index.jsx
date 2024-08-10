@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,8 +8,11 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext'
+import {EventRegister} from 'react-native-event-listeners'
+import auth from '@react-native-firebase/auth';
 
 const Index = ( {navigation} ) => {
+  
   const theme = useContext(themeContext);
   return (
     <View style={styles.container}>
