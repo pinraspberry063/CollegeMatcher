@@ -7,7 +7,6 @@ import { getFirestore, collection, query, where, getDocs } from 'firebase/firest
 import { db } from '../config/firebaseConfig';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
-import { TwitterAuthProvider } from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 
@@ -23,115 +22,6 @@ const Login = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId: '927238517919-c3vu6r24d30repq25jl1t6j7eoiqkb9a.apps.googleusercontent.com',
-    });
-
-    const handleDynamicLink = async (link) => {
-      if (link && auth().isSignInWithEmailLink(link.url)) {
-        let emailForSignIn = await AsyncStorage.getItem('emailForSignIn');
-        if (!emailForSignIn) {
-          Alert.alert(
-            'Email Required',
-            'Please enter the email address you used for sign-in',
-            [
-              {
-                text: 'OK',
-                onPress: async () => {
-                  const userEmail = await new Promise((resolve) => {
-                    Alert.prompt(
-                      'Enter Email',
-                      'Please enter your email address',
-                      (email) => resolve(email)
-                    );
-                  });
-                  if (userEmail) {
-                    emailForSignIn = userEmail;
-                  }
-                },
-              },
-            ]
-          );
-        }
-        if (emailForSignIn) {
-          try {
-            await auth().signInWithEmailLink(emailForSignIn, link.url);
-            await AsyncStorage.removeItem('emailForSignIn');
-            console.log('User signed in successfully');
-            Alert.alert('Success', 'You have been signed in successfully!');
-            navigation.navigate('Main');
-          } catch (error) {
-            console.error('Error signing in with email link:', error);
-            Alert.alert('Error', 'Failed to sign in: ' + error.message);
-          }
-        }
-      }
-    };
-
-    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
-
-    dynamicLinks()
-      .getInitialLink()
-      .then(link => {
-        if (link) {
-          handleDynamicLink(link);
-        }
-      });
-
-    return () => unsubscribe();
-  }, [navigation]);
-
- const handleEmailLinkSignIn = async () => {
-   if (!email) {
-     Alert.alert('Input Error', 'Please enter your email address.');
-     return;
-   }
-
-   setLoading(true);
-   try {
-     const link = await dynamicLinks().buildShortLink({
-       link: `https://collegematcher46019.page.link/emailSignIn?email=${encodeURIComponent(email)}`,
-       domainUriPrefix: 'https://collegematcher46019.page.link',
-       android: {
-         packageName: 'com.cm_app',
-       },
-       ios: {
-         bundleId: 'com.cm_app',
-       },
-     }, dynamicLinks.ShortLinkType.SHORT);
-
-     console.log('Generated short link:', link);
-
-     const actionCodeSettings = {
-       url: link,
-       handleCodeInApp: true,
-       iOS: {
-         bundleId: 'com.cm_app'
-       },
-       android: {
-         packageName: 'com.cm_app',
-         installApp: false,
-         minimumVersion: '12'
-       },
-       dynamicLinkDomain: 'collegematcher46019.page.link'
-     };
-
-     console.log('Action code settings:', actionCodeSettings);
-
-     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
-     await AsyncStorage.setItem('emailForSignIn', email);
-     Alert.alert('Email Sent', 'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.');
-     setLoading(false);
-   } catch (error) {
-     setLoading(false);
-     console.error('Email link sign-in error:', error);
-     console.error('Error code:', error.code);
-     console.error('Error message:', error.message);
-     Alert.alert('Error', `Failed to send email: ${error.message}`);
-   }
- };
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -178,6 +68,12 @@ const Login = ({ navigation }) => {
     }
   };
 
+    useEffect(() => {
+      GoogleSignin.configure({
+        webClientId: '927238517919-c3vu6r24d30repq25jl1t6j7eoiqkb9a.apps.googleusercontent.com',
+      });
+    }, []);
+
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.signOut(); // Ensures user is prompted to pick account
@@ -213,17 +109,49 @@ const Login = ({ navigation }) => {
     }
   };
 
-  const handleTwitterLogin = async () => {
-    try {
-      const { authToken, authTokenSecret } = await TwitterAuthProvider.getCredential();
-      const twitterCredential = auth.TwitterAuthProvider.credential(authToken, authTokenSecret);
-      await auth().signInWithCredential(twitterCredential);
-      Alert.alert('Twitter Login Successful');
-      navigation.navigate('Main');
-    } catch (error) {
-      Alert.alert('Twitter Login Failed', error.message);
-    }
-  };
+ const handleEmailLinkSignIn = async () => {
+   if (!email) {
+     Alert.alert('Input Error', 'Please enter your email address.');
+     return;
+   }
+
+   setLoading(true);
+   try {
+     const link = await dynamicLinks().buildLink({
+       link: 'https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}',
+       domainUriPrefix: 'https://collegematcher46019.page.link',
+       android: {
+         packageName: 'com.cm_app',
+       },
+     });
+
+     console.log('Generated dynamic link:', link);
+
+     const actionCodeSettings = {
+       url: link,
+       handleCodeInApp: true,
+       android: {
+         packageName: 'com.cm_app',
+         installApp: false,
+         minimumVersion: '12'
+       },
+       dynamicLinkDomain: 'collegematcher46019.page.link'
+     };
+
+     console.log('Action code settings:', actionCodeSettings);
+
+     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
+     await AsyncStorage.setItem('emailForSignIn', email);
+     Alert.alert('Email Sent', 'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.');
+   } catch (error) {
+     console.error('Email link sign-in error:', error);
+     console.error('Error code:', error.code);
+     console.error('Error message:', error.message);
+     Alert.alert('Error', 'Failed to send email: ${error.message}');
+   } finally {
+     setLoading(false);
+   }
+ };
 
   const checkIsRecruiter = async (uid) => {
     const firestore = getFirestore(db);
@@ -301,7 +229,6 @@ const Login = ({ navigation }) => {
           <Button title="Login with Phone" onPress={handlePhoneLogin} />
           <Button title="Login with Google" onPress={handleGoogleLogin} />
           <Button title="Login with Facebook" onPress={handleFacebookLogin} />
-          <Button title="Login with Twitter" onPress={handleTwitterLogin} />
           <Button title="Login with Email Link" onPress={handleEmailLinkSignIn} />
           <Button title="Forgot Password" onPress={handleForgotPassword} />
         </>

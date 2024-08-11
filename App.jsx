@@ -137,6 +137,7 @@ const LaunchStackScreen = () => (
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
     const listener = EventRegister.addEventListener('Change Theme', (data) => {
@@ -160,41 +161,45 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-const handleDynamicLink = async (link) => {
-  if (link.url) {
-    console.log('Received dynamic link:', link.url);
-    if (auth().isSignInWithEmailLink(link.url)) {
-      try {
-        const email = await AsyncStorage.getItem('emailForSignIn');
-        console.log('Retrieved email for sign-in:', email);
-        if (email) {
-          const result = await auth().signInWithEmailLink(email, link.url);
-          console.log('Sign-in result:', result);
-          await AsyncStorage.removeItem('emailForSignIn');
-          console.log('User signed in successfully:', result.user.email);
-          navigation.navigate('Home');
-        } else {
-          console.log('No email found for sign-in');
+  const handleDynamicLink = async (link) => {
+    if (link.url) {
+      console.log('Received dynamic link:', link.url);
+      if (auth().isSignInWithEmailLink(link.url)) {
+        try {
+          const email = await AsyncStorage.getItem('emailForSignIn');
+          console.log('Retrieved email for sign-in:', email);
+          if (email) {
+            const result = await auth().signInWithEmailLink(email, link.url);
+            console.log('Sign-in result:', result);
+            await AsyncStorage.removeItem('emailForSignIn');
+            console.log('User signed in successfully:', result.user.email);
+            setIsSignedIn(true);
+          } else {
+            console.log('No email found for sign-in');
+          }
+        } catch (error) {
+          console.error('Error signing in with email link:', error);
         }
-      } catch (error) {
-        console.error('Error signing in with email link:', error);
       }
     }
-  }
-};
+  };
 
-  return (
-    <UserProvider>
-      <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-        <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-          <RootStack.Navigator screenOptions={screenOptions}>
-            <RootStack.Screen name="Launch" component={LaunchStackScreen}/>
+
+return (
+  <UserProvider>
+    <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+      <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+        <RootStack.Navigator screenOptions={screenOptions}>
+          {isSignedIn ? (
             <RootStack.Screen name="Main" component={TabScreen}/>
-          </RootStack.Navigator>
-        </NavigationContainer>
-      </themeContext.Provider>
-    </UserProvider>
-  )
+          ) : (
+            <RootStack.Screen name="Launch" component={LaunchStackScreen}/>
+          )}
+        </RootStack.Navigator>
+      </NavigationContainer>
+    </themeContext.Provider>
+  </UserProvider>
+)
 }
 
 export default registerRootComponent(App);
