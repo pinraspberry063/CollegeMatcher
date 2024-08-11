@@ -61,7 +61,10 @@ const Login = ({ navigation }) => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
       setLoading(false);
-      navigation.navigate('PhoneVerification', { confirmation });
+      navigation.navigate('Launch', {
+        screen: 'PhoneVerification',
+        params: { verificationId: confirmation.verificationId }
+      });
     } catch (error) {
       setLoading(false);
       Alert.alert('Phone Login Failed', error.message);

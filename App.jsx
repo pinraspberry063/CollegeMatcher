@@ -26,6 +26,7 @@ import MakkAI from './app/MakkAI';
 import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
+import PhoneVerification from './app/PhoneVerification';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -132,12 +133,14 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
+    <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
   </LaunchStack.Navigator>
 )
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const listener = EventRegister.addEventListener('Change Theme', (data) => {
@@ -149,17 +152,16 @@ const App = () => {
   }, [darkMode])
 
   useEffect(() => {
-    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
-    // Check for the initial dynamic link if the app was opened with one
-    dynamicLinks()
-      .getInitialLink()
-      .then(link => {
-        if (link) {
-          handleDynamicLink(link);
-        }
-      });
-    return () => unsubscribe();
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
   }, []);
+
+  function onAuthStateChanged(user) { // call this function when there's a change in auth state
+    // update user to new user object or to null if not signed in
+    setUser(user);
+    // stop initial auth check if this function is accessed
+    if (initializing) setInitializing(false);
+  }
 
   const handleDynamicLink = async (link) => {
     if (link.url) {
@@ -173,34 +175,52 @@ const App = () => {
             console.log('Sign-in result:', result);
             await AsyncStorage.removeItem('emailForSignIn');
             console.log('User signed in successfully:', result.user.email);
-            setIsSignedIn(true);
+            setUser(result.user);
           } else {
             console.log('No email found for sign-in');
+            Alert.alert('Error', 'No email found for sign-in. Please try logging in again.');
           }
         } catch (error) {
           console.error('Error signing in with email link:', error);
+          Alert.alert('Error', 'Failed to sign in: ' + error.message);
         }
       }
     }
   };
 
+  useEffect(() => {
+      const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
 
-return (
-  <UserProvider>
-    <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-      <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-        <RootStack.Navigator screenOptions={screenOptions}>
-          {isSignedIn ? (
-            <RootStack.Screen name="Main" component={TabScreen}/>
-          ) : (
-            <RootStack.Screen name="Launch" component={LaunchStackScreen}/>
-          )}
-        </RootStack.Navigator>
-      </NavigationContainer>
-    </themeContext.Provider>
-  </UserProvider>
-)
-}
+      dynamicLinks()
+        .getInitialLink()
+        .then(link => {
+          if (link) {
+            handleDynamicLink(link);
+          }
+        })
+        .catch(error => console.error('Error checking initial link:', error));
+
+      return () => unsubscribe();
+    }, []);
+
+    if (initializing) return null;
+
+    return (
+      <UserProvider>
+        <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+          <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+            <RootStack.Navigator screenOptions={screenOptions}>
+              {user ? (
+                <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+              ) : (
+                <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+              )}
+            </RootStack.Navigator>
+          </NavigationContainer>
+        </themeContext.Provider>
+      </UserProvider>
+    )
+  }
 
 export default registerRootComponent(App);
 
