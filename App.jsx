@@ -210,11 +210,13 @@ const App = () => {
         <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
           <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
             <RootStack.Navigator screenOptions={screenOptions}>
-              {user ? (
+              {/* {user ? (
                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
               ) : (
                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
-              )}
+              )} */}
+              <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+              <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
             </RootStack.Navigator>
           </NavigationContainer>
         </themeContext.Provider>
