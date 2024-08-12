@@ -27,6 +27,9 @@ import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import PhoneVerification from './app/PhoneVerification';
+import ModeratorScreen from './app/ModeratorScreen';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { db } from './config/firebaseConfig';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -59,6 +62,7 @@ const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
     <MessageStack.Screen name="RecConvs" component={RecConvs} />
     <MessageStack.Screen name="Message" component={Message} />
+    <MessageStack.Screen name="Moderation" component={ModeratorScreen} />
   </MessageStack.Navigator>
 )
 
@@ -123,6 +127,9 @@ const TabScreen = () => (
     <Tab.Screen name="Forum" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
+    {userStatus === 'moderator' && (
+              <Tab.Screen name="Moderation" component={ModeratorScreen} />
+            )}
   </Tab.Navigator>
 )
 
@@ -136,6 +143,24 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
   </LaunchStack.Navigator>
 )
+
+const checkUserStatus = async (userId) => {
+  const firestore = getFirestore(db);
+  const userRef = doc(firestore, 'Users', userId);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    const userData = userSnap.data();
+    if (userData.status === 'banned') {
+      auth().signOut();
+      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
+      return 'banned';
+    } else if (userData.isModerator) {
+      return 'moderator';
+    }
+  }
+  return 'regular';
+};
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);

@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
 
@@ -116,6 +117,22 @@ const ColForum = ({ navigation }) => {
     }
   };
 
+  const handleReportPost = async (threadId, postId, reportedUser) => {
+    const reportData = {
+      threadId,
+      postId,
+      reportedUser,
+      source: 'forum'
+    };
+
+    const success = await handleReport(reportData);
+    if (success) {
+      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+    } else {
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -144,6 +161,7 @@ const ColForum = ({ navigation }) => {
                 <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
                 <Text style={[styles.postCreatedBy, { color: theme.textColor }]}>Posted by: {post.createdBy}</Text>
                 <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>Posted at: {post.createdAt.toDate().toLocaleString()}</Text>
+                <Button title="Report" onPress={() => handleReportPost(thread.id, post.id, post.createdBy)} />
               </View>
             ))}
             <View style={styles.newPostContainer}>
