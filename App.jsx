@@ -235,19 +235,24 @@ const App = () => {
 
     if (initializing) return null;
 
-  return (
-    <UserProvider>
-      <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-        <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-          <RootStack.Navigator screenOptions={screenOptions}>
-            <RootStack.Screen name="Launch" component={LaunchStackScreen} />
-            <RootStack.Screen name="Main" component={TabScreen} />
-          </RootStack.Navigator>
-        </NavigationContainer>
-      </themeContext.Provider>
-    </UserProvider>
-  );
-};
+    return (
+      <UserProvider>
+        <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+          <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+            <RootStack.Navigator screenOptions={screenOptions}>
+              {/* {user ? (
+                <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+              ) : (
+                <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+              )} */}
+              <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+              <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+            </RootStack.Navigator>
+          </NavigationContainer>
+        </themeContext.Provider>
+      </UserProvider>
+    )
+  }
 
 export default registerRootComponent(App);
 
