@@ -2,51 +2,73 @@ import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext'
+import { UserContext } from '../components/UserContext';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 
-const AccountCreation = ({ navigation}) => {
+const firestore = getFirestore(db);
+
+
+const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = () => {
-    if (!email || !password) {
-      Alert.alert('Input Error', 'Please enter both email and password.');
+  const handleSignUp = async () => {
+    if (!email || !password || !username) {
+      Alert.alert('Input Error', 'Please enter both email and password as well as your first and last name.');
       return;
     }
 
     setLoading(true);
-    auth().createUserWithEmailAndPassword(email, password)
-        .then(() => {
-            setLoading(false);
-            Alert.alert('Account Created');
-            navigation.navigate('Main');
-            })
-        .catch((error) => {
-             setLoading(false);
-             Alert.alert('Account Creation Failed');
-            }
-       )
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      setUser(user); // Set the logged in user in context
 
+      // Add user to Firestore
+      await addDoc(collection(firestore, 'Users'), {
+        User_UID: user.uid,
+        IsRecruiter: false, // Assuming default value, update as necessary
+        Username: username
+      });
+
+      setLoading(false);
+      Alert.alert('Account Created');
+      navigation.navigate('Main');
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Account Creation Failed', error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, {color: theme.color }]}>Create Account</Text>
+      <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
       <TextInput
-        style={[styles.input, {borderColor: theme.color,color: theme.color }]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Email"
         placeholderTextColor={theme.color}
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Password"
         placeholderTextColor={theme.color}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
+      />
+      <TextInput
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        placeholder="First and Last name"
+        placeholderTextColor={theme.color}
+        value={username}
+        onChangeText={setUsername}
       />
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />

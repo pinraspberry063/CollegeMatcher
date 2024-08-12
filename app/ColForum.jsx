@@ -1,119 +1,116 @@
+// Displays the threads and posts of the selected subgroup.
+
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
 
-const ColForum = ({ navigation }) => {
+const ColForum = ({ route, navigation }) => {
+  const { collegeName, forumName } = route.params;
   const [threads, setThreads] = useState([]);
   const [newThreadTitle, setNewThreadTitle] = useState('');
-  const [newThreadCreatedBy, setNewThreadCreatedBy] = useState('');
   const [newPostContent, setNewPostContent] = useState({});
-  const [newPostCreatedBy, setNewPostCreatedBy] = useState({});
+  const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
-
-  const collegeName = 'Louisiana Tech University';
+  const [username, setUsername] = useState('');
 
   useEffect(() => {
-    const unsubscribeThreads = [];
-    const unsubscribePosts = [];
+    if (user) {
+      fetchUsername(user.uid);
+    }
+  }, [user]);
 
-    const checkAndCreateCollegeDoc = async () => {
-      try {
-        const collegeDocRef = doc(firestore, 'Forums', collegeName);
-        const collegeDocSnap = await getDoc(collegeDocRef);
+  useEffect(() => {
+    fetchThreadsAndPosts();
+  }, [collegeName, forumName]);
 
-        if (!collegeDocSnap.exists()) {
-          await setDoc(collegeDocRef, {});
-        }
-
-        const threadsRef = collection(firestore, 'Forums', collegeName, 'threads');
-        const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
-
-        const unsubscribe = onSnapshot(threadsQuery, async (threadsSnapshot) => {
-          const threadsList = [];
-          const postsUnsubscribes = [];
-
-          for (const threadDoc of threadsSnapshot.docs) {
-            const threadData = threadDoc.data();
-            const threadId = threadDoc.id;
-
-            const postsRef = collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts');
-            const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
-
-            const postsSnapshot = await getDocs(postsQuery);
-            const postsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
-
-            threadsList.push({
-              id: threadId,
-              ...threadData,
-              posts: postsList,
-            });
-
-            // Set up real-time updates for posts in this thread
-            const postUnsubscribe = onSnapshot(postsQuery, (postsSnapshot) => {
-              const updatedPostsList = postsSnapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
-              setThreads(prevThreads => prevThreads.map(t => t.id === threadId ? { ...t, posts: updatedPostsList } : t));
-            });
-
-            postsUnsubscribes.push(postUnsubscribe);
-          }
-
-          setThreads(threadsList);
-          // Unsubscribe from previous posts listeners
-          unsubscribePosts.forEach(unsub => unsub());
-          unsubscribePosts.length = 0;
-          unsubscribePosts.push(...postsUnsubscribes);
-        });
-
-        unsubscribeThreads.push(unsubscribe);
-      } catch (error) {
-        console.error('Error fetching threads: ', error);
+  const fetchUsername = async (uid) => {
+    try {
+      const usersRef = collection(firestore, 'Users');
+      const q = query(usersRef, where('User_UID', '==', uid));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        setUsername(userDoc.data().Username);
+      } else {
+        console.error('No user found with the given UID.');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching username:', error);
+    }
+  };
 
-    checkAndCreateCollegeDoc();
+  const fetchThreadsAndPosts = async () => {
+    try {
+      const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
+      const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
+      const threadsSnapshot = await getDocs(threadsQuery);
+      const threadsList = [];
 
-    return () => {
-      // Unsubscribe from all listeners on unmount
-      unsubscribeThreads.forEach(unsub => unsub());
-      unsubscribePosts.forEach(unsub => unsub());
-    };
-  }, []);
+      for (const threadDoc of threadsSnapshot.docs) {
+        const threadData = threadDoc.data();
+        const threadId = threadDoc.id;
+
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
+        const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
+        const postsSnapshot = await getDocs(postsQuery);
+        const postsList = postsSnapshot.docs.map(postDoc => ({
+          id: postDoc.id,
+          ...postDoc.data()
+        }));
+
+        threadsList.push({
+          id: threadId,
+          ...threadData,
+          posts: postsList
+        });
+      }
+
+      setThreads(threadsList);
+    } catch (error) {
+      console.error('Error fetching threads and posts:', error);
+    }
+  };
 
   const handleAddThread = async () => {
-    try {
-      const newThread = {
-        title: newThreadTitle,
-        createdBy: newThreadCreatedBy,
-        createdAt: Timestamp.now(),
-      };
-
-      await addDoc(collection(firestore, 'Forums', collegeName, 'threads'), newThread);
-      setNewThreadTitle('');
-      setNewThreadCreatedBy('');
-    } catch (error) {
-      console.error('Error adding new thread: ', error);
+    if (newThreadTitle.trim() && username) {
+      try {
+        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
+        const newThread = {
+          title: newThreadTitle.trim(),
+          createdBy: username,
+          createdAt: Timestamp.now()
+        };
+        await addDoc(threadsRef, newThread);
+        setNewThreadTitle('');
+        fetchThreadsAndPosts();  // Refresh threads and posts after adding a new thread
+      } catch (error) {
+        console.error('Error adding new thread:', error);
+      }
     }
   };
 
   const handleAddPost = async (threadId) => {
-    try {
-      const newPost = {
-        content: newPostContent[threadId] || '',
-        createdBy: newPostCreatedBy[threadId] || '',
-        createdAt: Timestamp.now(),
-      };
-
-      await addDoc(collection(firestore, 'Forums', collegeName, 'threads', threadId, 'posts'), newPost);
-      setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
-      setNewPostCreatedBy(prev => ({ ...prev, [threadId]: '' }));
-    } catch (error) {
-      console.error('Error adding new post: ', error);
+    if (newPostContent[threadId]?.trim() && username) {
+      try {
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
+        const newPost = {
+          content: newPostContent[threadId].trim(),
+          createdBy: username,
+          createdAt: Timestamp.now()
+        };
+        await addDoc(postsRef, newPost);
+        setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
+        fetchThreadsAndPosts();  // Refresh threads and posts after adding a new post
+      } catch (error) {
+        console.error('Error adding new post:', error);
+      }
     }
   };
 
@@ -143,24 +140,18 @@ const ColForum = ({ navigation }) => {
             value={newThreadTitle}
             onChangeText={setNewThreadTitle}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Created By"
-            value={newThreadCreatedBy}
-            onChangeText={setNewThreadCreatedBy}
-          />
           <Button title="Add Thread" onPress={handleAddThread} />
         </View>
-        {threads.map((thread) => (
+        {threads.map(thread => (
           <View key={thread.id} style={styles.threadItem}>
             <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
             <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>Created by: {thread.createdBy}</Text>
             <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
-            {thread.posts.map((post) => (
+            {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
                 <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
                 <Text style={[styles.postCreatedBy, { color: theme.textColor }]}>Posted by: {post.createdBy}</Text>
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>Posted at: {post.createdAt.toDate().toLocaleString()}</Text>
+                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
                 <Button title="Report" onPress={() => handleReportPost(thread.id, post.id, post.createdBy)} />
               </View>
             ))}
@@ -169,13 +160,7 @@ const ColForum = ({ navigation }) => {
                 style={styles.input}
                 placeholder="Post Content"
                 value={newPostContent[thread.id] || ''}
-                onChangeText={(text) => setNewPostContent(prev => ({ ...prev, [thread.id]: text }))}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Created By"
-                value={newPostCreatedBy[thread.id] || ''}
-                onChangeText={(text) => setNewPostCreatedBy(prev => ({ ...prev, [thread.id]: text }))}
+                onChangeText={text => setNewPostContent(prev => ({ ...prev, [thread.id]: text }))}
               />
               <Button title="Add Post" onPress={() => handleAddPost(thread.id)} />
             </View>

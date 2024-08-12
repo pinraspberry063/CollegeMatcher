@@ -65,7 +65,7 @@ const MakkAI = () => {
   };
 
   const getAIResponse = async (message) => {
-    const API_KEY = '';
+    // const API_KEY = '';
     const apiUrl = `https://api.openai.com/v1/chat/completions`;
 
     try {
@@ -83,7 +83,7 @@ const MakkAI = () => {
           },
         }
       );
-      if (response.data && response.data.choices && response.data.choices[0].message) {
+      if (response.data && response.data.choices && response.data.choices[0]) {
         return response.data.choices[0].message.content.trim();
       } else {
         return "Sorry, I couldn't process your request.";
@@ -105,16 +105,14 @@ const MakkAI = () => {
         )}
         keyExtractor={item => item.id}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={[styles.input, { color: theme.color, borderColor: theme.color }]}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Type your message"
-          placeholderTextColor={theme.color}
-        />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
+      <TextInput
+        style={[styles.input, { color: theme.color, borderColor: theme.color }]}
+        value={input}
+        onChangeText={setInput}
+        placeholder="Type your message"
+        placeholderTextColor={theme.color}
+      />
+      <Button title="Send" onPress={sendMessage} />
     </View>
   );
 };
@@ -137,18 +135,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: '#E6E6FA',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-  },
   input: {
-    flex: 1,
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
-    marginRight: 10,
+    marginBottom: 10,
   },
 });
 
