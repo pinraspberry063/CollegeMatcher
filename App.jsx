@@ -126,7 +126,7 @@ const TabScreen = () => (
     <Tab.Screen name="Forum" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
-    {userStatus === 'moderator' && (
+    {checkUserStatus === 'moderator' && (
               <Tab.Screen name="Moderation" component={ModeratorScreen} />
             )}
   </Tab.Navigator>
