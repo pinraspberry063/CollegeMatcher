@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import React, { useState, useContext, useEffect } from 'react'
 import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 
 
 const firestore = getFirestore(db);
+
 const Quiz = ({ navigation }) => {
     const theme = useContext(themeContext);
     const stateData = [
@@ -236,15 +237,15 @@ const Quiz = ({ navigation }) => {
     const [gpa, setGpa] = useState('');
     const [satScore, setSatScore] = useState('');
     const [actScore, setActScore] = useState('');
-    const [stateChoice, setstate] = useState('');
-    const [major, setmajor] = useState('');
-    const [distanceFromCollege, setdistance] = useState('');
-    const [tuitionCost, settuition] = useState('');
-    const [religiousAffiliation, setreligiousAffil] = useState('');
-    const [size, setsize] = useState('');
-    const [urbanizationLevel, settypeOfArea] = useState('');
-    const [sportCollege, setsportEvents] = useState('');
-    const [collegeDiversity, setdiverse] = useState('');
+    const [stateChoice, setState] = useState('');
+    const [major, setMajor] = useState('');
+    const [distanceFromCollege, setDistance] = useState('');
+    const [tuitionCost, setTuition] = useState('');
+    const [religiousAffiliation, setReligiousAffil] = useState('');
+    const [size, setSize] = useState('');
+    const [urbanizationLevel, setTypeOfArea] = useState('');
+    const [sportCollege, setSportEvents] = useState('');
+    const [collegeDiversity, setDiverse] = useState('');
     const [schoolClassification, setType] = useState('');
 
 
@@ -283,42 +284,51 @@ const Quiz = ({ navigation }) => {
     const renderPageOne = () => (
         <View>
             <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
-            <GooglePlacesAutocomplete
-                placeholder='Start typing your address...'
-                onPress={(data, details = null) => {
-                    setAddress(data.description);
-                }}
-                query={{
-                    key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
-                    language: 'en',
-                }}
-                styles={{
-                    textInput: {
-                        height: 40,
-                        borderWidth: 1,
-                        fontSize: 18,
-                        padding: 10,
-                        marginVertical: 10,
-                        borderColor: theme.color,
-                    },
-                }}
-            />
+            <View style={{ zIndex: 10, elevation: 10 }}>
+                <GooglePlacesAutocomplete
+                    placeholder="Start typing your address..."
+                    onPress={(data, details = null) => {
+                        setAddress(data.description);
+                    }}
+                    query={{
+                        key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
+                        language: 'en',
+                    }}
+                    styles={{
+                        textInput: {
+                            height: 40,
+                            borderWidth: 1,
+                            fontSize: 18,
+                            padding: 10,
+                            marginVertical: 10,
+                            borderColor: theme.color,
+                        },
+                        listView: {
+                            backgroundColor: theme.background,
+                            position: 'absolute', // Position the list absolutely
+                            top: 50,
+                            zIndex: 10,
+                            elevation: 10,
+                        },
+                    }}
+                />
+            </View>
 
             <Text style={[styles.text, { color: theme.color }]}>How far from home do you want your college to be?</Text>
-            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setdistance} />
+            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
 
             <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
-            <DropdownComponent data={majorData} value={major} onChange={setmajor} />
+            <DropdownComponent data={majorData} value={major} onChange={setMajor} />
 
             <Text style={[styles.text, { color: theme.color }]}>How much are you willing to pay for tuition?</Text>
-            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={settuition} />
+            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
 
             <Text style={[styles.text, { color: theme.color }]}>SAT score?</Text>
             <TextInput
                 style={[styles.textInput, { borderColor: theme.color }]}
                 value={satScore}
                 onChangeText={setSatScore}
-                placeholder='Ex: 1200...'
+                placeholder="Ex: 1200..."
             />
 
             <Text style={[styles.text, { color: theme.color }]}>ACT score?</Text>
@@ -326,7 +336,7 @@ const Quiz = ({ navigation }) => {
                 style={[styles.textInput, { borderColor: theme.color }]}
                 value={actScore}
                 onChangeText={setActScore}
-                placeholder='Ex: 25...'
+                placeholder="Ex: 25..."
             />
         </View>
     );
@@ -342,7 +352,7 @@ const Quiz = ({ navigation }) => {
             />
 
             <Text style={[styles.text, { color: theme.color }]}>Do you wish to attend a college of a specific religious affiliation?</Text>
-            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setreligiousAffil} />
+            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
@@ -350,11 +360,11 @@ const Quiz = ({ navigation }) => {
                 { label: 'No', value: 'No' },
             ]}
                 value={sportCollege}
-                onChange={setsportEvents}
+                onChange={setSportEvents}
             />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you looking to attend college in a specific state?</Text>
-            <DropdownComponent data={stateData} value={stateChoice} onChange={setstate} />
+            <DropdownComponent data={stateData} value={stateChoice} onChange={setState} />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
@@ -363,15 +373,16 @@ const Quiz = ({ navigation }) => {
                 { label: 'Very Important', value: 'Very Important' },
             ]}
                 value={collegeDiversity}
-                onChange={setdiverse}
+                onChange={setDiverse}
             />
         </View>
     );
 
+
     const renderPageThree = () => (
         <View>
             <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} value={size} onChange={setsize} />
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
@@ -383,7 +394,7 @@ const Quiz = ({ navigation }) => {
             />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
-            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={settypeOfArea} />
+            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
 
             <View style={styles.buttonContainer}>
                 <Button
@@ -394,30 +405,40 @@ const Quiz = ({ navigation }) => {
         </View>
     );
 
+    const renderContent = () => {
+        if (currentPage === 1) return renderPageOne();
+        if (currentPage === 2) return renderPageTwo();
+        if (currentPage === 3) return renderPageThree();
+    };
+
     return (
-        <ScrollView style={styles.container}>
-            <SafeAreaView>
-                {currentPage === 1 && renderPageOne()}
-                {currentPage === 2 && renderPageTwo()}
-                {currentPage === 3 && renderPageThree()}
-                <View style={styles.buttonContainer}>
-                    {currentPage < 3 && (
-                        <Button
-                            style={styles.button}
-                            onPress={() => setCurrentPage(currentPage + 1)}
-                            title="Next"
-                        />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <SafeAreaView style={styles.container}>
+                <FlatList
+                    data={[{ key: 'quizContent' }]}
+                    renderItem={renderContent}
+                    keyExtractor={(item) => item.key}
+                    ListFooterComponent={() => (
+                        <View style={styles.buttonContainer}>
+                            {currentPage < 3 && (
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => setCurrentPage(currentPage + 1)}
+                                    title="Next"
+                                />
+                            )}
+                            {currentPage > 1 && (
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => setCurrentPage(currentPage - 1)}
+                                    title="Back"
+                                />
+                            )}
+                        </View>
                     )}
-                    {currentPage > 1 && (
-                        <Button
-                            style={styles.button}
-                            onPress={() => setCurrentPage(currentPage - 1)}
-                            title="Back"
-                        />
-                    )}
-                </View>
+                />
             </SafeAreaView>
-        </ScrollView>
+        </TouchableWithoutFeedback>
     );
 };
 
