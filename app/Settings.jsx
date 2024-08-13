@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import themeContext from '../theme/themeContext'
+import FavoritedColleges from './FavoritedColleges';
 
 const Settings = ({navigation}) => {
   const theme = useContext(themeContext);
@@ -25,7 +26,7 @@ const Settings = ({navigation}) => {
             <Text style={[styles.item, {color: theme.color}]}>Preferences</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => console.log("Favorited Colleges")}>
+          <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
 
             <Text style={[styles.item, {color: theme.color}]}>Favorited Colleges</Text>
           </TouchableOpacity>

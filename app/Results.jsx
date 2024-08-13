@@ -1,10 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, ScrollView, TouchableOpacity , Image} from 'react-native';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
 import DropdownComponent from '../components/DropdownComp';
 import { db } from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 
+const firestore = getFirestore(db);
+const usersRef = collection(firestore, 'Users');
+const user = auth().currentUser.uid;
+
+const favoriteCollege = async({ID}) => {
+
+    const collegeID = parseInt(ID);
+    
+
+    const userQuery = query(usersRef, where('User_UID', '==', user));
+
+    try {
+
+        const querySnapshot = await getDocs(userQuery);
+
+        if(!querySnapshot.empty){
+            const firstDoc = querySnapshot.docs[0];
+            const userData = firstDoc.data();
+            const currentFavorited = userData.favorited_colleges;
+            currentFavorited.push(collegeID);
+            
+            
+            await setDoc(firstDoc.ref,
+            {
+                favorited_colleges: currentFavorited
+                
+            }, {merge: true});
+
+            alert("College added to Favorites!")
+        }
+        
+        
+    } catch (error) {
+        console.error("Error adding college to favorites: ", error);
+        
+    }
+
+}
 
 
 
@@ -23,14 +61,22 @@ const Results = ({ route, navigation }) => {
     const [numResults, setNumResults] = useState(5);
     
     const renderItem = ({ item }) => (
-        <View style={styles.card}>
+        <ScrollView style={styles.card}>
+            <TouchableOpacity style={styles.button} onPress={() => {favoriteCollege({ID: item.id})}}>
+            <Image 
+                style={{width: 20, height: 20, alignSelf: 'flex-end'}} 
+                source={require('../assets/pinkstar.png')}  
+                
+                // onError={(error)=> console.log("Image error: " + error)}
+            />
+            </TouchableOpacity>
             <TouchableOpacity
             onPress={() => navigation.push('Details', {college: item.name, id: item.id})}
             >
                 <Text style={styles.collegeName}>{item.name}</Text>
-                <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
+                <Text style={styles.collegeScore}>Match Percent: {item.score}%</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
     
 
@@ -99,7 +145,12 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         width: 100,
-        alignSelf: 'flex-end'
+        
+    },
+    button: {
+        width: 20,
+        marginLeft: '93%',
+        alignContent: 'flex-end'
     }
 });
 

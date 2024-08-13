@@ -29,6 +29,7 @@ import Results from './app/Results';
 import Details from './app/Details';
 import { db } from './config/firebaseConfig';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where, getDoc} from 'firebase/firestore';
+import FavoritedColleges from './app/FavoritedColleges';
 
 
 
@@ -60,6 +61,8 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker} />
     <HomeStack.Screen name="Preferences" component={Preferences} />
+    <HomeStack.Screen name= "FavColleges" component={FavoritedColleges} />
+    <HomeStack.Screen name="DetailsFav" component={Details} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
   </HomeStack.Navigator>
 )
