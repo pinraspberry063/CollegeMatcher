@@ -7,6 +7,8 @@ import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
 
 const firestore = getFirestore(db);
 const Quiz = ({ navigation }) => {
@@ -229,6 +231,8 @@ const Quiz = ({ navigation }) => {
         { label: 'N/A', value: 'N/A' },
     ];
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [address, setAddress] = useState('');
     const [gpa, setGpa] = useState('');
     const [satScore, setSatScore] = useState('');
     const [actScore, setActScore] = useState('');
@@ -242,15 +246,13 @@ const Quiz = ({ navigation }) => {
     const [sportCollege, setsportEvents] = useState('');
     const [collegeDiversity, setdiverse] = useState('');
     const [schoolClassification, setType] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
 
 
     const collectionref = collection(firestore, 'Quiz');
 
-    
-
     const handleSubmit = async () => {
         const answers = {
+            address: address,
             gpa: gpa,
             sat: satScore,
             act: actScore,
@@ -264,56 +266,64 @@ const Quiz = ({ navigation }) => {
             size: size,
             school_classification: schoolClassification,
             urbanization_level: urbanizationLevel,
-            userId: auth().currentUser.uid
-        }
+            userId: auth().currentUser.uid,
+        };
 
         try {
-            // const querySnapshot = await getDocs(collectionref);
-            // const docCount = querySnapshot.size;
-            // const newDocId = `user${docCount + 1}`;
-
             await addDoc(collectionref, answers);
-            alert("Quiz submitted successfully!");
-            
+            alert('Quiz submitted successfully!');
         } catch (error) {
-            console.error("Error adding document: ", error);
-            
+            console.error('Error adding document: ', error);
         }
-        const result = ( await matchColleges(answers)).top5Colleges;
-        navigation.navigate("Results", {top5: result});
+
+        const result = (await matchColleges(answers)).top5Colleges;
+        navigation.navigate('Results', { top5: result });
     };
-    
 
     const renderPageOne = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>What is your GPA?</Text>
-            <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
-                value={gpa}
-                onChangeText={setGpa}
-                placeholder='Ex: 3.6...'
+            <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+            <GooglePlacesAutocomplete
+                placeholder='Start typing your address...'
+                onPress={(data, details = null) => {
+                    setAddress(data.description);
+                }}
+                query={{
+                    key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
+                    language: 'en',
+                }}
+                styles={{
+                    textInput: {
+                        height: 40,
+                        borderWidth: 1,
+                        fontSize: 18,
+                        padding: 10,
+                        marginVertical: 10,
+                        borderColor: theme.color,
+                    },
+                }}
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>How far from home do you want your college to be?</Text>
-            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setdistance}/>
+            <Text style={[styles.text, { color: theme.color }]}>How far from home do you want your college to be?</Text>
+            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setdistance} />
 
-            <Text style={[styles.text, {color: theme.color}]}>What do you plan to study?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
             <DropdownComponent data={majorData} value={major} onChange={setmajor} />
 
-            <Text style={[styles.text, {color: theme.color}]}>How much are you willing to pay for tuition?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>How much are you willing to pay for tuition?</Text>
             <DropdownComponent data={tuitionData} value={tuitionCost} onChange={settuition} />
 
-            <Text style={[styles.text, {color: theme.color}]}>SAT score?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>SAT score?</Text>
             <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
+                style={[styles.textInput, { borderColor: theme.color }]}
                 value={satScore}
                 onChangeText={setSatScore}
                 placeholder='Ex: 1200...'
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>ACT score?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>ACT score?</Text>
             <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
+                style={[styles.textInput, { borderColor: theme.color }]}
                 value={actScore}
                 onChangeText={setActScore}
                 placeholder='Ex: 25...'
@@ -323,50 +333,57 @@ const Quiz = ({ navigation }) => {
 
     const renderPageTwo = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>Do you wish to attend a college of a specific religious affiliation?</Text>
-            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setreligiousAffil}/>
+            <Text style={[styles.text, { color: theme.color }]}>What is your GPA?</Text>
+            <TextInput
+                style={[styles.textInput, { borderColor: theme.color }]}
+                value={gpa}
+                onChangeText={setGpa}
+                placeholder='Ex: 3.6...'
+            />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a school with sporting events?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Do you wish to attend a college of a specific religious affiliation?</Text>
+            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setreligiousAffil} />
+
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
                 { label: 'Yes', value: 'Yes' },
                 { label: 'No', value: 'No' },
-                
-            ]} 
-            value={sportCollege}
-            onChange={setsportEvents}
+            ]}
+                value={sportCollege}
+                onChange={setsportEvents}
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking to attend college in a specific state?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking to attend college in a specific state?</Text>
             <DropdownComponent data={stateData} value={stateChoice} onChange={setstate} />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a diverse college?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
                 { label: 'Neutral', value: 'Neutral' },
                 { label: 'Important', value: 'Important' },
                 { label: 'Very Important', value: 'Very Important' },
             ]}
-            value={collegeDiversity}
-            onChange={setdiverse}
+                value={collegeDiversity}
+                onChange={setdiverse}
             />
-
-            <Text style={[styles.text, {color: theme.color}]}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} value={size} onChange={setsize}/>
         </View>
     );
 
     const renderPageThree = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a Public or Private college?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
+            <DropdownComponent data={sizeData} value={size} onChange={setsize} />
+
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
                 { label: 'Public', value: 'Public' },
                 { label: 'Private', value: 'Private' },
-            ]} 
-            value={schoolClassification}
-            onChange={setType}
+            ]}
+                value={schoolClassification}
+                onChange={setType}
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a college in a specific type of area?</Text>
-            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={settypeOfArea}/>
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
+            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={settypeOfArea} />
 
             <View style={styles.buttonContainer}>
                 <Button
@@ -384,7 +401,6 @@ const Quiz = ({ navigation }) => {
                 {currentPage === 2 && renderPageTwo()}
                 {currentPage === 3 && renderPageThree()}
                 <View style={styles.buttonContainer}>
-                    
                     {currentPage < 3 && (
                         <Button
                             style={styles.button}
@@ -402,16 +418,16 @@ const Quiz = ({ navigation }) => {
                 </View>
             </SafeAreaView>
         </ScrollView>
-    )
-}
+    );
+};
 
-export default Quiz
+export default Quiz;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 20,
-        paddingHorizontal: 16
+        paddingHorizontal: 16,
     },
     textInput: {
         height: 40,
@@ -426,9 +442,9 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         paddingTop: 30,
-        margin:10
+        margin: 10,
     },
     button: {
-        marginTop:20
-    }
+        marginTop: 20,
+    },
 });
