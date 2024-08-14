@@ -7,7 +7,7 @@ import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const user = auth().currentUser.uid;
+
 
 const favoriteCollege = async({ID}) => {
 
@@ -49,6 +49,7 @@ const favoriteCollege = async({ID}) => {
 const Results = ({ route, navigation }) => {
     
     const top100  = route.params.top100;
+    const user = auth().currentUser.uid;
     
     // const screen = route.params.screen;
     

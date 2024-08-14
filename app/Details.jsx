@@ -12,11 +12,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Swiper from 'react-native-screens-swiper';
 import { color } from 'react-native-elements/dist/helpers';
+import Svg, {Circle, text} from 'react-native-svg';
+import majorData from '../assets/major_data';
 
 const firestore = getFirestore(db);
 const collegesRef = collection(firestore, 'CompleteColleges');
 const usersRef = collection(firestore, 'Users');
-const user = auth().currentUser.uid;
+
+
+const doCirclesOverlap = (circle1, circle2) => {
+    const dx = circle1.cx - circle2.cx;
+    const dy = circle1.cy - circle2.cy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const combinedRadii = circle1.r + circle2.r + 6;
+    return distance < combinedRadii;
+}
 
 const favoriteCollege = async({ID}) => {
 
@@ -155,6 +165,10 @@ const Demographics = ({navigation, collegeID}) => {
     // const collegeID = route.params.collegeID;
     const [sToF, setSToF] = useState(0);
     const [userPref, setUserPref] = useState([]);
+    const [circleData, setCircleData] = useState([]);
+    const user = auth().currentUser.uid;
+    const [majors, setMajors] = useState([]);
+
 
     useEffect(()=> {
         const func = async()=> {
@@ -163,9 +177,40 @@ const Demographics = ({navigation, collegeID}) => {
                 const querySnapshot = await getDocs(collegeQuery);
               
                 if (!querySnapshot.empty) {
-                  const firstDoc = querySnapshot.docs[0];
-                  const collegeData = firstDoc.data();
-                  const sToF = collegeData.student_to_Faculty_Ratio;
+                    const firstDoc = querySnapshot.docs[0];
+                    const collegeData = firstDoc.data();
+                    const sToF = collegeData.student_to_Faculty_Ratio;
+
+
+
+                    const uniqueMajors = [];
+                    const majorSet = new Set();
+
+                    majorData.forEach(major => {
+                        const majorCategory = major.categories || [' '];
+                        const field = 'percent_' + major.categories;
+                        const percent = collegeData[field];
+
+                        
+                        if (!majorSet.has(majorCategory) && percent) {
+                            majorSet.add(majorCategory);
+                            uniqueMajors.push([majorCategory, percent]);
+                        }
+                  });
+                  uniqueMajors.reduce((acc, curr) => {
+                    const majorCategory = curr.categories;
+
+                    if (!acc.some(major => major.categories === majorCategory)) {
+                        acc.push(curr);
+                        
+                    }
+                    
+                    return acc;
+
+                  }, []);
+
+                  
+                  setMajors(uniqueMajors);
               
                   setSToF(sToF);
                 } else {
@@ -180,7 +225,9 @@ const Demographics = ({navigation, collegeID}) => {
         func();
         // console.log(sToF)
 
-    },[sToF]);
+    },[sToF, majors]);
+
+
 
     useEffect(()=> {
         const func = async()=> {
@@ -208,12 +255,83 @@ const Demographics = ({navigation, collegeID}) => {
 
     },[userPref]);
 
+    
+
+    useEffect(() => {
+        const generateCircleData = () => {
+            const data = [];
+            const Xmin = 145;
+            const Xmax = 350;
+            const Ymin = 20;
+            const Ymax = 155;
+            const radius = 15; // Radius of the circles
+
+            while (data.length < sToF) {
+                const newCircle = {
+                    cx: Math.random() * (Xmax - Xmin) + Xmin,
+                    cy: Math.random() * (Ymax - Ymin) + Ymin,
+                    r: radius,
+                };
+
+                // Check if the new circle overlaps with any existing circles
+                let overlap = false;
+                for (let i = 0; i < data.length; i++) {
+                    if (doCirclesOverlap(newCircle, data[i])) {
+                        overlap = true;
+                        break;
+                    }
+                }
+
+                // Add the circle if no overlap was detected
+                if (!overlap) {
+                    data.push(newCircle);
+                }
+            }
+            setCircleData(data);
+        }
+
+        if (sToF > 0) {
+            generateCircleData();
+        }
+    }, [sToF]);
+
+    
+    
     return (
         <View style={styles.contentContainer}>
-            <Text> Student to Faculty Ratio: {sToF} </Text>
-            <Text> Major: {userPref.major} </Text>
-            <Text> Categories: {userPref.categories} </Text>
-            <Text> Diversity: To Be Calculated </Text>
+            <View>  
+                <Text style={styles.subTitle}>Student to Faculty Ratio: {sToF} </Text>
+            </View>
+            <Svg height="250" width="100%">
+                <Circle
+                    cx="50"
+                    cy="100"
+                    r='50'
+                    fill='blue'
+                />
+                
+                {circleData.map((circle, index) => (
+                    <Circle
+                        key={index}
+                        cx={circle.cx}
+                        cy={circle.cy}
+                        r={circle.r}
+                        fill='pink'
+                    />
+                ))}
+            </Svg>
+            
+            <Text style={styles.subTitle}>Major Break Down</Text>
+            {majors.map((major, index)=> (
+                <View key={index}>
+                    <Text> {major[0]} :</Text>
+                    <Text > {major[1]} % </Text>
+                </View>
+            ))}
+            <Text>  </Text>
+            <Text>  </Text>
+            <Text style={styles.subTitle}>Diversity: </Text>
+            <Text> To Be Calculated </Text>
             <Text></Text>
         </View>
     )
@@ -222,7 +340,7 @@ const Demographics = ({navigation, collegeID}) => {
 
 const OverView = ({collegeID}) => {
 
-    const [address, setAddress] = useState('');
+    const [address, setAddress] = useState([]);
     const [urbanLevel, setUrbanLevel] = useState([]);
     const [admRate, setAdmRate] = useState(0.0);
 
@@ -238,9 +356,13 @@ const OverView = ({collegeID}) => {
                   const admissionRate = parseFloat(collegeData.adm_rate);
                   const addy = collegeData.address;
                   const urban = collegeData.ubanization_level;
+                  const getCity = collegeData.city;
+                  const getState = collegeData.state;
 
-              
-                  setAddress(addy);
+                  const getAddy = [addy, getCity, getState];
+
+                  
+                  setAddress(getAddy);
                   setUrbanLevel(urban.split(':'));
                   setAdmRate(admissionRate);
                   
@@ -261,9 +383,14 @@ const OverView = ({collegeID}) => {
 
     return (
         <View style={styles.contentContainer}>
-            <Text>Address: {address}</Text>
-            <Text>Urbanization Level: {urbanLevel[1]} {urbanLevel[0]}</Text>
-            <Text>Admissions Rate: {admRate} %</Text>
+            <Text style={styles.subTitle}>Address:  </Text>
+            <Text>{address[0]}, {address[1]}, {address[2]}</Text>
+            
+            <Text style={styles.subTitle}>Urbanization Level: </Text>
+            <Text>{urbanLevel[1]} {urbanLevel[0]}</Text>
+            
+            <Text style={styles.subTitle}>Admissions Rate: </Text>
+            <Text>{admRate} %</Text>
             
             
         </View>
@@ -366,16 +493,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',  
     },
     contentContainer: {
-        flex: 1,
-        padding: 20, 
+        
+        paddingLeft: 20, 
         width: '100%', 
-        height: 485,
-        justifyContent: 'center',
-        alignContent: 'center',
+        height: 1500,
+        // justifyContent: 'center', 
+        // alignContent: 'center',
     },
     webView: {
         flex: 1, 
-        height: 485 
+        height: 1500 
     },
     button: {
         paddingVertical: 10,
@@ -389,6 +516,13 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontSize: 16,
     },
+    subTitle: {
+        fontSize: 25, 
+        fontWeight: 'bold', 
+        fontStyle:'italic', 
+        color:'black'
+
+    }
 
 
 })
