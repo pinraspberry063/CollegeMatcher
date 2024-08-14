@@ -286,9 +286,13 @@ const Quiz = ({ navigation }) => {
             <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
             <View style={{ zIndex: 10, elevation: 10 }}>
                 <GooglePlacesAutocomplete
-                    placeholder="Start typing your address..."
+                    placeholder="123 Main St..."
                     onPress={(data, details = null) => {
                         setAddress(data.description);
+                    }}
+                    textInputProps={{
+                        value: address,
+                        onChangeText: (text) => setAddress(text),
                     }}
                     query={{
                         key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
@@ -305,7 +309,7 @@ const Quiz = ({ navigation }) => {
                         },
                         listView: {
                             backgroundColor: theme.background,
-                            position: 'absolute', // Position the list absolutely
+                            position: 'absolute',
                             top: 50,
                             zIndex: 10,
                             elevation: 10,
