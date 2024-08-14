@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import { useNavigation } from '@react-navigation/native';
 
 const firestore = getFirestore(db);
 

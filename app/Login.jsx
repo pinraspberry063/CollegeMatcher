@@ -10,18 +10,13 @@ import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 
-const MAX_ATTEMPTS = 5;
-
 const Login = ({ navigation }) => {
   const theme = useContext(themeContext);
   const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
+  const [loginMethod, setLoginMethod] = useState('options'); // 'options', 'email', or 'phone'
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -29,16 +24,8 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    if (attempts >= MAX_ATTEMPTS) {
-      setIsLocked(true); // Lock the user out
-      return;
-    }
-
-    setLoading(true);
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      setLoading(false);
-      setAttempts(0);
       const isAllowed = await checkIsRecruiter(userCredential.user.uid);
       if (isAllowed) {
         setUser(userCredential.user); // Set the logged in user in context only if not banned
@@ -47,37 +34,13 @@ const Login = ({ navigation }) => {
         setUser(null);
       }
     } catch (error) {
-      setLoading(false);
-      setAttempts(attempts + 1);
       Alert.alert('Login Failed', error.message);
     }
   };
 
-  const handlePhoneLogin = async () => {
-    if (!phoneNumber) {
-      Alert.alert('Input Error', 'Please enter a phone number.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      setLoading(false);
-      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
-            if (isAllowed) {
-              setUser(userCredential.user);
-            } else {
-              setUser(null);
-            }
-      navigation.navigate('Launch', {
-        screen: 'PhoneVerification',
-        params: { verificationId: confirmation.verificationId }
-      });
-    } catch (error) {
-      setLoading(false);
-      Alert.alert('Phone Login Failed', error.message);
-    }
-  };
+  const handlePhoneLogin = () => {
+      navigation.navigate('PhoneVerification');
+    };
 
     useEffect(() => {
       GoogleSignin.configure({
@@ -119,12 +82,6 @@ const Login = ({ navigation }) => {
       }
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
       await auth().signInWithCredential(facebookCredential);
-      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
-                  if (isAllowed) {
-                    setUser(userCredential.user);
-                  } else {
-                    setUser(null);
-                  }
       Alert.alert('Facebook Login Successful');
       navigation.navigate('Main');
     } catch (error) {
@@ -138,7 +95,6 @@ const Login = ({ navigation }) => {
      return;
    }
 
-   setLoading(true);
    try {
      const link = await dynamicLinks().buildLink({
        link: 'https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}',
@@ -171,8 +127,6 @@ const Login = ({ navigation }) => {
      console.error('Error code:', error.code);
      console.error('Error message:', error.message);
      Alert.alert('Error', 'Failed to send email: ${error.message}');
-   } finally {
-     setLoading(false);
    }
  };
 
@@ -219,57 +173,60 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
       });
   };
 
-  return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Login</Text>
-      <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-        placeholder="Email"
-        placeholderTextColor={theme.color}
-        value={email}
-        onChangeText={setEmail}
-      />
-      <View style={styles.passwordContainer}>
+  const renderEmailLogin = () => (
+      <>
         <TextInput
-          style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: theme.color }]}
-          placeholder="Password"
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Email"
           placeholderTextColor={theme.color}
-          secureTextEntry={!showPassword}
-          value={password}
-          onChangeText={setPassword}
+          value={email}
+          onChangeText={setEmail}
         />
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.toggleButton}
-        >
-          <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: theme.color }]}
+            placeholder="Password"
+            placeholderTextColor={theme.color}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={styles.toggleButton}
+          >
+            <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
+          </TouchableOpacity>
+        </View>
+        <Button title="Login" onPress={handleEmailLogin} />
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={{ color: theme.color, marginTop: 10 }}>Forgot Password?</Text>
         </TouchableOpacity>
+      </>
+    );
+
+    const renderLoginOptions = () => (
+      <>
+        <Button title="Login with Email" onPress={() => setLoginMethod('email')} />
+        <Button title="Login with Phone" onPress={handlePhoneLogin} />
+        <Button title="Login with Google" onPress={handleGoogleLogin} />
+        <Button title="Login with Facebook" onPress={handleFacebookLogin} />
+        <Button title="Login with Email Link" onPress={handleEmailLinkSignIn} />
+      </>
+    );
+
+    return (
+      <View style={styles.container}>
+        <Text style={[styles.title, { color: theme.color }]}>Login</Text>
+        {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
+        {loginMethod === 'email' && (
+          <TouchableOpacity onPress={() => setLoginMethod('options')}>
+            <Text style={{ color: theme.color, marginTop: 20 }}>Other login options</Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
-        placeholder="Phone Number"
-        placeholderTextColor={theme.color}
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-      />
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <>
-          <Button title="Login with Email" onPress={handleEmailLogin} disabled={isLocked} />
-          <Button title="Login with Phone" onPress={handlePhoneLogin} />
-          <Button title="Login with Google" onPress={handleGoogleLogin} />
-          <Button title="Login with Facebook" onPress={handleFacebookLogin} />
-          <Button title="Login with Email Link" onPress={handleEmailLinkSignIn} />
-          <Button title="Forgot Password" onPress={handleForgotPassword} />
-        </>
-      )}
-      {isLocked && (
-        <Text style={styles.lockedText}>Your account is locked due to too many failed login attempts.</Text>
-      )}
-    </View>
-  );
-};
+    );
+  };
 
 const styles = StyleSheet.create({
   container: {
