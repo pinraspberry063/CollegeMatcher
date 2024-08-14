@@ -5,7 +5,7 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
-import { collection, getDocs, addDoc, doc, getFirestore, Timestamp, query, orderBy, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
@@ -18,11 +18,10 @@ const ColForum = ({ route, navigation }) => {
   const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
-  const [isRecruiter, setIsRecruiter] = useState(false);
 
   useEffect(() => {
     if (user) {
-      fetchUsernameAndRecruiterStatus(user.uid);
+      fetchUsername(user.uid);
     }
   }, [user]);
 
@@ -30,21 +29,19 @@ const ColForum = ({ route, navigation }) => {
     fetchThreadsAndPosts();
   }, [collegeName, forumName]);
 
-  const fetchUsernameAndRecruiterStatus = async (uid) => {
+  const fetchUsername = async (uid) => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userDoc = querySnapshot.docs[0];
-        const userData = userDoc.data();
-        setUsername(userData.Username);
-        setIsRecruiter(userData.IsRecruiter || false); // Check if the user is a recruiter
+        setUsername(userDoc.data().Username);
       } else {
         console.error('No user found with the given UID.');
       }
     } catch (error) {
-      console.error('Error fetching username and recruiter status:', error);
+      console.error('Error fetching username:', error);
     }
   };
 
@@ -87,8 +84,7 @@ const ColForum = ({ route, navigation }) => {
         const newThread = {
           title: newThreadTitle.trim(),
           createdBy: username,
-          createdAt: Timestamp.now(),
-          isRecruiter
+          createdAt: Timestamp.now()
         };
         await addDoc(threadsRef, newThread);
         setNewThreadTitle('');
@@ -106,8 +102,7 @@ const ColForum = ({ route, navigation }) => {
         const newPost = {
           content: newPostContent[threadId].trim(),
           createdBy: username,
-          createdAt: Timestamp.now(),
-          isRecruiter
+          createdAt: Timestamp.now()
         };
         await addDoc(postsRef, newPost);
         setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
@@ -133,24 +128,12 @@ const ColForum = ({ route, navigation }) => {
         {threads.map(thread => (
           <View key={thread.id} style={styles.threadItem}>
             <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
-            <Text style={[
-              styles.threadCreatedBy,
-              { color: theme.textColor },
-              thread.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
-            ]}>
-              Created by: {thread.createdBy}
-            </Text>
+            <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>Created by: {thread.createdBy}</Text>
             <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
             {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
                 <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
-                <Text style={[
-                  styles.postCreatedBy,
-                  { color: theme.textColor },
-                  post.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
-                ]}>
-                  Posted by: {post.createdBy}
-                </Text>
+                <Text style={[styles.postCreatedBy, { color: theme.textColor }]}>Posted by: {post.createdBy}</Text>
                 <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
               </View>
             ))}
@@ -232,10 +215,6 @@ const styles = StyleSheet.create({
   postCreatedAt: {
     fontSize: 14,
     marginTop: 4,
-  },
-  recruiterHighlight: {
-    fontWeight: 'bold',
-    color: '#ff9900', // Highlight color for recruiters
   },
 });
 

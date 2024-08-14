@@ -1,12 +1,13 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext';
+import themeContext from '../theme/themeContext'
 import { UserContext } from '../components/UserContext';
-import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
+
 
 const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -15,7 +16,6 @@ const AccountCreation = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isRecruiter, setIsRecruiter] = useState(false); // State for the Switch
 
   const handleSignUp = async () => {
     if (!email || !password || !username) {
@@ -32,8 +32,8 @@ const AccountCreation = ({ navigation }) => {
       // Add user to Firestore
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
-        IsRecruiter: isRecruiter, // Use the state of the Switch
-        Username: username,
+        IsRecruiter: false, // Assuming default value, update as necessary
+        Username: username
       });
 
       setLoading(false);
@@ -70,17 +70,6 @@ const AccountCreation = ({ navigation }) => {
         value={username}
         onChangeText={setUsername}
       />
-
-      <View style={styles.switchContainer}>
-        <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
-        <Switch
-          value={isRecruiter}
-          onValueChange={setIsRecruiter}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
-        />
-      </View>
-
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -107,15 +96,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     padding: 10,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 16,
   },
 });
 
