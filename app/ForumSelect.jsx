@@ -1,4 +1,5 @@
 // College selected. Display the different subgroups within the college's forum.
+
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,11 +17,12 @@ const ForumSelect = ({ route, navigation }) => {
   const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
+  const [isRecruiter, setIsRecruiter] = useState(false);
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
 
   useEffect(() => {
     if (user) {
-      fetchUsername(user.uid);
+      fetchUsernameAndRecruiterStatus(user.uid);
       fetchFollowedSubgroups(user.uid);
     }
   }, [user]);
@@ -43,19 +45,21 @@ const ForumSelect = ({ route, navigation }) => {
     fetchSubgroups();
   }, [collegeName]);
 
-  const fetchUsername = async (uid) => {
+  const fetchUsernameAndRecruiterStatus = async (uid) => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userDoc = querySnapshot.docs[0];
-        setUsername(userDoc.data().Username);
+        const userData = userDoc.data();
+        setUsername(userData.Username);
+        setIsRecruiter(userData.IsRecruiter || false); // Check if the user is a recruiter
       } else {
         console.error('No user found with the given UID.');
       }
     } catch (error) {
-      console.error('Error fetching username:', error);
+      console.error('Error fetching username and recruiter status:', error);
     }
   };
 
@@ -119,7 +123,8 @@ const ForumSelect = ({ route, navigation }) => {
           const newSubgroup = {
             forumName: newSubgroupName.trim(),
             createdBy: username,
-            createdAt: Timestamp.now()
+            createdAt: Timestamp.now(),
+            isRecruiter
           };
           const docRef = await addDoc(subgroupsRef, newSubgroup);
           setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
@@ -153,7 +158,12 @@ const ForumSelect = ({ route, navigation }) => {
         {subgroups.map(subgroup => (
           <View key={subgroup.id} style={styles.buttonContainer}>
             <Text style={styles.buttonText}>{subgroup.forumName}</Text>
-            <Text style={styles.buttonSubText}>Created by: {subgroup.createdBy}</Text>
+            <Text style={[
+              styles.buttonSubText,
+              subgroup.isRecruiter && styles.recruiterHighlight // Highlight if the creator is a recruiter
+            ]}>
+              Created by: {subgroup.createdBy}
+            </Text>
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={styles.viewButton}
@@ -240,6 +250,10 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 8,
     borderRadius: 4,
+  },
+  recruiterHighlight: {
+    color: '#ff9900', // Highlight color for recruiters
+    fontWeight: 'bold',
   },
 });
 

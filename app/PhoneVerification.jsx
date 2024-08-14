@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
 const PhoneVerification = ({ route, navigation }) => {
   const [verificationCode, setVerificationCode] = useState('');
-  const { confirmation } = route.params;
+  const { verificationId } = route.params;
 
   const handleVerification = async () => {
     try {
-      await confirmation.confirm(verificationCode);
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationId,
+        verificationCode
+      );
+      await auth().signInWithCredential(credential);
       Alert.alert('Verification Successful');
-      navigation.navigate('Home');
+      // The App.jsx will automatically navigate to the main screen when the user is authenticated
     } catch (error) {
       Alert.alert('Verification Failed', error.message);
     }

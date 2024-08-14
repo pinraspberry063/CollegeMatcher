@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -29,6 +29,11 @@ import Results from './app/Results';
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
 import FollowedForums from './app/FollowedForums';
+import PhoneVerification from './app/PhoneVerification';
+import ModeratorScreen from './app/ModeratorScreen';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { db } from './config/firebaseConfig';
+import UserActivityScreen from './app/UserActivityScreen';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -95,7 +100,8 @@ const icons = {
   QuizStack: 'magnify',
   ColForumSelector: 'forum',
   Messages: 'message',
-  AI: 'head'
+  AI: 'head',
+  Moderation: 'shield-account'
 };
 
 const Tab = createBottomTabNavigator();
@@ -129,6 +135,14 @@ const TabScreen = () => (
     <Tab.Screen name="ColForumSelector" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
+{/*     {checkUserStatus === 'moderator' && ( */}
+              <Tab.Screen name="Moderation" component={ModeratorScreen} />
+{/*             )} */}
+        <Tab.Screen
+              name="UserActivityScreen"
+              component={UserActivityScreen}
+              options={{ tabBarButton: () => null }}
+            />
   </Tab.Navigator>
 );
 
@@ -139,11 +153,32 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
+    <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
   </LaunchStack.Navigator>
 );
 
+const checkUserStatus = async (userId) => {
+  const firestore = getFirestore(db);
+  const userRef = doc(firestore, 'Users', userId);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists()) {
+    const userData = userSnap.data();
+    if (userData.status === 'banned') {
+      auth().signOut();
+      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
+      return 'banned';
+    } else if (userData.isModerator) {
+      return 'moderator';
+    }
+  }
+  return 'regular';
+};
+
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const listener = EventRegister.addEventListener('Change Theme', (data) => {
@@ -155,17 +190,16 @@ const App = () => {
   }, [darkMode]);
 
   useEffect(() => {
-    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
-    // Check for the initial dynamic link if the app was opened with one
-    dynamicLinks()
-      .getInitialLink()
-      .then(link => {
-        if (link) {
-          handleDynamicLink(link);
-        }
-      });
-    return () => unsubscribe();
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
   }, []);
+
+  function onAuthStateChanged(user) { // call this function when there's a change in auth state
+    // update user to new user object or to null if not signed in
+    setUser(user);
+    // stop initial auth check if this function is accessed
+    if (initializing) setInitializing(false);
+  }
 
   const handleDynamicLink = async (link) => {
     if (link.url) {
@@ -179,7 +213,7 @@ const App = () => {
             console.log('Sign-in result:', result);
             await AsyncStorage.removeItem('emailForSignIn');
             console.log('User signed in successfully:', result.user.email);
-            navigation.navigate('Home');
+            setUser(result.user);
           } else {
             console.log('No email found for sign-in');
           }
@@ -190,19 +224,41 @@ const App = () => {
     }
   };
 
-  return (
-    <UserProvider>
-      <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-        <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-          <RootStack.Navigator screenOptions={screenOptions}>
-            <RootStack.Screen name="Launch" component={LaunchStackScreen} />
-            <RootStack.Screen name="Main" component={TabScreen} />
-          </RootStack.Navigator>
-        </NavigationContainer>
-      </themeContext.Provider>
-    </UserProvider>
-  );
-};
+  useEffect(() => {
+      const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+
+      dynamicLinks()
+        .getInitialLink()
+        .then(link => {
+          if (link) {
+            handleDynamicLink(link);
+          }
+        })
+        .catch(error => console.error('Error checking initial link:', error));
+
+      return () => unsubscribe();
+    }, []);
+
+    if (initializing) return null;
+
+    return (
+      <UserProvider>
+        <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+          <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+            <RootStack.Navigator screenOptions={screenOptions}>
+{/*                */}{/* {user ? ( */}
+{/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
+{/*               ) : ( */}
+{/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
+{/*               )} */}
+              <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+              <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+            </RootStack.Navigator>
+          </NavigationContainer>
+        </themeContext.Provider>
+      </UserProvider>
+    )
+  }
 
 export default registerRootComponent(App);
 
