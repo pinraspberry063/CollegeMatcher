@@ -1,31 +1,57 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import auth from '@react-native-firebase/auth';
 
-const PhoneVerification = ({ route, navigation }) => {
+const PhoneVerification = ({ navigation }) => {
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const { confirmation } = route.params;
+  const [verificationId, setVerificationId] = useState(null);
 
-  const handleVerification = async () => {
+  const handleSendCode = async () => {
     try {
-      await confirmation.confirm(verificationCode);
-      Alert.alert('Verification Successful');
-      navigation.navigate('Home');
+      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setVerificationId(confirmation.verificationId);
+      Alert.alert('Verification code sent');
     } catch (error) {
-      Alert.alert('Verification Failed', error.message);
+      Alert.alert('Error', error.message);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    try {
+      const credential = auth.PhoneAuthProvider.credential(verificationId, verificationCode);
+      await auth().signInWithCredential(credential);
+      Alert.alert('Phone authentication successful');
+      navigation.navigate('Main');
+    } catch (error) {
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Enter Verification Code</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Verification Code"
-        value={verificationCode}
-        onChangeText={setVerificationCode}
-        keyboardType="numeric"
-      />
-      <Button title="Verify" onPress={handleVerification} />
+      <Text style={styles.title}>Phone Verification</Text>
+      {!verificationId ? (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+          <Button title="Send Verification Code" onPress={handleSendCode} />
+        </>
+      ) : (
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="Verification Code"
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+          />
+          <Button title="Verify Code" onPress={handleVerifyCode} />
+        </>
+      )}
     </View>
   );
 };

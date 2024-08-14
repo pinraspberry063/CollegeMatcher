@@ -5,6 +5,7 @@ import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
+import { handleReport } from '../src/utils/reportUtils';
 
 const Message = ({ route, navigation }) => {
   const theme = useContext(themeContext);
@@ -55,8 +56,8 @@ const Message = ({ route, navigation }) => {
 
           // Fetch usernames
           fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
-          // Set up listener for messages
-          setupMessageListener(firestore, conversationDocRef.id);
+            // Set up listener for messages
+            setupMessageListener(firestore, conversationDocRef.id);
           });
         } else {
           console.warn('No matching conversation found!');
@@ -118,6 +119,21 @@ const Message = ({ route, navigation }) => {
       };
       await addDoc(messagesRef, newMessageDoc);
       setNewMessage('');
+    }
+  };
+
+  const handleReportMessage = async (messageId, reportedUser) => {
+    const reportData = {
+      messageId,
+      reportedUser,
+      source: 'message'
+    };
+
+    const success = await handleReport(reportData);
+    if (success) {
+      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+    } else {
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
     }
   };
 

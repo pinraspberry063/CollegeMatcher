@@ -1,98 +1,86 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext';
+import { UserContext } from '../components/UserContext';
+import { collection, addDoc, getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
-import { Dropdown } from 'react-native-element-dropdown';
 
 const firestore = getFirestore(db);
 
-const AccountCreation = ({ navigation}) => {
+const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState(email);
-  const [accountType, setAccountType] = useState('student');
-  const [recruiter, setRecruiter] = useState(false);
+  const [isRecruiter, setIsRecruiter] = useState(false); // State for the Switch
 
-
-  const handleAccountTypeChange = (type) => {
-    setAccountType(type);
-    const isRecruiter = (accountType=='recruiter');
-    setRecruiter(isRecruiter);
-  }
-  const handleSignUp = () => {
-    if (!email || !password) {
-      Alert.alert('Input Error', 'Please enter both email and password.');
+  const handleSignUp = async () => {
+    if (!email || !password || !username) {
+      Alert.alert('Input Error', 'Please enter both email and password as well as your first and last name.');
       return;
     }
 
-    const userData = {
-      IsRecruiter: (accountType=='recruiter')? true: false,
-      User_UID: auth().currentUser.uid,
-      Username: username
-    }
-    const addUserToDatabase = () => {
-      const usersRef = collection(firestore, 'Users');
-          usersRef.addDoc(userData)
-    }
-
     setLoading(true);
-    auth().createUserWithEmailAndPassword(email, password)
-        .then(()=> {
-          setLoading(false);
-          Alert.alert('Account Created');
-          addUserToDatabase
-          navigation.navigate('Main');
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          Alert.alert('Account Creation Failed', error.message);
-        })
-        
+    try {
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      setUser(user); // Set the logged in user in context
 
+      // Add user to Firestore
+      await addDoc(collection(firestore, 'Users'), {
+        User_UID: user.uid,
+        IsRecruiter: isRecruiter, // Use the state of the Switch
+        Username: username,
+      });
+
+      setLoading(false);
+      Alert.alert('Account Created');
+      navigation.navigate('Main');
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Account Creation Failed', error.message);
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, {color: theme.color }]}>Create Account</Text>
+      <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
       <TextInput
-        style={[styles.input, {borderColor: theme.color,color: theme.color }]}
-        placeholder="Username"
-        placeholderTextColor={theme.color}
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={[styles.input, {borderColor: theme.color,color: theme.color }]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Email"
         placeholderTextColor={theme.color}
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Password"
         placeholderTextColor={theme.color}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
-      <Dropdown
-        placeholder="account type"
-        labelField="label"
-        valueField="value"
-        value={accountType}
-        onChange={handleAccountTypeChange}
-        data={[
-          {label: 'Student', value: 'student'},
-          {label: 'Recruiter', value: 'recruiter'},
-          {label: 'Alumni', value: 'alumni'}
-        ]}
+      <TextInput
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        placeholder="First and Last name"
+        placeholderTextColor={theme.color}
+        value={username}
+        onChangeText={setUsername}
       />
+
+      <View style={styles.switchContainer}>
+        <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
+        <Switch
+          value={isRecruiter}
+          onValueChange={setIsRecruiter}
+          trackColor={{ false: '#767577', true: theme.buttonColor }}
+          thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
+        />
+      </View>
+
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -119,6 +107,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     padding: 10,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  label: {
+    fontSize: 16,
   },
 });
 

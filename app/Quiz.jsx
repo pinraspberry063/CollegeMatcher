@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import React, { useState, useContext, useEffect } from 'react'
 import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,6 +8,10 @@ import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc ,query, where,  getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 import majorData from '../assets/major_data'
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+
+
+const firestore = getFirestore(db);
 
 const Quiz = ({ navigation }) => {
     const theme = useContext(themeContext);
@@ -158,25 +162,28 @@ const Quiz = ({ navigation }) => {
         { label: 'N/A', value: 'N/A' },
     ];
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [address, setAddress] = useState('');
     const [gpa, setGpa] = useState('');
     const [satScore, setSatScore] = useState('');
     const [actScore, setActScore] = useState('');
-    const [stateChoice, setstate] = useState('');
-    const [major, setmajor] = useState('');
-    const [distanceFromCollege, setdistance] = useState('');
-    const [tuitionCost, settuition] = useState('');
-    const [religiousAffiliation, setreligiousAffil] = useState('');
-    const [size, setsize] = useState('');
-    const [urbanizationLevel, settypeOfArea] = useState('');
-    const [sportCollege, setsportEvents] = useState('');
-    const [collegeDiversity, setdiverse] = useState('');
+    const [stateChoice, setState] = useState('');
+    const [major, setMajor] = useState('');
+    const [distanceFromCollege, setDistance] = useState('');
+    const [tuitionCost, setTuition] = useState('');
+    const [religiousAffiliation, setReligiousAffil] = useState('');
+    const [size, setSize] = useState('');
+    const [urbanizationLevel, setTypeOfArea] = useState('');
+    const [sportCollege, setSportEvents] = useState('');
+    const [collegeDiversity, setDiverse] = useState('');
     const [schoolClassification, setType] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
 
-    
+
+    const collectionref = collection(firestore, 'Quiz');
 
     const handleSubmit = async () => {
         const answers = {
+            address: address,
             gpa: gpa,
             sat: satScore,
             act: actScore,
@@ -200,91 +207,125 @@ const Quiz = ({ navigation }) => {
             
         
     };
-    
 
     const renderPageOne = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>What is your GPA?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+            <View style={{ zIndex: 10, elevation: 10 }}>
+                <GooglePlacesAutocomplete
+                    placeholder="123 Main St..."
+                    onPress={(data, details = null) => {
+                        setAddress(data.description);
+                    }}
+                    textInputProps={{
+                        value: address,
+                        onChangeText: (text) => setAddress(text),
+                    }}
+                    query={{
+                        key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
+                        language: 'en',
+                    }}
+                    styles={{
+                        textInput: {
+                            height: 40,
+                            borderWidth: 1,
+                            fontSize: 18,
+                            padding: 10,
+                            marginVertical: 10,
+                            borderColor: theme.color,
+                        },
+                        listView: {
+                            backgroundColor: theme.background,
+                            position: 'absolute',
+                            top: 50,
+                            zIndex: 10,
+                            elevation: 10,
+                        },
+                    }}
+                />
+            </View>
+
+            <Text style={[styles.text, { color: theme.color }]}>How far from home do you want your college to be?</Text>
+            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
+
+            <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
+            <DropdownComponent data={majorData} value={major} onChange={setMajor} />
+
+            <Text style={[styles.text, { color: theme.color }]}>How much are you willing to pay for tuition?</Text>
+            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
+
+            <Text style={[styles.text, { color: theme.color }]}>SAT score?</Text>
             <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
-                value={gpa}
-                onChangeText={setGpa}
-                placeholder='Ex: 3.6...'
-            />
-
-            <Text style={[styles.text, {color: theme.color}]}>How far from home do you want your college to be?</Text>
-            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setdistance}/>
-
-            <Text style={[styles.text, {color: theme.color}]}>What do you plan to study?</Text>
-            <DropdownComponent data={majorData} value={major} onChange={setmajor} />
-
-            <Text style={[styles.text, {color: theme.color}]}>How much are you willing to pay for tuition?</Text>
-            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={settuition} />
-
-            <Text style={[styles.text, {color: theme.color}]}>SAT score?</Text>
-            <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
+                style={[styles.textInput, { borderColor: theme.color }]}
                 value={satScore}
                 onChangeText={setSatScore}
-                placeholder='Ex: 1200...'
+                placeholder="Ex: 1200..."
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>ACT score?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>ACT score?</Text>
             <TextInput
-                style={[styles.textInput, {borderColor: theme.color}]}
+                style={[styles.textInput, { borderColor: theme.color }]}
                 value={actScore}
                 onChangeText={setActScore}
-                placeholder='Ex: 25...'
+                placeholder="Ex: 25..."
             />
         </View>
     );
 
     const renderPageTwo = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>Do you wish to attend a college of a specific religious affiliation?</Text>
-            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setreligiousAffil}/>
+            <Text style={[styles.text, { color: theme.color }]}>What is your GPA?</Text>
+            <TextInput
+                style={[styles.textInput, { borderColor: theme.color }]}
+                value={gpa}
+                onChangeText={setGpa}
+                placeholder='Ex: 3.6...'
+            />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a school with sporting events?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Do you wish to attend a college of a specific religious affiliation?</Text>
+            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
+
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
             <DropdownComponent data={[
                 { label: 'Yes', value: 'Yes' },
                 { label: 'No', value: 'No' },
-                
-            ]} 
-            value={sportCollege}
-            onChange={setsportEvents}
+            ]}
+                value={sportCollege}
+                onChange={setSportEvents}
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking to attend college in a specific state?</Text>
-            <DropdownComponent data={stateData} value={stateChoice} onChange={setstate} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking to attend college in a specific state?</Text>
+            <DropdownComponent data={stateData} value={stateChoice} onChange={setState} />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a diverse college?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
             <DropdownComponent data={[
                 { label: 'Neutral', value: 'Neutral' },
                 { label: 'Important', value: 'Important' },
                 { label: 'Very Important', value: 'Very Important' },
             ]}
-            value={collegeDiversity}
-            onChange={setdiverse}
+                value={collegeDiversity}
+                onChange={setDiverse}
             />
-
-            <Text style={[styles.text, {color: theme.color}]}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} value={size} onChange={setsize}/>
         </View>
     );
 
+
     const renderPageThree = () => (
         <View>
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a Public or Private college?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
+
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
             <DropdownComponent data={[
                 { label: 'Public', value: 'Public' },
                 { label: 'Private', value: 'Private' },
-            ]} 
-            value={schoolClassification}
-            onChange={setType}
+            ]}
+                value={schoolClassification}
+                onChange={setType}
             />
 
-            <Text style={[styles.text, {color: theme.color}]}>Are you looking for a college in a specific type of area?</Text>
-            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={settypeOfArea}/>
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
+            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
 
             <View style={styles.buttonContainer}>
                 <Button
@@ -295,41 +336,50 @@ const Quiz = ({ navigation }) => {
         </View>
     );
 
-    return (
-        <ScrollView style={styles.container}>
-            <SafeAreaView>
-                {currentPage === 1 && renderPageOne()}
-                {currentPage === 2 && renderPageTwo()}
-                {currentPage === 3 && renderPageThree()}
-                <View style={styles.buttonContainer}>
-                    
-                    {currentPage < 3 && (
-                        <Button
-                            style={styles.button}
-                            onPress={() => setCurrentPage(currentPage + 1)}
-                            title="Next"
-                        />
-                    )}
-                    {currentPage > 1 && (
-                        <Button
-                            style={styles.button}
-                            onPress={() => setCurrentPage(currentPage - 1)}
-                            title="Back"
-                        />
-                    )}
-                </View>
-            </SafeAreaView>
-        </ScrollView>
-    )
-}
+    const renderContent = () => {
+        if (currentPage === 1) return renderPageOne();
+        if (currentPage === 2) return renderPageTwo();
+        if (currentPage === 3) return renderPageThree();
+    };
 
-export default Quiz
+    return (
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <SafeAreaView style={styles.container}>
+                <FlatList
+                    data={[{ key: 'quizContent' }]}
+                    renderItem={renderContent}
+                    keyExtractor={(item) => item.key}
+                    ListFooterComponent={() => (
+                        <View style={styles.buttonContainer}>
+                            {currentPage < 3 && (
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => setCurrentPage(currentPage + 1)}
+                                    title="Next"
+                                />
+                            )}
+                            {currentPage > 1 && (
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => setCurrentPage(currentPage - 1)}
+                                    title="Back"
+                                />
+                            )}
+                        </View>
+                    )}
+                />
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
+    );
+};
+
+export default Quiz;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 20,
-        paddingHorizontal: 16
+        paddingHorizontal: 16,
     },
     textInput: {
         height: 40,
@@ -344,9 +394,9 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         paddingTop: 30,
-        margin:10
+        margin: 10,
     },
     button: {
-        marginTop:20
-    }
+        marginTop: 20,
+    },
 });

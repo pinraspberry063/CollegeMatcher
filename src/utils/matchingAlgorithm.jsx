@@ -1,7 +1,41 @@
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
+import axios from 'axios';
 import { useState } from 'react';
 import auth from '@react-native-firebase/auth';
+
+const findDist= (coords1, coords2) => {
+    const toRad = (x) => (x * Math.PI) / 180;
+    const lat1 = coords1.lat;
+    const lon1 = coords1.lng;
+    const lat2 = coords2.lat;
+    const lon2 = coords2.lng;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c;
+    return distance;
+};
+
+const geoCodeAddress = async (address) => {
+    const apiKey = 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI'
+    const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+        params: {
+            address: address,
+            key: apiKey
+        }
+    });
+    if (response.data.status === 'OK'){
+        const location = response.data.results[0].geometry.location;
+        return { lat: location.lat, lng: location.lng };
+    } else {
+        throw new Error('Geocoding not found');
+    }
+};
 
 const matchColleges = async (studentPreferences) => {
     const firestore = getFirestore(db);
@@ -9,7 +43,9 @@ const matchColleges = async (studentPreferences) => {
     const querySnapshot = await getDocs(collegeDataRef);
     const colleges = querySnapshot.docs.map(doc => doc.data());
 
-    const maxScore = 290;
+    const maxScore = 235;
+
+    const userCoords = await geoCodeAddress(studentPreferences.address);
 
     const tuitionRanges = {
         '$0 - $10,000': [0, 10000],
@@ -145,7 +181,20 @@ const matchColleges = async (studentPreferences) => {
         }
 
         // Distance from Home Matching (develop distance algorithm)
-        score += 20;
+        const distanceRanges = {
+            '0-50 miles': [0, 50 * 1.60934],
+            '50-200 miles': [50 * 1.60934, 200 * 1.60934],
+            '200-500 miles': [200 * 1.60934, 500 * 1.60934],
+            '500+ miles': [500 * 1.60934, Infinity],
+        };
+
+        const collegeCoords = { lat: parseFloat(college.latitude), lng: parseFloat(college.longitude) };
+        const distance = findDist(userCoords, collegeCoords);
+        const [minDistance, maxDistance] = distanceRanges[studentPreferences.distance_from_college] || [0, Infinity];
+
+        if (distance >= minDistance && distance <= maxDistance) {
+            score += 60;
+        };
 
         // Diversity Matching (develop matching logic based on number of fields made)
         score += 20;
