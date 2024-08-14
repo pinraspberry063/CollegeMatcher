@@ -1,7 +1,7 @@
 // Displays the threads and posts of the selected subgroup.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -114,21 +114,22 @@ const ColForum = ({ route, navigation }) => {
     }
   };
 
-  const handleReportPost = async (threadId, postId, reportedUser) => {
-    const reportData = {
-      threadId,
-      postId,
-      reportedUser,
-      source: 'forum'
-    };
+ const handleReportSubmission = async (reportType, threadId, postId = null, reportedUsername) => {
+   const reportData = {
+     threadId,
+     postId,
+     reportedUser: reportedUsername,
+     source: 'forum',
+     type: reportType
+   };
 
-    const success = await handleReport(reportData);
-    if (success) {
-      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-    } else {
-      Alert.alert('Error', 'Failed to submit report. Please try again.');
-    }
-  };
+   const success = await handleReport(reportData);
+   if (success) {
+     Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+   } else {
+     Alert.alert('Error', 'Failed to submit report. Please try again.');
+   }
+ };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -144,7 +145,16 @@ const ColForum = ({ route, navigation }) => {
         </View>
         {threads.map(thread => (
           <View key={thread.id} style={styles.threadItem}>
-            <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
+            <View style={styles.threadHeader}>
+              <View style={styles.threadTitleRow}>
+                <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
+              </View>
+              <Button
+                title="Report Thread"
+                onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
+                style={styles.reportButton}
+              />
+            </View>
             <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>Created by: {thread.createdBy}</Text>
             <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
             {thread.posts.map(post => (
@@ -152,7 +162,10 @@ const ColForum = ({ route, navigation }) => {
                 <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
                 <Text style={[styles.postCreatedBy, { color: theme.textColor }]}>Posted by: {post.createdBy}</Text>
                 <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
-                <Button title="Report" onPress={() => handleReportPost(thread.id, post.id, post.createdBy)} />
+                <Button
+                  title="Report Post"
+                  onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
+                />
               </View>
             ))}
             <View style={styles.newPostContainer}>
@@ -183,6 +196,25 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 8,
   },
+  threadHeader: {
+      flexDirection: 'column',
+      marginBottom: 8,
+    },
+    threadTitleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    threadTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      flex: 1,
+      marginRight: 8,
+    },
+    reportButton: {
+      marginTop: 4,
+    },
   newPostContainer: {
     marginTop: 12,
     padding: 12,

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -33,6 +33,7 @@ import PhoneVerification from './app/PhoneVerification';
 import ModeratorScreen from './app/ModeratorScreen';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from './config/firebaseConfig';
+import UserActivityScreen from './app/UserActivityScreen';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -65,7 +66,6 @@ const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
     <MessageStack.Screen name="RecConvs" component={RecConvs} />
     <MessageStack.Screen name="Message" component={Message} />
-    <MessageStack.Screen name="Moderation" component={ModeratorScreen} />
   </MessageStack.Navigator>
 );
 
@@ -100,7 +100,8 @@ const icons = {
   QuizStack: 'magnify',
   ColForumSelector: 'forum',
   Messages: 'message',
-  AI: 'head'
+  AI: 'head',
+  Moderation: 'shield-account'
 };
 
 const Tab = createBottomTabNavigator();
@@ -134,9 +135,14 @@ const TabScreen = () => (
     <Tab.Screen name="ColForumSelector" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
-    {checkUserStatus === 'moderator' && (
+{/*     {checkUserStatus === 'moderator' && ( */}
               <Tab.Screen name="Moderation" component={ModeratorScreen} />
-            )}
+{/*             )} */}
+        <Tab.Screen
+              name="UserActivityScreen"
+              component={UserActivityScreen}
+              options={{ tabBarButton: () => null }}
+            />
   </Tab.Navigator>
 );
 
@@ -240,11 +246,11 @@ const App = () => {
         <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
           <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
             <RootStack.Navigator screenOptions={screenOptions}>
-              {/* {user ? (
-                <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
-              ) : (
-                <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
-              )} */}
+{/*                */}{/* {user ? ( */}
+{/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
+{/*               ) : ( */}
+{/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
+{/*               )} */}
               <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
               <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
             </RootStack.Navigator>

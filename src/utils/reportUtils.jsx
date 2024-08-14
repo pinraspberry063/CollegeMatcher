@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 
@@ -13,8 +13,21 @@ export const handleReport = async (reportData) => {
       throw new Error('User not authenticated');
     }
 
+    // Fetch the reported user's User_UID
+    const usersRef = collection(firestore, 'Users');
+    const q = query(usersRef, where('Username', '==', reportData.reportedUser));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      throw new Error('Reported user not found');
+    }
+
+    const reportedUserDoc = querySnapshot.docs[0];
+    const reportedUserUID = reportedUserDoc.data().User_UID;
+
     const report = {
       ...reportData,
+      reportedUser: reportedUserUID,
       reportedBy: currentUser.uid,
       createdAt: Timestamp.now(),
       status: 'pending'

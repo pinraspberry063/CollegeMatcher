@@ -15,8 +15,16 @@ const Settings = ({navigation}) => {
 
   const handleLogout = async () => {
     try {
-      await auth().signOut();
-      // The navigation will be handled automatically by the RootStack in App.jsx
+      const currentUser = auth().currentUser;
+      if (currentUser) {
+        await auth().signOut();
+      }
+        // I can get rid of navigation in this function when/if ?user condition is uncommented in App.jsx
+      // Always navigate to the launch screen, regardless of whether the user was signed in or not
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Launch' }],
+      });
     } catch (error) {
       Alert.alert('Logout Error', error.message);
     }

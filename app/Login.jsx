@@ -36,14 +36,16 @@ const Login = ({ navigation }) => {
 
     setLoading(true);
     try {
-      await auth().signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        setLoading(false);
-        setAttempts(0);
-        setUser(userCredential.user); // Set the logged in user in context
-        checkIsRecruiter(userCredential.user.uid); // Check if the user is a recruiter
-        navigation.navigate('Main')
-      })
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      setLoading(false);
+      setAttempts(0);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+      if (isAllowed) {
+        setUser(userCredential.user); // Set the logged in user in context only if not banned
+      } else {
+        // If not allowed (banned), don't set the user or navigate
+        setUser(null);
+      }
     } catch (error) {
       setLoading(false);
       setAttempts(attempts + 1);
@@ -61,6 +63,12 @@ const Login = ({ navigation }) => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
       setLoading(false);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+            if (isAllowed) {
+              setUser(userCredential.user);
+            } else {
+              setUser(null);
+            }
       navigation.navigate('Launch', {
         screen: 'PhoneVerification',
         params: { verificationId: confirmation.verificationId }
@@ -84,6 +92,12 @@ const Login = ({ navigation }) => {
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+                  if (isAllowed) {
+                    setUser(userCredential.user);
+                  } else {
+                    setUser(null);
+                  }
       console.log('User signed in successfully:', userCredential.user.displayName);
       Alert.alert('Google Login Successful');
       navigation.navigate('Main');
@@ -105,6 +119,12 @@ const Login = ({ navigation }) => {
       }
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
       await auth().signInWithCredential(facebookCredential);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+                  if (isAllowed) {
+                    setUser(userCredential.user);
+                  } else {
+                    setUser(null);
+                  }
       Alert.alert('Facebook Login Successful');
       navigation.navigate('Main');
     } catch (error) {
@@ -156,25 +176,33 @@ const Login = ({ navigation }) => {
    }
  };
 
-  const checkIsRecruiter = async (uid) => {
-    const firestore = getFirestore(db);
-    const usersRef = collection(firestore, 'Users');
-    const userQuery = query(usersRef, where('User_UID', '==', uid));
+const checkIsRecruiter = async (uid) => { // change func name after demo
+  const firestore = getFirestore(db);
+  const usersRef = collection(firestore, 'Users');
+  const userQuery = query(usersRef, where('User_UID', '==', uid));
 
-    const querySnapshot = await getDocs(userQuery);
-    if (!querySnapshot.empty) {
-      const userDoc = querySnapshot.docs[0];
-      const data = userDoc.data();
-      if (data.IsRecruiter) {
-        navigation.navigate('Main', {
-          screen: 'Messages',
-          params: { screen: 'RecConvs' }
-        });
-      } else {
-        navigation.navigate('Main');
-      }
+  const querySnapshot = await getDocs(userQuery);
+  if (!querySnapshot.empty) {
+    const userDoc = querySnapshot.docs[0];
+    const data = userDoc.data();
+    if (data.status === 'banned') {
+      await auth().signOut();
+      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
+      // Don't navigate anywhere for banned users
+      return false;
     }
-  };
+    if (data.IsRecruiter) {
+      navigation.navigate('Main', {
+        screen: 'Messages',
+        params: { screen: 'RecConvs' }
+      });
+    } else {
+      navigation.navigate('Main');
+    }
+    return true;
+  }
+  return false; // User not found
+};
 
   const handleForgotPassword = () => {
     if (!email) {
