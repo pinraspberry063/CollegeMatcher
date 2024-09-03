@@ -1,23 +1,27 @@
 # CollegeMatcher
-Senior Capstone Project 
+
+Senior Capstone Project
 
 ## Project Description
-A web/mobile app that helps with the college search process by matching people to colleges based on their interests and stats. 
+
+A web/mobile app that helps with the college search process by matching people to colleges based on their interests and stats.
 
 ## Team Members
-* Keith Mueller
-* Arlind Bengu
-* Mason LeFrance
-* Katie Sparr
+
+- Keith Mueller
+- Arlind Bengu
+- Mason LeFrance
+- Katie Sparr
 
 ## Project Sponsor
+
 Colin Bailey
-* Assistant Director of Recruitment
-* Office of Admissions
+
+- Assistant Director of Recruitment
+- Office of Admissions
 
 ## Dependencies
-* [React Native & Android Studio](https://reactnative.dev/docs/set-up-your-environment?platform=android)
-* [Node.js](https://nodejs.org/en/download/prebuilt-installer/current)
-* FireStore
 
-
+- [React Native & Android Studio](https://reactnative.dev/docs/set-up-your-environment?platform=android)
+- [Node.js](https://nodejs.org/en/download/prebuilt-installer/current)
+- FireStore

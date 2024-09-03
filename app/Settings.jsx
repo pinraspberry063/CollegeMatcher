@@ -7,7 +7,7 @@ import {
   View,
   Alert,
 } from 'react-native';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext';
 import FavoritedColleges from './FavoritedColleges';
 import auth from '@react-native-firebase/auth';
 
@@ -18,14 +18,14 @@ const Settings = ({navigation}) => {
     try {
       const currentUser = auth().currentUser;
       if (currentUser) {
-        await auth().signOut()
+        await auth().signOut();
       }
-        // I can get rid of navigation in this function when/if ?user condition is uncommented in App.jsx
+      // I can get rid of navigation in this function when/if ?user condition is uncommented in App.jsx
       // Always navigate to the launch screen, regardless of whether the user was signed in or not
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Launch' }]
-      })
+        routes: [{name: 'Launch'}],
+      });
     } catch (error) {
       Alert.alert('Logout Error', error.message);
     }
@@ -42,17 +42,20 @@ const Settings = ({navigation}) => {
           <Text style={[styles.item, {color: theme.color}]}>Preferences</Text>
         </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
+        <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
+          <Text style={[styles.item, {color: theme.color}]}>
+            Favorited Colleges
+          </Text>
+        </TouchableOpacity>
 
-            <Text style={[styles.item, {color: theme.color}]}>Favorited Colleges</Text>
-          </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => console.log("Privacy")}>
+        <TouchableOpacity onPress={() => console.log('Privacy')}>
           <Text style={[styles.item, {color: theme.color}]}>Privacy</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => console.log("Saved MAKK Chats")}>
-          <Text style={[styles.item, {color: theme.color}]}>Saved MAKK Chats</Text>
+        <TouchableOpacity onPress={() => console.log('Saved MAKK Chats')}>
+          <Text style={[styles.item, {color: theme.color}]}>
+            Saved MAKK Chats
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleLogout}>
@@ -60,8 +63,8 @@ const Settings = ({navigation}) => {
         </TouchableOpacity>
       </ScrollView>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -70,8 +73,7 @@ const styles = StyleSheet.create({
   item: {
     fontSize: 30,
     padding: 20,
-
   },
 });
 
-export default Settings
+export default Settings;

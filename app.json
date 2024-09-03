@@ -4,11 +4,9 @@
     "scheme": "mycollegematcher",
     "entryPoint": "./App.jsx",
     "displayName": "CM_App",
-      "web": {
-        "bundler": "metro"
-      },
-    "plugins": [
-      "expo-router"
-    ]
-  }  
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-router"]
+  }
 }
