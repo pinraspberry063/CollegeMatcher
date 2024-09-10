@@ -120,6 +120,7 @@ const ColForum = ({ route, navigation }) => {
   };
 
  const handleReportSubmission = async (reportType, threadId, postId = null, reportedUsername) => {
+
    const reportData = {
      threadId,
      postId,
@@ -157,6 +158,7 @@ const ColForum = ({ route, navigation }) => {
               <Button
                 title="Report Thread"
                 onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
+                disabled={thread.createdBy === username}
                 style={styles.reportButton}
               />
             </View>
@@ -182,6 +184,7 @@ const ColForum = ({ route, navigation }) => {
                 <Button
                   title="Report Post"
                   onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
+                  disabled={post.createdBy === username}
                 />
               </View>
             ))}
