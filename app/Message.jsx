@@ -1,15 +1,34 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useEffect, useContext} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
-import { db } from '../config/firebaseConfig';
-import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
-import { UserContext } from '../components/UserContext';
-import { handleReport } from '../src/utils/reportUtils';
+import {db} from '../config/firebaseConfig';
+import {
+  collection,
+  addDoc,
+  doc,
+  Timestamp,
+  onSnapshot,
+  query,
+  orderBy,
+  getFirestore,
+  getDoc,
+  where,
+  getDocs,
+} from 'firebase/firestore';
+import {UserContext} from '../components/UserContext';
+import {handleReport} from '../src/utils/reportUtils';
 
-const Message = ({ route, navigation }) => {
+const Message = ({route, navigation}) => {
   const theme = useContext(themeContext);
-  const { user } = useContext(UserContext);
+  const {user} = useContext(UserContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [recruiterUID, setRecruiterUID] = useState(null);
@@ -30,7 +49,10 @@ const Message = ({ route, navigation }) => {
       } else {
         // Scan all collections in "Messaging" for a document with the current user's UID incase no conversationID was found
         const messagingRef = collection(firestore, 'Messaging');
-        const userQuery = query(messagingRef, where('User_UID', '==', user.uid));
+        const userQuery = query(
+          messagingRef,
+          where('User_UID', '==', user.uid),
+        );
         const userSnapshot = await getDocs(userQuery);
 
         if (!userSnapshot.empty) {
@@ -42,43 +64,47 @@ const Message = ({ route, navigation }) => {
         }
       }
 
-      getDoc(conversationDocRef).then((docSnap) => {
-        if (docSnap.exists) {
-          const data = docSnap.data();
-          if (data.User_UID === user.uid) {
-            setRecruiterUID(data.Recruiter_UID);
-            setIsRecruiter(false);
-          } else if (data.Recruiter_UID === user.uid) {
-            setRecruiterUID(data.User_UID);
-            setIsRecruiter(true);
-          }
-          setDocumentID(conversationDocRef.id);
+      getDoc(conversationDocRef)
+        .then(docSnap => {
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            if (data.User_UID === user.uid) {
+              setRecruiterUID(data.Recruiter_UID);
+              setIsRecruiter(false);
+            } else if (data.Recruiter_UID === user.uid) {
+              setRecruiterUID(data.User_UID);
+              setIsRecruiter(true);
+            }
+            setDocumentID(conversationDocRef.id);
 
-          // Fetch usernames
-          fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
-            // Set up listener for messages
-            setupMessageListener(firestore, conversationDocRef.id);
-          });
-        } else {
-          console.warn('No matching conversation found!');
-        }
-      }).catch((error) => {
-        console.error('Error fetching conversation:', error);
-      });
+            // Fetch usernames
+            fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(
+              () => {
+                // Set up listener for messages
+                setupMessageListener(firestore, conversationDocRef.id);
+              },
+            );
+          } else {
+            console.warn('No matching conversation found!');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching conversation:', error);
+        });
     };
 
     fetchConversation();
   }, [user, conversationId]);
 
-    // Listener is used to display the ordered messages from the database.
+  // Listener is used to display the ordered messages from the database.
   const setupMessageListener = (firestore, docId) => {
     const messagesRef = collection(firestore, 'Messaging', docId, 'conv');
     const q = query(messagesRef, orderBy('order'));
 
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const unsubscribe = onSnapshot(q, querySnapshot => {
       const msgs = [];
-      querySnapshot.forEach((doc) => {
-        msgs.push({ id: doc.id, ...doc.data() });
+      querySnapshot.forEach(doc => {
+        msgs.push({id: doc.id, ...doc.data()});
       });
       setMessages(msgs);
     });
@@ -86,7 +112,7 @@ const Message = ({ route, navigation }) => {
     return () => unsubscribe();
   };
 
-    // Fetch the usernames of the users to be used in messaging.
+  // Fetch the usernames of the users to be used in messaging.
   const fetchUsernames = async (uids, firestore) => {
     const usersRef = collection(firestore, 'Users');
     const usernameMap = {};
@@ -106,16 +132,21 @@ const Message = ({ route, navigation }) => {
     console.log('Set usernames:', usernameMap); // Debugging log
   };
 
-    // Handle the sending of messages.
+  // Handle the sending of messages.
   const handleSend = async () => {
     if (newMessage.trim() && user && documentID) {
       const firestore = getFirestore(db);
-      const messagesRef = collection(firestore, 'Messaging', documentID, 'conv');
+      const messagesRef = collection(
+        firestore,
+        'Messaging',
+        documentID,
+        'conv',
+      );
       const newMessageDoc = {
         content: newMessage,
         sender_UID: user.uid,
         timestamp: Timestamp.now(),
-        order: messages.length + 1
+        order: messages.length + 1,
       };
       await addDoc(messagesRef, newMessageDoc);
       setNewMessage('');
@@ -126,12 +157,15 @@ const Message = ({ route, navigation }) => {
     const reportData = {
       messageId,
       reportedUser,
-      source: 'message'
+      source: 'message',
     };
 
     const success = await handleReport(reportData);
     if (success) {
-      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+      Alert.alert(
+        'Report Submitted',
+        'Thank you for your report. Our moderators will review it shortly.',
+      );
     } else {
       Alert.alert('Error', 'Failed to submit report. Please try again.');
     }
@@ -148,16 +182,16 @@ const Message = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.messagesContainer}>
-        {messages.map((message) => (
+        {messages.map(message => (
           <View
             key={message.id}
             style={[
               styles.message,
-              (message.sender_UID === user.uid && !isRecruiter) || (message.sender_UID === recruiterUID && isRecruiter)
+              (message.sender_UID === user.uid && !isRecruiter) ||
+              (message.sender_UID === recruiterUID && isRecruiter)
                 ? styles.userMessage
-                : styles.recruiterMessage
-            ]}
-          >
+                : styles.recruiterMessage,
+            ]}>
             <Text style={styles.messageSender}>
               {usernames[message.sender_UID] || 'Unknown'}
             </Text>

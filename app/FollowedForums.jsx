@@ -1,19 +1,36 @@
 // After a college is selected, this screen allows the user to follow subgroups of their interest so they are easy to navigate to.
 
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useEffect, useContext} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
-import { db } from '../config/firebaseConfig';
-import { collection, getDocs, doc, query, where, getFirestore, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { UserContext } from '../components/UserContext';
+import {db} from '../config/firebaseConfig';
+import {
+  collection,
+  getDocs,
+  doc,
+  query,
+  where,
+  getFirestore,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
+import {UserContext} from '../components/UserContext';
 
 const firestore = getFirestore(db);
 
-const FollowedForums = ({ navigation }) => {
+const FollowedForums = ({navigation}) => {
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
   const [subgroupDetails, setSubgroupDetails] = useState([]);
-  const { user } = useContext(UserContext);
+  const {user} = useContext(UserContext);
   const theme = useContext(themeContext);
 
   useEffect(() => {
@@ -28,7 +45,7 @@ const FollowedForums = ({ navigation }) => {
     }
   }, [followedSubgroups]);
 
-  const fetchFollowedSubgroups = async (uid) => {
+  const fetchFollowedSubgroups = async uid => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
@@ -48,9 +65,15 @@ const FollowedForums = ({ navigation }) => {
   const fetchSubgroupDetails = async () => {
     try {
       const details = await Promise.all(
-        followedSubgroups.map(async (collegeAndForum) => {
+        followedSubgroups.map(async collegeAndForum => {
           const [collegeName, forumId] = collegeAndForum.split(':');
-          const forumDocRef = doc(firestore, 'Forums', collegeName, 'subgroups', forumId);
+          const forumDocRef = doc(
+            firestore,
+            'Forums',
+            collegeName,
+            'subgroups',
+            forumId,
+          );
           const forumDoc = await getDoc(forumDocRef);
           if (forumDoc.exists()) {
             return {
@@ -60,7 +83,7 @@ const FollowedForums = ({ navigation }) => {
             };
           }
           return null;
-        })
+        }),
       );
       setSubgroupDetails(details.filter(detail => detail !== null));
     } catch (error) {
@@ -80,12 +103,14 @@ const FollowedForums = ({ navigation }) => {
 
         if (isFollowing) {
           await updateDoc(userDocRef, {
-            followed_subGroups: arrayRemove(followString)
+            followed_subGroups: arrayRemove(followString),
           });
-          setFollowedSubgroups(followedSubgroups.filter(item => item !== followString));
+          setFollowedSubgroups(
+            followedSubgroups.filter(item => item !== followString),
+          );
         } else {
           await updateDoc(userDocRef, {
-            followed_subGroups: arrayUnion(followString)
+            followed_subGroups: arrayUnion(followString),
           });
           setFollowedSubgroups([...followedSubgroups, followString]);
         }
@@ -98,29 +123,29 @@ const FollowedForums = ({ navigation }) => {
   };
 
   const handleNavigation = (collegeName, forumName) => {
-    navigation.navigate('Forum', { collegeName, forumName });
+    navigation.navigate('Forum', {collegeName, forumName});
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {subgroupDetails.map(({ collegeName, forumName, forumId }) => (
+        {subgroupDetails.map(({collegeName, forumName, forumId}) => (
           <View key={forumId} style={styles.buttonContainer}>
             <Text style={styles.buttonText}>{forumName}</Text>
             <Text style={styles.collegeLabel}>College: {collegeName}</Text>
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={styles.viewButton}
-                onPress={() => handleNavigation(collegeName, forumName)}
-              >
+                onPress={() => handleNavigation(collegeName, forumName)}>
                 <Text style={styles.buttonText}>View</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.followButton}
-                onPress={() => toggleFollowSubgroup(collegeName, forumId)}
-              >
+                onPress={() => toggleFollowSubgroup(collegeName, forumId)}>
                 <Text style={styles.buttonText}>
-                  {followedSubgroups.includes(`${collegeName}:${forumId}`) ? 'Unfollow' : 'Follow'}
+                  {followedSubgroups.includes(`${collegeName}:${forumId}`)
+                    ? 'Unfollow'
+                    : 'Follow'}
                 </Text>
               </TouchableOpacity>
             </View>

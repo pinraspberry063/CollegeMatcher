@@ -1,23 +1,23 @@
 // The screen that displays the different colleges' forums that the user can navigate to. Leads user to ForumSelect screen.
 
-import React, { useState, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useContext} from 'react';
+import {StyleSheet, Text, View, ScrollView, Button} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
-import { db } from '../config/firebaseConfig';
-import { doc, getDoc, setDoc, getFirestore } from 'firebase/firestore';
+import {db} from '../config/firebaseConfig';
+import {doc, getDoc, setDoc, getFirestore} from 'firebase/firestore';
 
 const firestore = getFirestore(db);
 
-const ColForumSelector = ({ navigation }) => {
+const ColForumSelector = ({navigation}) => {
   const [colleges, setColleges] = useState([
-    "Louisiana Tech University",
-    "Test college",
-    "Test college2"
+    'Louisiana Tech University',
+    'Test college',
+    'Test college2',
   ]);
   const theme = useContext(themeContext);
 
-  const handleNavigation = async (collegeName) => {
+  const handleNavigation = async collegeName => {
     const collegeDocRef = doc(firestore, 'Forums', collegeName);
     const collegeDocSnap = await getDoc(collegeDocRef);
 
@@ -26,7 +26,7 @@ const ColForumSelector = ({ navigation }) => {
       await setDoc(collegeDocRef, {});
     }
 
-    navigation.navigate('ForumSelect', { collegeName });
+    navigation.navigate('ForumSelect', {collegeName});
   };
 
   const handleFollowedForumsNavigation = () => {
