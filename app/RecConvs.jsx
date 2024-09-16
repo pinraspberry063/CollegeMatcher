@@ -1,14 +1,20 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, Button, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { getFirestore, collection, query, getDocs, where } from 'firebase/firestore';
+import React, {useState, useEffect, useContext} from 'react';
+import {StyleSheet, Text, View, Button, ScrollView} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {
+  getFirestore,
+  collection,
+  query,
+  getDocs,
+  where,
+} from 'firebase/firestore';
 import themeContext from '../theme/themeContext';
-import { db } from '../config/firebaseConfig';
-import { UserContext } from '../components/UserContext';
+import {db} from '../config/firebaseConfig';
+import {UserContext} from '../components/UserContext';
 
-const RecConvs = ({ navigation }) => {
+const RecConvs = ({navigation}) => {
   const theme = useContext(themeContext);
-  const { user } = useContext(UserContext);
+  const {user} = useContext(UserContext);
   const [conversations, setConversations] = useState([]);
   const [usernames, setUsernames] = useState({});
 
@@ -36,13 +42,19 @@ const RecConvs = ({ navigation }) => {
     const fetchConversations = async () => {
       const firestore = getFirestore(db);
       const messagingRef = collection(firestore, 'Messaging');
-      const recruiterQuery = query(messagingRef, where('Recruiter_UID', '==', user.uid));
+      const recruiterQuery = query(
+        messagingRef,
+        where('Recruiter_UID', '==', user.uid),
+      );
 
       console.log('Fetching conversations for recruiter:', user.uid); // Debugging log
       const querySnapshot = await getDocs(recruiterQuery);
       console.log('Query snapshot size:', querySnapshot.size); // Debugging log
 
-      const convs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const convs = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       console.log('Fetched conversations:', convs); // Debugging log
       setConversations(convs);
 
@@ -51,7 +63,7 @@ const RecConvs = ({ navigation }) => {
       fetchUsernames(userUIDs);
     };
 
-    const fetchUsernames = async (userUIDs) => {
+    const fetchUsernames = async userUIDs => {
       const firestore = getFirestore(db);
       const usersRef = collection(firestore, 'Users');
       const usernameMap = {};
@@ -73,12 +85,19 @@ const RecConvs = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Conversations</Text>
+      <Text style={[styles.title, {color: theme.color}]}>Conversations</Text>
       <ScrollView style={styles.conversationsContainer}>
         {conversations.map(conv => (
           <View key={conv.id} style={styles.conversation}>
-            <Text style={styles.conversationText}>Conversation with: {usernames[conv.User_UID] || conv.User_UID}</Text>
-            <Button title="Open" onPress={() => navigation.navigate('Message', { conversationId: conv.id })} />
+            <Text style={styles.conversationText}>
+              Conversation with: {usernames[conv.User_UID] || conv.User_UID}
+            </Text>
+            <Button
+              title="Open"
+              onPress={() =>
+                navigation.navigate('Message', {conversationId: conv.id})
+              }
+            />
           </View>
         ))}
       </ScrollView>
