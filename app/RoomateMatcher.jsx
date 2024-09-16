@@ -111,6 +111,43 @@ const RoomateQuiz = ({ navigation }) => {
                          <DropdownComponent data={choice} value={shareDuties} onChange={setShareDuties} />
                      </View>
                  );
+                 const renderPageTwo = () => (
+                     <View>
+                         <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
+                         <DropdownComponent data={choice} value={drinking} onChange={setDrinkingHabit} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Are you against company being over at the dorm/apartment?</Text>
+                         <DropdownComponent data={choice} value={companyOver} onChange={setCompanyOver} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
+                         <DropdownComponent data={choice} value={informCompany} onChange={setInformCompany} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
+                         <DropdownComponent data={choice} value={hmwrkSpot} onChange={setHmwrkSpot} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
+                         <DropdownComponent data={choice} value={silence} onChange={setSilence} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
+                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
+                     </View>
+                 );
+                 const renderPageThree = () => (
+                     <View>
+                         <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
+                         <DropdownComponent data={choice} value={clean} onChange={setClean} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
+                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
+                         <DropdownComponent data={choice} value={boundaries} onChange={setBoundaries} />
+
+                         <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
+                         <DropdownComponent data={choice} value={shareDuties} onChange={setShareDuties} />
+                     </View>
+                 );
+
                      const renderContent = () => {
                          if (currentPage === 1) return renderPageOne();
                          if (currentPage === 2) return renderPageTwo();
