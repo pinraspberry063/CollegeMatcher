@@ -34,6 +34,7 @@ import ModeratorScreen from './app/ModeratorScreen';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
+import RecruiterVerification from './app/RecruiterVerification';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -154,6 +155,7 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
+    <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
   </LaunchStack.Navigator>
 );
 

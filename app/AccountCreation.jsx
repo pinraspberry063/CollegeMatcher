@@ -29,6 +29,7 @@ const AccountCreation = ({ navigation }) => {
       const user = userCredential.user;
       setUser(user); // Set the logged in user in context
 
+
       // Add user to Firestore
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
@@ -38,12 +39,20 @@ const AccountCreation = ({ navigation }) => {
 
       setLoading(false);
       Alert.alert('Account Created');
-      navigation.navigate('Main');
+
+      if (isRecruiter) {
+        // Navigate to RecruiterVerification screen if the user is a recruiter
+        navigation.navigate('RecruiterVerification');
+      } else {
+        // Otherwise, navigate to the main screen
+        navigation.navigate('Main');
+      }
     } catch (error) {
       setLoading(false);
       Alert.alert('Account Creation Failed', error.message);
     }
   };
+
 
   return (
     <View style={styles.container}>
