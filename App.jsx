@@ -20,6 +20,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
 import ColForum from './app/ColForum';
+import RoomateMatcher from './app/RoomateMatcher';
 import Message from './app/Message';
 import RecConvs from './app/RecConvs';
 import MakkAI from './app/MakkAI';
@@ -84,6 +85,7 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="Forum" component={ColForum} />
     <ForumStack.Screen name="ForumSelect" component={ForumSelect} />
     <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
+    <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
   </ForumStack.Navigator>
 );
 

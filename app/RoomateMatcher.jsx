@@ -9,11 +9,25 @@ import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase
 import matchColleges from '../src/utils/matchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
+export default RoomateQuiz;
 
 const firestore = getFirestore(db);
 
 const RoomateQuiz = ({ navigation }) => {
     const theme = useContext(themeContext);
+      /*return (
+        <View style={styles.container}>
+          <View style={styles.icon}>
+            <Ionicons
+            color = {theme.color}
+            raised
+            name='roommate-matcher'
+            //type='ionicon'
+            size= {40}
+            onPress = {() => {navigation.push('RoommateMatcher')}}
+            />
+          </View>
+          */
      const choice = [
          { label: 'One', value: 'Prefer Otherwise' },
          { label: 'Two', value: 'Do Not Care' },
@@ -23,7 +37,7 @@ const RoomateQuiz = ({ navigation }) => {
          ];
      const [currentPage, setCurrentPage] = useState(1);
          const [bedtime, setBedtime] = useState('');
-         const [10pmSleep, set10pmSleep] = useState('');
+         const [tenpmSleep, setTenpmSleep] = useState('');
          const [nightSilence, setNightSilence] = useState('');
          const [noise, setNoise] = useState('');
          const [friendsRoommate, setFriendsRoommate] = useState('');
@@ -33,7 +47,7 @@ const RoomateQuiz = ({ navigation }) => {
          const [informCompany, setInformCompany] = useState('');
          const [hmwrkSpot, setHmwrkSpot] = useState('');
          const [silence, setSilence] = useState('');
-         const [6amWake, set6amWake] = useState('');
+         const [sixamWake, setSixamWake] = useState('');
          const [clean, setClean] = useState('');
          const [boundaries, setBoundaries] = useState('');
          const [shareDuties, setShareDuties] = useState('');
@@ -43,7 +57,7 @@ const RoomateQuiz = ({ navigation }) => {
          const handleSubmit = async () => {
                  const answers = {
                      bedtime: bedtime,
-                     10pm_sleep: 10pmSleep,
+                     tenpm_sleep: tenpmSleep,
                      night_silence: nightSilence,
                      noise: noise,
                      friends_roommate: friendsRoommate,
@@ -53,7 +67,7 @@ const RoomateQuiz = ({ navigation }) => {
                      inform_company: informCompany,
                      hmwrk_spot: hmwrkSpot,
                      silence: silence,
-                     6am_wake: 6amWake,
+                     sixam_wake: sixamWake,
                      clean: clean,
                      boundaries: boundaries,
                      share_duties: shareDuties,
@@ -66,7 +80,7 @@ const RoomateQuiz = ({ navigation }) => {
                          <DropdownComponent data={choice} value={bedtime} onChange={setBedtime} />
 
                          <Text style={[styles.text, { color: theme.color }]}>Do you want light-out at 10pm or a specific time?</Text>
-                         <DropdownComponent data={choice} value={10pmSleep} onChange={set10pmSleep} />
+                         <DropdownComponent data={choice} value={tenpmSleep} onChange={setTenpmSleep} />
 
                          <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
                          <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
@@ -96,7 +110,7 @@ const RoomateQuiz = ({ navigation }) => {
                          <DropdownComponent data={choice} value={silence} onChange={setSilence} />
 
                          <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
-                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
+                         <DropdownComponent data={choice} value={sixamWake} onChange={setSixamWake} />
 
                          <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
                          <DropdownComponent data={choice} value={clean} onChange={setClean} />
@@ -148,17 +162,17 @@ const RoomateQuiz = ({ navigation }) => {
                      </View>
                  );
 
-                     const renderContent = () => {
-                         if (currentPage === 1) return renderPageOne();
-                         if (currentPage === 2) return renderPageTwo();
-                         if (currentPage === 3) return renderPageThree();
-                     };
+                 const renderContent = () => {
+                     if (currentPage === 1) return renderPageOne();
+                     if (currentPage === 2) return renderPageTwo();
+                     if (currentPage === 3) return renderPageThree();
+                 };
 
-return (
+    return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <SafeAreaView style={styles.container}>
                 <FlatList
-                    data={[{ key: 'quizContent' }]}
+                    data={[{ key: 'roomateQuizContent' }]}
                     renderItem={renderContent}
                     keyExtractor={(item) => item.key}
                     ListFooterComponent={() => (
@@ -183,8 +197,9 @@ return (
             </SafeAreaView>
         </TouchableWithoutFeedback>
     );
-};
-export default Quiz;
+//};
+
+//export default RoomateQuiz;
 
 const styles = StyleSheet.create({
     container: {
@@ -211,5 +226,3 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
 });
-
-
