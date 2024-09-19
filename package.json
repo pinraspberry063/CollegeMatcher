@@ -11,7 +11,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-firebase/app": "^20.1.0",
     "@react-native-firebase/auth": "^20.1.0",
@@ -24,7 +23,6 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.10.0",
     "axios": "^1.7.2",
-    "emailjs-com": "^3.2.0",
     "expo": "^51.0.17",
     "expo-constants": "~16.0.2",
     "expo-image-picker": "~15.0.7",

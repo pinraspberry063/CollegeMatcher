@@ -1,76 +1,90 @@
-import React, {useContext} from 'react';
-// import type {PropsWithChildren} from 'react';
-import TabBar from '../components/TabBar'
-import {
-  SafeAreaView,
-  ScrollView,
-  // StatusBar,
-  StyleSheet,
-  Text,
-  // useColorScheme,
-  View,
-  Button
-} from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { SafeAreaView, Text, View, Button, StyleSheet, Alert } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import themeContext from '../theme/themeContext'
+import themeContext from '../theme/themeContext';
+import { UserContext } from '../components/UserContext';  // Import the UserContext
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';  // Firestore imports
+import { db } from '../config/firebaseConfig';  // Import Firebase configuration
 
-// import {
-//   Colors,
-//   DebugInstructions,
-//   Header,
-//   LearnMoreLinks,
-//   ReloadInstructions,
-// } from 'react-native/Libraries/NewAppScreen';
+const firestore = getFirestore(db);  // Initialize Firestore
 
-const Index = ( {navigation} ) => {
+const Index = ({ navigation }) => {
   const theme = useContext(themeContext);
+  const { user } = useContext(UserContext);  // Get the current logged-in user
+  const [isSuperRec, setIsSuperRec] = useState(false);  // State to track if the user is SuperRec
+
+  useEffect(() => {
+    const checkSuperRec = async () => {
+      if (!user || !user.uid) {
+        return;  // User is not logged in
+      }
+
+      try {
+        // Query the "CompleteColleges" collection where "SuperRec" matches the user's UID
+        const q = query(
+          collection(firestore, 'CompleteColleges'),
+          where('SuperRec', '==', user.uid)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        // If a document is found, the user is a SuperRec
+        if (!querySnapshot.empty) {
+          setIsSuperRec(true);
+        }
+      } catch (error) {
+        console.error('Error checking SuperRec:', error);
+        Alert.alert('Error', 'Failed to check SuperRec status.');
+      }
+    };
+
+    checkSuperRec();
+  }, [user]);  // Run the check when the component mounts or user changes
+
   return (
     <View style={styles.container}>
       <View style={styles.icon}>
         <Ionicons
-        color = {theme.color}
-        raised
-        name='settings-outline'
-        //type='ionicon'
-        size= {40}
-        onPress = {() => {navigation.push('Settings')}}
+          color={theme.color}
+          raised
+          name="settings-outline"
+          size={40}
+          onPress={() => {
+            navigation.push('Settings');
+          }}
         />
       </View>
-      
+
       <SafeAreaView style={styles.titleContainer}>
-        
-          <Text style={[styles.title, {color: theme.color}]}>College Matcher</Text>
-          <Text style={[styles.subtitle, {color: theme.color}]}>Let colleges find you today!</Text>
-        
+        <Text style={[styles.title, { color: theme.color }]}>College Matcher</Text>
+        <Text style={[styles.subtitle, { color: theme.color }]}>
+          Let colleges find you today!
+        </Text>
       </SafeAreaView>
-          {/* <View style={styles.buttonContainer2}>
-            <Button
-              title="Login"
-              onPress={() => { navigation.navigate('Login') }}
-              buttonStyle={styles.button2}
-            />
-            <Button
-              title="Create Account"
-              onPress={() => { navigation.navigate('AccountCreation') }}
-              buttonStyle={styles.button2}
-            />
-          </View> */}
 
       <View style={styles.buttonContainer}>
         <Button
-          style={[styles.button, {textShadowColor: theme.color}]}
-          onPress={() => {navigation.push('QuizButton')}}
+          style={[styles.button, { textShadowColor: theme.color }]}
+          onPress={() => {
+            navigation.push('QuizButton');
+          }}
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
-        {/* <Button
-          style={[styles.button, { textShadowColor: theme.color }]}
-          onPress={() => { navigation.push('MakkAI'); }}
-          title="MAKK AI"
-          color="#841584"
-          accessibilityLabel="Chat with MAKK AI"
-        /> */}
+
+        {/* Conditionally render the SuperRec button */}
+        {isSuperRec && (
+          <Button
+            style={[styles.button, { textShadowColor: theme.color }]}
+            onPress={() => {
+              navigation.push('AddRecs');  // Navigate to your desired screen
+            }}
+            title="Super Recruiter"
+            color="#841584"
+            accessibilityLabel="Access Super Recruiter features"
+          />
+        )}
       </View>
     </View>
   );
@@ -82,37 +96,28 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: 300
+    paddingTop: 300,
   },
   title: {
     fontSize: 50,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
-  subtitle:  {
-    fontSize: 20
+  subtitle: {
+    fontSize: 20,
   },
   icon: {
     position: 'absolute',
     top: 0,
     right: 0,
-    backgroundColor: 'light'
+    backgroundColor: 'light',
   },
-  buttonContainer:{
+  buttonContainer: {
     alignItems: 'center',
-    paddingTop: 200
+    paddingTop: 200,
   },
   button: {
     width: '50%',
-    margin: 10
-  },
-
-  buttonContainer2: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  button2: {
-    marginVertical: 10,
-    width: 200,
+    margin: 10,
   },
 });
 

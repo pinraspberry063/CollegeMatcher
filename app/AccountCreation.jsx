@@ -29,12 +29,12 @@ const AccountCreation = ({ navigation }) => {
       const user = userCredential.user;
       setUser(user); // Set the logged in user in context
 
-
-      // Add user to Firestore
+      // Add user to Firestore with email included
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
-        IsRecruiter: isRecruiter, // Use the state of the Switch
+        IsRecruiter: isRecruiter,  // Use the state of the Switch
         Username: username,
+        Email: email,  // Store user's email
       });
 
       setLoading(false);

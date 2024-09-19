@@ -147,7 +147,7 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
     }
     if (data.IsRecruiter) {
       navigation.navigate('Main', {
-        screen: 'Messages',
+        screen: 'Message',
         params: { screen: 'RecConvs' }
       });
     } else {
