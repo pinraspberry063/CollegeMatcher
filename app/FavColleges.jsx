@@ -6,8 +6,7 @@ import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);  // Initialize Firestore
 
-const Results = ({ route }) => {
-    const top5 = route.params.top5;
+const FavColleges = () => {
     const { user } = useContext(UserContext);  // Get the current user from UserContext
     const [committedColleges, setCommittedColleges] = useState([]);
 
@@ -73,29 +72,29 @@ const Results = ({ route }) => {
         }
     };
 
-    const renderItem = ({ item }) => {
-        const isCommitted = committedColleges.includes(item.name);
-
-        return (
-            <View style={styles.card}>
-                <Text style={styles.collegeName}>{item.name}</Text>
-                <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
-                <Button
-                    title={isCommitted ? "Remove Commit" : "Commit"}
-                    onPress={() => handleCommit(item.name)}
-                />
-            </View>
-        );
-    };
+    const renderItem = ({ item }) => (
+        <View style={styles.card}>
+            <Text style={styles.collegeName}>{item}</Text>
+            <Button
+                title="Remove Commit"
+                onPress={() => handleCommit(item)}
+            />
+        </View>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Top 5 College Matches</Text>
-            <FlatList
-                data={top5}
-                renderItem={renderItem}
-                contentContainerStyle={styles.list}
-            />
+            <Text style={styles.title}>Your Committed Colleges</Text>
+            {committedColleges.length > 0 ? (
+                <FlatList
+                    data={committedColleges}
+                    renderItem={renderItem}
+                    keyExtractor={(item, index) => index.toString()}
+                    contentContainerStyle={styles.list}
+                />
+            ) : (
+                <Text style={styles.noCollegesText}>You have no committed colleges.</Text>
+            )}
         </SafeAreaView>
     );
 };
@@ -131,11 +130,11 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
     },
-    collegeScore: {
+    noCollegesText: {
         fontSize: 16,
+        textAlign: 'center',
         color: '#555',
-        marginBottom: 10,
     },
 });
 
-export default Results;
+export default FavColleges;

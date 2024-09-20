@@ -36,6 +36,7 @@ import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
 import RecruiterVerification from './app/RecruiterVerification';
 import AddRecs from './app/AddRecs';
+import FavColleges from './app/FavColleges';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -61,6 +62,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
+    <HomeStack.Screen name="FavColleges" component={FavColleges} />
   </HomeStack.Navigator>
 );
 
