@@ -22,23 +22,28 @@ const ModeratorScreen = ({ navigation }) => {
 
   const handleBanUser = async (reportId, reportedUser) => {
     try {
-      // First, find the user document using the User_UID
+      console.log(`Attempting to ban user: ${reportedUser}`);
+      // First, find the user document using the Username
       const usersRef = collection(firestore, 'Users');
-      const q = query(usersRef, where('User_UID', '==', reportedUser));
+      const q = query(usersRef, where('Username', '==', reportedUser));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
+        console.log(`User not found: ${reportedUser}`);
         throw new Error('User not found');
       }
 
       const userDoc = querySnapshot.docs[0];
+      console.log(`User document found for: ${reportedUser}`);
 
-      // Update user's status in Firestore
-      await updateDoc(userDoc.ref, { status: 'banned' });
+      // Update user's IsBanned field in Firestore
+      await updateDoc(userDoc.ref, { IsBanned: true });
+      console.log(`User banned: ${reportedUser}`);
 
       // Update report status
       const reportRef = doc(firestore, 'Reports', reportId);
       await updateDoc(reportRef, { status: 'resolved' });
+      console.log(`Report ${reportId} status updated to resolved`);
 
       // Refresh reports list
       fetchReports();

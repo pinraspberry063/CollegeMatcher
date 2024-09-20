@@ -32,8 +32,10 @@ const AccountCreation = ({ navigation }) => {
       // Add user to Firestore
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
-        IsRecruiter: isRecruiter, // Use the state of the Switch
         Username: username,
+        IsRecruiter: isRecruiter, // Use the state of the Switch
+        IsModerator: false,
+        IsBanned: false,
       });
 
       setLoading(false);
