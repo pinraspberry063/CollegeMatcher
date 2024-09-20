@@ -8,18 +8,18 @@ import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-
+import collegeName from '../app/ColForumSelector';
 
 const firestore = getFirestore(db);
 
 const RoomateMatcher = ({ navigation }) => {
     const theme = useContext(themeContext);
     const choice = [
-         { label: 'Prefer Otherwise', value: 'Prefer Otherwise' },
-         { label: 'Do Not Care', value: 'Do Not Care' },
-         { label: 'Occasionally Tolerable Otherwise', value: 'Occasionally Tolerable Otherwise' },
-         { label: 'Would Prefer', value: 'Would Prefer' },
-         { label: 'Necessary', value: 'Necessary' },
+         { label: 'Prefer Otherwise', value: 1 },
+         { label: 'Do Not Care', value: 2 },
+         { label: 'Occasionally Tolerable Otherwise', value: 3 },
+         { label: 'Would Prefer', value: 4 },
+         { label: 'Necessary', value: 5 },
          ];
 
      const [currentPage, setCurrentPage] = useState(1);

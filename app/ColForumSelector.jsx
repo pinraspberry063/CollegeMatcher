@@ -33,10 +33,6 @@ const ColForumSelector = ({ navigation }) => {
     navigation.navigate('FollowedForums');
   };
 
-  const handleRoomateMatcherNavigation = () => {
-    navigation.navigate('RoomateMatcher');
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -55,13 +51,6 @@ const ColForumSelector = ({ navigation }) => {
             onPress={handleFollowedForumsNavigation}
             color={theme.buttonColor}
           />
-        </View>
-        <View style={styles.followedForumsButtonContainer}>
-            <Button
-              title="Find a Roomate"
-               onPress={handleRoomateMatcherNavigation}
-               color={theme.buttonColor}
-            />
         </View>
       </ScrollView>
     </SafeAreaView>
