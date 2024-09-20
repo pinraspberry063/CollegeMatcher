@@ -9,164 +9,411 @@ import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase
 import matchColleges from '../src/utils/matchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
-export default RoomateQuiz;
 
 const firestore = getFirestore(db);
 
-const RoomateQuiz = ({ navigation }) => {
+const RoomateMatcher = ({ navigation }) => {
     const theme = useContext(themeContext);
-      /*return (
-        <View style={styles.container}>
-          <View style={styles.icon}>
-            <Ionicons
-            color = {theme.color}
-            raised
-            name='roommate-matcher'
-            //type='ionicon'
-            size= {40}
-            onPress = {() => {navigation.push('RoommateMatcher')}}
+    const stateData = [
+        { label: 'Alabama', value: 'Alabama' },
+        { label: 'Alaska', value: 'Alaska' },
+        { label: 'Arizona', value: 'Arizona' },
+        { label: 'Arkansas', value: 'Arkansas' },
+        { label: 'California', value: 'California' },
+        { label: 'Colorado', value: 'Colorado' },
+        { label: 'Connecticut', value: 'Connecticut' },
+        { label: 'Delaware', value: 'Delaware' },
+        { label: 'Florida', value: 'Florida' },
+        { label: 'Georgia', value: 'Georgia' },
+        { label: 'Hawaii', value: 'Hawaii' },
+        { label: 'Idaho', value: 'Idaho' },
+        { label: 'Illinois', value: 'Illinois' },
+        { label: 'Indiana', value: 'Indiana' },
+        { label: 'Iowa', value: 'Iowa' },
+        { label: 'Kansas', value: 'Kansas' },
+        { label: 'Kentucky', value: 'Kentucky' },
+        { label: 'Louisiana', value: 'Louisiana' },
+        { label: 'Maine', value: 'Maine' },
+        { label: 'Maryland', value: 'Maryland' },
+        { label: 'Massachusetts', value: 'Massachusetts' },
+        { label: 'Michigan', value: 'Michigan' },
+        { label: 'Minnesota', value: 'Minnesota' },
+        { label: 'Mississippi', value: 'Mississippi' },
+        { label: 'Missouri', value: 'Missouri' },
+        { label: 'Montana', value: 'Montana' },
+        { label: 'Nebraska', value: 'Nebraska' },
+        { label: 'Nevada', value: 'Nevada' },
+        { label: 'New Hampshire', value: 'New Hampshire' },
+        { label: 'New Jersey', value: 'New Jersey' },
+        { label: 'New Mexico', value: 'New Mexico' },
+        { label: 'New York', value: 'New York' },
+        { label: 'North Carolina', value: 'North Carolina' },
+        { label: 'North Dakota', value: 'North Dakota' },
+        { label: 'Ohio', value: 'Ohio' },
+        { label: 'Oklahoma', value: 'Oklahoma' },
+        { label: 'Oregon', value: 'Oregon' },
+        { label: 'Pennsylvania', value: 'Pennsylvania' },
+        { label: 'Rhode Island', value: 'Rhode Island' },
+        { label: 'South Carolina', value: 'South Carolina' },
+        { label: 'South Dakota', value: 'South Dakota' },
+        { label: 'Tennessee', value: 'Tennessee' },
+        { label: 'Texas', value: 'Texas' },
+        { label: 'Utah', value: 'Utah' },
+        { label: 'Vermont', value: 'Vermont' },
+        { label: 'Virginia', value: 'Virginia' },
+        { label: 'Washington', value: 'Washington' },
+        { label: 'West Virginia', value: 'West Virginia' },
+        { label: 'Wisconsin', value: 'Wisconsin' },
+        { label: 'Wyoming', value: 'Wyoming' },
+        { label: 'Puerto Rico', value: 'Puerto Rico' },
+    ];
+
+    const majorData = [
+        { label: 'Aerospace Engineering', value: 'Aerospace Engineering' },
+        { label: 'Accounting', value: 'Accounting' },
+        { label: 'Agriculture', value: 'Agriculture' },
+        { label: 'Architecture', value: 'Architecture' },
+        { label: 'Biology', value: 'Biology' },
+        { label: 'Biomedical Engineering', value: 'Biomedical Engineering' },
+        { label: 'Biomedical Science', value: 'Biomedical Science' },
+        { label: 'Business Administration', value: 'Business Administration' },
+        { label: 'Business Management', value: 'Business Management' },
+        { label: 'Civil Engineering', value: 'Civil Engineering' },
+        { label: 'Chemical Engineering', value: 'Chemical Engineering' },
+        { label: 'Chemistry', value: 'Chemistry' },
+        { label: 'Communications', value: 'Communication' },
+        { label: 'Communication Technology', value: 'Communication Technology' },
+        { label: 'Computer Information Systems', value: 'Computer Information Systems' },
+        { label: 'Computer Engineering', value: 'Computer Engineering' },
+        { label: 'Computer Science', value: 'Computer Science' },
+        { label: 'Construction Management', value: 'Construction Management' },
+        { label: 'Construction Trades', value: 'Construction Trades' },
+        { label: 'Criminal Justice', value: 'Criminal Justice' },
+        { label: 'Culinary', value: 'Culinary' },
+        { label: 'Ecology', value: 'Ecology' },
+        { label: 'Economics', value: 'Economics' },
+        { label: 'Education', value: 'Education' },
+        { label: 'Engineering Technologies', value: 'Engineering Technology' },
+        { label: 'Electrical Engineering', value: 'Electrical Engineering' },
+        { label: 'English', value: 'English' },
+        { label: 'Entrepreneurship', value: 'Entrepreneurship' },
+        { label: 'Environmental Engineering', value: 'Environmental Engineering' },
+        { label: 'Environmental Protections', value: 'Environmental Protections' },
+        { label: 'Environmental Sciences', value: 'Environmental Sciences' },
+        { label: 'Ethnic Studies', value: 'Ethnic Studies' },
+        { label: 'Fashion', value: 'Fashion' },
+        { label: 'Finance', value: 'Finance' },
+        { label: 'Fitness Studies', value: 'Fitness Studies' },
+        { label: 'Foreign Language', value: 'Foreign Language' },
+        { label: 'Forestry', value: 'Forestry' },
+        { label: 'General Studies', value: 'General Studies' },
+        { label: 'History', value: 'History' },
+        { label: 'Human Resources', value: 'Human Resources' },
+        { label: 'Human Sciences', value: 'Human Sciences' },
+        { label: 'Industrial Engineering', value: 'Industrial Engineering' },
+        { label: 'Interdisciplinary Studies', value: 'Interdisciplinary Studies' },
+        { label: 'Journalism', value: 'Journalism' },
+        { label: 'Legal Studies', value: 'Legal Studies' },
+        { label: 'Liberal Arts', value: 'Liberal Arts' },
+        { label: 'Marketing', value: 'Marketing' },
+        { label: 'Mathematics', value: 'Mathematics' },
+        { label: 'Mechanic and Repair Technologies', value: 'Mechanic and Repair Technologies' },
+        { label: 'Mechanical Engineering', value: 'Mechanical Engineering' },
+        { label: 'Multidisciplinary Studies', value: 'Multidisciplinary Studies' },
+        { label: 'Musical Studies', value: 'Musical Studies' },
+        { label: 'Natural Resource Management', value: 'Natural Resource Management' },
+        { label: 'Performing Arts', value: 'Performing Arts' },
+        { label: 'Philosophy', value: 'Philosophy' },
+        { label: 'Psychology', value: 'Psychology' },
+        { label: 'Physical Sciences', value: 'Physical Sciences' },
+        { label: 'Political Science', value: 'Political Science' },
+        { label: 'Precision Production', value: 'Precision Production' },
+        { label: 'Protective Services', value: 'Protective Services' },
+        { label: 'Public Administration', value: 'Public Administration' },
+        { label: 'Religious Studies', value: 'Religious Studies' },
+        { label: 'Religious Vocations', value: 'Religious Vocations' },
+        { label: 'Social Services', value: 'Social Services' },
+        { label: 'Social Sciences', value: 'Social Sciences' },
+        { label: 'Sociology', value: 'Sociology' },
+        { label: 'Statistics', value: 'Statistics' },
+        { label: 'Supply Chain', value: 'Supply Chain' },
+        { label: 'Theology', value: 'Theology' },
+        { label: 'Visual Arts', value: 'Visual Arts' },
+    ];
+
+    const distanceData = [
+        { label: '0-50 miles', value: '0-50 miles' },
+        { label: '50-200 miles', value: '50-200 miles' },
+        { label: '200-500 miles', value: '200-500 miles' },
+        { label: '500+ miles', value: '500+ miles' },
+    ];
+
+    const tuitionData = [
+        { label: '$0 - $10,000', value: '$0 - $10,000' },
+        { label: '$10,000 - $20,000', value: '$10,000 - $20,000' },
+        { label: '$20,000 - $30,000', value: '$20,000 - $30,000' },
+        { label: '$30,000 - $40,000', value: '$30,000 - $40,000' },
+        { label: '$40,000+', value: '$40,000+' },
+    ];
+
+    const religiousAffiliationData = [
+        { label: 'N/A', value: 'N/A' },
+        { label: 'American Methodist Episcopal', value: 'American Methodist Episcopal' },
+        { label: 'African Methodist Episcopal Zion', value: 'African Methodist Episcopal Zion' },
+        { label: 'American Baptist', value: 'American Baptist' },
+        { label: 'American Evangelical Lutheran', value: 'American Evangelical Lutheran' },
+        { label: 'Assemblies of God Church', value: 'Assemblies of God Church' },
+        { label: 'Baptist', value: 'Baptist' },
+        { label: 'Brethren Church', value: 'Brethren Church' },
+        { label: 'Christ and Missionary Alliance', value: 'Christ and Missionary Alliance' },
+        { label: 'Christian', value: 'Christian' },
+        { label: 'Christian Methodist', value: 'Christian Methodist' },
+        { label: 'Christian Reformed', value: 'Christian Reformed' },
+        { label: 'Church of God', value: 'Church of God' },
+        { label: 'Church of Nazarene', value: 'Church of Nazarene' },
+        { label: 'Church of Christ', value: 'Church of Christ' },
+        { label: 'Cumberland Presbyterian', value: 'Cumberland Presbyterian' },
+        { label: 'Episcopal Reformed', value: 'Episcopal Reformed' },
+        { label: 'Evangelical', value: 'Evangelical' },
+        { label: 'Evangelical Covenant', value: 'Evangelical Covenant' },
+        { label: 'Evangelical Free Church of American', value: 'Evangelical Free Church of American' },
+        { label: 'Evangelical Lutheran', value: 'Evangelical Lutheran' },
+        { label: 'Free Methodist', value: 'Free Methodist' },
+        { label: 'Free Will Baptist', value: 'Free Will Baptist' },
+        { label: 'General Baptist', value: 'General Baptist' },
+        { label: 'Greek Orthodox', value: 'Greek Orthodox' },
+        { label: 'Interdenominational', value: 'Interdenominational' },
+        { label: 'Jewish', value: 'Jewish' },
+        { label: 'Mennonite Brethren', value: 'Mennonite Brethren' },
+        { label: 'Mennonite', value: 'Mennonite' },
+        { label: 'Missionary', value: 'Missionary' },
+        { label: 'Moravian', value: 'Moravian' },
+        { label: 'Multiple Protestant Denomination', value: 'Multiple Protestant Denomination' },
+        { label: 'Non-Denominational', value: 'Non-Denominational' },
+        { label: 'North American Baptist', value: 'North American Baptist' },
+        { label: 'Original Free Will Baptist', value: 'Original Free Will Baptist' },
+        { label: 'Other Protestant', value: 'Other Protestant' },
+        { label: 'Pentecostal Holiness', value: 'Pentecostal Holiness' },
+        { label: 'Plymouth Brethren', value: 'Plymouth Brethren' },
+        { label: 'Presbyterian', value: 'Presbyterian' },
+        { label: 'Protestant Episcopal', value: 'Protestant Episcopal' },
+        { label: 'Reformed Church in America', value: 'Reformed Church in America' },
+        { label: 'Reformed Presbyterian', value: 'Reformed Presbyterian' },
+        { label: 'Roman Catholic', value: 'Roman Catholic' },
+        { label: 'Seventh Day Adventist', value: 'Seventh Day Adventist' },
+        { label: 'Southern Baptist', value: 'Southern Baptist' },
+        { label: 'Church of Jesus Christ of Latter-Day Saints', value: 'Church of Jesus Christ of Latter-Day Saints' },
+        { label: 'Undenominational', value: 'Undenominational' },
+        { label: 'Unitarian Universalist', value: 'Unitarian Universalist' },
+        { label: 'United Brethren', value: 'United Brethren' },
+        { label: 'United Methodist', value: 'United Methodist' },
+        { label: 'Wesleyan', value: 'Wesleyan' },
+        { label: 'Wisconsin Evangelical Lutheran', value: 'Wisconsin Evangelical Lutheran' },
+    ];
+
+    const sizeData = [
+        { label: 'Small', value: 'Small' },
+        { label: 'Medium', value: 'Medium' },
+        { label: 'Large', value: 'Large' },
+        { label: 'N/A', value: 'N/A' },
+    ];
+
+    const typeOfAreaData = [
+        { label: 'City: Small', value: 'City: Small' },
+        { label: 'City: Midsize', value: 'City: Midsize' },
+        { label: 'City: Large', value: 'City: Large' },
+        { label: 'Suburb: Small', value: 'Suburb: Small' },
+        { label: 'Suburb: Midsize', value: 'Suburb: Midsize' },
+        { label: 'Suburb: Large', value: 'Suburb: Large' },
+        { label: 'Rural: Fringe', value: 'Rural: Fringe' },
+        { label: 'Rural: Distant', value: 'Rural: Distant' },
+        { label: 'Town: Fringe', value: 'Town: Fringe' },
+        { label: 'Town: Distant', value: 'Town: Distant' },
+        { label: 'N/A', value: 'N/A' },
+    ];
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [address, setAddress] = useState('');
+    const [gpa, setGpa] = useState('');
+    const [satScore, setSatScore] = useState('');
+    const [actScore, setActScore] = useState('');
+    const [stateChoice, setState] = useState('');
+    const [major, setMajor] = useState('');
+    const [distanceFromCollege, setDistance] = useState('');
+    const [tuitionCost, setTuition] = useState('');
+    const [religiousAffiliation, setReligiousAffil] = useState('');
+    const [size, setSize] = useState('');
+    const [urbanizationLevel, setTypeOfArea] = useState('');
+    const [sportCollege, setSportEvents] = useState('');
+    const [collegeDiversity, setDiverse] = useState('');
+    const [schoolClassification, setType] = useState('');
+
+
+    const collectionref = collection(firestore, 'RoomateMatcher');
+
+    const handleSubmit = async () => {
+        const answers = {
+            address: address,
+            gpa: gpa,
+            sat: satScore,
+            act: actScore,
+            distance_from_college: distanceFromCollege,
+            major: major,
+            tuition_cost: tuitionCost,
+            religious_affiliation: religiousAffiliation,
+            sport_college: sportCollege,
+            state_choice: stateChoice,
+            college_diversity: collegeDiversity,
+            size: size,
+            school_classification: schoolClassification,
+            urbanization_level: urbanizationLevel,
+            userId: auth().currentUser.uid,
+        };
+
+        try {
+            await addDoc(collectionref, answers);
+            alert('Quiz submitted successfully!');
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
+
+        const result = (await matchColleges(answers)).top5Colleges;
+        navigation.navigate('Results', { top5: result });
+    };
+
+    const renderPageOne = () => (
+        <View>
+            <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+            <View style={{ zIndex: 10, elevation: 10 }}>
+                <GooglePlacesAutocomplete
+                    placeholder="123 Main St..."
+                    onPress={(data, details = null) => {
+                        setAddress(data.description);
+                    }}
+                    textInputProps={{
+                        value: address,
+                        onChangeText: (text) => setAddress(text),
+                    }}
+                    query={{
+                        key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
+                        language: 'en',
+                    }}
+                    styles={{
+                        textInput: {
+                            height: 40,
+                            borderWidth: 1,
+                            fontSize: 18,
+                            padding: 10,
+                            marginVertical: 10,
+                            borderColor: theme.color,
+                        },
+                        listView: {
+                            backgroundColor: theme.background,
+                            position: 'absolute',
+                            top: 50,
+                            zIndex: 10,
+                            elevation: 10,
+                        },
+                    }}
+                />
+            </View>
+
+            <Text style={[styles.text, { color: theme.color }]}>How far from home do you want your college to be?</Text>
+            <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
+
+            <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
+            <DropdownComponent data={majorData} value={major} onChange={setMajor} />
+
+            <Text style={[styles.text, { color: theme.color }]}>How much are you willing to pay for tuition?</Text>
+            <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
+
+            <Text style={[styles.text, { color: theme.color }]}>SAT score?</Text>
+            <TextInput
+                style={[styles.textInput, { borderColor: theme.color }]}
+                value={satScore}
+                onChangeText={setSatScore}
+                placeholder="Ex: 1200..."
             />
-          </View>
-          */
-     const choice = [
-         { label: 'One', value: 'Prefer Otherwise' },
-         { label: 'Two', value: 'Do Not Care' },
-         { label: 'Three', value: 'Occasionally Tolerable Otherwise' },
-         { label: 'Four', value: 'Would Prefer' },
-         { label: 'Five', value: 'Necessary' },
-         ];
-     const [currentPage, setCurrentPage] = useState(1);
-         const [bedtime, setBedtime] = useState('');
-         const [tenpmSleep, setTenpmSleep] = useState('');
-         const [nightSilence, setNightSilence] = useState('');
-         const [noise, setNoise] = useState('');
-         const [friendsRoommate, setFriendsRoommate] = useState('');
-         const [smoking, setSmokingHabit] = useState('');
-         const [drinking, setDrinkingHabit] = useState('');
-         const [companyOver, setCompanyOver] = useState('');
-         const [informCompany, setInformCompany] = useState('');
-         const [hmwrkSpot, setHmwrkSpot] = useState('');
-         const [silence, setSilence] = useState('');
-         const [sixamWake, setSixamWake] = useState('');
-         const [clean, setClean] = useState('');
-         const [boundaries, setBoundaries] = useState('');
-         const [shareDuties, setShareDuties] = useState('');
 
-         const collectionref = collection(firestore, 'RoomateQuiz');
+            <Text style={[styles.text, { color: theme.color }]}>ACT score?</Text>
+            <TextInput
+                style={[styles.textInput, { borderColor: theme.color }]}
+                value={actScore}
+                onChangeText={setActScore}
+                placeholder="Ex: 25..."
+            />
+        </View>
+    );
 
-         const handleSubmit = async () => {
-                 const answers = {
-                     bedtime: bedtime,
-                     tenpm_sleep: tenpmSleep,
-                     night_silence: nightSilence,
-                     noise: noise,
-                     friends_roommate: friendsRoommate,
-                     smoking: smoking,
-                     drinking: drinking,
-                     company_over: religiousAffiliation,
-                     inform_company: informCompany,
-                     hmwrk_spot: hmwrkSpot,
-                     silence: silence,
-                     sixam_wake: sixamWake,
-                     clean: clean,
-                     boundaries: boundaries,
-                     share_duties: shareDuties,
-                     userId: auth().currentUser.uid,
-                 };
+    const renderPageTwo = () => (
+        <View>
+            <Text style={[styles.text, { color: theme.color }]}>What is your GPA?</Text>
+            <TextInput
+                style={[styles.textInput, { borderColor: theme.color }]}
+                value={gpa}
+                onChangeText={setGpa}
+                placeholder='Ex: 3.6...'
+            />
 
-                 const renderPageOne = () => (
-                     <View>
-                         <Text style={[styles.text, { color: theme.color }]}>Do you want your roommate to have a consistent bedtime?</Text>
-                         <DropdownComponent data={choice} value={bedtime} onChange={setBedtime} />
+            <Text style={[styles.text, { color: theme.color }]}>Do you wish to attend a college of a specific religious affiliation?</Text>
+            <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Do you want light-out at 10pm or a specific time?</Text>
-                         <DropdownComponent data={choice} value={tenpmSleep} onChange={setTenpmSleep} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
+            <DropdownComponent data={[
+                { label: 'Yes', value: 'Yes' },
+                { label: 'No', value: 'No' },
+            ]}
+                value={sportCollege}
+                onChange={setSportEvents}
+            />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
-                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking to attend college in a specific state?</Text>
+            <DropdownComponent data={stateData} value={stateChoice} onChange={setState} />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Do you prefer a quiet environment in general?</Text>
-                         <DropdownComponent data={choice} value={noise} onChange={setNoise} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
+            <DropdownComponent data={[
+                { label: 'Neutral', value: 'Neutral' },
+                { label: 'Important', value: 'Important' },
+                { label: 'Very Important', value: 'Very Important' },
+            ]}
+                value={collegeDiversity}
+                onChange={setDiverse}
+            />
+        </View>
+    );
 
-                         <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with you roommate?</Text>
-                         <DropdownComponent data={choice} value={friendsRoommate} onChange={setFriendsRoommate} />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate smoking at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={smoking} onChange={setSmokingHabit} />
+    const renderPageThree = () => (
+        <View>
+            <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={drinking} onChange={setDrinkingHabit} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
+            <DropdownComponent data={[
+                { label: 'Public', value: 'Public' },
+                { label: 'Private', value: 'Private' },
+            ]}
+                value={schoolClassification}
+                onChange={setType}
+            />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Are you against company being over at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={companyOver} onChange={setCompanyOver} />
+            <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
+            <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
 
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={informCompany} onChange={setInformCompany} />
+            <View style={styles.buttonContainer}>
+                <Button
+                    onPress={handleSubmit}
+                    title="Submit"
+                />
+            </View>
+        </View>
+    );
 
-                         <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={hmwrkSpot} onChange={setHmwrkSpot} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
-                         <DropdownComponent data={choice} value={silence} onChange={setSilence} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
-                         <DropdownComponent data={choice} value={sixamWake} onChange={setSixamWake} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
-                         <DropdownComponent data={choice} value={clean} onChange={setClean} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
-                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
-                         <DropdownComponent data={choice} value={boundaries} onChange={setBoundaries} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={shareDuties} onChange={setShareDuties} />
-                     </View>
-                 );
-                 const renderPageTwo = () => (
-                     <View>
-                         <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={drinking} onChange={setDrinkingHabit} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Are you against company being over at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={companyOver} onChange={setCompanyOver} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={informCompany} onChange={setInformCompany} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={hmwrkSpot} onChange={setHmwrkSpot} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
-                         <DropdownComponent data={choice} value={silence} onChange={setSilence} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
-                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
-                     </View>
-                 );
-                 const renderPageThree = () => (
-                     <View>
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
-                         <DropdownComponent data={choice} value={clean} onChange={setClean} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
-                         <DropdownComponent data={choice} value={nightSilence} onChange={setNightSilence} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
-                         <DropdownComponent data={choice} value={boundaries} onChange={setBoundaries} />
-
-                         <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
-                         <DropdownComponent data={choice} value={shareDuties} onChange={setShareDuties} />
-                     </View>
-                 );
-
-                 const renderContent = () => {
-                     if (currentPage === 1) return renderPageOne();
-                     if (currentPage === 2) return renderPageTwo();
-                     if (currentPage === 3) return renderPageThree();
-                 };
+    const renderContent = () => {
+        if (currentPage === 1) return renderPageOne();
+        if (currentPage === 2) return renderPageTwo();
+        if (currentPage === 3) return renderPageThree();
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -197,9 +444,9 @@ const RoomateQuiz = ({ navigation }) => {
             </SafeAreaView>
         </TouchableWithoutFeedback>
     );
-//};
+};
 
-//export default RoomateQuiz;
+export default RoomateMatcher;
 
 const styles = StyleSheet.create({
     container: {
