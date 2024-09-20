@@ -29,18 +29,73 @@ import {
 } from 'firebase/firestore';
 import {UserContext} from '../components/UserContext';
 import {handleReport} from '../src/utils/reportUtils';
+import * as ImagePicker from 'expo-image-picker';
+import storage from '@react-native-firebase/storage';
+import * as Progress from 'react-native-progress';
+import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
 
 const ColForum = ({route, navigation}) => {
-  const {collegeName, forumName} = route.params;
-  const [threads, setThreads] = useState([]);
-  const [newThreadTitle, setNewThreadTitle] = useState('');
-  const [newPostContent, setNewPostContent] = useState({});
-  const {user} = useContext(UserContext);
-  const theme = useContext(themeContext);
-  const [username, setUsername] = useState('');
-  const [isRecruiter, setIsRecruiter] = useState(false);
+    const {collegeName, forumName} = route.params;
+    const [threads, setThreads] = useState([]);
+    const [newThreadTitle, setNewThreadTitle] = useState('');
+    const [newPostContent, setNewPostContent] = useState({});
+    const {user} = useContext(UserContext);
+    const theme = useContext(themeContext);
+    const [username, setUsername] = useState('');
+    const [isRecruiter, setIsRecruiter] = useState(false);
+    const [images, setImages] = useState([]); // add state to store selected image
+    const [uploading, setUploading] = useState(false);
+    const [transferred, setTransferred] = useState(0);
+
+    // Function to handle image selection
+    const selectImage = async () => {
+        const options = {
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        allowsMultipleSelection: true,
+        quality: 1,
+      };
+
+      let result = await ImagePicker.launchImageLibraryAsync(options);
+      if (!result.canceled) {
+          const images = result.assets.map(asset => ({uri: asset.uri }));
+          setImages([...images, ...selectedImages]);
+          }
+    };
+
+    // Upload image to Firebase
+    const uploadImage = async () => {
+          const imageUrls = [];
+
+          for (const image of images) {
+            const uploadUri = image.uri;
+            const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+
+            setUploading(true);
+            setTransferred(0);
+
+            const task = storage()
+              .ref(`forum_images/${auth().currentUser.uid}/${filename}`)
+              .putFile(uploadUri);
+
+    // Listen for upload
+        task.on('state_changed', snapshot => {
+          setTransferred(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        });
+
+        try {
+          await task;
+          const url = await storage().ref(`forum_images/${auth().currentUser.uid}/${filename}`).getDownloadURL();
+          imageUrls.push(url);  // Store uploaded image URL
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      setUploading(false);
+      return imageUrls;
+    };
 
   useEffect(() => {
     if (user) {
@@ -120,6 +175,10 @@ const ColForum = ({route, navigation}) => {
 
   const handleAddThread = async () => {
     if (newThreadTitle.trim() && username) {
+        let imageUrls = [];
+        if (images.length> 0) {
+            imageUrls = await uploadImages();
+            }
       try {
         const threadsRef = collection(
           firestore,
@@ -134,9 +193,11 @@ const ColForum = ({route, navigation}) => {
           createdBy: username,
           createdAt: Timestamp.now(),
           isRecruiter,
+          imageUrls: imageUrls,
         };
         await addDoc(threadsRef, newThread);
         setNewThreadTitle('');
+        setImages([]);
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new thread
       } catch (error) {
         console.error('Error adding new thread:', error);
@@ -208,6 +269,19 @@ const ColForum = ({route, navigation}) => {
             onChangeText={setNewThreadTitle}
           />
           <Button title="Add Thread" onPress={handleAddThread} />
+
+          {/*Button to select images */}
+          <Button title="Select Images" onPress={selectImage} />
+
+          {/*Display selected images */}
+          {images.length > 0 && (
+                      <View>
+                        {images.map((img, index) => (
+                          <Image key={index} source={{ uri: img.uri }} style={styles.imageBox} />
+                        ))}
+                        {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
+                      </View>
+                    )}
         </View>
         {threads.map(thread => (
           <View key={thread.id} style={styles.threadItem}>
@@ -217,6 +291,25 @@ const ColForum = ({route, navigation}) => {
                   {thread.title}
                 </Text>
               </View>
+
+              {/* Render the uploaded images */}
+              {thread.imageUrls && thread.imageUrls.length > 0 && (
+                  <View style={styles.imageContainer}>
+                      {thread.imageUrls.map((url, index) => (
+                          <Image key={index} source={{ uri:url }} style={sytles.imageBox} />
+                      ))}
+                  </View>
+              )}
+
+              {images.length > 0 && (
+                <View>
+                  {images.map((img, index) => (
+                    <Image key={index} source={{ uri: img.uri }} style={styles.imageBox} />
+                  ))}
+                  {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
+                </View>
+              )}
+
               <Button
                 title="Report Thread"
                 onPress={() =>
@@ -377,6 +470,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ff9900', // Highlight color for recruiters
   },
+  imageBox: {
+      width: 200,
+      height: 200,
+      marginVertical: 10,
+      },
 });
 
 export default ColForum;
