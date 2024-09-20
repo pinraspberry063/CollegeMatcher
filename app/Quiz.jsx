@@ -221,29 +221,44 @@ const Quiz = ({navigation}) => {
   const collectionref = collection(firestore, 'Quiz');
 
   const handleSubmit = async () => {
-    const answers = {
-      address: address,
-      gpa: gpa,
-      sat: satScore,
-      act: actScore,
-      distance_from_college: distanceFromCollege,
-      major: major,
-      tuition_cost: tuitionCost,
-      religious_affiliation: religiousAffiliation,
-      sport_college: sportCollege,
-      state_choice: stateChoice,
-      college_diversity: collegeDiversity,
-      size: size,
-      school_classification: schoolClassification,
-      urbanization_level: urbanizationLevel,
-      categories: majorData.find(entry => entry.label === major).categories,
-      userId: auth().currentUser.uid,
-    };
+      if (!address || !gpa || !major.length || !stateChoice.length || !distanceFromCollege || !tuitionCost || !religiousAffiliation || !sportCollege || !collegeDiversity || !size || !schoolClassification || !urbanizationLevel) {
+          alert("Please fill out all required fields before submitting.");
+          return;
+      }
 
-    const result = (await matchColleges(answers)).top100Colleges;
-    navigation.navigate('QuizStack', {top100: result});
-    alert('Quiz submitted successfully!');
+      const answers = {
+          address: address,
+          gpa: gpa,
+          sat: satScore || 'N/A',
+          act: actScore || 'N/A',
+          distance_from_college: distanceFromCollege,
+          major: major, // Keep this as an array
+          tuition_cost: tuitionCost,
+          religious_affiliation: religiousAffiliation,
+          sport_college: sportCollege,
+          state_choice: stateChoice, // Keep this as an array
+          college_diversity: collegeDiversity,
+          size: size,
+          school_classification: schoolClassification,
+          urbanization_level: urbanizationLevel,
+          categories: majorData.find(entry => entry.label === major[0])?.categories || [],
+          userId: auth().currentUser.uid,
+      };
+
+      try {
+          // Firebase submission
+          const docRef = await setDoc(doc(collectionref, auth().currentUser.uid), answers);
+
+          const result = (await matchColleges(answers)).top100Colleges;
+          navigation.navigate('QuizStack', { top100: result });
+          alert('Quiz submitted successfully!');
+      } catch (error) {
+          console.error("Error submitting the quiz:", error);
+          alert("There was an error submitting your quiz. Please try again.");
+      }
   };
+
+
 
   const renderPageOne = () => (
     <View>
@@ -296,7 +311,7 @@ const Quiz = ({navigation}) => {
       <Text style={[styles.text, {color: theme.color}]}>
         What do you plan to study?
       </Text>
-      <DropdownComponent data={majorData} value={major} onChange={setMajor} />
+      <DropdownComponent data={majorData} value={major} onChange={setMajor} multiSelect={true} />
 
       <Text style={[styles.text, {color: theme.color}]}>
         How much are you willing to pay for tuition?
@@ -363,6 +378,7 @@ const Quiz = ({navigation}) => {
         data={stateData}
         value={stateChoice}
         onChange={setState}
+        multiSelect={true}
       />
 
       <Text style={[styles.text, {color: theme.color}]}>

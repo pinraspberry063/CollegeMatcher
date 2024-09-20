@@ -50,6 +50,7 @@ import FollowedForums from './app/FollowedForums';
 import PhoneVerification from './app/PhoneVerification';
 import ModeratorScreen from './app/ModeratorScreen';
 import UserActivityScreen from './app/UserActivityScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const firestore = getFirestore(db);
 
@@ -326,30 +327,26 @@ const App = () => {
 
   return (
     <UserProvider>
-      <themeContext.Provider
-        value={darkMode === true ? theme.dark : theme.light}>
-        <NavigationContainer
-          theme={darkMode === true ? DarkTheme : DefaultTheme}>
-          <RootStack.Navigator screenOptions={screenOptions}>
-            {/*                */}
-            {/* {user ? ( */}
-            {/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
-            {/*               ) : ( */}
-            {/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
-            {/*               )} */}
-            <RootStack.Screen
-              name="Launch"
-              component={LaunchStackScreen}
-              options={{headerShown: false}}
-            />
-            <RootStack.Screen
-              name="Main"
-              component={TabScreen}
-              options={{headerShown: false}}
-            />
-          </RootStack.Navigator>
-        </NavigationContainer>
-      </themeContext.Provider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <themeContext.Provider
+          value={darkMode === true ? theme.dark : theme.light}>
+          <NavigationContainer
+            theme={darkMode === true ? DarkTheme : DefaultTheme}>
+            <RootStack.Navigator screenOptions={screenOptions}>
+              <RootStack.Screen
+                name="Launch"
+                component={LaunchStackScreen}
+                options={{headerShown: false}}
+              />
+              <RootStack.Screen
+                name="Main"
+                component={TabScreen}
+                options={{headerShown: false}}
+              />
+            </RootStack.Navigator>
+          </NavigationContainer>
+        </themeContext.Provider>
+      </GestureHandlerRootView>
     </UserProvider>
   );
 };
