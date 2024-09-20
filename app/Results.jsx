@@ -94,6 +94,17 @@ const Results = ({route, navigation}) => {
   const [womenOnly, setWomenOnly] = useState(false);
   const [chooseState, setChooseState] = useState(false);
   const [stateChoice, setStateChoice] = useState([]);
+  const [placeHolder, setPlaceHolder] = useState();
+  const [act, setACT] = useState(false);
+  const [actComp, setACTComp] = useState();
+  const [actEng, setACTEng] = useState();
+  const [actWrit, setACTWrit] = useState();
+  const [actMath, setACTMath] = useState();
+  const [actSci, setACTSci] = useState();
+  const [sat, setSAT] = useState(false);
+  
+
+
 
 
 
@@ -321,6 +332,39 @@ const Results = ({route, navigation}) => {
                       />
                     </View>
                   }
+                <View style={styles.checkboxContainer} > 
+                  <CheckBox
+                    value={act}
+                    onValueChange={setACT}
+                    style={styles.checkbox}
+                  />
+                  <Text> ACT </Text>
+                </View>
+                {act &&
+                  <View style={{width: '95%'}}>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.label}>Composite</Text>
+                      <TextInput style={styles.input} placeholder='34' value={actComp} onValueChange={setACTComp}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.label}>English</Text>
+                      <TextInput style={styles.input} placeholder='26' value={actEng} onValueChange={setACTEng}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.label}>Math</Text>
+                      <TextInput style={styles.input} placeholder='28' value={actMath} onValueChange={setACTMath}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.label}>Science</Text>
+                      <TextInput style={styles.input} placeholder='25' value={actSci} onValueChange={setACTSci}/>
+                    </View>
+                    <View style={{flexDirection: 'row'}}>
+                      <Text style={styles.label}>Writing</Text>
+                      <TextInput style={styles.input} placeholder='30' value={actWrit} onValueChange={setACTWrit}/>
+                    </View>
+                  </View>
+                }
+
               
   
             </View>
@@ -446,6 +490,10 @@ const styles = StyleSheet.create({
       margin: 8,
       alignSelf: 'center',
       flexDirection: 'row'
+  },
+  input: {
+
+    height: 10,
   }
   
 
