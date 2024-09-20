@@ -1,40 +1,20 @@
 // College selected. Display the different subgroups within the college's forum.
 
-import React, {useState, useEffect, useContext} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  Button,
-  TouchableOpacity,
-} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
-import {db} from '../config/firebaseConfig';
-import {
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  doc,
-  query,
-  where,
-  getFirestore,
-  Timestamp,
-} from 'firebase/firestore';
-import {UserContext} from '../components/UserContext';
+import { db } from '../config/firebaseConfig';
+import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, query, where, getFirestore, Timestamp } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
 
-const ForumSelect = ({route, navigation}) => {
-  const {collegeName} = route.params;
+const ForumSelect = ({ route, navigation }) => {
+  const { collegeName } = route.params;
   const [subgroups, setSubgroups] = useState([]);
   const [newSubgroupName, setNewSubgroupName] = useState('');
-  const {user} = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
@@ -50,16 +30,11 @@ const ForumSelect = ({route, navigation}) => {
   useEffect(() => {
     const fetchSubgroups = async () => {
       try {
-        const subgroupsRef = collection(
-          firestore,
-          'Forums',
-          collegeName,
-          'subgroups',
-        );
+        const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
         const subgroupsSnapshot = await getDocs(subgroupsRef);
         const subgroupsList = subgroupsSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data(),
+          ...doc.data()
         }));
         setSubgroups(subgroupsList);
       } catch (error) {
@@ -70,7 +45,7 @@ const ForumSelect = ({route, navigation}) => {
     fetchSubgroups();
   }, [collegeName]);
 
-  const fetchUsernameAndRecruiterStatus = async uid => {
+  const fetchUsernameAndRecruiterStatus = async (uid) => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
@@ -88,7 +63,7 @@ const ForumSelect = ({route, navigation}) => {
     }
   };
 
-  const fetchFollowedSubgroups = async uid => {
+  const fetchFollowedSubgroups = async (uid) => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
@@ -114,14 +89,12 @@ const ForumSelect = ({route, navigation}) => {
 
         if (isFollowing) {
           await updateDoc(userDocRef, {
-            followed_subGroups: arrayRemove(followString),
+            followed_subGroups: arrayRemove(followString)
           });
-          setFollowedSubgroups(
-            followedSubgroups.filter(item => item !== followString),
-          );
+          setFollowedSubgroups(followedSubgroups.filter(item => item !== followString));
         } else {
           await updateDoc(userDocRef, {
-            followed_subGroups: arrayUnion(followString),
+            followed_subGroups: arrayUnion(followString)
           });
           setFollowedSubgroups([...followedSubgroups, followString]);
         }
@@ -134,54 +107,38 @@ const ForumSelect = ({route, navigation}) => {
   };
 
   const handleAddSubgroup = async () => {
-    if (newSubgroupName.trim() && username) {
-      try {
-        const subgroupsRef = collection(
-          firestore,
-          'Forums',
-          collegeName,
-          'subgroups',
-        );
+      if (newSubgroupName.trim() && username) {
+        try {
+          const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
 
-        // Check if a document with the same forumName already exists
-        const existingSubgroupQuery = query(
-          subgroupsRef,
-          where('forumName', '==', newSubgroupName.trim()),
-        );
-        const existingSubgroupSnapshot = await getDocs(existingSubgroupQuery);
+          // Check if a document with the same forumName already exists
+          const existingSubgroupQuery = query(subgroupsRef, where('forumName', '==', newSubgroupName.trim()));
+          const existingSubgroupSnapshot = await getDocs(existingSubgroupQuery);
 
-        if (!existingSubgroupSnapshot.empty) {
-          console.log('Subgroup with this name already exists.');
-          return; // Prevent creating a duplicate
+          if (!existingSubgroupSnapshot.empty) {
+            console.log('Subgroup with this name already exists.');
+            return; // Prevent creating a duplicate
+          }
+
+          const newSubgroup = {
+            forumName: newSubgroupName.trim(),
+            createdBy: username,
+            createdAt: Timestamp.now(),
+            isRecruiter
+          };
+          const docRef = await addDoc(subgroupsRef, newSubgroup);
+          setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
+          setNewSubgroupName('');
+        } catch (error) {
+          console.error('Error adding new subgroup:', error);
         }
-
-        const newSubgroup = {
-          forumName: newSubgroupName.trim(),
-          createdBy: username,
-          createdAt: Timestamp.now(),
-          isRecruiter,
-        };
-        const docRef = await addDoc(subgroupsRef, newSubgroup);
-        setSubgroups([...subgroups, {id: docRef.id, ...newSubgroup}]);
-        setNewSubgroupName('');
-      } catch (error) {
-        console.error('Error adding new subgroup:', error);
       }
-    }
   };
 
-  const handleNavigation = async forumName => {
+  const handleNavigation = async (forumName) => {
     try {
-      const subgroupsRef = collection(
-        firestore,
-        'Forums',
-        collegeName,
-        'subgroups',
-      );
-      const subgroupQuery = query(
-        subgroupsRef,
-        where('forumName', '==', forumName),
-      );
+      const subgroupsRef = collection(firestore, 'Forums', collegeName, 'subgroups');
+      const subgroupQuery = query(subgroupsRef, where('forumName', '==', forumName));
       const subgroupSnapshot = await getDocs(subgroupQuery);
 
       if (subgroupSnapshot.empty) {
@@ -189,7 +146,7 @@ const ForumSelect = ({route, navigation}) => {
         return; // Prevent navigation if the subgroup doesn't exist
       }
 
-      navigation.navigate('Forum', {collegeName, forumName});
+      navigation.navigate('Forum', { collegeName, forumName });
     } catch (error) {
       console.error('Error navigating to the forum:', error);
     }
@@ -201,17 +158,17 @@ const ForumSelect = ({route, navigation}) => {
         {subgroups.map(subgroup => (
           <View key={subgroup.id} style={styles.buttonContainer}>
             <Text style={styles.buttonText}>{subgroup.forumName}</Text>
-            <Text
-              style={[
-                styles.buttonSubText,
-                subgroup.isRecruiter && styles.recruiterHighlight, // Highlight if the creator is a recruiter
-              ]}>
+            <Text style={[
+              styles.buttonSubText,
+              subgroup.isRecruiter && styles.recruiterHighlight // Highlight if the creator is a recruiter
+            ]}>
               Created by: {subgroup.createdBy}
             </Text>
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={styles.viewButton}
-                onPress={() => handleNavigation(subgroup.forumName)}>
+                onPress={() => handleNavigation(subgroup.forumName)}
+              >
                 <Text style={styles.buttonText}>View</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -219,9 +176,7 @@ const ForumSelect = ({route, navigation}) => {
                 onPress={() => toggleFollowSubgroup(collegeName, subgroup.id)} // Pass the college name and subgroup ID
               >
                 <Text style={styles.buttonText}>
-                  {followedSubgroups.includes(`${collegeName}:${subgroup.id}`)
-                    ? 'Unfollow'
-                    : 'Follow'}
+                  {followedSubgroups.includes(`${collegeName}:${subgroup.id}`) ? 'Unfollow' : 'Follow'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -234,11 +189,7 @@ const ForumSelect = ({route, navigation}) => {
             value={newSubgroupName}
             onChangeText={setNewSubgroupName}
           />
-          <Button
-            title="Add Subgroup"
-            onPress={handleAddSubgroup}
-            color={theme.buttonColor}
-          />
+          <Button title="Add Subgroup" onPress={handleAddSubgroup} color={theme.buttonColor} />
         </View>
       </ScrollView>
     </SafeAreaView>

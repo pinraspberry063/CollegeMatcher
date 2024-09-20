@@ -1,43 +1,22 @@
 // Displays the threads and posts of the selected subgroup.
 
-import React, {useState, useEffect, useContext} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  Button,
-  Alert,
-} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
-import {db} from '../config/firebaseConfig';
-import {
-  collection,
-  getDocs,
-  addDoc,
-  doc,
-  setDoc,
-  getDoc,
-  getFirestore,
-  Timestamp,
-  onSnapshot,
-  query,
-  orderBy,
-  where,
-} from 'firebase/firestore';
-import {UserContext} from '../components/UserContext';
-import {handleReport} from '../src/utils/reportUtils';
+import { db } from '../config/firebaseConfig';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc, getFirestore, Timestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
+import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
 
-const ColForum = ({route, navigation}) => {
-  const {collegeName, forumName} = route.params;
+const ColForum = ({ route, navigation }) => {
+  const { collegeName, forumName } = route.params;
   const [threads, setThreads] = useState([]);
   const [newThreadTitle, setNewThreadTitle] = useState('');
   const [newPostContent, setNewPostContent] = useState({});
-  const {user} = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
@@ -52,7 +31,7 @@ const ColForum = ({route, navigation}) => {
     fetchThreadsAndPosts();
   }, [collegeName, forumName]);
 
-  const fetchUsernameAndRecruiterStatus = async uid => {
+  const fetchUsernameAndRecruiterStatus = async (uid) => {
     try {
       const usersRef = collection(firestore, 'Users');
       const q = query(usersRef, where('User_UID', '==', uid));
@@ -72,14 +51,7 @@ const ColForum = ({route, navigation}) => {
 
   const fetchThreadsAndPosts = async () => {
     try {
-      const threadsRef = collection(
-        firestore,
-        'Forums',
-        collegeName,
-        'subgroups',
-        forumName,
-        'threads',
-      );
+      const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
       const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
       const threadsSnapshot = await getDocs(threadsQuery);
       const threadsList = [];
@@ -88,27 +60,18 @@ const ColForum = ({route, navigation}) => {
         const threadData = threadDoc.data();
         const threadId = threadDoc.id;
 
-        const postsRef = collection(
-          firestore,
-          'Forums',
-          collegeName,
-          'subgroups',
-          forumName,
-          'threads',
-          threadId,
-          'posts',
-        );
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
         const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
         const postsSnapshot = await getDocs(postsQuery);
         const postsList = postsSnapshot.docs.map(postDoc => ({
           id: postDoc.id,
-          ...postDoc.data(),
+          ...postDoc.data()
         }));
 
         threadsList.push({
           id: threadId,
           ...threadData,
-          posts: postsList,
+          posts: postsList
         });
       }
 
@@ -121,81 +84,57 @@ const ColForum = ({route, navigation}) => {
   const handleAddThread = async () => {
     if (newThreadTitle.trim() && username) {
       try {
-        const threadsRef = collection(
-          firestore,
-          'Forums',
-          collegeName,
-          'subgroups',
-          forumName,
-          'threads',
-        );
+        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
         const newThread = {
           title: newThreadTitle.trim(),
           createdBy: username,
           createdAt: Timestamp.now(),
-          isRecruiter,
+          isRecruiter
         };
         await addDoc(threadsRef, newThread);
         setNewThreadTitle('');
-        fetchThreadsAndPosts(); // Refresh threads and posts after adding a new thread
+        fetchThreadsAndPosts();  // Refresh threads and posts after adding a new thread
       } catch (error) {
         console.error('Error adding new thread:', error);
       }
     }
   };
 
-  const handleAddPost = async threadId => {
+  const handleAddPost = async (threadId) => {
     if (newPostContent[threadId]?.trim() && username) {
       try {
-        const postsRef = collection(
-          firestore,
-          'Forums',
-          collegeName,
-          'subgroups',
-          forumName,
-          'threads',
-          threadId,
-          'posts',
-        );
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
         const newPost = {
           content: newPostContent[threadId].trim(),
           createdBy: username,
           createdAt: Timestamp.now(),
-          isRecruiter,
+          isRecruiter
         };
         await addDoc(postsRef, newPost);
-        setNewPostContent(prev => ({...prev, [threadId]: ''}));
-        fetchThreadsAndPosts(); // Refresh threads and posts after adding a new post
+        setNewPostContent(prev => ({ ...prev, [threadId]: '' }));
+        fetchThreadsAndPosts();  // Refresh threads and posts after adding a new post
       } catch (error) {
         console.error('Error adding new post:', error);
       }
     }
   };
 
-  const handleReportSubmission = async (
-    reportType,
-    threadId,
-    postId = null,
-    reportedUsername,
-  ) => {
-    const reportData = {
-      threadId,
-      postId,
-      reportedUser: reportedUsername,
-      source: 'forum',
-      type: reportType,
-    };
+ const handleReportSubmission = async (reportType, threadId, postId = null, reportedUsername) => {
+   const reportData = {
+     threadId,
+     postId,
+     reportedUser: reportedUsername,
+     source: 'forum',
+     type: reportType
+   };
 
-    const success = await handleReport(reportData);
-    if (success) {
-      Alert.alert(
-        'Report Submitted',
-        'Thank you for your report. Our moderators will review it shortly.',
-      );
-    } else {
-      Alert.alert('Error', 'Failed to submit report. Please try again.');
-    }
-  };
+   const success = await handleReport(reportData);
+   if (success) {
+     Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+   } else {
+     Alert.alert('Error', 'Failed to submit report. Please try again.');
+   }
+ };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -213,60 +152,36 @@ const ColForum = ({route, navigation}) => {
           <View key={thread.id} style={styles.threadItem}>
             <View style={styles.threadHeader}>
               <View style={styles.threadTitleRow}>
-                <Text style={[styles.threadTitle, {color: theme.textColor}]}>
-                  {thread.title}
-                </Text>
+                <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
               </View>
               <Button
                 title="Report Thread"
-                onPress={() =>
-                  handleReportSubmission(
-                    'thread',
-                    thread.id,
-                    null,
-                    thread.createdBy,
-                  )
-                }
+                onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
                 style={styles.reportButton}
               />
             </View>
-            <Text
-              style={[
-                styles.threadCreatedBy,
-                {color: theme.textColor},
-                thread.isRecruiter && styles.recruiterHighlight, // Highlight if the user is a recruiter
-              ]}>
+            <Text style={[
+              styles.threadCreatedBy,
+              { color: theme.textColor },
+              thread.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
+            ]}>
               Created by: {thread.createdBy}
             </Text>
-            <Text style={[styles.threadCreatedAt, {color: theme.textColor}]}>
-              Created at: {thread.createdAt.toDate().toLocaleString()}
-            </Text>
+            <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
             {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
-                <Text style={[styles.postContent, {color: theme.textColor}]}>
-                  {post.content}
-                </Text>
-                <Text
-                  style={[
-                    styles.postCreatedBy,
-                    {color: theme.textColor},
-                    post.isRecruiter && styles.recruiterHighlight, // Highlight if the user is a recruiter
-                  ]}>
+                <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
+                <Text style={[
+                  styles.postCreatedBy,
+                  { color: theme.textColor },
+                  post.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
+                ]}>
                   Posted by: {post.createdBy}
                 </Text>
-                <Text style={[styles.postCreatedAt, {color: theme.textColor}]}>
-                  {post.createdAt.toDate().toLocaleString()}
-                </Text>
+                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
                 <Button
                   title="Report Post"
-                  onPress={() =>
-                    handleReportSubmission(
-                      'post',
-                      thread.id,
-                      post.id,
-                      post.createdBy,
-                    )
-                  }
+                  onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
                 />
               </View>
             ))}
@@ -275,14 +190,9 @@ const ColForum = ({route, navigation}) => {
                 style={styles.input}
                 placeholder="Post Content"
                 value={newPostContent[thread.id] || ''}
-                onChangeText={text =>
-                  setNewPostContent(prev => ({...prev, [thread.id]: text}))
-                }
+                onChangeText={text => setNewPostContent(prev => ({ ...prev, [thread.id]: text }))}
               />
-              <Button
-                title="Add Post"
-                onPress={() => handleAddPost(thread.id)}
-              />
+              <Button title="Add Post" onPress={() => handleAddPost(thread.id)} />
             </View>
           </View>
         ))}
@@ -304,24 +214,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   threadHeader: {
-    flexDirection: 'column',
-    marginBottom: 8,
-  },
-  threadTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-  },
-  threadTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
-    marginRight: 8,
-  },
-  reportButton: {
-    marginTop: 4,
-  },
+      flexDirection: 'column',
+      marginBottom: 8,
+    },
+    threadTitleRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    threadTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      flex: 1,
+      marginRight: 8,
+    },
+    reportButton: {
+      marginTop: 4,
+    },
   newPostContainer: {
     marginTop: 12,
     padding: 12,
