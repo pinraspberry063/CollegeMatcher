@@ -29,6 +29,7 @@ import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
+import majorData from '../assets/major_data';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -68,20 +69,6 @@ const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
   const user = auth().currentUser.uid;
 
-  
-
- 
-
-  // const screen = route.params.screen;
-
-  // const firestore = getFirestore(db);
-  // const resultsRef = collection(firestore, 'Users')
-  // const resultDoc = query(resultsRef, where('User_UID', '==', auth().currentUser.uid));
-  // const docID = (await getDocs(resultDoc)).docs[0].ref;
-  // const savedData = docID.top100Colleges;
-
-  const [numResults, setNumResults] = useState(5);
-  const [searchRes, setSearchRes] = useState('');
   const [search, setSearch] = useState('');
   const [colllegeList, setCollegeList] = useState(top100);
   const [showFilter, setShowFilter] = useState(false);
@@ -94,7 +81,6 @@ const Results = ({route, navigation}) => {
   const [womenOnly, setWomenOnly] = useState(false);
   const [chooseState, setChooseState] = useState(false);
   const [stateChoice, setStateChoice] = useState([]);
-  const [placeHolder, setPlaceHolder] = useState();
   const [act, setACT] = useState(false);
   const [actComp, setACTComp] = useState();
   const [actEng, setACTEng] = useState();
@@ -107,6 +93,8 @@ const Results = ({route, navigation}) => {
   const [satWrit, setSATWrit] = useState();
   const [satRead, setSATRead] = useState();
   const [satSci, setSATSci] = useState();
+  const [major, setMajor] = useState(false);
+  const [selMajors, setSelMajors] = useState([]);
   
   
 
@@ -124,10 +112,10 @@ const Results = ({route, navigation}) => {
         setisLoading(false);
 
       })
+
       }catch(error) {
         alert("Error Message: " + error);
       }
-      
       
     }
     setisLoading(true);
@@ -161,14 +149,6 @@ const Results = ({route, navigation}) => {
     </ScrollView>
   );
 
-  const camelize = (str) => {
-    str = str.toLowerCase();
-    return str.replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index)=> {
-      if (/\s+/.test(match));
-      if (index === 0) return match.toUpperCase();
-      return index === 0 ? match.toLowerCase() : match.toUpperCase();
-    });
-  }
 
   const handleFilterSearch = () => {
     setShowFilter(false);
@@ -187,12 +167,28 @@ const Results = ({route, navigation}) => {
       (((college.mealplan.toLowerCase() == "yes") && mealPlan) || ((college.mealplan.toLowerCase() == "no") && !mealPlan)) &&
 
       //ACT
-      ((college.act_Composite25 >= actComp)  || college.act_Composite25 == 'null' || actComp == null) &&  ((college.act_English25 >= actEng) || college.act_English25 == 'null' || actEng == null) && ((college.act_Math25 >= actMath) || college.act_Math25 == 'null' || actMath == null) &&
+      ((college.act_Composite25 >= actComp)  || college.act_Composite25 == 'null' || actComp == null) &&
+      ((college.act_English25 >= actEng) || college.act_English25 == 'null' || actEng == null) &&
+       ((college.act_Math25 >= actMath) || college.act_Math25 == 'null' || actMath == null) &&
       ((college.act_Writing25 >= actWrit) || college.act_Writing25 == 'null' || actWrit == null) &&
 
       //SAT
-      ((college.sat_Total >= satTotal) || college.sat_Total == 'null' || satTotal == null) &&  ((college.sat_Math25 >= satMath) || college.sat_Math25 == 'null' || satMath == null) && ((college.sat_Writing25 >= satWrit) || college.sat_Writing25 == 'null' || satWrit == null) &&
-      ((college.act_criticalReading25 >= satRead)  || college.act_criticalReading25 == 'null' || satRead == null)
+      ((college.sat_Total >= satTotal) || college.sat_Total == 'null' || satTotal == null) &&  
+      ((college.sat_Math25 >= satMath) || college.sat_Math25 == 'null' || satMath == null) &&
+      ((college.sat_Writing25 >= satWrit) || college.sat_Writing25 == 'null' || satWrit == null) &&
+      ((college.act_criticalReading25 >= satRead)  || college.act_criticalReading25 == 'null' || satRead == null) &&
+
+      //Majors
+      (selMajors.length === 0 || selMajors.every(majorName => {
+        // Use find method to search for the object with matching label or value
+        const majorFound =  majorData.find(major => major.label === majorName || major.value === majorName);
+        
+        // Return the categories if the major is found, otherwise return null
+        const majorCat = majorFound ? majorFound.categories : null;
+        const majorKey = 'percent_' + majorCat;
+        
+        return majorKey in college && parseInt(college[majorKey]) !== 0;
+      }))
       
     );
 
@@ -220,6 +216,8 @@ const Results = ({route, navigation}) => {
 
   const showFilters = ()=> {
     setShowFilter(!showFilter);
+    console.log(selMajors);
+    
 
   }
 
@@ -247,6 +245,7 @@ const Results = ({route, navigation}) => {
     
 
   }
+  
  
 
   
@@ -305,6 +304,50 @@ const Results = ({route, navigation}) => {
                   
                   <Text> Private </Text>
                 </View>
+
+                <View style={styles.checkboxContainer} > 
+                  <CheckBox
+                    value={major}
+                    onValueChange={setMajor}
+                    style={styles.checkbox}
+                  />
+                  <Text> Select Majors </Text>
+                </View>
+
+                <View style={styles.choices}>
+                {major && (
+                    <>
+                      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
+                        {selMajors.map((choice, index) => (
+                          <View key={index} style={styles.choiceBox}> 
+                            <Text style={styles.label}>{choice}</Text>
+                            <TouchableOpacity onPress={() => {
+                              setSelMajors(prevChoices => prevChoices.filter((_, i) => i !== index));
+                            }}>
+                              <Text>X</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      
+                      
+                    </>
+                  )}
+                  </View>
+
+                  {major &&
+
+                    <View style={{width:'95%'}}>
+                      <DropdownComponent
+                        style={{width: '98%', marginLeft: 15}}
+                        data={majorData}
+                        value={selMajors}
+                        onChange={(val) => {
+                          setSelMajors(prevChoices => [...prevChoices, val]);
+                        }}
+                      />
+                    </View>
+                  }
                 <View style={styles.checkboxContainer} > 
                   <CheckBox
                     value={chooseState}
@@ -491,13 +534,15 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     justifyContent: 'flex-start', 
     alignItems: 'flex-start',
+    paddingTop: 15,
   
   
   },
    checkboxContainer:{
     flexDirection: 'row',
     marginBottom: 20,
-    width: '95%'
+    width: '95%',
+    padding: 10
 
   }, 
   checkbox:{
