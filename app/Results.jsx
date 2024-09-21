@@ -102,9 +102,13 @@ const Results = ({route, navigation}) => {
   const [actMath, setACTMath] = useState();
   const [actSci, setACTSci] = useState();
   const [sat, setSAT] = useState(false);
+  const [satTotal, setSATTotal] = useState();
+  const [satMath, setSATMath] = useState();
+  const [satWrit, setSATWrit] = useState();
+  const [satRead, setSATRead] = useState();
+  const [satSci, setSATSci] = useState();
   
-
-
+  
 
 
 
@@ -169,46 +173,53 @@ const Results = ({route, navigation}) => {
   const handleFilterSearch = () => {
     setShowFilter(false);
     const filtered = colleges.filter(college=> 
+
+      // Women Only
       (((college.women_only === 1) && womenOnly) || ((college.women_only === 0) && !womenOnly)) &&
-      stateChoice.includes(college.state) &&
+
+      // Choose State
+      (stateChoice.includes(college.state) && chooseState || !chooseState) &&
+
+      // Public or Private
       ((college.school_classification.toLowerCase().includes("private") && privateSchool) || (college.school_classification.toLowerCase().includes("public") && publicSchool)) &&
-      (((college.mealplan.toLowerCase() === "yes") && mealPlan) || ((college.mealplan.toLowerCase() === "no") && !mealPlan))
+
+      // MealPlan
+      (((college.mealplan.toLowerCase() == "yes") && mealPlan) || ((college.mealplan.toLowerCase() == "no") && !mealPlan)) &&
+
+      //ACT
+      ((college.act_Composite25 >= actComp)  || college.act_Composite25 == 'null' || actComp == null) &&  ((college.act_English25 >= actEng) || college.act_English25 == 'null' || actEng == null) && ((college.act_Math25 >= actMath) || college.act_Math25 == 'null' || actMath == null) &&
+      ((college.act_Writing25 >= actWrit) || college.act_Writing25 == 'null' || actWrit == null) &&
+
+      //SAT
+      ((college.sat_Total >= satTotal) || college.sat_Total == 'null' || satTotal == null) &&  ((college.sat_Math25 >= satMath) || college.sat_Math25 == 'null' || satMath == null) && ((college.sat_Writing25 >= satWrit) || college.sat_Writing25 == 'null' || satWrit == null) &&
+      ((college.act_criticalReading25 >= satRead)  || college.act_criticalReading25 == 'null' || satRead == null)
       
     );
 
     setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
   }
 
-  const handleSearch = async(searchQuery) => {
-      setSearch(searchQuery);
-      
+  const handleSearch = (searchQuery) => {
 
-      const filtered = colleges.filter(name =>
-        name.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
+    setSearch(searchQuery);
+
+    if (searchQuery) {
+      const filtered = colleges.filter(college =>
+        college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-    
-      // const collegeQuery = query(collegeRef, where('shool_name', '==', camelize(search)));
-
-      // try {
-      //   const querySnapshot = await getDocs(collegeQuery);
-
-      //   if (!querySnapshot.empty) {
-      //     const colleges = querySnapshot.docs;
-      //     // setSearchRes(querySnapshot.docs.map(doc => doc.data()));    
-         
-      // const collegeData = colleges.map(college => college.data());
-      
-      setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
-      //  }
-      // } catch (error) {
-      //   console.error('Error adding college to favorites: ', error);
-      // }
-      setShowFilter(false);
+  
+      setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    } else {
+      // If searchQuery is not valid, reset the college list to the original data
+      setCollegeList(top100.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    }
+  
+    setShowFilter(false);
 
   }
 
   const showFilters = ()=> {
-    setShowFilter(true);
+    setShowFilter(!showFilter);
 
   }
 
@@ -242,14 +253,18 @@ const Results = ({route, navigation}) => {
     return (
       <View style={styles.container}>
         <View style={styles.searchView}>
-          <TextInput style={styles.searchText} placeholder='Search' clearButtonMode='always' value={search} onPress={showFilters} onChangeText={handleSearch}/>
+          <TextInput style={styles.searchText} placeholder='Search' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
           <TouchableOpacity style={styles.searchContainer} onPress={handleFilterSearch}>
                 <Text style={[{color: 'white'}]}>Search</Text>
           </TouchableOpacity>
         </View>
-        
+        <TouchableOpacity onPress={showFilters}>
+              <Text> Filter Search</Text>
+          </TouchableOpacity>
         {showFilter && 
+        
             <View style={styles.filterView}>
+              <ScrollView style={{width: '98%' }}>
                 <View style={styles.checkboxContainer} > 
                   <CheckBox
                     value={housing}
@@ -323,7 +338,7 @@ const Results = ({route, navigation}) => {
 
                     <View style={{width:'95%'}}>
                       <DropdownComponent
-                        style={{width: '95%'}}
+                        style={{width: '98%', marginLeft: 15}}
                         data={stateData}
                         value={stateChoice}
                         onChange={(val) => {
@@ -340,34 +355,51 @@ const Results = ({route, navigation}) => {
                   />
                   <Text> ACT </Text>
                 </View>
-                {act &&
-                  <View style={{width: '95%'}}>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={styles.label}>Composite</Text>
-                      <TextInput style={styles.input} placeholder='34' value={actComp} onValueChange={setACTComp}/>
+                  {act &&
+                    <View style={{width: '95%'}}>
+                      {['Composite', 'English', 'Math', 'Science', 'Writing'].map((label, index) => (
+                        <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+                          <Text style={styles.label}>{label}</Text>
+                          <TextInput
+                            placeholder={label === 'Writing' ? '30' : '34'} 
+                            value={index === 0 ? actComp : index === 1 ? actEng : index === 2 ? actMath : index === 3 ? actSci : actWrit}
+                            onValueChange={index === 0 ? setACTComp : index === 1 ? setACTEng : index === 2 ? setACTMath : index === 3 ? setACTSci : setACTWrit}
+                            style={styles.input}
+                          />
+                        </View>
+                      ))}
                     </View>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={styles.label}>English</Text>
-                      <TextInput style={styles.input} placeholder='26' value={actEng} onValueChange={setACTEng}/>
+                  }
+                <View style={styles.checkboxContainer} > 
+                  <CheckBox
+                    value={sat}
+                    onValueChange={setSAT}
+                    style={styles.checkbox}
+                  />
+                  <Text> SAT </Text>
+                </View>
+                  {sat &&
+                    <View style={{width: '95%'}}>
+                      {['Total', 'Math', 'Science', 'Writing', 'Critical Reading'].map((label, index) => (
+                        <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+                          <Text style={styles.label}>{label}</Text>
+                          <TextInput
+                            placeholder={label === 'Writing' ? '30' : '34'} 
+                            value={index === 0 ? satTotal : index === 1 ? satMath : index === 2 ? satSci : index === 3 ? satWrit : satRead}
+                            onValueChange={index === 0 ? setSATTotal : index === 1 ? setSATMath : index === 2 ? setSATSci : index === 3 ? setSATWrit : setSATRead}
+                            style={styles.input}
+                          />
+                        </View>
+                      ))}
                     </View>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={styles.label}>Math</Text>
-                      <TextInput style={styles.input} placeholder='28' value={actMath} onValueChange={setACTMath}/>
-                    </View>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={styles.label}>Science</Text>
-                      <TextInput style={styles.input} placeholder='25' value={actSci} onValueChange={setACTSci}/>
-                    </View>
-                    <View style={{flexDirection: 'row'}}>
-                      <Text style={styles.label}>Writing</Text>
-                      <TextInput style={styles.input} placeholder='30' value={actWrit} onValueChange={setACTWrit}/>
-                    </View>
-                  </View>
-                }
+                  }
+                
 
               
-  
+                </ScrollView>
             </View>
+
+          
         }
         
         <Text style={styles.title}>Top College Matches</Text>
@@ -457,8 +489,8 @@ const styles = StyleSheet.create({
     height: 600,
     borderBlockColor: 'green',
     borderWidth: 3,
-    justifyContent: 'center', 
-    alignItems: 'center',
+    justifyContent: 'flex-start', 
+    alignItems: 'flex-start',
   
   
   },
@@ -492,8 +524,11 @@ const styles = StyleSheet.create({
       flexDirection: 'row'
   },
   input: {
-
-    height: 10,
+    height: 30, 
+    borderColor: 'black',
+    borderWidth: 1,
+    padding: 8, 
+    marginLeft: 8,
   }
   
 
