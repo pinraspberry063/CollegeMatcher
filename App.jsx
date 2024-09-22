@@ -37,6 +37,7 @@ import UserActivityScreen from './app/UserActivityScreen';
 import RecruiterVerification from './app/RecruiterVerification';
 import AddRecs from './app/AddRecs';
 import FavColleges from './app/FavColleges';
+import EditCollege from './app/EditCollege';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -63,6 +64,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
+    <HomeStack.Screen name="EditCollege" component={EditCollege} />
   </HomeStack.Navigator>
 );
 

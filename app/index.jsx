@@ -12,6 +12,7 @@ const Index = ({ navigation }) => {
   const theme = useContext(themeContext);
   const { user } = useContext(UserContext);  // Get the current logged-in user
   const [isSuperRec, setIsSuperRec] = useState(false);  // State to track if the user is SuperRec
+  const [collegeDocId, setCollegeDocId] = useState(null);  // Track the document ID for the college
 
   useEffect(() => {
     const checkSuperRec = async () => {
@@ -20,21 +21,44 @@ const Index = ({ navigation }) => {
       }
 
       try {
-        // Query the "CompleteColleges" collection where "SuperRec" matches the user's UID
-        const q = query(
-          collection(firestore, 'CompleteColleges'),
-          where('SuperRec', '==', user.uid)
+        // Step 1: Query the "Users" collection to find the logged-in user and check if they are a Super Recruiter
+        const userQuery = query(
+          collection(firestore, 'Users'),
+          where('User_UID', '==', user.uid)
         );
 
-        const querySnapshot = await getDocs(q);
+        const userSnapshot = await getDocs(userQuery);
 
-        // If a document is found, the user is a SuperRec
-        if (!querySnapshot.empty) {
-          setIsSuperRec(true);
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+
+          // Check if the user is a Super Recruiter
+          if (userData.SuperRecruiter) {
+            setIsSuperRec(true);
+
+            // Step 2: Use the "RecruiterInstitution" field to find the college in "CompleteColleges"
+            const recruiterInstitution = userData.RecruiterInstitution;
+
+            const collegeQuery = query(
+              collection(firestore, 'CompleteColleges'),
+              where('shool_name', '==', recruiterInstitution)
+            );
+
+            const collegeSnapshot = await getDocs(collegeQuery);
+
+            // If a matching college document is found, save the document ID
+            if (!collegeSnapshot.empty) {
+              setCollegeDocId(collegeSnapshot.docs[0].id);
+            } else {
+              Alert.alert('Error', 'College not found for the given institution.');
+            }
+          }
+        } else {
+          Alert.alert('Error', 'User data not found.');
         }
       } catch (error) {
         console.error('Error checking SuperRec:', error);
-        Alert.alert('Error', 'Failed to check SuperRec status.');
+        Alert.alert('Error', 'Failed to check Super Recruiter status.');
       }
     };
 
@@ -75,15 +99,28 @@ const Index = ({ navigation }) => {
 
         {/* Conditionally render the SuperRec button */}
         {isSuperRec && (
-          <Button
-            style={[styles.button, { textShadowColor: theme.color }]}
-            onPress={() => {
-              navigation.push('AddRecs');  // Navigate to your desired screen
-            }}
-            title="Super Recruiter"
-            color="#841584"
-            accessibilityLabel="Access Super Recruiter features"
-          />
+          <>
+            <Button
+              style={[styles.button, { textShadowColor: theme.color }]}
+              onPress={() => {
+                navigation.push('AddRecs');  // Navigate to AddRecs screen
+              }}
+              title="Super Recruiter"
+              color="#841584"
+              accessibilityLabel="Access Super Recruiter features"
+            />
+
+            {/* New Edit College Button */}
+            <Button
+              style={[styles.button, { textShadowColor: theme.color }]}
+              onPress={() => {
+                navigation.push('EditCollege', { collegeDocId });  // Navigate to EditCollege page with the document ID
+              }}
+              title="Edit College"
+              color="#841584"
+              accessibilityLabel="Edit your college details"
+            />
+          </>
         )}
       </View>
     </View>

@@ -33,6 +33,8 @@ const AccountCreation = ({ navigation }) => {
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
         IsRecruiter: isRecruiter,  // Use the state of the Switch
+        SuperRecruiter: false,
+        RecruiterInstitution: "NA",
         Username: username,
         Email: email,  // Store user's email
       });
