@@ -88,7 +88,7 @@ const RoomateMatcher = ({ navigation }) => {
             <Text style={[styles.text, { color: theme.color }]}>Do you prefer a quiet environment in general?</Text>
             <DropdownComponent data={choice} value={noise} onChange={setNoise} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with you roommate?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with your roommate?</Text>
             <DropdownComponent data={choice} value={friendsRoommate} onChange={setFriendsRoommate} />
 
             <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate smoking at the dorm/apartment?</Text>
@@ -102,7 +102,7 @@ const RoomateMatcher = ({ navigation }) => {
              <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
              <DropdownComponent data={choice} value={drinking} onChange={setDrinkingHabit} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Are you against company being over at the dorm/apartment?</Text>
+             <Text style={[styles.text, { color: theme.color }]}>Are you against company frequently being over at the dorm/apartment?</Text>
              <DropdownComponent data={choice} value={companyOver} onChange={setCompanyOver} />
 
              <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
