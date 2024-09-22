@@ -51,6 +51,11 @@ const Settings = ({ navigation }) => {
           <Text style={[styles.item, { color: theme.color }]}>Privacy</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate('CompareColleges')}>
+          <Text style={[styles.item, { color: theme.color }]}>Compare Colleges</Text>
+        </TouchableOpacity>
+
+
         <TouchableOpacity onPress={handleLogout}>
           <Text style={[styles.item, { color: 'red' }]}>Logout</Text>
         </TouchableOpacity>
