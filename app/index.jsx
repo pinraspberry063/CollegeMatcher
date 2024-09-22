@@ -105,9 +105,9 @@ const Index = ({ navigation }) => {
               onPress={() => {
                 navigation.push('AddRecs');  // Navigate to AddRecs screen
               }}
-              title="Super Recruiter"
+              title="Add Recruiters to Institution"
               color="#841584"
-              accessibilityLabel="Access Super Recruiter features"
+              accessibilityLabel="Access who is considered a recruiter within your institution."
             />
 
             {/* New Edit College Button */}

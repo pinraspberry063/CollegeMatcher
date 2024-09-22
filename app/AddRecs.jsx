@@ -31,13 +31,22 @@ const AddRecs = () => {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-          const doc = querySnapshot.docs[0];  // Assuming you only need the first document found
-          setCollegeDocId(doc.id);  // Store the document ID
-          const { RecruiterUIDs } = doc.data();  // Get the array of Recruiter UIDs
+          const collegeDoc = querySnapshot.docs[0];  // Renamed to 'collegeDoc'
+          setCollegeDocId(collegeDoc.id);  // Store the document ID
+          const collegeData = collegeDoc.data();  // Get the document data
+
+          // Check if RecruiterUIDs exists, if not, add an empty array
+          if (!collegeData.RecruiterUIDs) {
+            const collegeDocRef = doc(firestore, 'CompleteColleges', collegeDoc.id);
+            await updateDoc(collegeDocRef, {
+              RecruiterUIDs: []  // Initialize RecruiterUIDs if it doesn't exist
+            });
+            collegeData.RecruiterUIDs = [];  // Set it as an empty array in the local state
+          }
 
           // Fetch the emails for each RecruiterUID from the Users collection
           const emails = await Promise.all(
-            RecruiterUIDs.map(async (recruiterUID) => {
+            collegeData.RecruiterUIDs.map(async (recruiterUID) => {
               try {
                 const userQuery = query(
                   collection(firestore, 'Users'),
@@ -118,7 +127,6 @@ const AddRecs = () => {
       Alert.alert('Error', 'Something went wrong while adding the recruiter.');
     }
   };
-
 
   // Function to remove a user from the recruiter list via email.
   const removeRecruiter = async (emailToRemove) => {
