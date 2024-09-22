@@ -23,7 +23,7 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.10.0",
     "axios": "^1.7.2",
-    "expo": "^51.0.17",
+    "expo": "^51.0.32",
     "expo-constants": "~16.0.2",
     "expo-image-picker": "~15.0.7",
     "expo-linking": "~6.3.1",
@@ -40,6 +40,7 @@
     "react-native-element-dropdown": "^2.12.1",
     "react-native-elements": "^3.4.3",
     "react-native-event-listeners": "^1.0.7",
+    "react-native-expo": "^0.1.4",
     "react-native-fbsdk": "^3.0.0",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "~2.16.1",
@@ -54,7 +55,7 @@
     "react-native-svg": "^15.5.0",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-web": "~0.19.10",
-    "react-native-webview": "13.8.6",
+    "react-native-webview": "^13.12.2",
     "react-navigation": "^5.0.0"
   },
   "devDependencies": {
