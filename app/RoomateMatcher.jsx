@@ -6,7 +6,7 @@ import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
-import matchColleges from '../src/utils/matchingAlgorithm';
+import matchRoomates from '../src/utils/roomateMatchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import collegeName from '../app/ColForumSelector';
 
@@ -70,8 +70,8 @@ const RoomateMatcher = ({ navigation }) => {
             console.error('Error adding document: ', error);
         }
 
-        const result = (await matchColleges(answers)).top5Colleges;
-        navigation.navigate('Results', { top5: result });
+        const result = (await matchRoomates(answers)).top5Roomates;
+        navigation.navigate('RoomateResults', { top5: result });
     };
 
     const renderPageOne = () => (

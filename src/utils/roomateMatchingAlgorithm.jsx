@@ -119,5 +119,22 @@ const matchRoomates = async (roomatePreferences) => {
             }
         const finalScore = Math.round((score/maxScore)*100);
         return{roomate, score:finalScore};
-    };
+    });
+    scores.sort((a,b)=> b.score - a.score);
+    const top5Roomates = scores.slice(0,5).map((s)=>({name:s.roomate.Username, score: s.score}));
+    const resultsRef = collection(firestore,'RoomateResults');
+
+    try{
+        await addDoc(resultsRef,{
+            userpreferences: roomatePreferences,
+            top5Roomates
+            });
+        alert("Roomates succesfully judged!");
+
+        } catch(error){
+            console.error("Error in adding ducment: ", error);
+        }
+    return {top5Roomates};
+
 };
+export default matchRoomates;

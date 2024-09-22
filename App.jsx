@@ -21,6 +21,7 @@ import Launch from './app/Launch';
 import Preferences from './app/Preferences';
 import ColForum from './app/ColForum';
 import RoomateMatcher from './app/RoomateMatcher';
+import RoomateResults from './app/RoomateResults';
 import Message from './app/Message';
 import RecConvs from './app/RecConvs';
 import MakkAI from './app/MakkAI';
@@ -86,6 +87,7 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="ForumSelect" component={ForumSelect} />
     <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
+    <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
   </ForumStack.Navigator>
 );
 
