@@ -5,10 +5,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import matchRoomates from '../src/utils/roomateMatchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
-import collegeName from '../app/ColForumSelector';
+import { UserContext } from '../components/UserContext';
+import { handleReport } from '../src/utils/reportUtils';
+import {collegeName} from '../app/ColForumSelector';
 
 const firestore = getFirestore(db);
 
@@ -38,10 +40,12 @@ const RoomateMatcher = ({ navigation }) => {
      const [clean, setClean] = useState('');
      const [boundaries, setBoundaries] = useState('');
      const [shareDuties, setShareDuties] = useState('');
+     //const [collegeName, setCollegeName] = useState(collegeName);
+     const [userName, setUsername] = useState('');
 
 
     const collectionref = collection(firestore, 'RoomateMatcher');
-
+    const userNames = collection(firestore,'Users');
 
     const handleSubmit = async () => {
         const answers = {
@@ -60,7 +64,9 @@ const RoomateMatcher = ({ navigation }) => {
             clean: clean,
             boundaries: boundaries,
             share_duties: shareDuties,
+            //college_name: collegeName,
             userId: auth().currentUser.uid,
+            username: userName
              };
 
         try {
@@ -73,7 +79,23 @@ const RoomateMatcher = ({ navigation }) => {
         const result = (await matchRoomates(answers)).top5Roomates;
         navigation.navigate('RoomateResults', { top5: result });
     };
-
+        const fetchUsername = async (uid) => {
+               try {
+                 const usersRef = collection(firestore, 'Users');
+                 const q = query(usersRef, where('User_UID', '==', uid));
+                 const querySnapshot = await getDocs(q);
+                 if (!querySnapshot.empty) {
+                   const userDoc = querySnapshot.docs[0];
+                   const userData = userDoc.data();
+                   setUsername(userData.Username);
+                 } else {
+                   console.error('No user found with the given UID.');
+                 }
+               } catch (error) {
+                 console.error('Error fetching username and recruiter status:', error);
+               }
+             };
+         fetchUsername(auth().currentUser.uid);
     const renderPageOne = () => (
         <View>
             <Text style={[styles.text, { color: theme.color }]}>Do you want your roommate to have a consistent bedtime?</Text>

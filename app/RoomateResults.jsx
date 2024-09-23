@@ -6,8 +6,8 @@ const RoomateResults = ({ route }) => {
     console.log("top5: " + top5);
     const renderItem = ({ item }) => (
         <View style={styles.card}>
-            <Text style={styles.collegeName}>{item.name}</Text>
-            <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
+            <Text style={styles.username}>{item.name}</Text>
+            <Text style={styles.roomateScore}>Match Accuracy: {item.score}%</Text>
         </View>
     );
 
@@ -50,12 +50,12 @@ const styles = StyleSheet.create({
         shadowRadius: 2,
         elevation: 2,
     },
-    collegeName: {
+    username: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 5,
     },
-    collegeScore: {
+    roomateScore: {
         fontSize: 16,
         color: '#555',
     },

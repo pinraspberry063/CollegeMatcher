@@ -1,6 +1,8 @@
 import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import auth from '@react-native-firebase/auth';
 
 const matchRoomates = async (roomatePreferences) => {
     const firestore = getFirestore(db);
@@ -11,6 +13,8 @@ const matchRoomates = async (roomatePreferences) => {
 
     const scores = roomates.map(roomate => {
         let score = 0;
+        if(roomate.userId != auth().currentUser.uid){
+        //let score = 0;
 
         //bedtime compatibility
         if(roomatePreferences.bedtime == roomate.bedtime){
@@ -117,17 +121,19 @@ const matchRoomates = async (roomatePreferences) => {
         else if(roomatePreferences.bedtime == roomate.bedtime - 1 || roomatePreferences.bedtime == roomate.bedtime + 1){
             score += 5;
             }
+        }
         const finalScore = Math.round((score/maxScore)*100);
-        return{roomate, score:finalScore};
+        const userName = roomate.username;
+        return{roomate, score:finalScore, username: userName};
     });
     scores.sort((a,b)=> b.score - a.score);
-    const top5Roomates = scores.slice(0,5).map((s)=>({name:s.roomate.Username, score: s.score}));
+    const top5Roomates = scores.slice(0,5).map((s)=>({name:s.username, score: s.score}));
     const resultsRef = collection(firestore,'RoomateResults');
 
     try{
         await addDoc(resultsRef,{
-            userpreferences: roomatePreferences,
-            top5Roomates
+            userPreferences: roomatePreferences,
+            top5Roomates,
             });
         alert("Roomates succesfully judged!");
 
