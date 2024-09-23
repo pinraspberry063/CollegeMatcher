@@ -173,12 +173,12 @@ const ColForum = ({route, navigation}) => {
   };
 
   const handleFavoriteSubmission = async (
-      liked,
+      favd,
       theadId,
       postId = null,
       usernamePost,
   ) => {
-      const likedData = {
+      const favdData = {
           threadId,
           postId,
           };
@@ -191,6 +191,18 @@ const ColForum = ({route, navigation}) => {
             Alert.alert('Error', 'Failed to add to favorites. Please try again.');
           }
   };
+
+  const handleLikes = async (
+      liked,
+      threadId,
+      postId = null,
+      usernamePost,
+  ) => {
+      const likedData = {
+              threadId,
+              postId,
+              };
+      };
 
   const handleReportSubmission = async (
     reportType,
@@ -292,6 +304,17 @@ const ColForum = ({route, navigation}) => {
                   title="Favorite"
                   onPress={() =>
                       handleFavoriteSubmission(
+                          'post',
+                          thread.id,
+                          post.id,
+                          post.createdBy,
+                      )
+                  }
+                />
+                <Button
+                  title="Like"
+                  onPress={() =>
+                      handleLikes(
                           'post',
                           thread.id,
                           post.id,
