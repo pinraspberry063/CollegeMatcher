@@ -152,6 +152,10 @@ const ForumSelect = ({ route, navigation }) => {
     }
   };
 
+    const handleRoomateMatcherNavigation = () => {
+      navigation.navigate('RoomateMatcher');
+    };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -191,6 +195,13 @@ const ForumSelect = ({ route, navigation }) => {
           />
           <Button title="Add Subgroup" onPress={handleAddSubgroup} color={theme.buttonColor} />
         </View>
+                <View style={styles.followedForumsButtonContainer}>
+                    <Button
+                      title="Find a Roomate"
+                       onPress={handleRoomateMatcherNavigation}
+                       color={theme.buttonColor}
+                    />
+                </View>
       </ScrollView>
     </SafeAreaView>
   );
