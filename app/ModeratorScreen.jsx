@@ -16,29 +16,53 @@ const ModeratorScreen = ({ navigation }) => {
     const reportsRef = collection(firestore, 'Reports');
     const q = query(reportsRef, where('status', '==', 'pending'));
     const querySnapshot = await getDocs(q);
-    const reportsList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
+      const reportData = doc.data();
+      const userRef = collection(firestore, 'Users');
+      let userQuery = query(userRef, where('Username', '==', reportData.reportedUser));
+      let userSnapshot = await getDocs(userQuery);
+
+      if (userSnapshot.empty) {
+        userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
+        userSnapshot = await getDocs(userQuery);
+      }
+
+      const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+      return { id: doc.id, ...reportData, isBanned };
+    }));
     setReports(reportsList);
   };
 
   const handleBanUser = async (reportId, reportedUser) => {
     try {
-      // First, find the user document using the User_UID
+      console.log(`Attempting to ban user: ${reportedUser}`);
+      // First, find the user document using the Username
       const usersRef = collection(firestore, 'Users');
-      const q = query(usersRef, where('User_UID', '==', reportedUser));
-      const querySnapshot = await getDocs(q);
+      let q = query(usersRef, where('Username', '==', reportedUser));
+      let querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
+        // If not found by Username, try with User_UID
+        q = query(usersRef, where('User_UID', '==', reportedUser));
+        querySnapshot = await getDocs(q);
+      }
+
+      if (querySnapshot.empty) {
+        console.log(`User not found: ${reportedUser}`);
         throw new Error('User not found');
       }
 
       const userDoc = querySnapshot.docs[0];
+      console.log(`User document found for: ${reportedUser}`);
 
-      // Update user's status in Firestore
-      await updateDoc(userDoc.ref, { status: 'banned' });
+      // Update user's IsBanned field in Firestore
+      await updateDoc(userDoc.ref, { IsBanned: true });
+      console.log(`User banned: ${reportedUser}`);
 
       // Update report status
       const reportRef = doc(firestore, 'Reports', reportId);
       await updateDoc(reportRef, { status: 'resolved' });
+      console.log(`Report ${reportId} status updated to resolved`);
 
       // Refresh reports list
       fetchReports();
@@ -50,79 +74,119 @@ const ModeratorScreen = ({ navigation }) => {
     }
   };
 
-const fetchUserActivity = async (reportedUser) => {
-  try {
-    const usersRef = collection(firestore, 'Users');
-    let userQuery = query(usersRef, where('Username', '==', reportedUser));
-    let querySnapshot = await getDocs(userQuery);
+  const handleUnbanUser = async (reportId, reportedUser) => {
+    try {
+      console.log(`Attempting to unban user: ${reportedUser}`);
+      const usersRef = collection(firestore, 'Users');
+      let q = query(usersRef, where('Username', '==', reportedUser));
+      let querySnapshot = await getDocs(q);
 
-    if (querySnapshot.empty) {
-      userQuery = query(usersRef, where('User_UID', '==', reportedUser));
-      querySnapshot = await getDocs(userQuery);
+      if (querySnapshot.empty) {
+        // If not found by Username, try with User_UID
+        q = query(usersRef, where('User_UID', '==', reportedUser));
+        querySnapshot = await getDocs(q);
+      }
+
+      if (querySnapshot.empty) {
+        console.log(`User not found: ${reportedUser}`);
+        throw new Error('User not found');
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      console.log(`User document found for: ${reportedUser}`);
+
+      // Update user's IsBanned field in Firestore
+      await updateDoc(userDoc.ref, { IsBanned: false });
+      console.log(`User unbanned: ${reportedUser}`);
+
+      // Update report status
+      const reportRef = doc(firestore, 'Reports', reportId);
+      await updateDoc(reportRef, { status: 'resolved' });
+      console.log(`Report ${reportId} status updated to resolved`);
+
+      // Refresh reports list
+      fetchReports();
+
+      Alert.alert('User Unbanned', 'The user has been unbanned successfully.');
+    } catch (error) {
+      console.error('Error unbanning user: ', error);
+      Alert.alert('Error', 'Failed to unban user. Please try again.');
     }
+  };
 
-    if (querySnapshot.empty) {
-      throw new Error('User not found');
-    }
+  const fetchUserActivity = async (reportedUser) => {
+    try {
+      const usersRef = collection(firestore, 'Users');
+      let userQuery = query(usersRef, where('Username', '==', reportedUser));
+      let querySnapshot = await getDocs(userQuery);
 
-    const userDoc = querySnapshot.docs[0];
-    const username = userDoc.data().Username;
-    const userUID = userDoc.data().User_UID;
-    console.log('Found user:', username, 'UID:', userUID);
+      if (querySnapshot.empty) {
+        userQuery = query(usersRef, where('User_UID', '==', reportedUser));
+        querySnapshot = await getDocs(userQuery);
+      }
 
-    const userActivity = { threads: [], posts: [] };
+      if (querySnapshot.empty) {
+        throw new Error('User not found');
+      }
 
-    const collegeName = 'Louisiana Tech University';
-    const subgroupsToCheck = ['Recruiter Check', 'Test General'];
+      const userDoc = querySnapshot.docs[0];
+      const username = userDoc.data().Username;
+      const userUID = userDoc.data().User_UID;
+      console.log('Found user:', username, 'UID:', userUID);
 
-    for (const subgroupName of subgroupsToCheck) {
-      console.log('Checking subgroup:', subgroupName);
+      const userActivity = { threads: [], posts: [] };
 
-      const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', subgroupName, 'threads');
-      const threadsSnapshot = await getDocs(threadsRef);
+      const collegeName = 'Louisiana Tech University';
+      const subgroupsToCheck = ['Recruiter Check', 'Test General'];
 
-      console.log('Threads found:', threadsSnapshot.size);
+      for (const subgroupName of subgroupsToCheck) {
+        console.log('Checking subgroup:', subgroupName);
 
-      // Fetch threads created by the user
-      const userThreadsQuery = query(threadsRef, where('createdBy', '==', username));
-      const userThreadsSnapshot = await getDocs(userThreadsQuery);
+        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', subgroupName, 'threads');
+        const threadsSnapshot = await getDocs(threadsRef);
 
-      userThreadsSnapshot.forEach(threadDoc => {
-        userActivity.threads.push({
-          id: threadDoc.id,
-          collegeName,
-          subgroupName,
-          ...threadDoc.data()
-        });
-      });
+        console.log('Threads found:', threadsSnapshot.size);
 
-      // Fetch posts for each thread in the subgroup
-      for (const threadDoc of threadsSnapshot.docs) {
-        const postsRef = collection(threadsRef, threadDoc.id, 'posts');
-        const postsQuery = query(postsRef, where('createdBy', '==', username));
-        const postsSnapshot = await getDocs(postsQuery);
+        // Fetch threads created by the user
+        const userThreadsQuery = query(threadsRef, where('createdBy', '==', username));
+        const userThreadsSnapshot = await getDocs(userThreadsQuery);
 
-        console.log('Posts found in thread', threadDoc.id, ':', postsSnapshot.size);
-
-        postsSnapshot.forEach(postDoc => {
-          userActivity.posts.push({
-            id: postDoc.id,
-            threadId: threadDoc.id,
+        userThreadsSnapshot.forEach(threadDoc => {
+          userActivity.threads.push({
+            id: threadDoc.id,
             collegeName,
             subgroupName,
-            ...postDoc.data()
+            ...threadDoc.data()
           });
         });
-      }
-    }
 
-    console.log('User Activity:', userActivity);
-    return userActivity;
-  } catch (error) {
-    console.error('Error fetching user activity:', error);
-    return null;
-  }
-};
+        // Fetch posts for each thread in the subgroup
+        for (const threadDoc of threadsSnapshot.docs) {
+          const postsRef = collection(threadsRef, threadDoc.id, 'posts');
+          const postsQuery = query(postsRef, where('createdBy', '==', username));
+          const postsSnapshot = await getDocs(postsQuery);
+
+          console.log('Posts found in thread', threadDoc.id, ':', postsSnapshot.size);
+
+          postsSnapshot.forEach(postDoc => {
+            userActivity.posts.push({
+              id: postDoc.id,
+              threadId: threadDoc.id,
+              collegeName,
+              subgroupName,
+              ...postDoc.data()
+            });
+          });
+        }
+      }
+
+      console.log('User Activity:', userActivity);
+      return userActivity;
+    } catch (error) {
+      console.error('Error fetching user activity:', error);
+      return null;
+    }
+  };
 
   const handleViewUserActivity = async (reportedUser) => {
     const userActivity = await fetchUserActivity(reportedUser);
@@ -138,11 +202,13 @@ const fetchUserActivity = async (reportedUser) => {
       <Text>Reported User: {item.reportedUser}</Text>
       <Text>Reported By: {item.reportedBy}</Text>
       <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
-      <Button title="Ban User" onPress={() => handleBanUser(item.id, item.reportedUser)} />
+      <Button
+        title={item.isBanned ? "Unban User" : "Ban User"}
+        onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
+      />
       <Button title="View User Activity" onPress={() => handleViewUserActivity(item.reportedUser)} />
     </View>
   );
-
 
   return (
     <View style={styles.container}>

@@ -46,6 +46,7 @@ const ColForum = ({route, navigation}) => {
     const theme = useContext(themeContext);
     const [username, setUsername] = useState('');
     const [isRecruiter, setIsRecruiter] = useState(false);
+    const [isModerator, setIsModerator] = useState(false);
     const [images, setImages] = useState([]); // add state to store selected image
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
@@ -109,7 +110,7 @@ const ColForum = ({route, navigation}) => {
 
   useEffect(() => {
     fetchThreadsAndPosts();
-  }, [collegeName, forumName]);
+  }, [collegeName, forumName, isModerator]);
 
   const fetchUsernameAndRecruiterStatus = async (uid) => {
     try {
@@ -120,47 +121,103 @@ const ColForum = ({route, navigation}) => {
         const userDoc = querySnapshot.docs[0];
         const userData = userDoc.data();
         setUsername(userData.Username);
-        setIsRecruiter(userData.IsRecruiter || false); // Check if the user is a recruiter
+        setIsRecruiter(userData.IsRecruiter || false);
+        setIsModerator(userData.IsModerator || false); // change function name later
       } else {
         console.error('No user found with the given UID.');
       }
     } catch (error) {
-      console.error('Error fetching username and recruiter status:', error);
+      console.error('Error fetching username and status:', error);
     }
   };
 
   const fetchThreadsAndPosts = async () => {
     try {
+      console.log('Fetching threads and posts');
       const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
       const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
       const threadsSnapshot = await getDocs(threadsQuery);
       const threadsList = [];
 
+      console.log(`Found ${threadsSnapshot.size} threads`);
+
       for (const threadDoc of threadsSnapshot.docs) {
         const threadData = threadDoc.data();
         const threadId = threadDoc.id;
 
-        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
-        const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
-        const postsSnapshot = await getDocs(postsQuery);
-        const postsList = postsSnapshot.docs.map(postDoc => ({
-          id: postDoc.id,
-          ...postDoc.data()
-        }));
+        // Check if the thread creator is banned
+        console.log(`Checking ban status for thread creator: ${threadData.createdBy}`);
+        const usersRef = collection(firestore, 'Users');
+        const userQuery = query(usersRef, where('Username', '==', threadData.createdBy));
+        const userQuerySnapshot = await getDocs(userQuery);
 
-        threadsList.push({
-          id: threadId,
-          ...threadData,
-          posts: postsList
-        });
+        if (userQuerySnapshot.empty) {
+          console.log(`User document not found for: ${threadData.createdBy}`);
+          // Decide how to handle threads with missing creator data
+          // For now include them to avoid losing data
+          threadsList.push({
+            id: threadId,
+            ...threadData,
+            posts: []
+          });
+        } else {
+          const userDoc = userQuerySnapshot.docs[0];
+          const userData = userDoc.data();
+          console.log('Thread creator data:', userData);
+          const isThreadCreatorBanned = userData.IsBanned || false;
+          console.log(`Thread ${threadId} creator (${threadData.createdBy}) banned:`, isThreadCreatorBanned);
+
+          if (!isThreadCreatorBanned || isModerator) {
+            console.log(`Including thread ${threadId}`);
+            const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
+            const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
+            const postsSnapshot = await getDocs(postsQuery);
+            const postsList = [];
+
+            for (const postDoc of postsSnapshot.docs) {
+              const postData = postDoc.data();
+              // Check if the post creator is banned
+              const postCreatorQuery = query(usersRef, where('Username', '==', postData.createdBy));
+              const postCreatorSnapshot = await getDocs(postCreatorQuery);
+
+              if (!postCreatorSnapshot.empty) {
+                const postCreatorData = postCreatorSnapshot.docs[0].data();
+                const isPostCreatorBanned = postCreatorData.IsBanned || false;
+
+                if (!isPostCreatorBanned || isModerator) {
+                  postsList.push({
+                    id: postDoc.id,
+                    ...postData
+                  });
+                }
+              } else {
+                console.log(`Post creator not found: ${postData.createdBy}`);
+                // Decide how to handle posts with missing creator data
+                // For now, we'll include them to avoid losing data
+                postsList.push({
+                  id: postDoc.id,
+                  ...postData
+                });
+              }
+            }
+
+            threadsList.push({
+              id: threadId,
+              ...threadData,
+              posts: postsList
+            });
+          } else {
+            console.log(`Excluding thread ${threadId} due to banned creator`);
+          }
+        }
       }
 
+      console.log(`Setting ${threadsList.length} threads`);
       setThreads(threadsList);
     } catch (error) {
       console.error('Error fetching threads and posts:', error);
     }
   };
-
   const handleAddThread = async () => {
     if (newThreadTitle.trim() && username) {
         let imageUrls = [];
@@ -265,6 +322,7 @@ const ColForum = ({route, navigation}) => {
   };
 
  const handleReportSubmission = async (reportType, threadId, postId = null, reportedUsername) => {
+
    const reportData = {
      threadId,
      postId,
@@ -334,6 +392,7 @@ const ColForum = ({route, navigation}) => {
               <Button
                 title="Report Thread"
                 onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
+                disabled={thread.createdBy === username}
                 style={styles.reportButton}
               />
             </View>
@@ -372,6 +431,7 @@ const ColForum = ({route, navigation}) => {
                 <Button
                   title="Report Post"
                   onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
+                  disabled={post.createdBy === username}
                 />
               </View>
             ))}

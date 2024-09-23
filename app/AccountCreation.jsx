@@ -39,6 +39,8 @@ const AccountCreation = ({ navigation }) => {
         SuperRecruiter: false,
         RecruiterInstitution: 'NA',
         Username: username,
+        IsModerator: false,
+        IsBanned: false,
         Email: email,
         mfaEnabled: isMfaEnabled,
         phoneNumber: '',
