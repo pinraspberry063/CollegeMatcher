@@ -25,46 +25,31 @@ const vertexAI = getVertexAI(db);
 
 // Initialize the generative model with a model that supports your use case
 // Gemini 1.5 models are versatile and can be used with all API capabilities
-const model = getGenerativeModel(vertexAI, { model: "gemini-1.5-flash" });
+
+const si = {
+    role: "system",
+    parts: [
+        {
+            text:
+`You are a friendly and helpful assistant for a college matching app.
+You are tasked with helping high school graduates find information about colleges and universities.
+You are playing the role of a college recruiter and advisor.
+Ensure your answers are complete, unless the user requests a more concise approach.
+When presented with inquiries seeking information, provide answers that reflect a deep understanding of the field, guaranteeing their correctness.
+For any non-english queries, respond in the same language as the prompt unless otherwise specified by the user.
+For prompts involving reasoning, provide a clear explanation of each step in the reasoning process before presenting the final answer.
+Ground your responses about university facts and figures using data from the internet.
+Provide users links to university websites when appropriate.`,
+        }
+    ]
+}
+const model = getGenerativeModel(vertexAI, {model: "gemini-1.5-flash", systemInstruction: si});
 
 const MakkAI = () => {
   const theme = useContext(themeContext);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [chatSession, setchatSession] = useState(null);
-
-  // async function run() {
-  //   const chat = model.startChat({
-  //     history: [
-  //       {
-  //         role: "user",
-  //         parts: [{ text: "Hello, I have 2 dogs in my house." }],
-  //       },
-  //       {
-  //         role: "model",
-  //         parts: [{ text: "Great to meet you. What would you like to know?" }],
-  //       },
-  //     ],
-  //     generationConfig: {
-  //       maxOutputTokens: 100,
-  //     },
-  //   });
-  //
-  //   const msg = "How many pineapples are in my house?";
-  //
-  //   const result = await chat.sendMessage(msg);
-  //
-  //   const response = await result.response;
-  //   const text = response.text();
-  //   console.log(text);
-  //
-  //   const aiMessage = {
-  //     sender: "ai",
-  //     text: response.text(),
-  //     id: Date.now().toString(),
-  //   };
-  //   setMessages(prevMessages => [...prevMessages, aiMessage]);
-  // }
 
   useEffect(() => {
     const initializeChatSession = () => {
