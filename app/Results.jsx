@@ -236,8 +236,8 @@ const Results = ({route, navigation}) => {
 
   if(isLoading){
     return (
-      <View>
-        <Text> Loading...</Text>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size={100}/>
       </View>
 
     );
@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
     width: '90%'
   },
   choiceBox: {
-      width: 100,
+      width: 125,
       height: 50,
       borderBlockColorL: 'black',
       borderWidth: 1,
