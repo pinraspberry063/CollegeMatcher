@@ -38,6 +38,7 @@ import RecruiterVerification from './app/RecruiterVerification';
 import AddRecs from './app/AddRecs';
 import FavColleges from './app/FavColleges';
 import EditCollege from './app/EditCollege';
+import MFAScreen from './app/MFAScreen';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -162,6 +163,7 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
     <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
+    <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
   </LaunchStack.Navigator>
 );
 
