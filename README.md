@@ -9,6 +9,10 @@ A web/mobile app that helps with the college search process by matching people t
 * Arlind Bengu
 * Mason LeFrance
 * Katie Sparr
+* Christain Salassi
+* Britteny Favor
+* Alex Frederick
+* Phillip Moore
 
 ## Project Sponsor
 Colin Bailey
