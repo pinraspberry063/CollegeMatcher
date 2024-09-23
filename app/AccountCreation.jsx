@@ -17,10 +17,16 @@ const AccountCreation = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isRecruiter, setIsRecruiter] = useState(false); // State for the Switch
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleSignUp = async () => {
-    if (!email || !password || !username) {
-      Alert.alert('Input Error', 'Please enter both email and password as well as your first and last name.');
+    if (!email || !password || !username || !confirmPassword) {
+      Alert.alert('Input Error', 'Please fill out all fields.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Passwords do not match.');
       return;
     }
 
@@ -39,8 +45,6 @@ const AccountCreation = ({ navigation }) => {
         SuperRecruiter: false,
         RecruiterInstitution: 'NA',
         Username: username,
-        IsModerator: false,
-        IsBanned: false,
         Email: email,
         mfaEnabled: isMfaEnabled,
         phoneNumber: '',
@@ -59,7 +63,7 @@ const AccountCreation = ({ navigation }) => {
         navigation.navigate('RecruiterVerification');
       } else if (isMfaEnabled) {
         console.log('Navigating to MFAScreen');
-        navigation.navigate('MFAScreen');
+        navigation.navigate('MFAScreen', { fromAccountCreation: true });
       } else {
         console.log('Navigating to Main screen');
         navigation.navigate('Main');
@@ -89,6 +93,14 @@ const AccountCreation = ({ navigation }) => {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Confirm Password"
+          placeholderTextColor={theme.color}
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
         <TextInput
           style={[styles.input, { borderColor: theme.color, color: theme.color }]}
