@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from 'react';
+import React, {useContext, useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Linking,
+  Animated,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
@@ -33,6 +34,18 @@ const Login = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState('options'); // 'options', 'email', or 'phone'
+
+  // Add animation
+  const slideAnim = useRef(new Animated.Value(-1000)).current; //start off screen
+
+  useEffect(() => {
+      Animated.timing(slideAnim, {
+          toValue: 0, // Moves to its normal position
+          duration: 1000, // Duration of the animation
+          useNativeDriver: true, // Optimize performance
+      }).start();
+    }, [slideAnim]);
+  // End animation
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -271,19 +284,19 @@ const Login = ({navigation}) => {
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, {color: theme.color}]}>Login</Text>
-      {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
-      {loginMethod === 'email' && (
-        <TouchableOpacity onPress={() => setLoginMethod('options')}>
-          <Text style={{color: theme.color, marginTop: 20}}>
-            Other login options
-          </Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-};
+      <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+        <Text style={[styles.title, {color: theme.color}]}>Login</Text>
+        {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
+        {loginMethod === 'email' && (
+          <TouchableOpacity onPress={() => setLoginMethod('options')}>
+            <Text style={{color: theme.color, marginTop: 20}}>
+              Other login options
+            </Text>
+          </TouchableOpacity>
+        )}
+      </Animated.View>
+    );
+  };
 
 const styles = StyleSheet.create({
   container: {
