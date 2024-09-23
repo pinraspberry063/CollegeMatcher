@@ -1,18 +1,10 @@
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  Timestamp,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import {db} from '../../config/firebaseConfig';
+import { getFirestore, collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
 
-export const handleReport = async reportData => {
+export const handleReport = async (reportData) => {
   try {
     const reportRef = collection(firestore, 'Reports');
     const currentUser = auth().currentUser;
@@ -38,7 +30,7 @@ export const handleReport = async reportData => {
       reportedUser: reportedUserUID,
       reportedBy: currentUser.uid,
       createdAt: Timestamp.now(),
-      status: 'pending',
+      status: 'pending'
     };
 
     await addDoc(reportRef, report);

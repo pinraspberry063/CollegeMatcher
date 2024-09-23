@@ -1,25 +1,16 @@
-import React, {useContext, useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-  Switch,
-} from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
-import {UserContext} from '../components/UserContext';
-import {collection, addDoc, getFirestore} from 'firebase/firestore';
-import {db} from '../config/firebaseConfig';
+import { UserContext } from '../components/UserContext';
+import { collection, addDoc, getFirestore } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
 
-const AccountCreation = ({navigation}) => {
+const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
-  const {setUser} = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
@@ -28,50 +19,55 @@ const AccountCreation = ({navigation}) => {
 
   const handleSignUp = async () => {
     if (!email || !password || !username) {
-      Alert.alert(
-        'Input Error',
-        'Please enter both email and password as well as your first and last name.',
-      );
+      Alert.alert('Input Error', 'Please enter both email and password as well as your first and last name.');
       return;
     }
 
     setLoading(true);
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(
-        email,
-        password,
-      );
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
       setUser(user); // Set the logged in user in context
 
-      // Add user to Firestore
+      // Add user to Firestore with email included
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
-        IsRecruiter: isRecruiter, // Use the state of the Switch
+        IsRecruiter: isRecruiter,  // Use the state of the Switch
+        SuperRecruiter: false,
+        RecruiterInstitution: "NA",
         Username: username,
+        Email: email,  // Store user's email
       });
 
       setLoading(false);
       Alert.alert('Account Created');
-      navigation.navigate('Main');
+
+      if (isRecruiter) {
+        // Navigate to RecruiterVerification screen if the user is a recruiter
+        navigation.navigate('RecruiterVerification');
+      } else {
+        // Otherwise, navigate to the main screen
+        navigation.navigate('Main');
+      }
     } catch (error) {
       setLoading(false);
       Alert.alert('Account Creation Failed', error.message);
     }
   };
 
+
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, {color: theme.color}]}>Create Account</Text>
+      <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Email"
         placeholderTextColor={theme.color}
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="Password"
         placeholderTextColor={theme.color}
         secureTextEntry
@@ -79,7 +75,7 @@ const AccountCreation = ({navigation}) => {
         onChangeText={setPassword}
       />
       <TextInput
-        style={[styles.input, {borderColor: theme.color, color: theme.color}]}
+        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
         placeholder="First and Last name"
         placeholderTextColor={theme.color}
         value={username}
@@ -87,13 +83,11 @@ const AccountCreation = ({navigation}) => {
       />
 
       <View style={styles.switchContainer}>
-        <Text style={[styles.label, {color: theme.color}]}>
-          I am a recruiter
-        </Text>
+        <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
         <Switch
           value={isRecruiter}
           onValueChange={setIsRecruiter}
-          trackColor={{false: '#767577', true: theme.buttonColor}}
+          trackColor={{ false: '#767577', true: theme.buttonColor }}
           thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
         />
       </View>
