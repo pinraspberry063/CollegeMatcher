@@ -36,6 +36,10 @@ import ModeratorScreen from './app/ModeratorScreen';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
+import RecruiterVerification from './app/RecruiterVerification';
+import AddRecs from './app/AddRecs';
+import FavColleges from './app/FavColleges';
+import EditCollege from './app/EditCollege';
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -60,6 +64,9 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Picker" component={Picker} />
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
+    <HomeStack.Screen name="AddRecs" component={AddRecs} />
+    <HomeStack.Screen name="FavColleges" component={FavColleges} />
+    <HomeStack.Screen name="EditCollege" component={EditCollege} />
   </HomeStack.Navigator>
 );
 
@@ -158,6 +165,7 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
+    <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
   </LaunchStack.Navigator>
 );
 

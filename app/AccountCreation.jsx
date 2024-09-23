@@ -29,21 +29,32 @@ const AccountCreation = ({ navigation }) => {
       const user = userCredential.user;
       setUser(user); // Set the logged in user in context
 
-      // Add user to Firestore
+      // Add user to Firestore with email included
       await addDoc(collection(firestore, 'Users'), {
         User_UID: user.uid,
-        IsRecruiter: isRecruiter, // Use the state of the Switch
+        IsRecruiter: isRecruiter,  // Use the state of the Switch
+        SuperRecruiter: false,
+        RecruiterInstitution: "NA",
         Username: username,
+        Email: email,  // Store user's email
       });
 
       setLoading(false);
       Alert.alert('Account Created');
-      navigation.navigate('Main');
+
+      if (isRecruiter) {
+        // Navigate to RecruiterVerification screen if the user is a recruiter
+        navigation.navigate('RecruiterVerification');
+      } else {
+        // Otherwise, navigate to the main screen
+        navigation.navigate('Main');
+      }
     } catch (error) {
       setLoading(false);
       Alert.alert('Account Creation Failed', error.message);
     }
   };
+
 
   return (
     <View style={styles.container}>

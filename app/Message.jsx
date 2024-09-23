@@ -1,3 +1,5 @@
+// This is where the actual messaging takes place.
+
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
