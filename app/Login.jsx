@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, To
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
@@ -17,6 +17,10 @@ const Login = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginMethod, setLoginMethod] = useState('options'); // 'options', 'email', or 'phone'
+  const [showMfaPrompt, setShowMfaPrompt] = useState(false);
+  const [mfaVerificationCode, setMfaVerificationCode] = useState('');
+  const [mfaConfirmation, setMfaConfirmation] = useState(null);
+  const firestore = getFirestore(db);
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -26,15 +30,48 @@ const Login = ({ navigation }) => {
 
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
-      if (isAllowed) {
-        setUser(userCredential.user); // Set the logged in user in context only if not banned
+      const uid = userCredential.user.uid;
+
+      // Check if MFA is enabled for the user
+      const userDoc = await getDoc(doc(firestore, 'Users', uid));
+      if (userDoc.exists() && userDoc.data().mfaEnabled) {
+        // Send MFA verification code
+        const phoneNumber = userDoc.data().phoneNumber;
+        const confirmationResult = await auth().verifyPhoneNumber(phoneNumber);
+        setMfaConfirmation(confirmationResult);
+        setShowMfaPrompt(true);
+        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
       } else {
-        // If not allowed (banned), don't set the user or navigate
-        setUser(null);
+        // No MFA, proceed normally
+        await checkIsRecruiter(uid);
       }
     } catch (error) {
+      console.error('Login Error:', error);
       Alert.alert('Login Failed', error.message);
+    }
+  };
+
+  const handleMfaVerification = async () => {
+    if (!mfaVerificationCode) {
+      Alert.alert('Input Error', 'Please enter the verification code.');
+      return;
+    }
+
+    try {
+      const credential = auth.PhoneAuthProvider.credential(
+        mfaConfirmation.verificationId,
+        mfaVerificationCode
+      );
+
+      // Reauthenticate the user with the phone credential
+      await auth().currentUser.reauthenticateWithCredential(credential);
+
+      // Hide MFA prompt and navigate
+      setShowMfaPrompt(false);
+      navigation.navigate('Main');
+    } catch (error) {
+      console.error('MFA Verification Error:', error);
+      Alert.alert('Verification Failed', 'Invalid verification code.');
     }
   };
 
@@ -224,6 +261,18 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
             <Text style={{ color: theme.color, marginTop: 20 }}>Other login options</Text>
           </TouchableOpacity>
         )}
+        {showMfaPrompt && (
+          <View style={styles.mfaContainer}>
+            <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
+            <TextInput
+              style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+              placeholder="Verification Code"
+              value={mfaVerificationCode}
+              onChangeText={setMfaVerificationCode}
+            />
+            <Button title="Verify Code" onPress={handleMfaVerification} />
+          </View>
+        )}
       </View>
     );
   };
@@ -262,6 +311,16 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 10,
+  },
+  mfaContainer: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  mfaTitle: {
+    fontSize: 18,
+    marginBottom: 12,
   },
 });
 
