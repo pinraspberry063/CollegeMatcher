@@ -1,5 +1,16 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import React, {useContext, useState, useEffect, useRef} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  TouchableOpacity,
+  Linking,
+  Animated,
+} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
@@ -21,6 +32,18 @@ const Login = ({ navigation }) => {
   const [mfaVerificationCode, setMfaVerificationCode] = useState('');
   const [mfaConfirmation, setMfaConfirmation] = useState(null);
   const firestore = getFirestore(db);
+
+  // Add animation
+  const slideAnim = useRef(new Animated.Value(-1000)).current; //start off screen
+
+  useEffect(() => {
+      Animated.timing(slideAnim, {
+          toValue: 0, // Moves to its normal position
+          duration: 1000, // Duration of the animation
+          useNativeDriver: true, // Optimize performance
+      }).start();
+    }, [slideAnim]);
+  // End animation
 
   const handleEmailLogin = async () => {
     if (!email || !password) {
@@ -252,13 +275,15 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
       </>
     );
 
-    return (
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.color }]}>Login</Text>
+  return (
+      <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+        <Text style={[styles.title, {color: theme.color}]}>Login</Text>
         {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
         {loginMethod === 'email' && (
           <TouchableOpacity onPress={() => setLoginMethod('options')}>
-            <Text style={{ color: theme.color, marginTop: 20 }}>Other login options</Text>
+            <Text style={{color: theme.color, marginTop: 20}}>
+              Other login options
+            </Text>
           </TouchableOpacity>
         )}
         {showMfaPrompt && (
@@ -273,7 +298,7 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
             <Button title="Verify Code" onPress={handleMfaVerification} />
           </View>
         )}
-      </View>
+      </Animated.View>
     );
   };
 

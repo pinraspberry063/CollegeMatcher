@@ -28,12 +28,24 @@ import MakkAI from './app/MakkAI';
 import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
+import Details from './app/Details';
+
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
 import FollowedForums from './app/FollowedForums';
 import PhoneVerification from './app/PhoneVerification';
 import ModeratorScreen from './app/ModeratorScreen';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  setDoc,
+  getFirestore,
+  query,
+  where,
+  getDoc,
+} from 'firebase/firestore';
 import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
 import RecruiterVerification from './app/RecruiterVerification';
@@ -41,6 +53,8 @@ import AddRecs from './app/AddRecs';
 import FavColleges from './app/FavColleges';
 import EditCollege from './app/EditCollege';
 import MFAScreen from './app/MFAScreen';
+
+const firestore = getFirestore(db);
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -84,8 +98,26 @@ const QuizStackScreen = () => (
   <QuizStack.Navigator screenOptions={screenOptions}>
     <QuizStack.Screen name="Quiz" component={Quiz} />
     <QuizStack.Screen name="Results" component={Results} />
+    <QuizStack.Screen name="Details" component={Details} />
   </QuizStack.Navigator>
 );
+
+
+const ResultStack = createNativeStackNavigator();
+const ResultStackScreen = ({route}) => {
+  const Top100 = route.params.Top100;
+  console.log('Top100' + Top100);
+  return (
+    <ResultStack.Navigator screenOptions={screenOptions}>
+      <ResultStack.Screen
+        name="Results"
+        initialParams={{top100: Top100}}
+        component={Results}
+      />
+      <ResultStack.Screen name="Details" component={Details} />
+    </ResultStack.Navigator>
+  );
+};
 
 const ForumStack = createNativeStackNavigator();
 const ForumStackScreen = () => (
@@ -110,14 +142,53 @@ const AIStackScreen = () => (
 const icons = {
   Home: 'home',
   QuizStack: 'magnify',
-  ColForumSelector: 'forum',
+  ColForumSelectorTab: 'forum',
   Messages: 'message',
   AI: 'head',
   Moderation: 'shield-account'
 };
 
 const Tab = createBottomTabNavigator();
-const TabScreen = () => (
+const TabScreen = () => {
+  const [topColleges, setTopColleges] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const user = auth().currentUser.uid;
+
+  useEffect(() => {
+    const checkQuiz = async () => {
+      const usersRef = collection(firestore, 'Users');
+      const userQuery = query(
+        usersRef,
+        where('User_UID', '==', auth().currentUser.uid),
+      );
+      try {
+        const querySnapshot = await getDocs(userQuery);
+
+        if (!querySnapshot.empty) {
+          const firstDoc = querySnapshot.docs[0];
+          const collegeData = firstDoc.data();
+          const top100 = collegeData.top100Colleges;
+
+          setTopColleges(top100);
+        } else {
+          console.log('No matching document found.');
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error retrieving document:', error);
+      }
+    };
+    checkQuiz();
+  }, [topColleges, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View>
+        <Text>Loading</Text>
+      </View>
+    );
+  }
+  return(
   <Tab.Navigator
     screenOptions={({ route }) => ({
       tabBarIcon: ({ color, size }) => {
@@ -143,8 +214,12 @@ const TabScreen = () => (
     })}
   >
     <Tab.Screen name="Home" component={HomeStackScreen} />
-    <Tab.Screen name="QuizStack" component={QuizStackScreen} />
-    <Tab.Screen name="ColForumSelector" component={ForumStackScreen} />
+    <Tab.Screen
+        name="QuizStack"
+        initialParams={{Top100: topColleges}}
+        component={ResultStackScreen}
+      />
+    <Tab.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
     <Tab.Screen name="Messages" component={MessageStackScreen} />
     <Tab.Screen name="AI" component={AIStackScreen} />
 {/*     {checkUserStatus === 'moderator' && ( */}
@@ -156,7 +231,7 @@ const TabScreen = () => (
               options={{ tabBarButton: () => null }}
             />
   </Tab.Navigator>
-);
+)};
 
 const RootStack = createNativeStackNavigator();
 const LaunchStack = createNativeStackNavigator();
@@ -191,6 +266,8 @@ const checkUserStatus = async (userId) => {
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [takenQuiz, setTakenQuiz] = useState(false);
+  const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
 
@@ -203,17 +280,14 @@ const App = () => {
     };
   }, [darkMode]);
 
+  // Dependency on data
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    const subscriber = auth().onAuthStateChanged(()=> setUser(user));
+    if (initializing){
+      setInitializing(false);
+    }
     return subscriber; // unsubscribe on unmount
-  }, []);
-
-  function onAuthStateChanged(user) { // call this function when there's a change in auth state
-    // update user to new user object or to null if not signed in
-    setUser(user);
-    // stop initial auth check if this function is accessed
-    if (initializing) setInitializing(false);
-  }
+  }, [user, initializing]);
 
   const handleDynamicLink = async (link) => {
     if (link.url) {
