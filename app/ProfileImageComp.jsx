@@ -1,17 +1,11 @@
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
-import React, {useContext, useState} from 'react';
-import {Button, Image} from 'react-native-elements';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity } from 'react-native'
+import React, { useContext, useState } from 'react'
+import { Button, Image } from 'react-native-elements';
 import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext';
+import themeContext from '../theme/themeContext'
 
 export default function Picker({navigation}) {
   const theme = useContext(themeContext);
@@ -21,21 +15,21 @@ export default function Picker({navigation}) {
   const user = auth().currentUser;
 
   const navigateToAccountSettings = () => {
-    navigation.navigate('Account');
-  };
+    navigation.navigate("Account");
+  }
   const uploadImage = async () => {
-    const {uri} = image;
-    const filename = 'profile';
-    const uploadUri = uri;
+    const { uri } = image;
+    const filename = "profile";
+    const uploadUri =  uri;
     setUploading(true);
     setTransferred(0);
     const task = storage()
-      .ref('images/' + user.uid + '/' + filename)
+      .ref("images/" + user.uid + "/" + filename)
       .putFile(uploadUri);
     // set progress state
     task.on('state_changed', snapshot => {
       setTransferred(
-        Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 10000,
+        Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 10000
       );
     });
     try {
@@ -46,62 +40,65 @@ export default function Picker({navigation}) {
     setUploading(false);
     Alert.alert(
       'Photo uploaded!',
-      'Your photo has been uploaded to Firebase Cloud Storage!',
+      'Your photo has been uploaded to Firebase Cloud Storage!'
     );
     setImage(null);
+    
   };
-
-  const selectImage = async () => {
+  
+  const selectImage = async() => {
+    
     const options = {
       maxWidth: 2000,
       maxHeight: 2000,
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
+      allowsEditing: true, 
       quality: 1,
       storageOptions: {
         skipBackup: true,
-        path: 'images',
-      },
+        path: 'images'
+      }
     };
-
+    
     let response = await ImagePicker.launchImageLibraryAsync(options);
     if (!response.canceled) {
-      const source = {uri: response.assets[0].uri};
+      const source = { uri: response.assets[0].uri };
       console.log(source);
       setImage(source);
+      
     }
+   
   };
   return (
-    <SafeAreaView
-      style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
-      <Button
-        style={styles.selectButton}
-        onPress={selectImage}
-        title="Select Image"
-      />
-
-      <View
-        style={[styles.imageContainer, {backgroundColor: theme.background}]}>
+    <SafeAreaView style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+      <Button style={styles.selectButton} 
+      onPress={selectImage}
+      title= "Select Image"/>
+       
+      
+      <View style={[styles.imageContainer, {backgroundColor: theme.background}]}>
         {image !== null ? (
-          <Image source={{uri: image.uri}} style={styles.imageBox} />
+          <Image source={{ uri: image.uri }} style={styles.imageBox} />
         ) : null}
         {uploading ? (
           <View style={styles.progressBarContainer}>
             <Progress.Bar progress={transferred} width={300} />
           </View>
         ) : (
-          <Button
-            style={styles.uploadButton}
-            onPress={() => {
-              uploadImage(), navigateToAccountSettings();
-            }}
-            title="Save"
-          />
+          <Button 
+          style={styles.uploadButton} 
+          onPress={() => {uploadImage(), navigateToAccountSettings()}}
+          title= "Save"/>
+            
+          
         )}
       </View>
     </SafeAreaView>
   );
+  
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -113,7 +110,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 50,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   uploadButton: {
     //borderRadius: 5,
@@ -121,22 +118,22 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 20
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold'
   },
   imageContainer: {
     marginTop: 30,
     marginBottom: 50,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   progressBarContainer: {
-    marginTop: 20,
+    marginTop: 20
   },
   imageBox: {
     width: 300,
-    height: 300,
-  },
+    height: 300
+  }
 });

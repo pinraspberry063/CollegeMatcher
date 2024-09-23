@@ -1,8 +1,8 @@
-import React, {useState} from 'react';
-import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
-const PhoneVerification = ({navigation}) => {
+const PhoneVerification = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationId, setVerificationId] = useState(null);
@@ -19,10 +19,7 @@ const PhoneVerification = ({navigation}) => {
 
   const handleVerifyCode = async () => {
     try {
-      const credential = auth.PhoneAuthProvider.credential(
-        verificationId,
-        verificationCode,
-      );
+      const credential = auth.PhoneAuthProvider.credential(verificationId, verificationCode);
       await auth().signInWithCredential(credential);
       Alert.alert('Phone authentication successful');
       navigation.navigate('Main');
