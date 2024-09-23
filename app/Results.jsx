@@ -1,82 +1,17 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert, TextInput, ActivityIndicator,TouchableOpacity, ScrollView} from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { db } from '../config/firebaseConfig';
-
-const firestore = getFirestore(db);  // Initialize Firestore
-
-const Results = ({ route }) => {
-    const top5 = route.params.top5;
-    const { user } = useContext(UserContext);  // Get the current user from UserContext
-    const [committedColleges, setCommittedColleges] = useState([]);
-
-    useEffect(() => {
-        const fetchCommittedColleges = async () => {
-            if (!user) return;
-
-            // Query the "Users" collection for the document where "User_UID" matches the current user's UID
-            const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
-            const querySnapshot = await getDocs(usersQuery);
-
-            if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0];  // Get the first matching document
-                const data = userDoc.data();
-
-                // Set the committed colleges from the user's data, or an empty array if it doesn't exist
-                setCommittedColleges(data.Committed_Colleges || []);
-            }
-        };
-
-        fetchCommittedColleges();
-    }, [user]);
-
-    const handleCommit = async (collegeName) => {
-        try {
-            if (!user) {
-                Alert.alert('Error', 'You must be logged in to commit to a college.');
-                return;
-            }
-
-            const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
-            const querySnapshot = await getDocs(usersQuery);
-import React, {useEffect, useState} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TextInput,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  Button,
-  Image,
-  ActivityIndicator,
-  Pressable
-} from 'react-native';
 import  CheckBox  from '@react-native-community/checkbox';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  setDoc,
-  getFirestore,
-  query,
-  where,
-} from 'firebase/firestore';
 import DropdownComponent from '../components/DropdownComp';
-import {db} from '../config/firebaseConfig';
-import auth from '@react-native-firebase/auth';
 import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const collegeRef = collection(firestore, 'CompleteColleges');
-
+const collegeRef = collection(firestore, 'CompleteColleges'); // Initialize Firestore
 
 const favoriteCollege = async ({ID}) => {
   const collegeID = parseInt(ID);
@@ -86,64 +21,6 @@ const favoriteCollege = async ({ID}) => {
   try {
     const querySnapshot = await getDocs(userQuery);
 
-            if (!querySnapshot.empty) {
-                const userDoc = querySnapshot.docs[0];  // Get the first matching document
-                const userDocRef = doc(firestore, 'Users', userDoc.id);
-
-                let updatedCommittedColleges;
-                if (committedColleges.includes(collegeName)) {
-                    // Remove the college if it exists in the committed list
-                    updatedCommittedColleges = committedColleges.filter(college => college !== collegeName);
-                    await updateDoc(userDocRef, {
-                        Committed_Colleges: arrayRemove(collegeName),
-                    });
-                    Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}`);
-                } else {
-                    // Add the college if it doesn't exist in the committed list
-                    updatedCommittedColleges = [...committedColleges, collegeName];
-                    await updateDoc(userDocRef, {
-                        Committed_Colleges: arrayUnion(collegeName),
-                    });
-                    Alert.alert('Committed', `You have committed to ${collegeName}`);
-                }
-
-                // Update the local state
-                setCommittedColleges(updatedCommittedColleges);
-            } else {
-                Alert.alert('Error', 'User not found in the database.');
-            }
-        } catch (error) {
-            console.error('Error committing to college:', error);
-            Alert.alert('Error', 'Something went wrong while committing to the college.');
-        }
-    };
-
-    const renderItem = ({ item }) => {
-        const isCommitted = committedColleges.includes(item.name);
-
-        return (
-            <View style={styles.card}>
-                <Text style={styles.collegeName}>{item.name}</Text>
-                <Text style={styles.collegeScore}>Match Accuracy: {item.score}%</Text>
-                <Button
-                    title={isCommitted ? "Remove Commit" : "Commit"}
-                    onPress={() => handleCommit(item.name)}
-                />
-            </View>
-        );
-    };
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Top 5 College Matches</Text>
-            <FlatList
-                data={top5}
-                renderItem={renderItem}
-                contentContainerStyle={styles.list}
-            />
-        </SafeAreaView>
-    );
-};
     if (!querySnapshot.empty) {
       const firstDoc = querySnapshot.docs[0];
       const userData = firstDoc.data();
@@ -158,7 +35,7 @@ const favoriteCollege = async ({ID}) => {
         {merge: true},
       );
 
-      alert('College added to Favorites!');
+      Alert.alert('College added to Favorites!');
     }
   } catch (error) {
     console.error('Error adding college to favorites: ', error);
@@ -167,7 +44,9 @@ const favoriteCollege = async ({ID}) => {
 
 const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
-  const user = auth().currentUser.uid;
+  // const user = auth().currentUser.uid;
+  const { user } = useContext(UserContext);  // Get the current user from UserContext
+  const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
   const [colllegeList, setCollegeList] = useState(top100);
@@ -198,7 +77,25 @@ const Results = ({route, navigation}) => {
   
   
 
+  useEffect(() => {
+    const fetchCommittedColleges = async () => {
+        if (!user) return;
 
+        // Query the "Users" collection for the document where "User_UID" matches the current user's UID
+        const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
+        const querySnapshot = await getDocs(usersQuery);
+
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];  // Get the first matching document
+            const data = userDoc.data();
+
+            // Set the committed colleges from the user's data, or an empty array if it doesn't exist
+            setCommittedColleges(data.Committed_Colleges || []);
+        }
+    };
+
+    fetchCommittedColleges();
+}, [user]);
 
   useEffect(() => {
     
@@ -214,7 +111,7 @@ const Results = ({route, navigation}) => {
       })
 
       }catch(error) {
-        alert("Error Message: " + error);
+        Alert.alert("Error Message: " + error);
       }
       
     }
@@ -225,9 +122,55 @@ const Results = ({route, navigation}) => {
     
   }, [])
 
-  const renderItem = ({item}) => (
+  const handleCommit = async (collegeName) => {
+    try {
+        if (!user) {
+            Alert.alert('Error', 'You must be logged in to commit to a college.');
+            return;
+        }
+
+        const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
+        const querySnapshot = await getDocs(usersQuery);
+
+        if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0];  // Get the first matching document
+            const userDocRef = doc(firestore, 'Users', userDoc.id);
+
+            let updatedCommittedColleges;
+            if (committedColleges.includes(collegeName)) {
+                // Remove the college if it exists in the committed list
+                updatedCommittedColleges = committedColleges.filter(college => college !== collegeName);
+                await updateDoc(userDocRef, {
+                    Committed_Colleges: arrayRemove(collegeName),
+                });
+                Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}`);
+            } else {
+                // Add the college if it doesn't exist in the committed list
+                updatedCommittedColleges = [...committedColleges, collegeName];
+                await updateDoc(userDocRef, {
+                    Committed_Colleges: arrayUnion(collegeName),
+                });
+                Alert.alert('Committed', `You have committed to ${collegeName}`);
+            }
+
+            // Update the local state
+            setCommittedColleges(updatedCommittedColleges);
+        } else {
+            Alert.alert('Error', 'User not found in the database.');
+        }
+    } catch (error) {
+        console.error('Error committing to college:', error);
+        Alert.alert('Error', 'Something went wrong while committing to the college.');
+    }
+};
+
+  const renderItem = ({item}) => {
+    const isCommitted = committedColleges.includes(item.name);
+    
+    return(
+    
     <ScrollView style={styles.card}>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.button}
         onPress={() => {
           favoriteCollege({ID: item.id});
@@ -238,7 +181,16 @@ const Results = ({route, navigation}) => {
 
           // onError={(error)=> console.log("Image error: " + error)}
         />
+      </TouchableOpacity> */}
+      <TouchableOpacity
+        style = {[styles.button, {backgroundColor: 'pink', width: 70, height: 20, alignSelf: 'flex-end'}]}
+        onPress={() => handleCommit(item.name)}
+      >
+        <Text>{isCommitted ? "Remove Commit" : "Commit"}</Text>
+
       </TouchableOpacity>
+                    
+      
       <TouchableOpacity
         onPress={() =>
           navigation.push('Details', {college: item.name, id: item.id})
@@ -246,8 +198,9 @@ const Results = ({route, navigation}) => {
         <Text style={styles.collegeName}>{item.name}</Text>
         <Text style={styles.collegeScore}>Match Percent: {item.score}%</Text>
       </TouchableOpacity>
+      
     </ScrollView>
-  );
+  )};
 
 
   const handleFilterSearch = () => {
@@ -437,9 +390,9 @@ const Results = ({route, navigation}) => {
 
                   {major &&
 
-                    <View style={{width:'95%'}}>
+                    <View style={{flex:1,width:'95%'}}>
                       <DropdownComponent
-                        style={{width: '98%', marginLeft: 15}}
+                        style={{width: '75%', marginLeft: 15}}
                         data={majorData}
                         value={selMajors}
                         onChange={(val) => {
@@ -479,9 +432,9 @@ const Results = ({route, navigation}) => {
 
                   {chooseState &&
 
-                    <View style={{width:'95%'}}>
+                    <View style={{flex:1, width:'95%'}}>
                       <DropdownComponent
-                        style={{width: '98%', marginLeft: 15}}
+                        style={{ marginLeft: 15}}
                         data={stateData}
                         value={stateChoice}
                         onChange={(val) => {
@@ -560,42 +513,123 @@ const Results = ({route, navigation}) => {
   
 
 
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        padding: 20,
+      flex: 1,
+      backgroundColor: '#fff',
+      padding: 20,
     },
     title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      paddingTop: 20,
+      textAlign: 'center',
     },
     list: {
-        paddingBottom: 20,
+      paddingBottom: 20,
+      paddingTop: 60,
     },
     card: {
-        backgroundColor: '#f8f8f8',
-        padding: 20,
-        borderRadius: 10,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
+      backgroundColor: '#f8f8f8',
+      padding: 20,
+      borderRadius: 10,
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOffset: {width: 0, height: 2},
+      shadowOpacity: 0.2,
+      shadowRadius: 2,
+      elevation: 2,
     },
     collegeName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 5,
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 5,
     },
     collegeScore: {
-        fontSize: 16,
-        color: '#555',
-        marginBottom: 10,
+      fontSize: 16,
+      color: '#555',
     },
-});
-
-export default Results
+    dropdown: {
+      width: 100,
+    },
+    button: {
+      width: 20,
+      marginLeft: '93%',
+      alignContent: 'flex-end',
+    },
+    searchView:{
+      width: '100%',
+      height: 100,
+      justifyContent: 'center',
+    },
+    searchText: {
+      width: '75%',
+      height: 50,
+      borderBlockColor: 'grey',
+      borderWidth: 1
+  
+    },
+    searchContainer:{
+      width: '25%',
+      height: '50%',
+      position: 'absolute',
+      right: 0,
+      top: 25,
+      backgroundColor: 'purple',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    filterView: {
+      width: '95%',
+      height: 600,
+      borderBlockColor: 'green',
+      borderWidth: 3,
+      justifyContent: 'flex-start', 
+      alignItems: 'flex-start',
+      paddingTop: 15,
+    
+    
+    },
+     checkboxContainer:{
+      flexDirection: 'row',
+      marginBottom: 20,
+      width: '95%',
+      padding: 10
+  
+    }, 
+    checkbox:{
+      alignSelf: 'center',
+  
+    },
+    label: {
+      margin: 8,
+      color: 'black'
+      
+    },
+    choices: {
+      flexDirection: 'row',
+      
+      width: '90%'
+    },
+    choiceBox: {
+        width: 125,
+        height: 50,
+        borderBlockColorL: 'black',
+        borderWidth: 1,
+        margin: 8,
+        alignSelf: 'center',
+        flexDirection: 'row'
+    },
+    input: {
+      height: 30, 
+      borderColor: 'black',
+      borderWidth: 1,
+      padding: 8, 
+      marginLeft: 8,
+    }
+    
+  
+  });
+  
+  export default Results
