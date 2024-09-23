@@ -54,6 +54,7 @@ import FavColleges from './app/FavColleges';
 import EditCollege from './app/EditCollege';
 import MFAScreen from './app/MFAScreen';
 import CompareColleges from './app/CompareColleges';
+import UsernamePrompt from './app/UsernamePrompt';
 
 const firestore = getFirestore(db);
 
@@ -246,6 +247,7 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
     <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
     <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
+    <LaunchStack.Screen name="UsernamePrompt" component={UsernamePrompt} />
   </LaunchStack.Navigator>
 );
 

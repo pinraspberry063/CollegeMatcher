@@ -115,15 +115,20 @@ const Login = ({ navigation }) => {
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
-      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
-                  if (isAllowed) {
-                    setUser(userCredential.user);
-                  } else {
-                    setUser(null);
-                  }
-      console.log('User signed in successfully:', userCredential.user.displayName);
-      Alert.alert('Google Login Successful');
-      navigation.navigate('Main');
+      const user = userCredential.user;
+
+      // Check if user document exists
+      const userDocRef = doc(firestore, 'Users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Prompt for username
+        navigation.navigate('UsernamePrompt', { user });
+      } else {
+        // User document exists, proceed to main app
+        setUser(user);
+        navigation.navigate('Main');
+      }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       Alert.alert('Google Login Failed', error.message);
@@ -141,9 +146,21 @@ const Login = ({ navigation }) => {
         throw new Error('Something went wrong obtaining access token');
       }
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
-      await auth().signInWithCredential(facebookCredential);
-      Alert.alert('Facebook Login Successful');
-      navigation.navigate('Main');
+      const userCredential = await auth().signInWithCredential(facebookCredential);
+      const user = userCredential.user;
+
+      // Check if user document exists
+      const userDocRef = doc(firestore, 'Users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Prompt for username
+        navigation.navigate('UsernamePrompt', { user });
+      } else {
+        // User document exists, proceed to main app
+        setUser(user);
+        navigation.navigate('Main');
+      }
     } catch (error) {
       Alert.alert('Facebook Login Failed', error.message);
     }

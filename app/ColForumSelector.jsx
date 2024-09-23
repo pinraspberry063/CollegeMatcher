@@ -15,7 +15,7 @@ const ColForumSelector = ({ navigation }) => {
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
-      if (!user) {
+      if (!user || !user.uid) {
         Alert.alert('Error', 'User not logged in.');
         return;
       }
