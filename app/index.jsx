@@ -1,10 +1,12 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { SafeAreaView, Text, View, Button, StyleSheet, Alert } from 'react-native';
+import React, {useContext, useEffect, useState} from 'react';
+import {SafeAreaView, StyleSheet, Text, View, Button, Dimensions, Animated, TouchableWithoutFeedback , TouchableOpacity, ImageBackground, Alert} from 'react-native';
+
 import Ionicons from '@expo/vector-icons/Ionicons';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';  // Import the UserContext
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';  // Firestore imports
 import { db } from '../config/firebaseConfig';  // Import Firebase configuration
+import PlanetSwiper from '../components/PlanetSlider.jsx';
 
 const firestore = getFirestore(db);  // Initialize Firestore
 
@@ -66,10 +68,11 @@ const Index = ({ navigation }) => {
   }, [user]);  // Run the check when the component mounts or user changes
 
   return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <View style={styles.container}>
       <View style={styles.icon}>
         <Ionicons
-          color={theme.color}
+          color='white'
           raised
           name="settings-outline"
           size={40}
@@ -80,11 +83,29 @@ const Index = ({ navigation }) => {
       </View>
 
       <SafeAreaView style={styles.titleContainer}>
-        <Text style={[styles.title, { color: theme.color }]}>College Matcher</Text>
-        <Text style={[styles.subtitle, { color: theme.color }]}>
+        <Text style={[styles.title, {color: 'purple'}]}>
+          College Matcher
+        </Text>
+        <Text style={[styles.subtitle, {color: 'white'}]}>
           Let colleges find you today!
         </Text>
       </SafeAreaView>
+        
+        <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 100}}>
+           {/* Orange central view */}
+        <View style={{marginTop: -30}} >
+          <View style={styles.orangeCircle} />
+        </View>
+          
+          <PlanetSwiper /> 
+        </View>
+
+        
+      
+      
+
+      
+      
 
       <View style={styles.buttonContainer}>
         <Button
@@ -124,16 +145,21 @@ const Index = ({ navigation }) => {
         )}
       </View>
     </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover'
+  },
   container: {
     flex: 1,
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: 300,
+    paddingTop: 150,
   },
   title: {
     fontSize: 50,
@@ -148,9 +174,18 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: 'light',
   },
+  orangeCircle: {
+    width: 250,
+    height: 250,
+    borderRadius: 225,
+    backgroundColor: 'orange',
+    position: 'absolute', 
+    alignSelf: 'center' 
+  },
   buttonContainer: {
+    flex: 1,
     alignItems: 'center',
-    paddingTop: 200,
+    paddingTop: 100,
   },
   button: {
     width: '50%',
@@ -158,4 +193,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Index;
+export default Index
