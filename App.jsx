@@ -53,9 +53,11 @@ import AddRecs from './app/AddRecs';
 import FavColleges from './app/FavColleges';
 import EditCollege from './app/EditCollege';
 import MFAScreen from './app/MFAScreen';
+import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 
 const firestore = getFirestore(db);
+
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -83,6 +85,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
+    <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
   </HomeStack.Navigator>
 );
 
