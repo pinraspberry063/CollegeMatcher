@@ -9,6 +9,7 @@ import {
   TextInput,
   Button,
   Alert,
+  Image,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
@@ -53,15 +54,18 @@ const ColForum = ({route, navigation}) => {
     const selectImage = async () => {
         const options = {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
+        allowsEditing: false,
         allowsMultipleSelection: true,
         quality: 1,
       };
 
       let result = await ImagePicker.launchImageLibraryAsync(options);
+
+      console.log(result);
+
       if (!result.canceled) {
-          const images = result.assets.map(asset => ({uri: asset.uri }));
-          setImages([...images, ...selectedImages]);
+          const images = result.assets.map(asset => asset.uri );
+          setImages(images);
           }
     };
 
@@ -70,7 +74,7 @@ const ColForum = ({route, navigation}) => {
           const imageUrls = [];
 
           for (const image of images) {
-            const uploadUri = image.uri;
+            const uploadUri = image;
             const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
 
             setUploading(true);
@@ -177,7 +181,7 @@ const ColForum = ({route, navigation}) => {
     if (newThreadTitle.trim() && username) {
         let imageUrls = [];
         if (images.length> 0) {
-            imageUrls = await uploadImages();
+            imageUrls = await uploadImage();
             }
       try {
         const threadsRef = collection(
@@ -205,8 +209,65 @@ const ColForum = ({route, navigation}) => {
     }
   };
 
+    // Add image selection and uploading for posts
+    const [postImages, setPostImages] = useState({}); // Store images per thread
+    const [uploadingPost, setUploadingPost] = useState(false);
+    const [transferredPost, setTransferredPost] = useState(0);
+
+    const selectPostImage = async (threadId) => {
+      const options = {
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      };
+
+      let result = await ImagePicker.launchImageLibraryAsync(options);
+
+      if (!result.canceled) {
+        const images = result.assets.map(asset => asset.uri);
+        setPostImages(prev => ({...prev, [threadId]: images}));
+      }
+    };
+
+    const uploadPostImages = async (threadId) => {
+      const imageUrls = [];
+      const images = postImages[threadId] || [];
+
+      for (const image of images) {
+        const filename = image.substring(image.lastIndexOf('/') + 1);
+
+        setUploadingPost(true);
+        setTransferredPost(0);
+
+        const task = storage()
+          .ref(`forum_post_images/${auth().currentUser.uid}/${filename}`)
+          .putFile(image);
+
+        task.on('state_changed', snapshot => {
+          setTransferredPost(Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        });
+
+        try {
+          await task;
+          const url = await storage().ref(`forum_post_images/${auth().currentUser.uid}/${filename}`).getDownloadURL();
+          imageUrls.push(url); // Store uploaded image URLs
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      setUploadingPost(false);
+      return imageUrls;
+    };
+
+
   const handleAddPost = async threadId => {
     if (newPostContent[threadId]?.trim() && username) {
+      let postImageUrls = []
+      if (postImages[threadId]?.length > 0) {
+          postImageUrls = await uploadPostImages(threadId);
+          }
+
       try {
         const postsRef = collection(
           firestore,
@@ -223,9 +284,11 @@ const ColForum = ({route, navigation}) => {
           createdBy: username,
           createdAt: Timestamp.now(),
           isRecruiter,
+          imageUrls: postImageUrls,
         };
         await addDoc(postsRef, newPost);
         setNewPostContent(prev => ({...prev, [threadId]: ''}));
+        setPostImages(prev => ({...prev, [threadId]: []})); //clear selected images
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new post
       } catch (error) {
         console.error('Error adding new post:', error);
@@ -276,8 +339,8 @@ const ColForum = ({route, navigation}) => {
           {/*Display selected images */}
           {images.length > 0 && (
                       <View>
-                        {images.map((img, index) => (
-                          <Image key={index} source={{ uri: img.uri }} style={styles.imageBox} />
+                        {images.map((imageUri, index) => (
+                          <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
                         ))}
                         {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
                       </View>
@@ -296,15 +359,15 @@ const ColForum = ({route, navigation}) => {
               {thread.imageUrls && thread.imageUrls.length > 0 && (
                   <View style={styles.imageContainer}>
                       {thread.imageUrls.map((url, index) => (
-                          <Image key={index} source={{ uri:url }} style={sytles.imageBox} />
+                          <Image key={index} source={{ uri:url }} style={styles.imageBox} />
                       ))}
                   </View>
               )}
 
               {images.length > 0 && (
                 <View>
-                  {images.map((img, index) => (
-                    <Image key={index} source={{ uri: img.uri }} style={styles.imageBox} />
+                  {images.map((imageUri, index) => (
+                    <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
                   ))}
                   {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
                 </View>
@@ -339,6 +402,16 @@ const ColForum = ({route, navigation}) => {
                 <Text style={[styles.postContent, {color: theme.textColor}]}>
                   {post.content}
                 </Text>
+
+                {/* Render post images */}
+                {post.imageUrls && post.imageUrls.length > 0 && (
+                  <View style={styles.imageContainer}>
+                    {post.imageUrls.map((url, index) => (
+                      <Image key={index} source={{ uri: url }} style={styles.imageBox} />
+                    ))}
+                  </View>
+                )}
+
                 <Text
                   style={[
                     styles.postCreatedBy,
@@ -372,6 +445,18 @@ const ColForum = ({route, navigation}) => {
                   setNewPostContent(prev => ({...prev, [thread.id]: text}))
                 }
               />
+              <Button title="Select Post Images" onPress={() => selectPostImage(thread.id)} />
+
+              {/* Display selected post images */}
+                {postImages[thread.id]?.length > 0 && (
+                  <View>
+                    {postImages[thread.id].map((imageUri, index) => (
+                      <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
+                    ))}
+                    {uploadingPost ? <Progress.Bar progress={transferredPost} width={300} /> : null}
+                  </View>
+                )}
+
               <Button
                 title="Add Post"
                 onPress={() => handleAddPost(thread.id)}
@@ -474,6 +559,11 @@ const styles = StyleSheet.create({
       width: 200,
       height: 200,
       marginVertical: 10,
+      },
+  imageContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 10,
       },
 });
 
