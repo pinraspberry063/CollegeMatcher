@@ -127,6 +127,10 @@ const Settings = ({ navigation }) => {
             disabled={loading}
           />
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('CompareColleges')}>
+          <Text style={[styles.item, { color: theme.color }]}>Compare Colleges</Text>
+        </TouchableOpacity>
+
 
         <TouchableOpacity onPress={handleLogout}>
           <Text style={[styles.item, { color: 'red' }]}>Logout</Text>
