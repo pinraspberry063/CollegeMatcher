@@ -35,17 +35,7 @@ import ForumSelect from './app/ForumSelect';
 import FollowedForums from './app/FollowedForums';
 import PhoneVerification from './app/PhoneVerification';
 import ModeratorScreen from './app/ModeratorScreen';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  setDoc,
-  getFirestore,
-  query,
-  where,
-  getDoc,
-} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, setDoc, getFirestore, query, where, getDoc } from 'firebase/firestore';
 import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
 import RecruiterVerification from './app/RecruiterVerification';

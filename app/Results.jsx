@@ -44,15 +44,15 @@ const favoriteCollege = async ({ID}) => {
 
 const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
-  // const user = auth().currentUser.uid;
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [committedColleges, setCommittedColleges] = useState([]);
-
   const [search, setSearch] = useState('');
   const [colllegeList, setCollegeList] = useState(top100);
   const [showFilter, setShowFilter] = useState(false);
   const [colleges, setColleges] = useState([]);
   const [isLoading, setisLoading] = useState(false);
+  const [miniGameVisible, setMiniGameVisible] = useState(true); // State to control mini-game visibility
+  const [score, setScore] = useState(0); // Score for minigame
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
   const [privateSchool, setPrivate] = useState (false);
@@ -74,8 +74,7 @@ const Results = ({route, navigation}) => {
   const [satSci, setSATSci] = useState();
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
-  
-  
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -98,7 +97,7 @@ const Results = ({route, navigation}) => {
 }, [user]);
 
   useEffect(() => {
-    
+
     const loadData = async() => {
 
       try{
@@ -113,13 +112,9 @@ const Results = ({route, navigation}) => {
       }catch(error) {
         Alert.alert("Error Message: " + error);
       }
-      
     }
     setisLoading(true);
     loadData();
-    
-  
-    
   }, [])
 
   const handleCommit = async (collegeName) => {
@@ -166,22 +161,10 @@ const Results = ({route, navigation}) => {
 
   const renderItem = ({item}) => {
     const isCommitted = committedColleges.includes(item.name);
-    
-    return(
-    
-    <ScrollView style={styles.card}>
-      {/* <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          favoriteCollege({ID: item.id});
-        }}>
-        <Image
-          style={{width: 20, height: 20, alignSelf: 'flex-end'}}
-          source={require('../assets/pinkstar.png')}
 
-          // onError={(error)=> console.log("Image error: " + error)}
-        />
-      </TouchableOpacity> */}
+    return(
+
+    <ScrollView style={styles.card}>
       <TouchableOpacity
         style = {[styles.button, {backgroundColor: 'pink', width: 70, height: 20, alignSelf: 'flex-end'}]}
         onPress={() => handleCommit(item.name)}
@@ -189,8 +172,8 @@ const Results = ({route, navigation}) => {
         <Text>{isCommitted ? "Remove Commit" : "Commit"}</Text>
 
       </TouchableOpacity>
-                    
-      
+
+
       <TouchableOpacity
         onPress={() =>
           navigation.push('Details', {college: item.name, id: item.id})
@@ -198,14 +181,14 @@ const Results = ({route, navigation}) => {
         <Text style={styles.collegeName}>{item.name}</Text>
         <Text style={styles.collegeScore}>Match Percent: {item.score}%</Text>
       </TouchableOpacity>
-      
+
     </ScrollView>
   )};
 
 
   const handleFilterSearch = () => {
     setShowFilter(false);
-    const filtered = colleges.filter(college=> 
+    const filtered = colleges.filter(college=>
 
       // Women Only
       (((college.women_only === 1) && womenOnly) || ((college.women_only === 0) && !womenOnly)) &&
@@ -226,7 +209,7 @@ const Results = ({route, navigation}) => {
       ((college.act_Writing25 >= actWrit) || college.act_Writing25 == 'null' || actWrit == null) &&
 
       //SAT
-      ((college.sat_Total >= satTotal) || college.sat_Total == 'null' || satTotal == null) &&  
+      ((college.sat_Total >= satTotal) || college.sat_Total == 'null' || satTotal == null) &&
       ((college.sat_Math25 >= satMath) || college.sat_Math25 == 'null' || satMath == null) &&
       ((college.sat_Writing25 >= satWrit) || college.sat_Writing25 == 'null' || satWrit == null) &&
       ((college.act_criticalReading25 >= satRead)  || college.act_criticalReading25 == 'null' || satRead == null) &&
@@ -235,14 +218,14 @@ const Results = ({route, navigation}) => {
       (selMajors.length === 0 || selMajors.every(majorName => {
         // Use find method to search for the object with matching label or value
         const majorFound =  majorData.find(major => major.label === majorName || major.value === majorName);
-        
+
         // Return the categories if the major is found, otherwise return null
         const majorCat = majorFound ? majorFound.categories : null;
         const majorKey = 'percent_' + majorCat;
-        
+
         return majorKey in college && parseInt(college[majorKey]) !== 0;
       }))
-      
+
     );
 
     setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
@@ -256,28 +239,24 @@ const Results = ({route, navigation}) => {
       const filtered = colleges.filter(college =>
         college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
-  
+
       setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     } else {
       // If searchQuery is not valid, reset the college list to the original data
       setCollegeList(top100.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     }
-  
     setShowFilter(false);
-
   }
 
   const showFilters = ()=> {
     setShowFilter(!showFilter);
     console.log(selMajors);
-    
-
   }
 
   const handlePublicPrivate = (isPrivate) => {
     setPrivate(isPrivate);
     setPublicSchool(!isPrivate)
-    
+
   }
 
   const handleChooseState = (choice) => {
@@ -287,21 +266,28 @@ const Results = ({route, navigation}) => {
     }
   }
 
-  if(isLoading){
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size={100}/>
-      </View>
-
-    );
-  
-    
-
+  if (isLoading) {
+      return (
+        <View style={styles.container}>
+          <Text>Loading your results...</Text>
+          {miniGameVisible && (
+            <View>
+              <Text>Score: {score}</Text>
+              <TouchableOpacity onPress={() => setScore(score + 1)}>
+                <Text style={styles.button}>+1</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                setMiniGameVisible(false);
+                // Logic to show results content can go here
+              }}>
+                <Text style={styles.stopGameButton}>Show Results</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      );
   }
-  
- 
 
-  
     return (
       <View style={styles.container}>
         <View style={styles.searchView}>
@@ -313,11 +299,11 @@ const Results = ({route, navigation}) => {
         <TouchableOpacity onPress={showFilters}>
               <Text> Filter Search</Text>
           </TouchableOpacity>
-        {showFilter && 
-        
+        {showFilter &&
+
             <View style={styles.filterView}>
               <ScrollView style={{width: '98%' }}>
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={housing}
                     onValueChange={setHousing}
@@ -325,7 +311,7 @@ const Results = ({route, navigation}) => {
                   />
                   <Text> On-Campus Housing </Text>
                 </View>
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={mealPlan}
                     onValueChange={setMealplan}
@@ -333,7 +319,7 @@ const Results = ({route, navigation}) => {
                   />
                   <Text> Meal Plan </Text>
                 </View>
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={womenOnly}
                     onValueChange={setWomenOnly}
@@ -341,24 +327,24 @@ const Results = ({route, navigation}) => {
                   />
                   <Text> Women-only </Text>
                 </View>
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={publicSchool}
                     onValueChange={() => handlePublicPrivate(false)}
                     style={styles.checkbox}
                   />
-                  
+
                   <Text> Public </Text>
                   <CheckBox
                     value={privateSchool}
                     onValueChange={() => handlePublicPrivate(true)}
                     style={styles.checkbox}
                   />
-                  
+
                   <Text> Private </Text>
                 </View>
 
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={major}
                     onValueChange={setMajor}
@@ -372,7 +358,7 @@ const Results = ({route, navigation}) => {
                     <>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
                         {selMajors.map((choice, index) => (
-                          <View key={index} style={styles.choiceBox}> 
+                          <View key={index} style={styles.choiceBox}>
                             <Text style={styles.label}>{choice}</Text>
                             <TouchableOpacity onPress={() => {
                               setSelMajors(prevChoices => prevChoices.filter((_, i) => i !== index));
@@ -382,8 +368,8 @@ const Results = ({route, navigation}) => {
                           </View>
                         ))}
                       </ScrollView>
-                      
-                      
+
+
                     </>
                   )}
                   </View>
@@ -401,7 +387,7 @@ const Results = ({route, navigation}) => {
                       />
                     </View>
                   }
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={chooseState}
                     onValueChange={handleChooseState}
@@ -414,7 +400,7 @@ const Results = ({route, navigation}) => {
                     <>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.scrollView}>
                         {stateChoice.map((choice, index) => (
-                          <View key={index} style={styles.choiceBox}> 
+                          <View key={index} style={styles.choiceBox}>
                             <Text style={styles.label}>{choice}</Text>
                             <TouchableOpacity onPress={() => {
                               setStateChoice(prevChoices => prevChoices.filter((_, i) => i !== index));
@@ -424,8 +410,8 @@ const Results = ({route, navigation}) => {
                           </View>
                         ))}
                       </ScrollView>
-                      
-                      
+
+
                     </>
                   )}
                   </View>
@@ -443,7 +429,7 @@ const Results = ({route, navigation}) => {
                       />
                     </View>
                   }
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={act}
                     onValueChange={setACT}
@@ -457,7 +443,7 @@ const Results = ({route, navigation}) => {
                         <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
                           <Text style={styles.label}>{label}</Text>
                           <TextInput
-                            placeholder={label === 'Writing' ? '30' : '34'} 
+                            placeholder={label === 'Writing' ? '30' : '34'}
                             value={index === 0 ? actComp : index === 1 ? actEng : index === 2 ? actMath : index === 3 ? actSci : actWrit}
                             onValueChange={index === 0 ? setACTComp : index === 1 ? setACTEng : index === 2 ? setACTMath : index === 3 ? setACTSci : setACTWrit}
                             style={styles.input}
@@ -466,7 +452,7 @@ const Results = ({route, navigation}) => {
                       ))}
                     </View>
                   }
-                <View style={styles.checkboxContainer} > 
+                <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={sat}
                     onValueChange={setSAT}
@@ -480,7 +466,7 @@ const Results = ({route, navigation}) => {
                         <View key={index} style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
                           <Text style={styles.label}>{label}</Text>
                           <TextInput
-                            placeholder={label === 'Writing' ? '30' : '34'} 
+                            placeholder={label === 'Writing' ? '30' : '34'}
                             value={index === 0 ? satTotal : index === 1 ? satMath : index === 2 ? satSci : index === 3 ? satWrit : satRead}
                             onValueChange={index === 0 ? setSATTotal : index === 1 ? setSATMath : index === 2 ? setSATSci : index === 3 ? setSATWrit : setSATRead}
                             style={styles.input}
@@ -489,15 +475,10 @@ const Results = ({route, navigation}) => {
                       ))}
                     </View>
                   }
-                
-
-              
                 </ScrollView>
             </View>
-
-          
         }
-        
+
         <Text style={styles.title}>Top College Matches</Text>
         <FlatList
           data={colllegeList}
@@ -509,9 +490,6 @@ const Results = ({route, navigation}) => {
     );
 
   }
-
-  
-
 
   const styles = StyleSheet.create({
     container: {
@@ -536,7 +514,7 @@ const Results = ({route, navigation}) => {
       borderRadius: 10,
       marginBottom: 10,
       shadowColor: '#000',
-      shadowOffset: {width: 0, height: 2},
+      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.2,
       shadowRadius: 2,
       elevation: 2,
@@ -558,7 +536,7 @@ const Results = ({route, navigation}) => {
       marginLeft: '93%',
       alignContent: 'flex-end',
     },
-    searchView:{
+    searchView: {
       width: '100%',
       height: 100,
       justifyContent: 'center',
@@ -567,10 +545,9 @@ const Results = ({route, navigation}) => {
       width: '75%',
       height: 50,
       borderBlockColor: 'grey',
-      borderWidth: 1
-  
+      borderWidth: 1,
     },
-    searchContainer:{
+    searchContainer: {
       width: '25%',
       height: '50%',
       position: 'absolute',
@@ -578,58 +555,57 @@ const Results = ({route, navigation}) => {
       top: 25,
       backgroundColor: 'purple',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     filterView: {
       width: '95%',
       height: 600,
       borderBlockColor: 'green',
       borderWidth: 3,
-      justifyContent: 'flex-start', 
+      justifyContent: 'flex-start',
       alignItems: 'flex-start',
       paddingTop: 15,
-    
-    
     },
-     checkboxContainer:{
+    checkboxContainer: {
       flexDirection: 'row',
       marginBottom: 20,
       width: '95%',
-      padding: 10
-  
-    }, 
-    checkbox:{
+      padding: 10,
+    },
+    checkbox: {
       alignSelf: 'center',
-  
     },
     label: {
       margin: 8,
-      color: 'black'
-      
+      color: 'black',
     },
     choices: {
       flexDirection: 'row',
-      
-      width: '90%'
+      width: '90%',
     },
     choiceBox: {
-        width: 125,
-        height: 50,
-        borderBlockColorL: 'black',
-        borderWidth: 1,
-        margin: 8,
-        alignSelf: 'center',
-        flexDirection: 'row'
+      width: 125,
+      height: 50,
+      borderBlockColorL: 'black',
+      borderWidth: 1,
+      margin: 8,
+      alignSelf: 'center',
+      flexDirection: 'row',
     },
     input: {
-      height: 30, 
+      height: 30,
       borderColor: 'black',
       borderWidth: 1,
-      padding: 8, 
+      padding: 8,
       marginLeft: 8,
-    }
-    
-  
+    },
+    stopGameButton: {
+      marginTop: 20,
+      padding: 10,
+      backgroundColor: 'red',
+      color: 'white',
+      textAlign: 'center',
+    },
   });
-  
-  export default Results
+
+  export default Results;
