@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, doc, deleteDoc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import matchRoomates from '../src/utils/roomateMatchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { UserContext } from '../components/UserContext';
@@ -68,7 +68,23 @@ const RoomateMatcher = ({ navigation }) => {
             userId: auth().currentUser.uid,
             username: userName
              };
-
+          const deleteItem = async(uid) => {
+              const quizesRef = collection(firestore, 'RoomateMatcher');
+              const q = query(quizesRef, where('userId', '==', uid));
+              const querySnapshot = await getDocs(q);
+              try{
+              if (!querySnapshot.empty) {
+                  const userDoc = querySnapshot.docs[0];
+                   const userData = userDoc.data();
+                   deleteDoc(userDoc.ref)
+                   } else {
+                       console.error('No user found with the given UID.');
+                   }
+               } catch (error) {
+                   console.error('Error deleting repeat quiz:', error);
+               }
+           };
+       deleteItem(auth().currentUser.uid);
         try {
             await addDoc(collectionref, answers);
             alert('Quiz submitted successfully!');
