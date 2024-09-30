@@ -187,6 +187,7 @@ const Quiz = ({ navigation }) => {
   const [sizeImportance, setSizeImportance] = useState(0.5);
   const [classificationImportance, setClassificationImportance] = useState(0.5);
   const [urbanizationImportance, setUrbanizationImportance] = useState(0.5);
+  const [placeSearch, setPlaceSearch] = useState("123 Main St...");
 
   const handleSubmit = async () => {
     if (!address || !gpa || !major.length || !stateChoice.length || !distanceFromCollege || !tuitionCost || !religiousAffiliation || !sportCollege || !collegeDiversity || !size || !schoolClassification || !urbanizationLevel) {
@@ -240,18 +241,22 @@ const Quiz = ({ navigation }) => {
               <GooglePlacesAutocomplete
               placeholder="123 Main St..."
               fetchDetails={true}
+              keepResultsAfterBlur={true}
               onPress={(data, details = null) => {
                   if (details && details.formatted_address) {
                       console.log("Full Address Selected: ", details.formatted_address);
+                      setPlaceSearch(details.formatted_address);
                       setAddress(details.formatted_address);
+                      
                   } else {
                       setAddress(data.description);
                   }
               }}
+              value={address}
 
           textInputProps={{
-              value: address,
-              onChangeText: (text) => setAddress(text),
+              value: placeSearch,
+              onChangeText: setPlaceSearch
           }}
           query={{
               key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
