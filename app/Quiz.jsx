@@ -8,7 +8,7 @@ import auth from '@react-native-firebase/auth';
 import {collection, addDoc, getDocs, doc, setDoc, query, where, getFirestore,} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 import majorData from '../assets/major_data';
-import { Slider } from 'react-native-elements';
+import Slider from '@react-native-community/slider';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 
 const firestore = getFirestore(db);
@@ -239,9 +239,16 @@ const Quiz = ({ navigation }) => {
           <View style={{ zIndex: 10, elevation: 10 }}>
               <GooglePlacesAutocomplete
               placeholder="123 Main St..."
+              fetchDetails={true}
               onPress={(data, details = null) => {
-                  setAddress(data.description);
+                  if (details && details.formatted_address) {
+                      console.log("Full Address Selected: ", details.formatted_address);
+                      setAddress(details.formatted_address);
+                  } else {
+                      setAddress(data.description);
+                  }
               }}
+
           textInputProps={{
               value: address,
               onChangeText: (text) => setAddress(text),
@@ -250,6 +257,8 @@ const Quiz = ({ navigation }) => {
               key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
               language: 'en',
           }}
+          debounce={200}
+          enablePoweredByContainer={false}
           styles={{
               textInput: {
                   height: 40,
@@ -263,8 +272,8 @@ const Quiz = ({ navigation }) => {
                   backgroundColor: theme.background,
                   position: 'absolute',
                   top: 50,
-                  zIndex: 10,
-                  elevation: 10,
+                  zIndex: 1000,
+                  elevation: 1000,
               },
           }}
         />
@@ -275,7 +284,7 @@ const Quiz = ({ navigation }) => {
       </Text>
       <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
       <Slider
-        value={distanceImportance}
+        value={distanceImportance || 0.5}
         onValueChange={setDistanceImportance}
         step={0.1}
         minimumValue={0}
@@ -292,7 +301,7 @@ const Quiz = ({ navigation }) => {
       <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
       <DropdownComponent data={majorData} value={major} onChange={setMajor} multiSelect={true} />
       <Slider
-        value={majorImportance}
+        value={majorImportance || 0.5}
         onValueChange={setMajorImportance}
         step={0.1}
         minimumValue={0}
@@ -331,7 +340,7 @@ const Quiz = ({ navigation }) => {
       </Text>
       <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
       <Slider
-        value={tuitionImportance}
+        value={tuitionImportance || 0.5}
         onValueChange={setTuitionImportance}
         step={0.1}
         minimumValue={0}
@@ -379,7 +388,7 @@ const Quiz = ({ navigation }) => {
       <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
       <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
       <Slider
-        value={sportEventsImportance}
+        value={sportEventsImportance || 0.5}
         onValueChange={setSportEventsImportance}
         step={0.1}
         minimumValue={0}
@@ -398,7 +407,7 @@ const Quiz = ({ navigation }) => {
       </Text>
       <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} />
       <Slider
-        value={stateChoiceImportance}
+        value={stateChoiceImportance || 0.5}
         onValueChange={setStateChoiceImportance}
         step={0.1}
         minimumValue={0}
