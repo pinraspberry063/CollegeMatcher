@@ -97,7 +97,7 @@ const Index = ({ navigation }) => {
           <View style={styles.orangeCircle} />
         </View>
           
-          <PlanetSwiper /> 
+          <PlanetSwiper navigation={navigation}/> 
         </View>
 
         
