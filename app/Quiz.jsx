@@ -5,11 +5,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, query, deleteDoc, where, setDoc , getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 import majorData from '../assets/major_data';
+import { UserContext } from '../components/UserContext';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import stateData from '../assets/state_data';
+import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
 
@@ -144,6 +146,25 @@ const Quiz = ({navigation}) => {
             urbanization_level: urbanizationLevel,
             userId: auth().currentUser.uid,
         };
+          const deleteItem = async(uid) => {
+              const quizesRef = collection(firestore, 'Quiz');
+              const q = query(quizesRef, where('userId', '==', uid));
+              const querySnapshot = await getDocs(q);
+              //onst quizCount = await querySnapshot.count;
+              //console.log(quizCount);
+              try{
+              if (!querySnapshot.empty) {
+                  const userDoc = querySnapshot.docs[0];
+                  const userData = userDoc.data();
+                  deleteDoc(userDoc.ref)
+                   } else {
+                       console.error('No user found with the given UID.');
+                   }
+               } catch (error) {
+                   console.error('Error deleting repeat quiz:', error);
+               }
+           };
+       await deleteItem(auth().currentUser.uid);
 
         try {
             await addDoc(collectionref, answers);
