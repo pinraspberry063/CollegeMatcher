@@ -5,12 +5,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, doc, deleteDoc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, doc, deleteDoc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs, count, data, get } from 'firebase/firestore';
 import matchRoomates from '../src/utils/roomateMatchingAlgorithm';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
-import {collegeName} from '../app/ColForumSelector';
 
 const firestore = getFirestore(db);
 
@@ -40,7 +39,7 @@ const RoomateMatcher = ({ navigation }) => {
      const [clean, setClean] = useState('');
      const [boundaries, setBoundaries] = useState('');
      const [shareDuties, setShareDuties] = useState('');
-     //const [collegeName, setCollegeName] = useState(collegeName);
+     const [collegeName, setCollegeName] = useState('');
      const [userName, setUsername] = useState('');
 
 
@@ -64,7 +63,7 @@ const RoomateMatcher = ({ navigation }) => {
             clean: clean,
             boundaries: boundaries,
             share_duties: shareDuties,
-            //college_name: collegeName,
+            college_name: collegeName,
             userId: auth().currentUser.uid,
             username: userName
              };
@@ -72,11 +71,13 @@ const RoomateMatcher = ({ navigation }) => {
               const quizesRef = collection(firestore, 'RoomateMatcher');
               const q = query(quizesRef, where('userId', '==', uid));
               const querySnapshot = await getDocs(q);
+              //onst quizCount = await querySnapshot.count;
+              //console.log(quizCount);
               try{
               if (!querySnapshot.empty) {
                   const userDoc = querySnapshot.docs[0];
-                   const userData = userDoc.data();
-                   deleteDoc(userDoc.ref)
+                  const userData = userDoc.data();
+                  deleteDoc(userDoc.ref)
                    } else {
                        console.error('No user found with the given UID.');
                    }
@@ -84,7 +85,7 @@ const RoomateMatcher = ({ navigation }) => {
                    console.error('Error deleting repeat quiz:', error);
                }
            };
-       deleteItem(auth().currentUser.uid);
+       await deleteItem(auth().currentUser.uid);
         try {
             await addDoc(collectionref, answers);
             alert('Quiz submitted successfully!');
@@ -104,11 +105,12 @@ const RoomateMatcher = ({ navigation }) => {
                    const userDoc = querySnapshot.docs[0];
                    const userData = userDoc.data();
                    setUsername(userData.Username);
+                   setCollegeName(userData.Committed_Colleges[0]);
                  } else {
                    console.error('No user found with the given UID.');
                  }
                } catch (error) {
-                 console.error('Error fetching username and recruiter status:', error);
+                 console.error('Error Fetching Username and CollegeName:', error);
                }
              };
          fetchUsername(auth().currentUser.uid);
