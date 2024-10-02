@@ -2,10 +2,12 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
-const PlayerShip = ({ playerPosition }) => {
+const PlayerShip = ({ playerPositionX, playerPositionY }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ translateX: playerPosition.value }],
+      transform: [
+          { translateX: playerPositionX.value },
+          { translateY: playerPositionY.value}],
     };
   });
 
