@@ -23,13 +23,13 @@ import ColForum from './app/ColForum';
 import RoomateMatcher from './app/RoomateMatcher';
 import RoomateResults from './app/RoomateResults';
 import Message from './app/Message';
+import RoomateMessage from './app/RoomateMessage';
 import RecConvs from './app/RecConvs';
 import MakkAI from './app/MakkAI';
 import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import Details from './app/Details';
-
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
 import FollowedForums from './app/FollowedForums';
