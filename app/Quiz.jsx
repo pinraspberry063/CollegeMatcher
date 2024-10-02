@@ -158,7 +158,7 @@ const Quiz = ({navigation}) => {
                   const userData = userDoc.data();
                   deleteDoc(userDoc.ref)
                    } else {
-                       console.error('No user found with the given UID.');
+                       //console.error('No user found with the given UID.');
                    }
                } catch (error) {
                    console.error('Error deleting repeat quiz:', error);

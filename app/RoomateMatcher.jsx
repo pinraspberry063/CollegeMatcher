@@ -79,7 +79,7 @@ const RoomateMatcher = ({ navigation }) => {
                   const userData = userDoc.data();
                   deleteDoc(userDoc.ref)
                    } else {
-                       console.error('No user found with the given UID.');
+                       //console.error('(RoomateMatcher/delete)No user found with the given UID.');
                    }
                } catch (error) {
                    console.error('Error deleting repeat quiz:', error);
@@ -107,7 +107,7 @@ const RoomateMatcher = ({ navigation }) => {
                    setUsername(userData.Username);
                    setCollegeName(userData.Committed_Colleges[0]);
                  } else {
-                   console.error('No user found with the given UID.');
+                   console.error('(RoomateMatcher/username)No user found with the given UID.');
                  }
                } catch (error) {
                  console.error('Error Fetching Username and CollegeName:', error);
