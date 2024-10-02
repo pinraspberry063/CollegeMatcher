@@ -29,6 +29,7 @@ import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import Details from './app/Details';
+import EmailVerificationPrompt from './app/EmailVerificationPrompt';
 
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
@@ -248,6 +249,7 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
     <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
     <LaunchStack.Screen name="UsernamePrompt" component={UsernamePrompt} />
+    <LaunchStack.Screen name="EmailVerificationPrompt" component={EmailVerificationPrompt} />
   </LaunchStack.Navigator>
 );
 
