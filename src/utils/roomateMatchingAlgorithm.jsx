@@ -14,11 +14,7 @@ const matchRoomates = async (roomatePreferences) => {
     const scores = roomates.map(roomate => {
         let score = 0;
         if(roomate.userId != auth().currentUser.uid && roomate.college_name == roomatePreferences.college_name){
-        //let score = 0;
-        console.log(roomate.collegeName);
-        console.log(roomatePreferences.collegeName);
-        console.log(roomate.collegeName == roomatePreferences.collegeName)
-        console.log(roomatePreferences.bedtime);
+
         //bedtime compatibility
         if(roomatePreferences.bedtime == roomate.bedtime){
             score+=20;
@@ -129,8 +125,13 @@ const matchRoomates = async (roomatePreferences) => {
         const userName = roomate.username;
         return{roomate, score:finalScore, username: userName};
     });
+    const checkCompat = (answers) =>{
+        return answers.score > 0;
+        };
     scores.sort((a,b)=> b.score - a.score);
-    const top5Roomates = scores.slice(0,5).map((s)=>({name:s.username, score: s.score}));
+    const scoresFiltered = scores.filter(checkCompat);
+    console.log(scoresFiltered.length);
+    const top5Roomates = scoresFiltered.slice(0,5).map((s)=>({name:s.username, score: s.score}));
     const resultsRef = collection(firestore,'RoomateResults');
 
     try{
