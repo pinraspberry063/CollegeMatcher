@@ -35,6 +35,13 @@ const Launch = ({navigation}) => {
             }}
             buttonStyle={styles.button2}
           />
+          <Button
+            title="Game"
+            onPress={() => {
+              navigation.navigate('Game');
+            }}
+            buttonStyle={styles.button2}
+          />
         </View>
       </ImageBackground>
     </Animated.View>

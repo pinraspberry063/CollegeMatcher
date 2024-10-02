@@ -157,7 +157,7 @@ const Results = ({route, navigation}) => {
         console.error('Error committing to college:', error);
         Alert.alert('Error', 'Something went wrong while committing to the college.');
     }
-};
+  };
 
   const renderItem = ({item}) => {
     const isCommitted = committedColleges.includes(item.name);
