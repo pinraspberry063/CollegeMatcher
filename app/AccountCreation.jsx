@@ -19,6 +19,16 @@ const AccountCreation = ({ navigation }) => {
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  const determineNextScreen = () => {
+    if (isMfaEnabled) {
+      return isRecruiter ? 'RecruiterVerification' : 'Main';
+    } else if (isRecruiter) {
+      return 'RecruiterVerification';
+    } else {
+      return 'Main';
+    }
+  };
+
   const handleSignUp = async () => {
     if (!email || !password || !username || !confirmPassword) {
       Alert.alert('Input Error', 'Please fill out all fields.');
@@ -55,7 +65,11 @@ const AccountCreation = ({ navigation }) => {
        await user.sendEmailVerification();
        Alert.alert('Account Created', 'Please verify your email before proceeding.');
 
-      navigation.navigate('EmailVerificationPrompt', { isMfaEnabled, isRecruiter });
+      navigation.navigate('EmailVerificationPrompt', {
+        isMfaEnabled,
+        isRecruiter,
+        nextScreen: isMfaEnabled ? 'MFAScreen' : determineNextScreen()
+      });
       Alert.alert('Account Created Successfully');
 
       // Navigation logic

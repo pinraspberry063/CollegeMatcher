@@ -17,12 +17,13 @@ const EmailVerificationPrompt = ({ navigation, route }) => {
   };
 
   const proceedAfterVerification = () => {
-    if (isMfaEnabled) {
-      navigation.replace('MFAScreen');
-    } else if (isRecruiter) {
-      navigation.replace('RecruiterVerification');
+    if (route.params.nextScreen === 'MFAScreen') {
+      navigation.navigate('MFAScreen', {
+        nextScreen: isRecruiter ? 'RecruiterVerification' : 'Main',
+        ...route.params
+      });
     } else {
-      navigation.replace('Main');
+      navigation.navigate(route.params.nextScreen);
     }
   };
 
