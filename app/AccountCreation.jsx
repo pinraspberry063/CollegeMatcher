@@ -62,30 +62,30 @@ const AccountCreation = ({ navigation }) => {
 
       console.log('User document created in Firestore');
 
-       await user.sendEmailVerification();
-       Alert.alert('Account Created', 'Please verify your email before proceeding.');
-
-      navigation.navigate('EmailVerificationPrompt', {
-        isMfaEnabled,
-        isRecruiter,
-        nextScreen: isMfaEnabled ? 'MFAScreen' : determineNextScreen()
-      });
+//        await user.sendEmailVerification();
+//        Alert.alert('Account Created', 'Please verify your email before proceeding.');
+//
+//       navigation.navigate('EmailVerificationPrompt', {
+//         isMfaEnabled,
+//         isRecruiter,
+//         nextScreen: isMfaEnabled ? 'MFAScreen' : determineNextScreen()
+//       });
       Alert.alert('Account Created Successfully');
 
       // Navigation logic
       console.log('isRecruiter:', isRecruiter);
       console.log('isMfaEnabled:', isMfaEnabled);
 
-//       if (isRecruiter) {
-//         console.log('Navigating to RecruiterVerification');
-//         navigation.navigate('RecruiterVerification');
-//       } else if (isMfaEnabled) {
-//         console.log('Navigating to MFAScreen');
-//         navigation.navigate('MFAScreen', { fromAccountCreation: true });
-//       } else {
-//         console.log('Navigating to Main screen');
-//         navigation.navigate('Main');
-//       }
+      if (isRecruiter) {
+        console.log('Navigating to RecruiterVerification');
+        navigation.navigate('RecruiterVerification');
+      } else if (isMfaEnabled) {
+        console.log('Navigating to MFAScreen');
+        navigation.navigate('MFAScreen', { fromAccountCreation: true });
+      } else {
+        console.log('Navigating to Main screen');
+        navigation.navigate('Main');
+      }
     } catch (error) {
       console.error('Account Creation Error:', error);
       Alert.alert('Account Creation Failed', error.message);
