@@ -55,6 +55,7 @@ import EditCollege from './app/EditCollege';
 import MFAScreen from './app/MFAScreen';
 import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
+import { CollegesProvider } from './components/CollegeContext';
 
 const firestore = getFirestore(db);
 
@@ -315,21 +316,23 @@ const App = () => {
     if (initializing) return null;
 
     return (
-      <UserProvider>
-        <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-          <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
-            <RootStack.Navigator screenOptions={screenOptions}>
-{/*                */}{/* {user ? ( */}
-{/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
-{/*               ) : ( */}
-{/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
-{/*               )} */}
-              <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
-              <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
-            </RootStack.Navigator>
-          </NavigationContainer>
-        </themeContext.Provider>
-      </UserProvider>
+      <CollegesProvider>
+        <UserProvider>
+          <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+            <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+              <RootStack.Navigator screenOptions={screenOptions}>
+  {/*                */}{/* {user ? ( */}
+  {/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
+  {/*               ) : ( */}
+  {/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
+  {/*               )} */}
+                <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+                <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+              </RootStack.Navigator>
+            </NavigationContainer>
+          </themeContext.Provider>
+        </UserProvider>
+      </CollegesProvider>
     )
   }
 

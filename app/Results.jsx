@@ -8,6 +8,7 @@ import DropdownComponent from '../components/DropdownComp';
 import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
+import { CollegesContext } from '../components/CollegeContext';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -51,7 +52,8 @@ const Results = ({route, navigation}) => {
   const [search, setSearch] = useState('');
   const [colllegeList, setCollegeList] = useState(top100);
   const [showFilter, setShowFilter] = useState(false);
-  const [colleges, setColleges] = useState([]);
+  // const [colleges, setColleges] = useState([]);
+  const {colleges, loading} = useContext(CollegesContext);
   const [isLoading, setisLoading] = useState(false);
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
@@ -97,30 +99,30 @@ const Results = ({route, navigation}) => {
     fetchCommittedColleges();
 }, [user]);
 
-  useEffect(() => {
+  // useEffect(() => {
     
-    const loadData = async() => {
+  //   const loadData = async() => {
 
-      try{
-      await college_data()
-      .then((data)=>{
-        const collegeData = (data.docs.map(doc=> doc.data()));
-        setColleges(collegeData);
-        setisLoading(false);
+  //     try{
+  //     await college_data()
+  //     .then((data)=>{
+  //       const collegeData = (data.docs.map(doc=> doc.data()));
+  //       setColleges(collegeData);
+  //       setisLoading(false);
 
-      })
+  //     })
 
-      }catch(error) {
-        Alert.alert("Error Message: " + error);
-      }
+  //     }catch(error) {
+  //       Alert.alert("Error Message: " + error);
+  //     }
       
-    }
-    setisLoading(true);
-    loadData();
+  //   }
+  //   setisLoading(true);
+  //   loadData();
     
   
     
-  }, [])
+  // }, [])
 
   const handleCommit = async (collegeName) => {
     try {
@@ -287,7 +289,15 @@ const Results = ({route, navigation}) => {
     }
   }
 
-  if(isLoading){
+  const handleSetMajor = (choice) => {
+    setMajor(choice);
+    if(!choice){
+      setSelMajors([]);
+    }
+
+  }
+
+  if(isLoading || loading){
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size={100}/>
@@ -361,7 +371,7 @@ const Results = ({route, navigation}) => {
                 <View style={styles.checkboxContainer} > 
                   <CheckBox
                     value={major}
-                    onValueChange={setMajor}
+                    onValueChange={handleSetMajor}
                     style={styles.checkbox}
                   />
                   <Text> Select Majors </Text>
