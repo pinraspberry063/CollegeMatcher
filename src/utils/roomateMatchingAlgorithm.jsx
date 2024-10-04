@@ -214,15 +214,18 @@ const matchRoomates = async (roomatePreferences) => {
         }
         const finalScore = Math.round((score/maxScore)*100);
         const userName = roomate.username;
-        return{roomate, score:finalScore, username: userName};
+        const roomateUID = roomate.userId;
+        console.log(roomate.userId);
+        console.log(roomateUID);
+        return{roomate, score:finalScore, username: userName, roomate_uid: roomateUID };
     });
     const checkCompat = (answers) =>{
         return answers.score > 0;
         };
     scores.sort((a,b)=> b.score - a.score);
     const scoresFiltered = scores.filter(checkCompat);
-    console.log(scoresFiltered.length);
-    const top5Roomates = scoresFiltered.slice(0,5).map((s)=>({name:s.username, score: s.score}));
+    const top5Roomates = scoresFiltered.slice(0,5).map((s)=>({name:s.username, score: s.score, roomate_uid: s.roomate_uid}));
+    console.log(top5Roomates);
     const resultsRef = collection(firestore,'RoomateResults');
 
     try{
