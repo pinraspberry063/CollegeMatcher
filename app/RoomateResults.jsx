@@ -31,7 +31,7 @@ const RoomateResults = ({ route, navigation }) => {
           if (!existingConvoSnapshot.empty) {
             // Conversation already exists, navigate to the existing conversation
             const conversationId = existingConvoSnapshot.docs[0].id;
-            navigation.navigate('Message', { conversationId });
+            navigation.navigate('RoomateMessage', { conversationId });
           } else {
             // No conversation exists, create a new one
             const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
@@ -43,7 +43,7 @@ const RoomateResults = ({ route, navigation }) => {
             await addDoc(collection(newConvoRef, 'conv'), {});
 
             // Navigate to the newly created conversation
-            navigation.navigate('Message', { conversationId: newConvoRef.id });
+            navigation.navigate('RoomateMessage', { conversationId: newConvoRef.id });
           }
         },
         [db, user, navigation] // Dependencies for useCallback
