@@ -11,12 +11,9 @@ const RoomateResults = ({ route, navigation }) => {
     const { user } = useContext(UserContext);
     const [conversations, setConversations] = useState([]);
     const [usernames, setUsernames] = useState({});
-    console.log("top5: " + top5);
 
     const handleMessageNavigation = useCallback(
         async (userUID,roomateUID) => {
-            console.log(roomateUID);
-            console.log(userUID);
           const firestore = getFirestore(db);
 
           // Check if a conversation already exists between the user and the recruiter

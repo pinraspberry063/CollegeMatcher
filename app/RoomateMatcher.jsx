@@ -72,7 +72,6 @@ const RoomateMatcher = ({ navigation }) => {
               const q = query(quizesRef, where('userId', '==', uid));
               const querySnapshot = await getDocs(q);
               //onst quizCount = await querySnapshot.count;
-              //console.log(quizCount);
               try{
               if (!querySnapshot.empty) {
                   const userDoc = querySnapshot.docs[0];

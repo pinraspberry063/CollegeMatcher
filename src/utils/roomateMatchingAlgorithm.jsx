@@ -215,8 +215,6 @@ const matchRoomates = async (roomatePreferences) => {
         const finalScore = Math.round((score/maxScore)*100);
         const userName = roomate.username;
         const roomateUID = roomate.userId;
-        console.log(roomate.userId);
-        console.log(roomateUID);
         return{roomate, score:finalScore, username: userName, roomate_uid: roomateUID };
     });
     const checkCompat = (answers) =>{
