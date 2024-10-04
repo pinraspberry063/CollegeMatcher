@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard,} from 'react-native';
+import {StyleSheet, Text, View, ScrollView,TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard,} from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -165,7 +165,15 @@ const Quiz = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [gpa, setGpa] = useState('');
   const [satScore, setSatScore] = useState('');
+  const [satMath, setSatMath] = useState('');
+  const [satCriticalReading, setSatCriticalReading] = useState('');
+  const [satWriting, setSatWriting] = useState('');
   const [actScore, setActScore] = useState('');
+  const [actMath, setActMath] = useState('');
+  const [actScience, setActScience] = useState('');
+  const [actReading, setActReading] = useState('');
+  const [actEnglish, setActEnglish] = useState('');
+  const [actWriting, setActWriting] = useState('');
   const [stateChoice, setState] = useState('');
   const [major, setMajor] = useState('');
   const [distanceFromCollege, setDistance] = useState('');
@@ -190,9 +198,25 @@ const Quiz = ({ navigation }) => {
   const [placeSearch, setPlaceSearch] = useState("123 Main St...");
 
   const handleSubmit = async () => {
-    if (!address || !gpa || !major.length || !stateChoice.length || !distanceFromCollege || !tuitionCost || !religiousAffiliation || !sportCollege || !collegeDiversity || !size || !schoolClassification || !urbanizationLevel) {
-      alert('Please fill out all required fields before submitting.');
-      return;
+      const missingFields = [];
+
+    if (!address) missingFields.push('Address');
+    if (!gpa) missingFields.push('GPA');
+    if (!major.length) missingFields.push('Major');
+    if (!stateChoice.length) missingFields.push('State Choice');
+    if (!distanceFromCollege) missingFields.push('Distance from College');
+    if (!tuitionCost) missingFields.push('Tuition Cost');
+    if (!religiousAffiliation) missingFields.push('Religious Affiliation');
+    if (!sportCollege) missingFields.push('Sporting Events');
+    if (!collegeDiversity) missingFields.push('College Diversity');
+    if (!size) missingFields.push('College Size');
+    if (!schoolClassification) missingFields.push('School Classification');
+    if (!urbanizationLevel) missingFields.push('Urbanization Level');
+
+    if (missingFields.length > 0) {
+        const fields = missingFields.join(', ');
+        alert(`Please fill out the following required fields: ${fields}`);
+        return;
     }
 
     const answers = {
@@ -200,6 +224,14 @@ const Quiz = ({ navigation }) => {
       gpa,
       sat: satScore || 'N/A',
       act: actScore || 'N/A',
+      sat_critical_reading: satCriticalReading || 'N/A',
+      sat_writing: satWriting || 'N/A',
+      act: actScore || 'N/A',
+      act_math: actMath || 'N/A',
+      act_science: actScience || 'N/A',
+      act_reading: actReading || 'N/A',
+      act_english: actEnglish || 'N/A',
+      act_writing: actWriting || 'N/A',
       distance_from_college: distanceFromCollege,
       distance_importance: distanceImportance,
       major,
@@ -224,64 +256,41 @@ const Quiz = ({ navigation }) => {
     };
 
     try {
-      await setDoc(doc(collectionref, auth().currentUser.uid), answers);
+      await setDoc(doc(collection(firestore, "Users"), auth().currentUser.uid), answers);
       const result = (await matchColleges(answers)).top100Colleges;
       navigation.navigate('QuizStack', { top100: result });
       alert('Quiz submitted successfully!');
     } catch (error) {
       console.error('Error submitting the quiz:', error);
-      alert('There was an error submitting your quiz. Please try again.');
+      alert('There was an error submitting your quiz.');
     }
   };
 
   const renderPageOne = () => (
-      <View>
-          <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
-          <View style={{ zIndex: 10, elevation: 10 }}>
-              <GooglePlacesAutocomplete
-              placeholder="123 Main St..."
-              fetchDetails={true}
-              keepResultsAfterBlur={true}
-              onPress={(data, details = null) => {
-                  if (details && details.formatted_address) {
-                      console.log("Full Address Selected: ", details.formatted_address);
-                      setPlaceSearch(details.formatted_address);
-                      setAddress(details.formatted_address);
-                      
-                  } else {
-                      setAddress(data.description);
-                  }
-              }}
-              value={address}
-
-          textInputProps={{
-              value: placeSearch,
-              onChangeText: setPlaceSearch
-          }}
-          query={{
-              key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
-              language: 'en',
-          }}
-          debounce={200}
-          enablePoweredByContainer={false}
-          styles={{
-              textInput: {
-                  height: 40,
-                  borderWidth: 1,
-                  fontSize: 18,
-                  padding: 10,
-                  marginVertical: 10,
-                  borderColor: theme.color,
-              },
-              listView: {
-                  backgroundColor: theme.background,
-                  position: 'absolute',
-                  top: 50,
-                  zIndex: 1000,
-                  elevation: 1000,
-              },
-          }}
-        />
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+    <View>
+      <Text style={[styles.text, { color: theme.color }]}>
+        Are you looking to attend college in a specific state?
+      </Text>
+      <DropdownComponent
+        data={stateData}
+        value={stateChoice}
+        onChange={setState}
+        multiSelect={true}
+      />
+      <Slider
+        value={stateChoiceImportance || 0.5}
+        onValueChange={setStateChoiceImportance}
+        step={0.1}
+        minimumValue={0}
+        maximumValue={1}
+        thumbTintColor="silver"
+        minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+        <Text>Not Important</Text>
+        <Text>Neutral</Text>
+        <Text>Very Important</Text>
       </View>
 
       <Text style={[styles.text, { color: theme.color }]}>
@@ -319,12 +328,64 @@ const Quiz = ({ navigation }) => {
         <Text>Neutral</Text>
         <Text>Very Important</Text>
       </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Composite score?</Text>
+      <TextInput
+        style={[styles.textInput, { borderColor: theme.color }]}
+        value={actScore}
+        onChangeText={setActScore}
+        placeholder="Ex: 25..."
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Math score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={actMath}
+         onChangeText={setActMath}
+         placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT English score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={actEnglish}
+         onChangeText={setActEnglish}
+         placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Reading score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={actReading}
+         onChangeText={setActReading}
+         placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Science score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={actScience}
+         onChangeText={setActScience}
+         placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Writing score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={actWriting}
+         onChangeText={setActWriting}
+         placeholder='Ex: 25...'
+      />
+      <View style={styles.buttonContainer}>
+          <Button onPress={handleNext} title="Next" />
+      </View>
     </View>
+   </ScrollView>
   );
 
   const renderPageTwo = () => (
     <View>
-      <Text style={[styles.text, { color: theme.color }]}>SAT score?</Text>
+      <Text style={[styles.text, { color: theme.color }]}>SAT Composite score?</Text>
       <TextInput
         style={[styles.textInput, { borderColor: theme.color }]}
         value={satScore}
@@ -332,12 +393,28 @@ const Quiz = ({ navigation }) => {
         placeholder="Ex: 1200..."
       />
 
-      <Text style={[styles.text, { color: theme.color }]}>ACT score?</Text>
+      <Text style={[styles.text, { color: theme.color }]}>SAT Math score?</Text>
       <TextInput
-        style={[styles.textInput, { borderColor: theme.color }]}
-        value={actScore}
-        onChangeText={setActScore}
-        placeholder="Ex: 25..."
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={satMath}
+         onChangeText={setSatMath}
+         placeholder='Ex: 1200...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>SAT Critical Reading score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={satCriticalReading}
+         onChangeText={setSatCriticalReading}
+         placeholder='Ex: 1200...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>SAT Writing score?</Text>
+      <TextInput
+         style={[styles.textInput, { borderColor: theme.color }]}
+         value={satWriting}
+         onChangeText={setSatWriting}
+         placeholder='Ex: 1200...'
       />
 
       <Text style={[styles.text, { color: theme.color }]}>
@@ -370,11 +447,108 @@ const Quiz = ({ navigation }) => {
   );
 
   const renderPageThree = () => (
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
     <View>
+      <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+      <View style={{ zIndex: 10, elevation: 10 }}>
+        <GooglePlacesAutocomplete
+          placeholder="123 Main St..."
+          fetchDetails={true}
+          keepResultsAfterBlur={false}
+          onPress={(data, details = null) => {
+            if (details && details.formatted_address) {
+              console.log("Full Address Selected: ", details.formatted_address);
+              setPlaceSearch(details.formatted_address);
+              setAddress(details.formatted_address);
+            } else {
+              setAddress(data.description);
+            }
+          }}
+          value={address}
+          textInputProps={{
+            value: placeSearch,
+            onChangeText: setPlaceSearch
+          }}
+          query={{
+            key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
+            language: 'en',
+          }}
+          debounce={200}
+          enablePoweredByContainer={false}
+          styles={{
+            textInput: {
+              height: 40,
+              borderWidth: 1,
+              fontSize: 18,
+              padding: 10,
+              marginVertical: 10,
+              borderColor: theme.color,
+            },
+            listView: {
+              backgroundColor: theme.background,
+              position: 'absolute',
+              top: 50,
+              zIndex: 1000,
+              elevation: 1000,
+            },
+          }}
+        />
+      </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
+      <DropdownComponent
+          data={[
+              { label: 'Neutral', value: '1' },
+              { label: 'Important', value: '2' },
+              { label: 'Very Important', value: '3' },
+          ]}
+          selectedValue={collegeDiversity}
+          onValueChange={setDiverse}
+        />
+        <Slider
+            value={diversityImportance || 0.5}
+            onValueChange={setDiversityImportance}
+            step={0.1}
+            minimumValue={0}
+            maximumValue={1}
+            thumbTintColor="silver"
+            minimumTrackTintColor="purple"
+        />
+        <View style={styles.sliderLabels}>
+            <Text>Not Important</Text>
+            <Text>Neutral</Text>
+            <Text>Very Important</Text>
+       </View>
+
+       <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
+       <DropdownComponent
+          data={sizeData}
+          selectedValue={size}
+          onValueChange={setSize}
+       />
+       <Slider
+         value={sizeImportance || 0.5}
+         onValueChange={setSizeImportance}
+         step={0.1}
+         minimumValue={0}
+         maximumValue={1}
+         thumbTintColor="silver"
+         minimumTrackTintColor="purple"
+        />
+       <View style={styles.sliderLabels}>
+           <Text>Not Important</Text>
+           <Text>Neutral</Text>
+           <Text>Very Important</Text>
+      </View>
+
       <Text style={[styles.text, { color: theme.color }]}>
         Do you wish to attend a college of a specific religious affiliation?
       </Text>
-      <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
+      <DropdownComponent
+        data={religiousAffiliationData}
+        value={religiousAffiliation}
+        onChange={setReligiousAffil}
+      />
       <Slider
         value={religiousAffilImportance}
         onValueChange={setReligiousAffilImportance}
@@ -391,7 +565,11 @@ const Quiz = ({ navigation }) => {
       </View>
 
       <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
-      <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
+      <DropdownComponent
+        data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+        value={sportCollege}
+        onChange={setSportEvents}
+      />
       <Slider
         value={sportEventsImportance || 0.5}
         onValueChange={setSportEventsImportance}
@@ -407,29 +585,57 @@ const Quiz = ({ navigation }) => {
         <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>
-        Are you looking to attend college in a specific state?
-      </Text>
-      <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} />
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
+      <DropdownComponent
+         data={[
+             { label: 'Public', value: '1' },
+             { label: 'Private', value: '2' },
+         ]}
+         selectedValue={schoolClassification}
+         onValueChange={setType}
+      />
       <Slider
-        value={stateChoiceImportance || 0.5}
-        onValueChange={setStateChoiceImportance}
-        step={0.1}
-        minimumValue={0}
-        maximumValue={1}
-        thumbTintColor="silver"
-        minimumTrackTintColor="purple"
+            value={classificationImportance || 0.5}
+            onValueChange={setClassificationImportance}
+            step={0.1}
+            minimumValue={0}
+            maximumValue={1}
+            thumbTintColor="silver"
+            minimumTrackTintColor="purple"
       />
       <View style={styles.sliderLabels}>
-        <Text>Not Important</Text>
-        <Text>Neutral</Text>
-        <Text>Very Important</Text>
+            <Text>Not Important</Text>
+            <Text>Neutral</Text>
+            <Text>Very Important</Text>
+      </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
+      <DropdownComponent
+          data={typeOfAreaData}
+          selectedValue={urbanizationLevel}
+          onValueChange={setTypeOfArea}
+      />
+      <Slider
+         value={urbanizationImportance || 0.5}
+         onValueChange={setUrbanizationImportance}
+         step={0.1}
+         minimumValue={0}
+         maximumValue={1}
+         thumbTintColor="silver"
+         minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+          <Text>Not Important</Text>
+          <Text>Neutral</Text>
+          <Text>Very Important</Text>
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button onPress={handleSubmit} title="Submit" />
+          <Button onPress={handleBack} title="Back" />
+          <Button onPress={handleSubmit} title="Submit" />
       </View>
     </View>
+    </ScrollView>
   );
 
   const renderContent = () => {
@@ -437,6 +643,7 @@ const Quiz = ({ navigation }) => {
     if (currentPage === 2) return renderPageTwo();
     if (currentPage === 3) return renderPageThree();
   };
+
 
   const handleNext = () => setCurrentPage((prev) => prev + 1);
   const handleBack = () => setCurrentPage((prev) => prev - 1);
@@ -448,6 +655,7 @@ const Quiz = ({ navigation }) => {
           data={[{ key: 'quizContent' }]}
           renderItem={renderContent}
           keyExtractor={(item) => item.key}
+          keyboardShouldPersistTaps="handled"
           ListFooterComponent={() => (
             <View style={styles.buttonContainer}>
               {currentPage < 3 && <Button onPress={handleNext} title="Next" />}
