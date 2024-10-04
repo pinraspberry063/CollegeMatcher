@@ -12,9 +12,9 @@ const Message = ({ route, navigation }) => {
   const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [recruiterUID, setRecruiterUID] = useState(null);
+  const [roomateUID, setRoomateUID] = useState(null);
   const [documentID, setDocumentID] = useState(null);
-  const [isRecruiter, setIsRecruiter] = useState(false);
+  //const [isRecruiter, setIsRecruiter] = useState(false);
   const [usernames, setUsernames] = useState({});
 
   const conversationId = route.params?.conversationId; // Safely get conversationId from route params
@@ -45,17 +45,20 @@ const Message = ({ route, navigation }) => {
       getDoc(conversationDocRef).then((docSnap) => {
         if (docSnap.exists) {
           const data = docSnap.data();
+          setRoomateUID(data.Roomate_UID);
+          /*
           if (data.User_UID === user.uid) {
-            setRecruiterUID(data.Recruiter_UID);
-            setIsRecruiter(false);
-          } else if (data.Recruiter_UID === user.uid) {
-            setRecruiterUID(data.User_UID);
-            setIsRecruiter(true);
+            setRoomateUID(data.Roomate_UID);
+            //setIsRecruiter(false);
+          } else if (data.Roomate_UID === user.uid) {
+            setRoomateUID(data.User_UID);
+            //setIsRecruiter(true);
           }
+      */
           setDocumentID(conversationDocRef.id);
 
           // Fetch usernames
-          fetchUsernames([data.User_UID, data.Recruiter_UID], firestore).then(() => {
+          fetchUsernames([data.User_UID, data.Roomate_UID], firestore).then(() => {
             // Set up listener for messages
             setupMessageListener(firestore, conversationDocRef.id);
           });
@@ -153,9 +156,9 @@ const Message = ({ route, navigation }) => {
             key={message.id}
             style={[
               styles.message,
-              (message.sender_UID === user.uid && !isRecruiter) || (message.sender_UID === recruiterUID && isRecruiter)
+              (message.sender_UID === user.uid) || (message.sender_UID === roomateUID)
                 ? styles.userMessage
-                : styles.recruiterMessage
+                : styles.roomateMessage
             ]}
           >
             <Text style={styles.messageSender}>
@@ -208,7 +211,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#d1e7dd',
     alignSelf: 'flex-end',
   },
-  recruiterMessage: {
+  roomateMessage: {
     backgroundColor: '#f8d7da',
     alignSelf: 'flex-start',
   },
