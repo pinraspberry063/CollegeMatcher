@@ -11,24 +11,37 @@ const RoomateResults = ({ route, navigation }) => {
     const { user } = useContext(UserContext);
     const [conversations, setConversations] = useState([]);
     const [usernames, setUsernames] = useState({});
-
+    //const [conversationId, setConversationId] = useState('');
     const handleMessageNavigation = useCallback(
         async (userUID,roomateUID) => {
           const firestore = getFirestore(db);
 
           // Check if a conversation already exists between the user and the recruiter
           const messagingRef = collection(firestore, 'Messaging');
-          const existingConvoQuery = query(
+          const existingConvoInQuery = query(
+            messagingRef,
+            where('Roomate_UID', '==', userUID),
+            where('User_UID', '==', roomateUID)
+          );
+          const existingConvoOutQuery = query(
             messagingRef,
             where('Roomate_UID', '==', roomateUID),
             where('User_UID', '==', userUID)
           );
-          const existingConvoSnapshot = await getDocs(existingConvoQuery);
-
-          if (!existingConvoSnapshot.empty) {
+          const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
+          const existingConvoOutSnapshot = await getDocs(existingConvoOutQuery);
+          console.log(!existingConvoInSnapshot.empty);
+          console.log(!existingConvoOutSnapshot.empty);
+          if (!existingConvoInSnapshot.empty || !existingConvoOutSnapshot.empty) {
             // Conversation already exists, navigate to the existing conversation
-            const conversationId = existingConvoSnapshot.docs[0].id;
-            navigation.navigate('RoomateMessage', { conversationId });
+            if(!existingConvoInSnapshot.empty){
+                const conversationId = existingConvoInSnapshot.docs[0].id;
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
+            else if(!existingConvoOutSnapshot.empty){
+                const conversationId = existingConvoOutSnapshot.docs[0].id;
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
           } else {
             // No conversation exists, create a new one
             const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
