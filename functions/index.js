@@ -1,46 +1,53 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
-// const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
-
-// Import the functions module
 const functions = require("firebase-functions");
-
-// Initialize the admin SDK
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// Import SendGrid
+const sgMail = require("@sendgrid/mail");
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+// Initialize SendGrid with API Key from environment variables
+sgMail.setApiKey(functions.config().sendgrid.key);
 
-// Add our new function to revoke user tokens
-exports.revokeUserTokens = functions.firestore
+exports.sendBanNotification = functions.firestore
     .document("Users/{userId}")
-    .onUpdate((change, context) => {
-      const newValue = change.after.data();
-      const previousValue = change.before.data();
+    .onUpdate(async (change, context) => {
+        const newValue = change.after.data();
+        const previousValue = change.before.data();
 
-      if (newValue.status === "banned" && previousValue.status !== "banned") {
-        return admin.auth().revokeRefreshTokens(context.params.userId)
-            .then(() => {
-              logger.info("Tokens revoked for user", context.params.userId);
-              return null;
-            })
-            .catch((error) => {
-              logger.error("Error revoking tokens:", error);
-            });
-      }
-      return null;
+        console.log("Function triggered for user:", context.params.userId);
+        console.log("Previous value:", previousValue);
+        console.log("New value:", newValue);
+
+        if (newValue.IsBanned === true && previousValue.IsBanned !== true) {
+            console.log("User banned. Sending notification email...");
+            try {
+                // Retrieve the user's email from Firestore
+                const userEmail = newValue.Email; // Make sure 'Email' field exists in your Users collection
+
+                // Define the email content
+                const msg = {
+                    to: userEmail,
+                    from: "kam069@email.latech.edu",
+                    subject: "UniVerse: Your Account Has Been Banned",
+                    text: "Hello,\n\nYour account has been banned from UniVerse.",
+                    html: `
+                        <p>Hello,</p>
+                        <p>Your account has been <strong>banned</strong> from CollegeUniverse.</p>
+                        <p>Best regards,<br/>CollegeMatcher Team</p>
+                    `,
+                };
+
+                // Send the email
+                await sgMail.send(msg);
+                console.log("Ban notification email sent to user", context.params.userId);
+
+                return null;
+            } catch (error) {
+                console.error("Error in sendBanNotification function:", error);
+                return null;
+            }
+        } else {
+            console.log("User not banned or already banned. No action taken.");
+            return null;
+        }
     });

@@ -53,20 +53,25 @@ const Login = ({ navigation }) => {
 
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      const uid = userCredential.user.uid;
+      const user = userCredential.user;
 
-      // Check if MFA is enabled for the user
-      const userDoc = await getDoc(doc(firestore, 'Users', uid));
-      if (userDoc.exists() && userDoc.data().mfaEnabled) {
-        // Send MFA verification code
-        const phoneNumber = userDoc.data().phoneNumber;
-        const confirmationResult = await auth().verifyPhoneNumber(phoneNumber);
-        setMfaConfirmation(confirmationResult);
-        setShowMfaPrompt(true);
-        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+      if (user) {
+        const uid = user.uid;
+        // Check if MFA is enabled for the user
+        const userDoc = await getDoc(doc(firestore, 'Users', uid));
+        if (userDoc.exists() && userDoc.data().mfaEnabled) {
+          // Send MFA verification code
+          const phoneNumber = userDoc.data().phoneNumber;
+          const confirmationResult = await auth().verifyPhoneNumber(phoneNumber);
+          setMfaConfirmation(confirmationResult);
+          setShowMfaPrompt(true);
+          Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+        } else {
+          // No MFA, proceed normally
+          await checkIsRecruiter(uid);
+        }
       } else {
-        // No MFA, proceed normally
-        await checkIsRecruiter(uid);
+        Alert.alert('Login Error', 'Failed to retrieve user information.');
       }
     } catch (error) {
       console.error('Login Error:', error);
@@ -207,32 +212,37 @@ const Login = ({ navigation }) => {
    }
  };
 
-const checkIsRecruiter = async (uid) => { // change func name after demo
-  const firestore = getFirestore(db);
-  const usersRef = collection(firestore, 'Users');
-  const userQuery = query(usersRef, where('User_UID', '==', uid));
+const checkIsRecruiter = async (uid) => {
+  try {
+    const firestore = getFirestore(db);
+    const usersRef = collection(firestore, 'Users');
+    const userQuery = query(usersRef, where('User_UID', '==', uid));
 
-  const querySnapshot = await getDocs(userQuery);
-  if (!querySnapshot.empty) {
-    const userDoc = querySnapshot.docs[0];
-    const data = userDoc.data();
-    if (data.status === 'banned') {
-      await auth().signOut();
-      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
-      // Don't navigate anywhere for banned users
-      return false;
+    const querySnapshot = await getDocs(userQuery);
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const data = userDoc.data();
+      if (data.IsBanned === true) {
+        await auth().signOut();
+        Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
+        // Don't navigate anywhere for banned users
+        return false;
+      }
+      if (data.IsRecruiter) {
+        navigation.navigate('Main', {
+          screen: 'Message',
+          params: { screen: 'RecConvs' }
+        });
+      } else {
+        navigation.navigate('Main');
+      }
+      return true;
     }
-    if (data.IsRecruiter) {
-      navigation.navigate('Main', {
-        screen: 'Message',
-        params: { screen: 'RecConvs' }
-      });
-    } else {
-      navigation.navigate('Main');
-    }
-    return true;
+    return false; // User not found
+  } catch (error) {
+    console.error('Error checking recruiter status:', error);
+    return false;
   }
-  return false; // User not found
 };
 
   const handleForgotPassword = () => {
