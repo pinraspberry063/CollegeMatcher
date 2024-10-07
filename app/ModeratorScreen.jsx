@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
@@ -7,30 +7,80 @@ const firestore = getFirestore(db);
 
 const ModeratorScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchReports();
   }, []);
 
   const fetchReports = async () => {
-    const reportsRef = collection(firestore, 'Reports');
-    const q = query(reportsRef, where('status', '==', 'pending'));
-    const querySnapshot = await getDocs(q);
-    const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
-      const reportData = doc.data();
-      const userRef = collection(firestore, 'Users');
-      let userQuery = query(userRef, where('Username', '==', reportData.reportedUser));
-      let userSnapshot = await getDocs(userQuery);
+    setIsLoading(true);
+    try {
+      const reportsRef = collection(firestore, 'Reports');
+      const q = query(reportsRef, where('status', '==', 'pending'));
+      const querySnapshot = await getDocs(q);
+      const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
+        const reportData = doc.data();
+        const userRef = collection(firestore, 'Users');
+        let userQuery = query(userRef, where('Username', '==', reportData.reportedUser));
+        let userSnapshot = await getDocs(userQuery);
 
-      if (userSnapshot.empty) {
-        userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
-        userSnapshot = await getDocs(userQuery);
-      }
+        if (userSnapshot.empty) {
+          userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
+          userSnapshot = await getDocs(userQuery);
+        }
 
-      const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
-      return { id: doc.id, ...reportData, isBanned };
-    }));
-    setReports(reportsList);
+        const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+        return { id: doc.id, ...reportData, isBanned };
+      }));
+
+      // Sort reports by createdAt timestamp (most recent first)
+      reportsList.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+      setReports(reportsList);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      Alert.alert('Error', 'Failed to fetch reports. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      fetchReports(); // If search term is empty, fetch all reports
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const reportsRef = collection(firestore, 'Reports');
+      const q = query(reportsRef,
+        where('status', '==', 'pending'),
+        where('reportedUser', '==', searchTerm.trim())
+      );
+      const querySnapshot = await getDocs(q);
+      const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
+        const reportData = doc.data();
+        const userRef = collection(firestore, 'Users');
+        let userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
+        let userSnapshot = await getDocs(userQuery);
+
+        const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+        return { id: doc.id, ...reportData, isBanned };
+      }));
+
+      // Sort reports by createdAt timestamp (most recent first)
+      reportsList.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+      setReports(reportsList);
+    } catch (error) {
+      console.error('Error searching reports:', error);
+      Alert.alert('Error', 'Failed to search reports. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBanUser = async (reportId, reportedUser) => {
@@ -213,6 +263,15 @@ const ModeratorScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pending Reports</Text>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by reported user UID"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+        />
+        <Button title="Search" onPress={handleSearch} />
+      </View>
       <FlatList
         data={reports}
         renderItem={renderReportItem}
@@ -231,6 +290,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
   },
   reportItem: {
     marginBottom: 20,
