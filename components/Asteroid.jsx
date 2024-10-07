@@ -7,8 +7,8 @@ const Asteroid = ({ positionX, positionY }) => {
   // Animated styles for asteroid position
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: positionX.value },
-      { translateY: positionY.value }
+      { translateX: positionX.value - 35 },
+      { translateY: positionY.value - 35 }
     ],
   }));
 
@@ -19,11 +19,11 @@ const Asteroid = ({ positionX, positionY }) => {
 
 const styles = StyleSheet.create({
   asteroid: {
-    width: 30,
-    height: 30,
+    width: 70,
+    height: 70,
     backgroundColor: 'gray',
     borderRadius: 15,
-    position: 'absolute', // Make sure it can be positioned freely
+    position: 'absolute',
   },
 });
 

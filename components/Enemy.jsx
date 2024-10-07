@@ -10,10 +10,10 @@ const Enemy = ({ enemyPositionX, enemyPositionY, warning }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
       position: 'absolute',
-      left: enemyPositionX.value,
-      top: enemyPositionY.value,
-      width: 50,
-      height: 50,
+      left: enemyPositionX.value - 35,
+      top: enemyPositionY.value - 35,
+      width: 70,
+      height: 70,
     };
   });
 
@@ -21,7 +21,6 @@ const Enemy = ({ enemyPositionX, enemyPositionY, warning }) => {
     <AnimatedImage
       source={warning ? require('../assets/enemy-warning.png') : require('../assets/enemy.png')}
       style={animatedStyle}
-      resizeMode="contain"
     />
   );
 };

@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
 import Animated, { useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import PlayerShip from '../components/PlayerShip';
 import Enemy from '../components/Enemy';
 import Asteroid from '../components/Asteroid';
 
 const Game = ({ navigation }) => {
+  const { width: screenWidth } = Dimensions.get('window');
+  const { height: screenHeight } = Dimensions.get('window');
   const playerPositionX = useSharedValue(150);
-  const playerPositionY = useSharedValue(-100); // Ensure player Y position is a valid value within screen height
-  const screenWidth = 400;
-  const screenHeight = 800;
+  const playerPositionY = useSharedValue(780);
+
   const warningLineHeight = 100;
-  const asteroidFallDuration = 3000;
+  const asteroidFallDuration = 6000;
 
   const gameIntervals = useRef([]); // Track all intervals to clear on quit
 
@@ -48,23 +49,23 @@ const Game = ({ navigation }) => {
 
   // Asteroid logic
   const asteroids = [
-    { positionX: useSharedValue(0), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
-    { positionX: useSharedValue(0), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
-    { positionX: useSharedValue(0), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
   ];
 
   // Movement logic for the player ship
   useEffect(() => {
     const movePlayer = () => {
-      if (isMovingLeft && playerPositionX.value > 0) {
+      if (isMovingLeft && playerPositionX.value > 50) {
         playerPositionX.value = withTiming(playerPositionX.value - 20, {
-          duration: 100,
+          duration: 80,
           easing: Easing.linear,
         });
       }
       if (isMovingRight && playerPositionX.value < screenWidth - 50) { // Ensure player does not move off-screen
         playerPositionX.value = withTiming(playerPositionX.value + 20, {
-          duration: 100,
+          duration: 80,
           easing: Easing.linear,
         });
       }
@@ -76,12 +77,12 @@ const Game = ({ navigation }) => {
     return () => clearInterval(interval);
   }, [isMovingLeft, isMovingRight, playerPositionX]);
 
-  // Improved Collision Detection Logic
+  //Collision Detection Logic
   const checkBoundingBoxCollision = (source, target) => {
-    const sourceWidth = 30; // Assuming width of source (asteroid or enemy)
-    const sourceHeight = 30; // Assuming height of source
-    const targetWidth = 50; // Assuming width of target (player or enemy)
-    const targetHeight = 50; // Assuming height of target
+    const sourceWidth = 70; // Assuming width of source (asteroid or enemy)
+    const sourceHeight = 70; // Assuming height of source
+    const targetWidth = 70; // Assuming width of target (player or enemy)
+    const targetHeight = 70; // Assuming height of target
 
     const sourceLeft = source.positionX.value;
     const sourceRight = source.positionX.value + sourceWidth;
@@ -122,7 +123,7 @@ const Game = ({ navigation }) => {
   // Handle enemy and player collision
   const handleEnemyPlayerCollision = () => {
     enemies.forEach((enemy, index) => {
-      if (enemy.active.current && checkBoundingBoxCollision(enemy, { positionX: playerPositionX, positionY: playerPositionY })) {
+      if (enemy.swooping.current && checkBoundingBoxCollision(enemy, { positionX: playerPositionX, positionY: playerPositionY })) {
         console.log(`Player collided with enemy ${index + 1}!`);
         // Handle collision logic (e.g., reduce player health, deactivate enemy)
       }
@@ -152,7 +153,7 @@ const Game = ({ navigation }) => {
             enemy.swooping.current = true; // Start swooping
 
             // Move enemy downward toward the player
-            enemy.positionY.value = withTiming(screenHeight - 100, { duration: 2000, easing: Easing.linear }); // Move down near player
+            enemy.positionY.value = withTiming(playerPositionY.value, { duration: 2000, easing: Easing.linear }); // Move down near player
 
             const newPositionX = Math.random() < 0.5 ? -50 : screenWidth + 50;
 

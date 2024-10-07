@@ -6,19 +6,18 @@ import playerImage from '../assets/player.webp';
 const PlayerShip = ({ playerPositionX, playerPositionY }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
-        position: "absolute",
-      transform: [
-        { translateX: playerPositionX.value - 25 }, // Center horizontally (50 width)
-        { translateY: playerPositionY.value }, // No vertical adjustment needed
-      ],
-    };
-  });
+        position: 'absolute',
+              left: playerPositionX.value - 35,
+              top: playerPositionY.value,
+              width: 70,
+              height: 70,
+            };
+          });
 
   return (
     <Animated.Image
       source={playerImage}
       style={[styles.ship, animatedStyle]}
-      resizeMode="contain"
     />
   );
 };
