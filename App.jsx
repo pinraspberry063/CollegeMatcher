@@ -461,6 +461,6 @@ const styles = StyleSheet.create({
   image: {
     resizeMode: 'contain',
     width: '70%',
-    height: '60%',
+    height: '70%',
   },
 });
