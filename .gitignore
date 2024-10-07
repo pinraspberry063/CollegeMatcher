@@ -77,3 +77,4 @@ yarn-error.log
 .expo
 dist/
 web-build/
+/eslint.config.mjs
