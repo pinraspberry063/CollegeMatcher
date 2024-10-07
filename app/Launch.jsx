@@ -39,6 +39,7 @@ const Launch = ({navigation}) => {
             title="Game"
             onPress={() => {
               navigation.navigate('Game');
+              console.log("launching game...");
             }}
             buttonStyle={styles.button2}
           />

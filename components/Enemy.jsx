@@ -1,28 +1,29 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { Image } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 
-const Enemy = ({ enemyPositionX, enemyPositionY }) => {
+// Create an animated version of the Image component
+const AnimatedImage = Animated.createAnimatedComponent(Image);
+
+const Enemy = ({ enemyPositionX, enemyPositionY, warning }) => {
+  // Use an animated style hook to connect shared values to the style
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-          { translateX: enemyPositionX.value },
-          { translateY: enemyPositionY.value },
-          ],
+      position: 'absolute',
+      left: enemyPositionX.value,
+      top: enemyPositionY.value,
+      width: 50,
+      height: 50,
     };
   });
 
   return (
-    <Animated.View style={[styles.ship, animatedStyle]} />
+    <AnimatedImage
+      source={warning ? require('../assets/enemy-warning.png') : require('../assets/enemy.png')}
+      style={animatedStyle}
+      resizeMode="contain"
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  ship: {
-    width: 50,
-    height: 50,
-    backgroundColor: 'red',
-  },
-});
 
 export default Enemy;
