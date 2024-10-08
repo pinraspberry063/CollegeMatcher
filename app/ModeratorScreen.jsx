@@ -252,6 +252,7 @@ const ModeratorScreen = ({ navigation }) => {
       <Text>Reported User: {item.reportedUser}</Text>
       <Text>Reported By: {item.reportedBy}</Text>
       <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
+      <Text>Reason: {item.reason}</Text>
       <Button
         title={item.isBanned ? "Unban User" : "Ban User"}
         onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
