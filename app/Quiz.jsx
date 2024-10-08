@@ -267,17 +267,31 @@ const Quiz = ({ navigation }) => {
   };
 
   const renderPageOne = () => (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
     <View>
-      <Text style={[styles.text, { color: theme.color }]}>
-        Are you looking to attend college in a specific state?
-      </Text>
+      <Text style={[styles.text, { color: theme.color }]}>What do you plan on studying?</Text>
       <DropdownComponent
-        data={stateData}
-        value={stateChoice}
-        onChange={setState}
+        data={majorData}
+        value={major}
+        onChange={setMajor}
         multiSelect={true}
       />
+      <Slider
+        value={majorImportance || 0.5}
+        onValueChange={setMajorImportance}
+        step={0.1}
+        minimumValue={0}
+        maximumValue={1}
+        thumbTintColor="silver"
+        minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+        <Text>Not Important</Text>
+        <Text>Neutral</Text>
+        <Text>Very Important</Text>
+      </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking to attend college in a specific state?</Text>
+      <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} />
       <Slider
         value={stateChoiceImportance || 0.5}
         onValueChange={setStateChoiceImportance}
@@ -293,9 +307,7 @@ const Quiz = ({ navigation }) => {
         <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>
-        How far from home do you want your college to be?
-      </Text>
+      <Text style={[styles.text, { color: theme.color }]}>How far from home do you want your college to be?</Text>
       <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
       <Slider
         value={distanceImportance || 0.5}
@@ -312,114 +324,7 @@ const Quiz = ({ navigation }) => {
         <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>What do you plan to study?</Text>
-      <DropdownComponent data={majorData} value={major} onChange={setMajor} multiSelect={true} />
-      <Slider
-        value={majorImportance || 0.5}
-        onValueChange={setMajorImportance}
-        step={0.1}
-        minimumValue={0}
-        maximumValue={1}
-        thumbTintColor="silver"
-        minimumTrackTintColor="purple"
-      />
-      <View style={styles.sliderLabels}>
-        <Text>Not Important</Text>
-        <Text>Neutral</Text>
-        <Text>Very Important</Text>
-      </View>
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT Composite score?</Text>
-      <TextInput
-        style={[styles.textInput, { borderColor: theme.color }]}
-        value={actScore}
-        onChangeText={setActScore}
-        placeholder="Ex: 25..."
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT Math score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={actMath}
-         onChangeText={setActMath}
-         placeholder='Ex: 25...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT English score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={actEnglish}
-         onChangeText={setActEnglish}
-         placeholder='Ex: 25...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT Reading score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={actReading}
-         onChangeText={setActReading}
-         placeholder='Ex: 25...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT Science score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={actScience}
-         onChangeText={setActScience}
-         placeholder='Ex: 25...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>ACT Writing score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={actWriting}
-         onChangeText={setActWriting}
-         placeholder='Ex: 25...'
-      />
-      <View style={styles.buttonContainer}>
-          <Button onPress={handleNext} title="Next" />
-      </View>
-    </View>
-   </ScrollView>
-  );
-
-  const renderPageTwo = () => (
-    <View>
-      <Text style={[styles.text, { color: theme.color }]}>SAT Composite score?</Text>
-      <TextInput
-        style={[styles.textInput, { borderColor: theme.color }]}
-        value={satScore}
-        onChangeText={setSatScore}
-        placeholder="Ex: 1200..."
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>SAT Math score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={satMath}
-         onChangeText={setSatMath}
-         placeholder='Ex: 1200...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>SAT Critical Reading score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={satCriticalReading}
-         onChangeText={setSatCriticalReading}
-         placeholder='Ex: 1200...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>SAT Writing score?</Text>
-      <TextInput
-         style={[styles.textInput, { borderColor: theme.color }]}
-         value={satWriting}
-         onChangeText={setSatWriting}
-         placeholder='Ex: 1200...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>
-        How much are you willing to pay for tuition?
-      </Text>
+      <Text style={[styles.text, { color: theme.color }]}>How much are you willing to pay for tuition?</Text>
       <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
       <Slider
         value={tuitionImportance || 0.5}
@@ -435,123 +340,16 @@ const Quiz = ({ navigation }) => {
         <Text>Neutral</Text>
         <Text>Very Important</Text>
       </View>
-
-      <Text style={[styles.text, { color: theme.color }]}>What is your GPA?</Text>
-      <TextInput
-        style={[styles.textInput, { borderColor: theme.color }]}
-        value={gpa}
-        onChangeText={setGpa}
-        placeholder="Ex: 3.6..."
-      />
     </View>
   );
 
-  const renderPageThree = () => (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+  const renderPageTwo = () => (
     <View>
-      <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
-      <View style={{ zIndex: 10, elevation: 10 }}>
-        <GooglePlacesAutocomplete
-          placeholder="123 Main St..."
-          fetchDetails={true}
-          keepResultsAfterBlur={false}
-          onPress={(data, details = null) => {
-            if (details && details.formatted_address) {
-              console.log("Full Address Selected: ", details.formatted_address);
-              setPlaceSearch(details.formatted_address);
-              setAddress(details.formatted_address);
-            } else {
-              setAddress(data.description);
-            }
-          }}
-          value={address}
-          textInputProps={{
-            value: placeSearch,
-            onChangeText: setPlaceSearch
-          }}
-          query={{
-            key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI',
-            language: 'en',
-          }}
-          debounce={200}
-          enablePoweredByContainer={false}
-          styles={{
-            textInput: {
-              height: 40,
-              borderWidth: 1,
-              fontSize: 18,
-              padding: 10,
-              marginVertical: 10,
-              borderColor: theme.color,
-            },
-            listView: {
-              backgroundColor: theme.background,
-              position: 'absolute',
-              top: 50,
-              zIndex: 1000,
-              elevation: 1000,
-            },
-          }}
-        />
-      </View>
-
-      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
-      <DropdownComponent
-          data={[
-              { label: 'Neutral', value: '1' },
-              { label: 'Important', value: '2' },
-              { label: 'Very Important', value: '3' },
-          ]}
-          selectedValue={collegeDiversity}
-          onValueChange={setDiverse}
-        />
-        <Slider
-            value={diversityImportance || 0.5}
-            onValueChange={setDiversityImportance}
-            step={0.1}
-            minimumValue={0}
-            maximumValue={1}
-            thumbTintColor="silver"
-            minimumTrackTintColor="purple"
-        />
-        <View style={styles.sliderLabels}>
-            <Text>Not Important</Text>
-            <Text>Neutral</Text>
-            <Text>Very Important</Text>
-       </View>
-
-       <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
-       <DropdownComponent
-          data={sizeData}
-          selectedValue={size}
-          onValueChange={setSize}
-       />
-       <Slider
-         value={sizeImportance || 0.5}
-         onValueChange={setSizeImportance}
-         step={0.1}
-         minimumValue={0}
-         maximumValue={1}
-         thumbTintColor="silver"
-         minimumTrackTintColor="purple"
-        />
-       <View style={styles.sliderLabels}>
-           <Text>Not Important</Text>
-           <Text>Neutral</Text>
-           <Text>Very Important</Text>
-      </View>
-
-      <Text style={[styles.text, { color: theme.color }]}>
-        Do you wish to attend a college of a specific religious affiliation?
-      </Text>
-      <DropdownComponent
-        data={religiousAffiliationData}
-        value={religiousAffiliation}
-        onChange={setReligiousAffil}
-      />
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a public or private school?</Text>
+      <DropdownComponent data={typeOfAreaData} value={schoolClassification} onChange={setType} />
       <Slider
-        value={religiousAffilImportance}
-        onValueChange={setReligiousAffilImportance}
+        value={classificationImportance || 0.5}
+        onValueChange={setClassificationImportance}
         step={0.1}
         minimumValue={0}
         maximumValue={1}
@@ -564,12 +362,54 @@ const Quiz = ({ navigation }) => {
         <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a diverse college?</Text>
       <DropdownComponent
-        data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
-        value={sportCollege}
-        onChange={setSportEvents}
+         data={[
+             { label: 'Neutral', value: 'Neutral' },
+             { label: 'Important', value: 'Important' },
+             { label: 'Very Important', value: 'Very Important' },
+         ]}
+         value={collegeDiversity}
+         onChange={setDiverse}
       />
+      <Slider
+        value={diversityImportance || 0.5}
+        onValueChange={setDiversityImportance}
+        step={0.1}
+        minimumValue={0}
+        maximumValue={1}
+        thumbTintColor="silver"
+        minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+        <Text>Not Important</Text>
+        <Text>Neutral</Text>
+        <Text>Very Important</Text>
+      </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>Do you wish to attend a college with a specific religious affiliation?</Text>
+      <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
+      <Slider
+        value={religiousAffilImportance || 0.5}
+        onValueChange={setReligiousAffilImportance}
+        step={0.1}
+        minimumValue={0}
+        maximumValue={1}
+        thumbTintColor="silver"
+        minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+        <Text>Not Important</Text>
+        <Text>Neutral</Text>
+        <Text>Very Important</Text>
+      </View>
+    </View>
+  );
+
+  const renderPageThree = () => (
+    <View>
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
+      <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
       <Slider
         value={sportEventsImportance || 0.5}
         onValueChange={setSportEventsImportance}
@@ -585,63 +425,147 @@ const Quiz = ({ navigation }) => {
         <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a Public or Private college?</Text>
-      <DropdownComponent
-         data={[
-             { label: 'Public', value: '1' },
-             { label: 'Private', value: '2' },
-         ]}
-         selectedValue={schoolClassification}
-         onValueChange={setType}
-      />
+      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
+      <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
       <Slider
-            value={classificationImportance || 0.5}
-            onValueChange={setClassificationImportance}
-            step={0.1}
-            minimumValue={0}
-            maximumValue={1}
-            thumbTintColor="silver"
-            minimumTrackTintColor="purple"
+        value={urbanizationImportance || 0.5}
+        onValueChange={setUrbanizationImportance}
+        step={0.1}
+        minimumValue={0}
+        maximumValue={1}
+        thumbTintColor="silver"
+        minimumTrackTintColor="purple"
       />
       <View style={styles.sliderLabels}>
-            <Text>Not Important</Text>
-            <Text>Neutral</Text>
-            <Text>Very Important</Text>
+        <Text>Not Important</Text>
+        <Text>Neutral</Text>
+        <Text>Very Important</Text>
       </View>
 
-      <Text style={[styles.text, { color: theme.color }]}>Are you looking for a college in a specific type of area?</Text>
-      <DropdownComponent
-          data={typeOfAreaData}
-          selectedValue={urbanizationLevel}
-          onValueChange={setTypeOfArea}
+      <Text style={[styles.text, { color: theme.color }]}>What is your GPA?</Text>
+      <TextInput
+          style={[styles.textInput, { borderColor: theme.color }]}
+          value={gpa}
+          onChangeText={setGpa}
+          placeholder="Ex: 3.6..."
       />
-      <Slider
-         value={urbanizationImportance || 0.5}
-         onValueChange={setUrbanizationImportance}
-         step={0.1}
-         minimumValue={0}
-         maximumValue={1}
-         thumbTintColor="silver"
-         minimumTrackTintColor="purple"
+    </View>
+  );
+
+  const renderPageFour = () => (
+    <View>
+        <Text style={[styles.text, { color: theme.color }]}>ACT Composite score?</Text>
+        <TextInput
+             style={[styles.textInput, { borderColor: theme.color }]}
+             value={actScore}
+             onChangeText={setActScore}
+             placeholder="Ex: 25..."
+        />
+      <Text style={[styles.text, { color: theme.color }]}>ACT Math score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={actMath}
+               onChangeText={setActMath}
+               placeholder='Ex: 25...'
       />
-      <View style={styles.sliderLabels}>
-          <Text>Not Important</Text>
-          <Text>Neutral</Text>
-          <Text>Very Important</Text>
-      </View>
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT English score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={actEnglish}
+               onChangeText={setActEnglish}
+               placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Reading score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={actReading}
+               onChangeText={setActReading}
+               placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Science score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={actScience}
+               onChangeText={setActScience}
+               placeholder='Ex: 25...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>ACT Writing score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={actWriting}
+               onChangeText={setActWriting}
+               placeholder='Ex: 25...'
+      />
+    </View>
+  );
+
+  const renderPageFive = () => (
+    <View>
+      <Text style={[styles.text, { color: theme.color }]}>SAT Composite score?</Text>
+      <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={satScore}
+              onChangeText={setSatScore}
+              placeholder="Ex: 1200..."
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>SAT Math score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={satMath}
+               onChangeText={setSatMath}
+               placeholder='Ex: 1200...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>SAT Critical Reading score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={satCriticalReading}
+               onChangeText={setSatCriticalReading}
+               placeholder='Ex: 1200...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>SAT Writing score?</Text>
+      <TextInput
+               style={[styles.textInput, { borderColor: theme.color }]}
+               value={satWriting}
+               onChangeText={setSatWriting}
+               placeholder='Ex: 1200...'
+      />
+
+      <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+      <GooglePlacesAutocomplete
+        placeholder="123 Main St..."
+        fetchDetails={true}
+        onPress={(data, details = null) => {
+          if (details && details.formatted_address) {
+            setPlaceSearch(details.formatted_address);
+            setAddress(details.formatted_address);
+          } else {
+            setAddress(data.description);
+          }
+        }}
+        value={address}
+        textInputProps={{ value: placeSearch, onChangeText: setPlaceSearch }}
+        query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
+      />
 
       <View style={styles.buttonContainer}>
-          <Button onPress={handleBack} title="Back" />
-          <Button onPress={handleSubmit} title="Submit" />
+        <Button onPress={handleSubmit} title="Submit" />
       </View>
     </View>
-    </ScrollView>
   );
 
   const renderContent = () => {
     if (currentPage === 1) return renderPageOne();
     if (currentPage === 2) return renderPageTwo();
     if (currentPage === 3) return renderPageThree();
+    if (currentPage === 4) return renderPageFour();
+    if (currentPage === 5) return renderPageFive();
   };
 
 
@@ -658,7 +582,7 @@ const Quiz = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
           ListFooterComponent={() => (
             <View style={styles.buttonContainer}>
-              {currentPage < 3 && <Button onPress={handleNext} title="Next" />}
+              {currentPage < 5 && <Button onPress={handleNext} title="Next" />}
               {currentPage > 1 && <Button onPress={handleBack} title="Back" />}
             </View>
           )}
