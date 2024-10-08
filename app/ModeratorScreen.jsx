@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
@@ -9,8 +9,6 @@ const ModeratorScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [banReasons, setBanReasons] = useState({});
-  const [showBanInput, setShowBanInput] = useState({});
 
   useEffect(() => {
     fetchReports();
@@ -85,42 +83,30 @@ const ModeratorScreen = ({ navigation }) => {
     }
   };
 
-  const handleBanUser = useCallback(async (reportId, reportedUser) => {
-    if (!showBanInput[reportId]) {
-      // If the ban input is not shown, show it
-      setShowBanInput(prev => ({ ...prev, [reportId]: true }));
-      return;
-    }
-
-    const banReason = banReasons[reportId];
-    if (!banReason || !banReason.trim()) {
-      Alert.alert('Error', 'Please provide a reason for banning the user.');
-      return;
-    }
-
+  const handleBanUser = async (reportId, reportedUser) => {
     try {
       console.log(`Attempting to ban user: ${reportedUser}`);
+      // First, find the user document using the Username
       const usersRef = collection(firestore, 'Users');
       let q = query(usersRef, where('Username', '==', reportedUser));
       let querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
+        // If not found by Username, try with User_UID
         q = query(usersRef, where('User_UID', '==', reportedUser));
         querySnapshot = await getDocs(q);
       }
 
       if (querySnapshot.empty) {
+        console.log(`User not found: ${reportedUser}`);
         throw new Error('User not found');
       }
 
       const userDoc = querySnapshot.docs[0];
       console.log(`User document found for: ${reportedUser}`);
 
-      // Update user's IsBanned field and add ban reason in Firestore
-      await updateDoc(userDoc.ref, {
-        IsBanned: true,
-        BanReason: banReason
-      });
+      // Update user's IsBanned field in Firestore
+      await updateDoc(userDoc.ref, { IsBanned: true });
       console.log(`User banned: ${reportedUser}`);
 
       // Update report status
@@ -135,12 +121,8 @@ const ModeratorScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error banning user: ', error);
       Alert.alert('Error', 'Failed to ban user. Please try again.');
-    } finally {
-      // Clear the ban reason and hide the input for this report
-      setBanReasons(prev => ({...prev, [reportId]: ''}));
-      setShowBanInput(prev => ({...prev, [reportId]: false}));
     }
-  }, [banReasons, showBanInput]);
+  };
 
   const handleUnbanUser = async (reportId, reportedUser) => {
     try {
@@ -184,16 +166,18 @@ const ModeratorScreen = ({ navigation }) => {
 
   const fetchUserActivity = async (reportedUser) => {
     try {
+      // Find the user document to get the username
       const usersRef = collection(firestore, 'Users');
-      let userQuery = query(usersRef, where('Username', '==', reportedUser));
+      let userQuery = query(usersRef, where('User_UID', '==', reportedUser));
       let querySnapshot = await getDocs(userQuery);
 
       if (querySnapshot.empty) {
-        userQuery = query(usersRef, where('User_UID', '==', reportedUser));
+        userQuery = query(usersRef, where('Username', '==', reportedUser));
         querySnapshot = await getDocs(userQuery);
       }
 
       if (querySnapshot.empty) {
+        console.log('User not found with given identifier:', reportedUser);
         throw new Error('User not found');
       }
 
@@ -204,60 +188,80 @@ const ModeratorScreen = ({ navigation }) => {
 
       const userActivity = { threads: [], posts: [] };
 
-      const collegeName = 'Louisiana Tech University';
-      const subgroupsToCheck = ['Recruiter Check', 'Test General'];
+      // Fetch all threads created by the user using Collection Group Query
+      const threadsQuery = query(
+        collectionGroup(firestore, 'threads'),
+        where('createdBy', '==', username)
+      );
+      const threadsSnapshot = await getDocs(threadsQuery);
 
-      for (const subgroupName of subgroupsToCheck) {
-        console.log('Checking subgroup:', subgroupName);
+      console.log(`Total user threads found: ${threadsSnapshot.size}`);
 
-        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', subgroupName, 'threads');
-        const threadsSnapshot = await getDocs(threadsRef);
+      threadsSnapshot.forEach((threadDoc) => {
+        const threadPath = threadDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1
+        const pathSegments = threadPath.split('/');
 
-        console.log('Threads found:', threadsSnapshot.size);
+        // Extract collegeName and subgroupName from the path
+        // Ensure the path has the expected structure
+        if (pathSegments.length >= 6) {
+          const collegeName = pathSegments[1];
+          const subgroupName = pathSegments[3];
 
-        // Fetch threads created by the user
-        const userThreadsQuery = query(threadsRef, where('createdBy', '==', username));
-        const userThreadsSnapshot = await getDocs(userThreadsQuery);
-
-        userThreadsSnapshot.forEach(threadDoc => {
           userActivity.threads.push({
             id: threadDoc.id,
             collegeName,
             subgroupName,
-            ...threadDoc.data()
+            ...threadDoc.data(),
           });
-        });
-
-        // Fetch posts for each thread in the subgroup
-        for (const threadDoc of threadsSnapshot.docs) {
-          const postsRef = collection(threadsRef, threadDoc.id, 'posts');
-          const postsQuery = query(postsRef, where('createdBy', '==', username));
-          const postsSnapshot = await getDocs(postsQuery);
-
-          console.log('Posts found in thread', threadDoc.id, ':', postsSnapshot.size);
-
-          postsSnapshot.forEach(postDoc => {
-            userActivity.posts.push({
-              id: postDoc.id,
-              threadId: threadDoc.id,
-              collegeName,
-              subgroupName,
-              ...postDoc.data()
-            });
-          });
+        } else {
+          console.warn(`Unexpected thread path structure: ${threadPath}`);
         }
-      }
+      });
 
-      console.log('User Activity:', userActivity);
+      // Fetch all posts created by the user using Collection Group Query
+      const postsQuery = query(
+        collectionGroup(firestore, 'posts'),
+        where('createdBy', '==', username)
+      );
+      const postsSnapshot = await getDocs(postsQuery);
+
+      console.log(`Total user posts found: ${postsSnapshot.size}`);
+
+      postsSnapshot.forEach((postDoc) => {
+        const postPath = postDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1/posts/Post 1
+        const pathSegments = postPath.split('/');
+
+        if (pathSegments.length >= 8) {
+          const collegeName = pathSegments[1];
+          const subgroupName = pathSegments[3];
+          const threadId = pathSegments[5];
+
+          userActivity.posts.push({
+            id: postDoc.id,
+            threadId,
+            collegeName,
+            subgroupName,
+            ...postDoc.data(),
+          });
+        } else {
+          console.warn(`Unexpected post path structure: ${postPath}`);
+        }
+      });
+
+      console.log('User Activity:', JSON.stringify(userActivity, null, 2));
       return userActivity;
     } catch (error) {
       console.error('Error fetching user activity:', error);
+      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
       return null;
     }
   };
 
   const handleViewUserActivity = async (reportedUser) => {
+    setIsLoading(true);
     const userActivity = await fetchUserActivity(reportedUser);
+    setIsLoading(false);
+
     if (userActivity) {
       navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
     } else {
@@ -270,17 +274,8 @@ const ModeratorScreen = ({ navigation }) => {
       <Text>Reported User: {item.reportedUser}</Text>
       <Text>Reported By: {item.reportedBy}</Text>
       <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
-      <Text>Reason: {item.reason}</Text>
-      {showBanInput[item.id] && !item.isBanned && (
-        <TextInput
-          style={styles.banReasonInput}
-          placeholder="Enter reason for banning"
-          value={banReasons[item.id] || ''}
-          onChangeText={(text) => setBanReasons(prev => ({...prev, [item.id]: text}))}
-        />
-      )}
       <Button
-        title={item.isBanned ? "Unban User" : (showBanInput[item.id] ? "Confirm Ban" : "Ban User")}
+        title={item.isBanned ? "Unban User" : "Ban User"}
         onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
       />
       <Button title="View User Activity" onPress={() => handleViewUserActivity(item.reportedUser)} />
@@ -299,11 +294,15 @@ const ModeratorScreen = ({ navigation }) => {
         />
         <Button title="Search" onPress={handleSearch} />
       </View>
-      <FlatList
-        data={reports}
-        renderItem={renderReportItem}
-        keyExtractor={item => item.id}
-      />
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={reports}
+          renderItem={renderReportItem}
+          keyExtractor={item => item.id}
+        />
+      )}
     </View>
   );
 };
@@ -335,13 +334,6 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
-  },
-  banReasonInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
   },
 });
 
