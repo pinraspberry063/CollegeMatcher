@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
@@ -9,6 +9,8 @@ const ModeratorScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [banReasons, setBanReasons] = useState({});
+  const [showBanInput, setShowBanInput] = useState({});
 
   useEffect(() => {
     fetchReports();
@@ -83,30 +85,42 @@ const ModeratorScreen = ({ navigation }) => {
     }
   };
 
-  const handleBanUser = async (reportId, reportedUser) => {
+  const handleBanUser = useCallback(async (reportId, reportedUser) => {
+    if (!showBanInput[reportId]) {
+      // If the ban input is not shown, show it
+      setShowBanInput(prev => ({ ...prev, [reportId]: true }));
+      return;
+    }
+
+    const banReason = banReasons[reportId];
+    if (!banReason || !banReason.trim()) {
+      Alert.alert('Error', 'Please provide a reason for banning the user.');
+      return;
+    }
+
     try {
       console.log(`Attempting to ban user: ${reportedUser}`);
-      // First, find the user document using the Username
       const usersRef = collection(firestore, 'Users');
       let q = query(usersRef, where('Username', '==', reportedUser));
       let querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        // If not found by Username, try with User_UID
         q = query(usersRef, where('User_UID', '==', reportedUser));
         querySnapshot = await getDocs(q);
       }
 
       if (querySnapshot.empty) {
-        console.log(`User not found: ${reportedUser}`);
         throw new Error('User not found');
       }
 
       const userDoc = querySnapshot.docs[0];
       console.log(`User document found for: ${reportedUser}`);
 
-      // Update user's IsBanned field in Firestore
-      await updateDoc(userDoc.ref, { IsBanned: true });
+      // Update user's IsBanned field and add ban reason in Firestore
+      await updateDoc(userDoc.ref, {
+        IsBanned: true,
+        BanReason: banReason
+      });
       console.log(`User banned: ${reportedUser}`);
 
       // Update report status
@@ -121,8 +135,12 @@ const ModeratorScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error banning user: ', error);
       Alert.alert('Error', 'Failed to ban user. Please try again.');
+    } finally {
+      // Clear the ban reason and hide the input for this report
+      setBanReasons(prev => ({...prev, [reportId]: ''}));
+      setShowBanInput(prev => ({...prev, [reportId]: false}));
     }
-  };
+  }, [banReasons, showBanInput]);
 
   const handleUnbanUser = async (reportId, reportedUser) => {
     try {
@@ -253,8 +271,16 @@ const ModeratorScreen = ({ navigation }) => {
       <Text>Reported By: {item.reportedBy}</Text>
       <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
       <Text>Reason: {item.reason}</Text>
+      {showBanInput[item.id] && !item.isBanned && (
+        <TextInput
+          style={styles.banReasonInput}
+          placeholder="Enter reason for banning"
+          value={banReasons[item.id] || ''}
+          onChangeText={(text) => setBanReasons(prev => ({...prev, [item.id]: text}))}
+        />
+      )}
       <Button
-        title={item.isBanned ? "Unban User" : "Ban User"}
+        title={item.isBanned ? "Unban User" : (showBanInput[item.id] ? "Confirm Ban" : "Ban User")}
         onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
       />
       <Button title="View User Activity" onPress={() => handleViewUserActivity(item.reportedUser)} />
@@ -309,6 +335,13 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
+  },
+  banReasonInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
   },
 });
 
