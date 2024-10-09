@@ -30,7 +30,8 @@ export const handleReport = async (reportData) => {
       reportedUser: reportedUserUID,
       reportedBy: currentUser.uid,
       createdAt: Timestamp.now(),
-      status: 'pending'
+      status: 'pending',
+      reason: reportData.reason // Include the reason in the report
     };
 
     await addDoc(reportRef, report);

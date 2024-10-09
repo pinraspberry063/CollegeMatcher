@@ -3,7 +3,7 @@ import college_data from './college_data';
 const majorData = [
     { label: 'Aerospace Engineering', value: 'Aerospace Engineering' , categories: 'EngineeringDegrees'  },
     { label: 'Accounting', value: 'Accounting' , categories:  'Business_Management_Marketing_and_RelatedDegrees' },
-    { label: 'Agriculture', value: 'Agriculture', categories:  'AgriculturalDegrees'  },
+    { label: 'Agriculture', value: 'Agriculture', categories:  'agriculturalDegrees'  },
     { label: 'Architecture', value: 'Architecture',  categories: 'ArchitectureDegrees' },
     { label: 'Biology', value: 'Biology', categories: 'Biological_and_BiomedicalSciencesDegrees'  },
     { label: 'Biomedical Engineering', value: 'Biomedical Engineering', categories: 'Biological_and_BiomedicalSciencesDegrees' },

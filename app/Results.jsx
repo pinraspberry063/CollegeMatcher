@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert, TextInput, ActivityIndicator,TouchableOpacity, ScrollView} from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert, TextInput, ActivityIndicator,TouchableOpacity, ScrollView, ImageBackground, Image} from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { db } from '../config/firebaseConfig';
@@ -8,6 +8,7 @@ import DropdownComponent from '../components/DropdownComp';
 import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
+import { CollegesContext } from '../components/CollegeContext';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -51,7 +52,8 @@ const Results = ({route, navigation}) => {
   const [search, setSearch] = useState('');
   const [colllegeList, setCollegeList] = useState(top100);
   const [showFilter, setShowFilter] = useState(false);
-  const [colleges, setColleges] = useState([]);
+  // const [colleges, setColleges] = useState([]);
+  const {colleges, loading} = useContext(CollegesContext);
   const [isLoading, setisLoading] = useState(false);
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
@@ -97,30 +99,30 @@ const Results = ({route, navigation}) => {
     fetchCommittedColleges();
 }, [user]);
 
-  useEffect(() => {
+  // useEffect(() => {
     
-    const loadData = async() => {
+  //   const loadData = async() => {
 
-      try{
-      await college_data()
-      .then((data)=>{
-        const collegeData = (data.docs.map(doc=> doc.data()));
-        setColleges(collegeData);
-        setisLoading(false);
+  //     try{
+  //     await college_data()
+  //     .then((data)=>{
+  //       const collegeData = (data.docs.map(doc=> doc.data()));
+  //       setColleges(collegeData);
+  //       setisLoading(false);
 
-      })
+  //     })
 
-      }catch(error) {
-        Alert.alert("Error Message: " + error);
-      }
+  //     }catch(error) {
+  //       Alert.alert("Error Message: " + error);
+  //     }
       
-    }
-    setisLoading(true);
-    loadData();
+  //   }
+  //   setisLoading(true);
+  //   loadData();
     
   
     
-  }, [])
+  // }, [])
 
   const handleCommit = async (collegeName) => {
     try {
@@ -184,10 +186,9 @@ const Results = ({route, navigation}) => {
         />
       </TouchableOpacity> */}
       <TouchableOpacity
-        style = {[styles.button, {backgroundColor: 'pink', width: 70, height: 20, alignSelf: 'flex-end'}]}
         onPress={() => handleCommit(item.name)}
       >
-        <Text>{isCommitted ? "Remove Commit" : "Commit"}</Text>
+        {isCommitted ? <Image source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/> : <Image source={require('../assets/rocket.png')} style={[styles.commitButton]}/>}
 
       </TouchableOpacity>
                     
@@ -197,7 +198,7 @@ const Results = ({route, navigation}) => {
           navigation.push('Details', {college: item.name, id: item.id})
         }>
         <Text style={styles.collegeName}>{item.name}</Text>
-        <Text style={styles.collegeScore}>Match Percent: {item.score}%</Text>
+        <Text style={styles.collegeScore}> {(item.score != null)? "Match Percent: " + item.score + "%": "No Previous Matches"}</Text>
       </TouchableOpacity>
       
     </ScrollView>
@@ -288,7 +289,15 @@ const Results = ({route, navigation}) => {
     }
   }
 
-  if(isLoading){
+  const handleSetMajor = (choice) => {
+    setMajor(choice);
+    if(!choice){
+      setSelMajors([]);
+    }
+
+  }
+
+  if(isLoading || loading){
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size={100}/>
@@ -304,9 +313,10 @@ const Results = ({route, navigation}) => {
 
   
     return (
+      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
         <View style={styles.searchView}>
-          <TextInput style={styles.searchText} placeholder='Search' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
+          <TextInput style={styles.searchText} placeholder='Search...' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
           <TouchableOpacity style={styles.searchContainer} onPress={handleFilterSearch}>
                 <Text style={[{color: 'white'}]}>Search</Text>
           </TouchableOpacity>
@@ -362,7 +372,7 @@ const Results = ({route, navigation}) => {
                 <View style={styles.checkboxContainer} > 
                   <CheckBox
                     value={major}
-                    onValueChange={setMajor}
+                    onValueChange={handleSetMajor}
                     style={styles.checkbox}
                   />
                   <Text> Select Majors </Text>
@@ -507,6 +517,7 @@ const Results = ({route, navigation}) => {
           contentContainerStyle={styles.list}
         />
       </View>
+      </ImageBackground>
     );
 
   }
@@ -515,24 +526,29 @@ const Results = ({route, navigation}) => {
 
 
   const styles = StyleSheet.create({
-    container: {
+    background: {
       flex: 1,
-      backgroundColor: '#fff',
-      padding: 20,
+      resizeMode: 'cover'
     },
+    // container: {
+    //   flex: 1,
+    //   backgroundColor: '#fff',
+    //   padding: 20,
+    // },
     title: {
       fontSize: 24,
       fontWeight: 'bold',
       marginBottom: 20,
       paddingTop: 20,
       textAlign: 'center',
+      color: 'grey'
     },
     list: {
       paddingBottom: 20,
       paddingTop: 60,
     },
     card: {
-      backgroundColor: '#f8f8f8',
+      backgroundColor: '#3A3B3C',
       padding: 20,
       borderRadius: 10,
       marginBottom: 10,
@@ -541,15 +557,18 @@ const Results = ({route, navigation}) => {
       shadowOpacity: 0.2,
       shadowRadius: 2,
       elevation: 2,
+      width: '95%',
+      alignSelf: 'center'
     },
     collegeName: {
       fontSize: 18,
       fontWeight: 'bold',
+      color: 'white',
       marginBottom: 5,
     },
     collegeScore: {
       fontSize: 16,
-      color: '#555',
+      color: '#dbdada',
     },
     dropdown: {
       width: 100,
@@ -560,24 +579,30 @@ const Results = ({route, navigation}) => {
       alignContent: 'flex-end',
     },
     searchView:{
-      width: '100%',
-      height: 100,
+      width: '90%',
+      height: 50,
       justifyContent: 'center',
+      alignSelf: 'center',
+      marginTop: 50
     },
     searchText: {
-      width: '75%',
+      width: '95%',
       height: 50,
       borderBlockColor: 'grey',
-      borderWidth: 1
+      borderWidth: 1,
+      backgroundColor: '#fff',
+      borderRadius: 50,
+      paddingLeft: 25
   
     },
     searchContainer:{
-      width: '25%',
-      height: '50%',
+      width: '15%',
+      height: '101%',
       position: 'absolute',
-      right: 0,
-      top: 25,
-      backgroundColor: 'purple',
+      right: 15,
+      bottom: 1,
+      backgroundColor: '#e5801b',
+      borderRadius: 55,
       alignItems: 'center',
       justifyContent: 'center'
     },
@@ -616,7 +641,7 @@ const Results = ({route, navigation}) => {
     choiceBox: {
         width: 125,
         height: 50,
-        borderBlockColorL: 'black',
+        borderBlockColor: 'black',
         borderWidth: 1,
         margin: 8,
         alignSelf: 'center',
@@ -628,7 +653,9 @@ const Results = ({route, navigation}) => {
       borderWidth: 1,
       padding: 8, 
       marginLeft: 8,
-    }
+    },
+    commitButton:
+    { width: 50, height: 50, alignSelf: 'flex-end', borderRadius: 15, paddingLeft:20, }
     
   
   });
