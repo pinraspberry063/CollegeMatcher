@@ -147,7 +147,7 @@ const Message = ({ route, navigation }) => {
             key={message.id}
             style={[
               styles.message,
-              (message.sender_UID === user.uid) || (message.sender_UID === roomateUID)
+              (message.sender_UID === user.uid)
                 ? styles.userMessage
                 : styles.roomateMessage
             ]}
