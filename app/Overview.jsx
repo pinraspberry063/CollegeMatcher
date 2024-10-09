@@ -1,4 +1,4 @@
-import {Text,View, StyleSheet} from 'react-native';
+import {Text,View, StyleSheet, ImageBackground} from 'react-native';
 import React, { useEffect, useState} from 'react';
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
@@ -55,20 +55,22 @@ const OverView = ({collegeID}) => {
     }, [address, urbanLevel, admRate]);
   
     return (
+      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>
       <View style={styles.contentContainer}>
         <Text style={styles.subTitle}>Address: </Text>
-        <Text>
+        <Text style= {{color: 'white'}}>
           {address[0]}, {address[1]}, {address[2]}
         </Text>
   
         <Text style={styles.subTitle}>Urbanization Level: </Text>
-        <Text>
+        <Text style= {{color: 'white'}}>
           {urbanLevel[1]} {urbanLevel[0]}
         </Text>
   
         <Text style={styles.subTitle}>Admissions Rate: </Text>
-        <Text>{admRate} %</Text>
+        <Text style= {{color: 'white'}}>{admRate} %</Text>
       </View>
+      </ImageBackground>
     );
   };
 
@@ -78,7 +80,7 @@ const OverView = ({collegeID}) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      marginTop: Constants.statusBarHeight,
+      resizeMode: 'cover'
     },
     star: {
       width: 50,
@@ -119,6 +121,7 @@ const OverView = ({collegeID}) => {
       fontSize: 25,
       fontWeight: 'bold',
       fontStyle: 'italic',
-      color: 'black',
+      color: 'white',
+      marginTop: 10
     },
   });

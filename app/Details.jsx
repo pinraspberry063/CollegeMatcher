@@ -107,7 +107,7 @@ const OverView = React.lazy(() => import('./Overview'));
   
     return (
       <ScrollView style={styles.container}>
-        <View style={{height: 200}}>
+        <View style={{height: 200, backgroundColor: '#a49af4'}}>
           <TouchableOpacity
             onPress={() => {
               favoriteCollege({ID: collegeID});
@@ -121,9 +121,10 @@ const OverView = React.lazy(() => import('./Overview'));
           <Text
             style={{
               fontSize: 40,
-              color: 'black',
+              color: 'white',
               paddingLeft: 15,
               fontWeight: 'bold',
+              paddingTop: Constants.statusBarHeight
             }}>
             {collName}
           </Text>
@@ -166,7 +167,6 @@ const OverView = React.lazy(() => import('./Overview'));
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      marginTop: Constants.statusBarHeight,
     },
     star: {
       width: 50,

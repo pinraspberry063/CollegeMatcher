@@ -3,6 +3,7 @@ StyleSheet,
 Text,
 View,
 TouchableOpacity,
+ImageBackground
 } from 'react-native';
 import React, { useEffect, useState} from 'react';
 import Constants from 'expo-constants';
@@ -73,6 +74,7 @@ const Link = ({uri}) => {
 
 const AdmOverView = () => {
     return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>
     <View style={styles.contentContainer}>
         <TouchableOpacity
         style={styles.button}
@@ -92,6 +94,7 @@ const AdmOverView = () => {
         </TouchableOpacity>
         )}
     </View>
+    </ ImageBackground>
     );
 };
 
@@ -111,7 +114,7 @@ export default Admissions
 const styles = StyleSheet.create({
 container: {
     flex: 1,
-    marginTop: Constants.statusBarHeight,
+    resizeMode: 'cover',
 },
 star: {
     width: 50,
@@ -125,8 +128,8 @@ swipView: {
     marginBottom: Constants.statusBarHeight,
     justifyContent: 'center',
 },
-contentContainer: {
-    paddingLeft: 20,
+contentContainer: { 
+    alignItems: 'center',
     width: '100%',
     height: 1500,
     // justifyContent: 'center',
@@ -139,9 +142,11 @@ webView: {
 button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#A020F0',
+    backgroundColor: '#37a599',
     borderRadius: 5,
-    marginVertical: 5,
+    marginVertical: 10,
+    alignSelf: 'center',
+    width: '75%'
 },
 buttonText: {
     color: '#FADADD',

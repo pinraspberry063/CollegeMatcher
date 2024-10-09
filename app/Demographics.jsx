@@ -172,11 +172,11 @@ return (
         />
         ))}
     </Svg> */}
-    <View style={{padding: 20}}>
+    <View style={{paddingVertical: 20}}>
         <Text style={styles.subTitle}>Major Break Down</Text>
         {majors.map((major, index) => (
-            <View key={index}>
-            <Text style={{color: '#eae8e5'}}> {major[0]} :</Text>
+            <View style={{marginVertical: 10}} key={index}>
+            <Text style={{color: '#eae8e5', marginBottom: 5 }}> {major[0]} :</Text>
             <Progress.Bar progress={parseInt(major[1])/100} width={100}/>
             </View>
         ))}
