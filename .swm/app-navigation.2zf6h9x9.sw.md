@@ -1,6 +1,42 @@
 ---
 title: App Navigation
 ---
+&nbsp;
+
+<SwmSnippet path="/App.jsx" line="196">
+
+---
+
+TabStack Navigator handles all the screens in the home animation of the orniting planets. The buttons themselves are handled in the PlanetSlider component file. The Tab navigator itself has been removed.
+
+```javascript
+  <TabStack.Navigator
+    screenOptions={screenOptions}
+  >
+    <TabStack.Screen name="Home" component={HomeStackScreen} />
+    <TabStack.Screen
+        name="QuizStack"
+        initialParams={{Top100: topColleges}}
+        component={ResultStackScreen}
+      />
+    <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+    <TabStack.Screen name="Messages" component={MessageStackScreen} />
+    <TabStack.Screen name="AI" component={AIStackScreen} />
+{/*     {checkUserStatus === 'moderator' && ( */}
+              <Tab.Screen name="Moderation" component={ModeratorScreen} />
+{/*             )} */}
+        <TabStack.Screen
+              name="UserActivityScreen"
+              component={UserActivityScreen}
+              options={{ tabBarButton: () => null }}
+            />
+  </TabStack.Navigator>
+```
+
+---
+
+</SwmSnippet>
+
 Navigation Stack For Home Page:\
 &nbsp;&nbsp;&nbsp;&nbsp;-- Handles navigation away from the homepage&nbsp;\
 &nbsp;&nbsp;&nbsp;&nbsp;-- Includes the top navigation bar (Settings)
