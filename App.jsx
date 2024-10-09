@@ -260,7 +260,7 @@ const checkUserStatus = async userId => {
 };
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [takenQuiz, setTakenQuiz] = useState(false);
   const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state

@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   Linking,
   Animated,
+  ImageBackground,
+  Image,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
@@ -37,6 +39,7 @@ const Login = ({navigation}) => {
 
   // Add animation
   const slideAnim = useRef(new Animated.Value(-1000)).current; //start off screen
+  const astronautAnim = useRef(new Animated.ValueXY({ x: -200, y: 800 })).current;
 
   useEffect(() => {
       Animated.timing(slideAnim, {
@@ -44,7 +47,14 @@ const Login = ({navigation}) => {
           duration: 1000, // Duration of the animation
           useNativeDriver: true, // Optimize performance
       }).start();
-    }, [slideAnim]);
+
+    // Astronaut
+      Animated.timing(astronautAnim, {
+          toValue: { x: 0, y: 700 },
+          duration: 1000,
+          useNativeDriver: true,
+          }).start();
+    }, []);
   // End animation
 
   const handleEmailLogin = async () => {
@@ -61,12 +71,21 @@ const Login = ({navigation}) => {
       const isAllowed = await checkIsRecruiter(userCredential.user.uid);
       if (isAllowed) {
         setUser(userCredential.user); // Set the logged in user in context only if not banned
+
+        // Astronaut out
+        Animated.timing(astronautAnim, {
+            toValue: { x: 1000, y: 700 },
+            duration: 800,
+            useNativeDriver: true,
+            }).start(() => {
+                navigation.navigate('Main');    //navigate to next screen AFTER animation
+            });
       } else {
         // If not allowed (banned), don't set the user or navigate
         setUser(null);
       }
       Alert.alert('Login Successful');
-      navigation.navigate('Main');
+      //navigation.navigate('Main');
     } catch (error) {
       Alert.alert('Login Failed', error.message);
     }
@@ -284,6 +303,7 @@ const Login = ({navigation}) => {
   );
 
   return (
+      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
       <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
         <Text style={[styles.title, {color: theme.color}]}>Login</Text>
         {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
@@ -295,6 +315,18 @@ const Login = ({navigation}) => {
           </TouchableOpacity>
         )}
       </Animated.View>
+
+      {/* Astronaut fly by */}
+      <Animated.Image
+        source={require('../assets/Astronaut.png')}
+        style={[
+            styles.astronaut,
+            {transform: astronautAnim.getTranslateTransform(),
+                }
+            ]}
+        resizeMode = "contain"
+        />
+      </ImageBackground>
     );
   };
 
@@ -311,7 +343,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'white',
     borderWidth: 1,
     marginBottom: 12,
     padding: 10,
@@ -333,6 +365,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
   },
+  background: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      },
+  astronaut: {
+      position: 'absolute',
+      width: 150,
+      height: 150,
+      bottom: 50,
+      left: '45%',
+      },
 });
 
 export default Login;

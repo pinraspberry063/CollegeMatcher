@@ -63,7 +63,7 @@ const Index = ({navigation}) => {
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
-      
+
       </View>
     </View>
     </ImageBackground>

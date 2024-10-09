@@ -2,7 +2,7 @@ import {StyleSheet, Text, View, Button, ImageBackground, Animated} from 'react-n
 import React, {useRef, useEffect} from 'react';
 
 //test background
-const backgroundImage = { uri: 'file:./assets/universe.jpeg' };
+//const backgroundImage = { uri: 'file:./assets/universe.jpeg' };
 
 const Launch = ({navigation}) => {
     // animation value for opacity
@@ -19,8 +19,8 @@ const Launch = ({navigation}) => {
 
   return (
     <Animated.View style={{...styles.container, opacity: fadeAnim}}>
-      <ImageBackground source={backgroundImage} style={styles.background}>
-        <View style={styles.buttonContainer2}>
+     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+       <View style={styles.buttonContainer2}>
           <Button
             title="Login"
             onPress={() => {

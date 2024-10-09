@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Keyboard,
+  ImageBackground,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
@@ -421,6 +422,7 @@ const Quiz = ({navigation}) => {
   };
 
   return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <FlatList
@@ -448,6 +450,7 @@ const Quiz = ({navigation}) => {
         />
       </SafeAreaView>
     </TouchableWithoutFeedback>
+   </ImageBackground>
   );
 };
 
@@ -465,6 +468,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     padding: 10,
     marginVertical: 10,
+    color: 'white',
   },
   text: {
     fontSize: 18,
@@ -476,5 +480,10 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
+  },
+  background: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
   },
 });
