@@ -1,5 +1,5 @@
 import React from "react";
-import { View, SafeAreaView, Text, Dimensions } from "react-native";
+import { View, SafeAreaView, Text, Dimensions, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -10,6 +10,8 @@ import Animated, {
   
 } from "react-native-reanimated";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 
 
 const { width, height } = Dimensions.get("screen");
@@ -21,48 +23,43 @@ const planetHeight = (height/4) * 0.5;
 
 const slides = [
   {
-    text: "1",
-    icon: "rocket-sharp",
+    // Take the Quiz
+    icon: "lead-pencil",
+    page: 'QuizButton'
   },
   {
-    text: "2",
-    icon: "rocket-sharp",
+    // QuickSearch
+    icon: "magnify",
+    page: 'QuizStack'
   },
   {
-    text: "3",
-    icon: "rocket-sharp",
+    // Compare Colleges
+    icon: "compare-vertical",
+    page: 'CompareColleges'
   },
   {
-    text: "4",
-    icon: "rocket-sharp",
+    // Direct Messages
+    icon: "message",
+    page: 'Messages'
   },
   {
-    text: "4",
-    icon: "rocket-sharp",
+    // Forums
+    icon: "earth",
+    page: 'ColForumSelectorTab'
   },
   {
-    text: "4",
-    icon: "rocket-sharp",
+    // AI
+    icon: "head",
+    page: 'AI'
   },
   {
-    text: "4",
-    icon: "rocket-sharp",
-  },
-  {
-    text: "4",
-    icon: "rocket-sharp",
-  },
-  {
-    text: "4",
-    icon: "rocket-sharp",
-  },
-  {
-    text: "4",
-    icon: "rocket-sharp",
+    // Settings
+    icon: "star-settings-outline",
+    page: 'Settings'
   },
 ];
 
-const Slide = ({ slide, scrollOffset, index }) => {
+const Slide = ({ slide, scrollOffset, index , navigation}) => {
   const animatedStyle = useAnimatedStyle(() => {
     const input = scrollOffset.value / planetWidth;
     const inputRange = [index - 1, index, index + 1];
@@ -94,6 +91,7 @@ const Slide = ({ slide, scrollOffset, index }) => {
   });
 
   return (
+    
     <Animated.View
       key={index}
       style={[
@@ -106,6 +104,7 @@ const Slide = ({ slide, scrollOffset, index }) => {
         animatedStyle,
       ]}
     >
+      <TouchableOpacity style={{flex: 1}} onPress={()=>{navigation.navigate(slide.page)}}>
       <View
         style={{
           padding: 5,
@@ -116,18 +115,12 @@ const Slide = ({ slide, scrollOffset, index }) => {
           justifyContent: "center",
         }}
       >
-        <Ionicons name={slide.icon} size={25} color={textColor} />
-        <Text
-          style={{
-            color: textColor,
-            fontSize: 10,
-            fontWeight: "bold",
-          }}
-        >
-          {slide.text}
-        </Text>
+        <MaterialCommunityIcons name={slide.icon} size={25} color={textColor} />
+    
       </View>
+      </TouchableOpacity>
     </Animated.View>
+
   );
 };
 
@@ -162,7 +155,7 @@ const Indicator = ({ scrollOffset, index }) => {
   );
 };
 
-const PlanetSwiper = () => {
+const PlanetSwiper = ({navigation}) => {
   const scrollOffset = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -194,6 +187,7 @@ const PlanetSwiper = () => {
               index={index}
               slide={slide}
               scrollOffset={scrollOffset}
+              navigation={navigation}
             />
           );
         })}
