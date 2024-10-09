@@ -1,9 +1,12 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import CollegeSearch from '../app/SearchComp';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import themeContext from '../theme/themeContext';
+import { db } from '../config/firebaseConfig';
+import CollegeSearch from '../app/SearchComp';
 
+const firestore = getFirestore(db);
 
 const getGrade = (value, ranges) => {
     for (let range of ranges) {
@@ -49,6 +52,58 @@ const CompareColleges = ({ navigation }) => {
     const theme = useContext(themeContext);
     const [college1, setCollege1] = useState(null);
     const [college2, setCollege2] = useState(null);
+    const [colleges, setColleges] = useState([]);
+    const [search, setSearch] = useState('');
+    const [filteredColleges, setFilteredColleges] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchColleges = async () => {
+            try {
+                const collegeRef = collection(firestore, 'CompleteColleges');
+                const querySnapshot = await getDocs(collegeRef);
+                const collegeData = querySnapshot.docs.map(doc => doc.data());
+                setColleges(collegeData);
+                setLoading(false);
+            } catch (error) {
+                console.error('Error loading colleges:', error);
+                setLoading(false);
+            }
+        };
+
+        fetchColleges();
+    }, []);
+
+    const handleSearch = (text) => {
+        setSearch(text);
+        if (text) {
+            const filtered = colleges.filter(college =>
+                college.shool_name.toLowerCase().includes(text.toLowerCase())
+            );
+            setFilteredColleges(filtered);
+        } else {
+            setFilteredColleges([]);
+        }
+    };
+
+    const renderCollegeItem = ({ item }) => (
+        <TouchableOpacity
+            style={styles.collegeCard}
+            onPress={() => {
+                if (!college1) {
+                    setCollege1(item);
+                } else if (!college2) {
+                    setCollege2(item);
+                }
+            }}
+        >
+            <Text style={styles.collegeName}>{item.shool_name}</Text>
+        </TouchableOpacity>
+    );
+
+    if (loading) {
+        return <ActivityIndicator size="large" color={theme.color} style={styles.loader} />;
+    }
 
     const satRanges = [
         { min: 1400, max: 1600, grade: 'A+' },
@@ -136,9 +191,6 @@ const CompareColleges = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
-            </TouchableOpacity>
             <Text style={styles.title}>Compare Colleges</Text>
 
             <Text>Select the first college:</Text>
