@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   Linking,
   Animated,
+  ImageBackground,
+  Image,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
@@ -42,6 +44,7 @@ const Login = ({ navigation }) => {
 
   // Add animation
   const slideAnim = useRef(new Animated.Value(-1000)).current; //start off screen
+  const astronautAnim = useRef(new Animated.ValueXY({ x: -200, y: 800 })).current;
 
   useEffect(() => {
       Animated.timing(slideAnim, {
@@ -49,7 +52,14 @@ const Login = ({ navigation }) => {
           duration: 1000, // Duration of the animation
           useNativeDriver: true, // Optimize performance
       }).start();
-    }, [slideAnim]);
+
+    // Astronaut
+      Animated.timing(astronautAnim, {
+          toValue: { x: 0, y: 700 },
+          duration: 1000,
+          useNativeDriver: true,
+          }).start();
+    }, []);
   // End animation
 
   // === Helper Functions to Validate Input ===
@@ -144,6 +154,8 @@ const Login = ({ navigation }) => {
       } else {
         Alert.alert('Login Error', 'Failed to retrieve user information.');
       }
+      Alert.alert('Login Successful');
+      //navigation.navigate('Main');
     } catch (error) {
       console.error('Login Error:', error);
       Alert.alert('Login Failed', error.message);
@@ -490,7 +502,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   input: {
-    height: 50,
+    height: 40,
+    borderColor: 'white',
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 12,
@@ -547,6 +560,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
   },
+  background: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      },
+  astronaut: {
+      position: 'absolute',
+      width: 150,
+      height: 150,
+      bottom: 50,
+      left: '45%',
+      },
 });
 
 export default Login;
