@@ -143,7 +143,8 @@ const Results = ({route, navigation}) => {
                 await updateDoc(userDocRef, {
                     Committed_Colleges: arrayRemove(collegeName),
                 });
-                Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}`);
+                Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}
+                \n Please inform your possible roommates of this decision!`);
             } else {
                 // Add the college if it doesn't exist in the committed list
                 updatedCommittedColleges = [...committedColleges, collegeName];

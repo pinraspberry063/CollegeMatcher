@@ -223,7 +223,7 @@ const matchRoomates = async (roomatePreferences) => {
     scores.sort((a,b)=> b.score - a.score);
     const scoresFiltered = scores.filter(checkCompat);
     const top5Roomates = scoresFiltered.slice(0,5).map((s)=>({name:s.username, score: s.score, roomate_uid: s.roomate_uid}));
-    console.log(top5Roomates);
+    //console.log(top5Roomates);
     const resultsRef = collection(firestore,'RoomateResults');
 
     try{

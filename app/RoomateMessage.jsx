@@ -46,15 +46,6 @@ const Message = ({ route, navigation }) => {
         if (docSnap.exists) {
           const data = docSnap.data();
           setRoomateUID(data.Roomate_UID);
-          /*
-          if (data.User_UID === user.uid) {
-            setRoomateUID(data.Roomate_UID);
-            //setIsRecruiter(false);
-          } else if (data.Roomate_UID === user.uid) {
-            setRoomateUID(data.User_UID);
-            //setIsRecruiter(true);
-          }
-      */
           setDocumentID(conversationDocRef.id);
 
           // Fetch usernames
