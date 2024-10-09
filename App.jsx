@@ -260,7 +260,7 @@ const checkUserStatus = async (userId) => {
 
   if (userSnap.exists()) {
     const userData = userSnap.data();
-    if (userData.status === 'banned') {
+    if (userData.IsBanned === true) {
       auth().signOut();
       Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
       return 'banned';

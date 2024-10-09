@@ -122,15 +122,15 @@ const Login = ({ navigation }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      // Check if user document exists
+      // Check if user document exists and has a username
       const userDocRef = doc(firestore, 'Users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
-      if (!userDoc.exists()) {
+      if (!userDoc.exists() || !userDoc.data().Username) {
         // Prompt for username
         navigation.navigate('UsernamePrompt', { user });
       } else {
-        // User document exists, proceed to main app
+        // User document exists with a username, proceed to main app
         setUser(user);
         navigation.navigate('Main');
       }
@@ -201,8 +201,22 @@ const Login = ({ navigation }) => {
 
      console.log('Action code settings:', actionCodeSettings);
 
-     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
+     const userCredential =  auth().sendSignInLinkToEmail(email, actionCodeSettings);
      await AsyncStorage.setItem('emailForSignIn', email);
+     const user = userCredential.user;
+
+           // Check if user document exists
+           const userDocRef = doc(firestore, 'Users', user.uid);
+           const userDoc = await getDoc(userDocRef);
+
+           if (!userDoc.exists()) {
+             // Prompt for username
+             navigation.navigate('UsernamePrompt', { user });
+           } else {
+             // User document exists, proceed to main app
+             setUser(user);
+             navigation.navigate('Main');
+           }
      Alert.alert('Email Sent', 'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.');
    } catch (error) {
      console.error('Email link sign-in error:', error);
