@@ -5,6 +5,7 @@ import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
+import auth from '@react-native-firebase/auth';
 import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, query, where, getFirestore, Timestamp } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 
@@ -14,17 +15,37 @@ const ProfilePage = ({ navigation }) => {
 
     const { user } = useContext(UserContext);
     const theme = useContext(themeContext);
+    const [userName, setUsername] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const userNames = collection(firestore,'Users');
 
-
+    const fetchUserdata = async (uid) => {
+                   try {
+                     const usersRef = collection(firestore, 'Users');
+                     const q = query(usersRef, where('User_UID', '==', uid));
+                     const querySnapshot = await getDocs(q);
+                     if (!querySnapshot.empty) {
+                       const userDoc = querySnapshot.docs[0];
+                       const userData = userDoc.data();
+                       setUsername(userData.Username);
+                       setUserEmail(userData.Email)
+                     } else {
+                       console.error('No user found with the given UID.');
+                     }
+                   } catch (error) {
+                     console.error('Error fetching username and recruiter status:', error);
+                   }
+                 };
+             fetchUserdata(auth().currentUser.uid);
 
     return (
         <SafeAreaView>
             <ScrollView>
                 <Text styles={styles.buttonText}>
-                    "User Profile Page"
+                    User Profile Page
                 </Text>
                 <Text styles={styles.buttonText}>
-                    This is where the Username will go.
+                    Username: {userName}
                 </Text>
                 <Text styles={styles.smallerText}>
                     Account Creation:
@@ -33,7 +54,7 @@ const ProfilePage = ({ navigation }) => {
                     Name:
                 </Text>
                 <Text styles={styles.smallerText}>
-                    Contact info:
+                    Contact info: {userEmail}
                 </Text>
                 <Text styles={styles.smallerText}>
                     Status:
@@ -56,13 +77,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 10,
     color: '#000000',
   },
   smallerText: {
-      fontSize: 14,
+      fontSize: 20,
       color: '#0000000'
   },
   buttonSubText: {
