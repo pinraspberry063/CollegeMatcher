@@ -16,7 +16,7 @@ const ProfilePage = ({ navigation }) => {
     const { user } = useContext(UserContext);
     const theme = useContext(themeContext);
     const [userName, setUsername] = useState('');
-    const [userEmail, setUserEmail] = useState('');
+    const [Email, setUserEmail] = useState('');
     const userNames = collection(firestore,'Users');
 
     const fetchUserdata = async (uid) => {
@@ -39,7 +39,7 @@ const ProfilePage = ({ navigation }) => {
              fetchUserdata(auth().currentUser.uid);
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={styles.container}>
             <ScrollView>
                 <Text styles={styles.buttonText}>
                     User Profile Page
@@ -54,7 +54,7 @@ const ProfilePage = ({ navigation }) => {
                     Name:
                 </Text>
                 <Text styles={styles.smallerText}>
-                    Contact info: {userEmail}
+                    Contact info: {Email}
                 </Text>
                 <Text styles={styles.smallerText}>
                     Status:
@@ -68,6 +68,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    fontSize: 24,
+    color: '#FFFFFFF',
   },
   buttonContainer: {
     marginBottom: 16,
@@ -80,11 +82,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#000000',
+    color: '#FFFFFFF',
   },
   smallerText: {
       fontSize: 20,
-      color: '#0000000'
+      color: '#FFFFFFF'
   },
   buttonSubText: {
     fontSize: 14,
