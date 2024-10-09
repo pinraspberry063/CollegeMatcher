@@ -61,5 +61,5 @@ const styles = StyleSheet.create({
   button2: {
     marginVertical: 10,
     width: 200,
-  },
-});
+    },
+})

@@ -3,7 +3,7 @@ import React , {useState, useEffect} from 'react';
 import { Dropdown } from 'react-native-element-dropdown';
 import axios from 'axios';
 
-  const DropdownComponent = ({data, value, onChange, style}) => {
+  const DropdownComponent = ({data, value, onChange}) => {
     const [selectedValue, setSelectedValue] = useState(value);
 
     useEffect(() => {
@@ -20,7 +20,7 @@ import axios from 'axios';
     return (
       <View style={styles.container}>
             <Dropdown
-                style={[styles.dropdown, style]}
+                style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
