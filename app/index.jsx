@@ -71,7 +71,7 @@ const Index = ({ navigation }) => {
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <View style={styles.container}>
       <View style={styles.icon}>
-        <Ionicons
+        {/* <Ionicons
           color='white'
           raised
           name="settings-outline"
@@ -79,7 +79,7 @@ const Index = ({ navigation }) => {
           onPress={() => {
             navigation.push('Settings');
           }}
-        />
+        /> */}
       </View>
 
       <SafeAreaView style={styles.titleContainer}>
