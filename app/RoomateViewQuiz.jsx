@@ -31,12 +31,14 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
      const [collegeName, setCollegeName] = useState('');
      const [userName, setUsername] = useState('');
      const handleFindRoomateAns = async (roomate_UID) =>{
+         /*
         const roomateDataRef = collection(firestore, 'RoomateMatcher');
         const currRoomateQuery = query(
                     roomateDataRef,
                      where('userId', '==', roomate_UID)
                 );
         const currRoomateSnapshot = await getDocs(currRoomateQuery);
+
         console.log("handleFindRoomateAns");
         console.log(roomate_UID);
         if(currRoomateSnapshot.docs[0].bedtime = 1){
@@ -57,6 +59,7 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
         else{
             setBedtime('AHHHH');
             }
+        */
      };
     handleFindRoomateAns(roomate_UID);
     return (
@@ -65,33 +68,46 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
             <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you want light-out at 10pm or a specific time?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you prefer a quiet environment in general?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with your roommate?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate smoking at the dorm/apartment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Are you against company frequently being over at the dorm/apartment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
             <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
-
+            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
 
         </SafeAreaView>
     );
@@ -100,7 +116,7 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#030303',
         padding: 20,
     },
     title: {
