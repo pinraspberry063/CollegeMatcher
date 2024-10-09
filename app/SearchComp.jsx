@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity } from 'react-native';
 import { fetchColleges } from '../app/AccessCollegeData';
+import { CollegesContext } from '../components/CollegeContext';
 
 const CollegeSearch = ({ onCollegeSelect }) => {
     const [searchText, setSearchText] = useState('');
-    const [colleges, setColleges] = useState([]);
+    // const [colleges, setColleges] = useState([]);
     const [filteredColleges, setFilteredColleges] = useState([]);
+    const {colleges, loading} = useContext(CollegesContext);
 
-    useEffect(() => {
-        const getData = async () => {
-            const collegesData = await fetchColleges();
-            setColleges(collegesData);
-        };
-        getData();
-    }, []);
+    // useEffect(() => {
+    //     const getData = async () => {
+    //         const collegesData = await fetchColleges();
+    //         setColleges(collegesData);
+    //     };
+    //     getData();
+    // }, []);
 
     useEffect(() => {
         if (searchText.trim()) {
