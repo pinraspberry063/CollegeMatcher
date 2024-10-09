@@ -8,81 +8,73 @@ import Asteroid from '../components/Asteroid';
 const Game = ({ navigation }) => {
   const { width: screenWidth } = Dimensions.get('window');
   const { height: screenHeight } = Dimensions.get('window');
-  const playerPositionX = useSharedValue(150);
-  const playerPositionY = useSharedValue(780);
 
-  const warningLineHeight = 100;
+  // Sizes based on screen dimensions
+  const playerWidth = screenWidth * 0.1;
+  const playerHeight = screenHeight * 0.1;
+
+  // Initial player position based on screen size
+  const playerPositionX = useSharedValue(screenWidth / 2 - playerWidth / 2);
+  const playerPositionY = useSharedValue(screenHeight - playerHeight - 20);
+
+  const warningLineHeight = screenHeight * 0.1; // 10% of screen height
   const asteroidFallDuration = 6000;
 
   const gameIntervals = useRef([]); // Track all intervals to clear on quit
 
-  // Enemy logic
-  const enemies = [
-    {
-      positionX: useSharedValue(150),
-      positionY: useSharedValue(100),
-      active: useRef(true),
-      swooping: useRef(false),
-      originalY: 100,
-      warning: useRef(false),
-    },
-    {
-      positionX: useSharedValue(200),
-      positionY: useSharedValue(200),
-      active: useRef(true),
-      swooping: useRef(false),
-      originalY: 200,
-      warning: useRef(false),
-    },
-    {
-      positionX: useSharedValue(250),
-      positionY: useSharedValue(300),
-      active: useRef(true),
-      swooping: useRef(false),
-      originalY: 300,
-      warning: useRef(false),
-    },
-  ];
+  // Store a separate ref for swooping state
+  const swoopRefs = useRef({});
 
-  const [isMovingLeft, setIsMovingLeft] = useState(false);
-  const [isMovingRight, setIsMovingRight] = useState(false);
+  // State to track enemies and their statuses
+  const [enemies, setEnemies] = useState([
+    {
+      id: 1,
+      positionX: useSharedValue(screenWidth * 0.3),
+      positionY: useSharedValue(screenHeight * 0.1), // Fixed Y position for enemy 1
+      originalY: screenHeight * 0.1, // Save original Y position
+      speed: Math.random() * 1000 + 500,
+      active: true,
+      warning: false,
+    },
+    {
+      id: 2,
+      positionX: useSharedValue(screenWidth * 0.5),
+      positionY: useSharedValue(screenHeight * 0.2), // Fixed Y position for enemy 2
+      originalY: screenHeight * 0.2, // Save original Y position
+      speed: Math.random() * 300 + 1500,
+      active: true,
+      warning: false,
+    },
+    {
+      id: 3,
+      positionX: useSharedValue(screenWidth * 0.7),
+      positionY: useSharedValue(screenHeight * 0.3), // Fixed Y position for enemy 3
+      originalY: screenHeight * 0.3, // Save original Y position
+      speed: Math.random() * 1000 + 1200,
+      active: true,
+      warning: false,
+    },
+  ]);
 
-  // Asteroid logic
+  // Asteroid logic with positions relative to screen
   const asteroids = [
-    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
-    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
-    { positionX: useSharedValue(-500), positionY: useSharedValue(-900), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-screenWidth), positionY: useSharedValue(-screenHeight), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-screenWidth), positionY: useSharedValue(-screenHeight), warningLine: useRef(null), active: useRef(false) },
+    { positionX: useSharedValue(-screenWidth), positionY: useSharedValue(-screenHeight), warningLine: useRef(null), active: useRef(false) },
   ];
 
-  // Movement logic for the player ship
   useEffect(() => {
-    const movePlayer = () => {
-      if (isMovingLeft && playerPositionX.value > 50) {
-        playerPositionX.value = withTiming(playerPositionX.value - 20, {
-          duration: 80,
-          easing: Easing.linear,
-        });
-      }
-      if (isMovingRight && playerPositionX.value < screenWidth - 50) { // Ensure player does not move off-screen
-        playerPositionX.value = withTiming(playerPositionX.value + 20, {
-          duration: 80,
-          easing: Easing.linear,
-        });
-      }
-    };
+    enemies.forEach((enemy) => {
+      swoopRefs.current[enemy.id] = { swooping: false };
+    });
+  }, [enemies]);
 
-    const interval = setInterval(movePlayer, 200);
-    gameIntervals.current.push(interval);
-
-    return () => clearInterval(interval);
-  }, [isMovingLeft, isMovingRight, playerPositionX]);
-
-  //Collision Detection Logic
+  // Collision Detection Logic
   const checkBoundingBoxCollision = (source, target) => {
-    const sourceWidth = 70; // Assuming width of source (asteroid or enemy)
-    const sourceHeight = 70; // Assuming height of source
-    const targetWidth = 70; // Assuming width of target (player or enemy)
-    const targetHeight = 70; // Assuming height of target
+    const sourceWidth = 70;
+    const sourceHeight = 70;
+    const targetWidth = 70;
+    const targetHeight = 70;
 
     const sourceLeft = source.positionX.value;
     const sourceRight = source.positionX.value + sourceWidth;
@@ -103,7 +95,7 @@ const Game = ({ navigation }) => {
   };
 
   const handleAsteroidCollision = (asteroid) => {
-    if (!asteroid.active.current) return; // Check if asteroid is active before checking collision
+    if (!asteroid.active.current) return;
 
     // Check collision with player
     if (checkBoundingBoxCollision(asteroid, { positionX: playerPositionX, positionY: playerPositionY })) {
@@ -112,69 +104,101 @@ const Game = ({ navigation }) => {
     }
 
     // Check collision with enemies
-    enemies.forEach((enemy, index) => {
-      if (enemy.active.current && checkBoundingBoxCollision(asteroid, enemy)) {
-        console.log(`Enemy ${index + 1} hit by asteroid!`);
-        enemy.active.current = false; // Deactivate enemy
-      }
-    });
+    setEnemies((prevEnemies) =>
+      prevEnemies.map((enemy) => {
+        if (enemy.active && checkBoundingBoxCollision(asteroid, enemy)) {
+          console.log(`Enemy hit by asteroid!`);
+          return { ...enemy, active: false }; // Deactivate enemy
+        }
+        return enemy;
+      })
+    );
   };
 
-  // Handle enemy and player collision
   const handleEnemyPlayerCollision = () => {
-    enemies.forEach((enemy, index) => {
-      if (enemy.swooping.current && checkBoundingBoxCollision(enemy, { positionX: playerPositionX, positionY: playerPositionY })) {
-        console.log(`Player collided with enemy ${index + 1}!`);
-        // Handle collision logic (e.g., reduce player health, deactivate enemy)
-      }
-    });
+    setEnemies((prevEnemies) =>
+      prevEnemies.map((enemy) => {
+        if (swoopRefs.current[enemy.id].swooping && checkBoundingBoxCollision(enemy, { positionX: playerPositionX, positionY: playerPositionY })) {
+          console.log('Player collided with enemy!');
+          // Handle collision logic (e.g., reduce player health)
+        }
+        return enemy;
+      })
+    );
   };
 
-  // Enemy Movement Logic
+  // Movement logic for the player ship
+  const movePlayer = (direction) => {
+    if (direction === 'left' && playerPositionX.value > 0) {
+      playerPositionX.value = withTiming(playerPositionX.value - screenWidth * 0.1, {
+        duration: 50,
+        easing: Easing.linear,
+      });
+    } else if (direction === 'right' && playerPositionX.value < screenWidth - playerWidth) {
+      playerPositionX.value = withTiming(playerPositionX.value + screenWidth * 0.1, {
+        duration: 50,
+        easing: Easing.linear,
+      });
+    }
+  };
+
   useEffect(() => {
     const moveEnemy = (enemy) => {
       const followPlayer = () => {
-        if (!enemy.swooping.current && enemy.active.current) {
+        if (!swoopRefs.current[enemy.id].swooping && enemy.active) {
           enemy.positionX.value = withTiming(playerPositionX.value, {
-            duration: 2000,
+            duration: enemy.speed,
             easing: Easing.linear,
           });
         }
       };
 
       const swoopEnemy = () => {
-        if (!enemy.swooping.current && !enemy.warning.current) {
-          // Trigger the warning state
-          enemy.warning.current = true;
+        if (swoopRefs.current[enemy.id].swooping || !enemy.active) return;
 
-          // Display warning and freeze for a moment before swooping
+        // Log when the swoop starts
+        console.log(`Enemy ${enemy.id} is starting to swoop`);
+
+        // Set swooping to true
+        swoopRefs.current[enemy.id].swooping = true;
+
+        // Start swooping process with a warning delay
+        setEnemies((prevEnemies) =>
+          prevEnemies.map((e) => (e.id === enemy.id ? { ...e, warning: true } : e))
+        );
+
+        setTimeout(() => {
+          setEnemies((prevEnemies) =>
+            prevEnemies.map((e) => (e.id === enemy.id ? { ...e, warning: false } : e))
+          );
+
+          // Move down toward the player
+          enemy.positionY.value = withTiming(playerPositionY.value, {
+            duration: enemy.speed,
+            easing: Easing.linear,
+          });
+
+          // Move enemy horizontally off-screen
+          const newPositionX = Math.random() < 0.5 ? -50 : screenWidth + 50;
+
           setTimeout(() => {
-            enemy.warning.current = false; // Hide warning
-            enemy.swooping.current = true; // Start swooping
-
-            // Move enemy downward toward the player
-            enemy.positionY.value = withTiming(playerPositionY.value, { duration: 2000, easing: Easing.linear }); // Move down near player
-
-            const newPositionX = Math.random() < 0.5 ? -50 : screenWidth + 50;
+            enemy.positionX.value = withTiming(newPositionX, { duration: 1500, easing: Easing.linear });
 
             setTimeout(() => {
-              // Move enemy horizontally to side
-              enemy.positionX.value = newPositionX;
-
-              // Return to original position
               enemy.positionY.value = withTiming(enemy.originalY, { duration: 1000, easing: Easing.linear });
-              enemy.positionX.value = withTiming(playerPositionX.value + Math.random() * 50 - 25, {
-                duration: 2000,
-                easing: Easing.linear,
-              });
 
-              enemy.swooping.current = false;
-            }, 2000);
-          }, 1000); // 1 second warning before swooping
-        }
+              // Mark swoop as finished after cooldown
+              const swoopCooldown = 5000 + Math.random() * 4000;
+              setTimeout(() => {
+                swoopRefs.current[enemy.id].swooping = false;
+                console.log(`Enemy ${enemy.id} finished swooping`);
+              }, swoopCooldown);
+            }, 1500); // Wait for the enemy to move fully off-screen
+          }, enemy.speed);
+        }, 1000); // Warning duration before swoop
       };
 
-      const swoopInterval = setInterval(swoopEnemy, 6000 + Math.random() * 3000);
+      const swoopInterval = setInterval(swoopEnemy, 10000 + Math.random() * 5000); // Delay between swoops
       const followInterval = setInterval(followPlayer, 500);
 
       gameIntervals.current.push(swoopInterval, followInterval);
@@ -186,17 +210,17 @@ const Game = ({ navigation }) => {
     };
 
     enemies.forEach((enemy) => {
-      if (enemy.active.current) moveEnemy(enemy);
+      if (enemy.active) moveEnemy(enemy);
     });
   }, []);
+
 
   // Falling asteroids logic
   useEffect(() => {
     const animateAsteroid = (asteroid) => {
       const randomXPosition = Math.random() * screenWidth;
-      asteroid.active.current = true; // Set asteroid to active
+      asteroid.active.current = true;
 
-      // Show warning line before fall
       asteroid.warningLine.current = randomXPosition;
 
       setTimeout(() => {
@@ -205,7 +229,6 @@ const Game = ({ navigation }) => {
 
         asteroid.positionY.value = -1000;
 
-        // Animate fall and handle collisions
         asteroid.positionY.value = withTiming(screenHeight + 50, {
           duration: asteroidFallDuration,
           easing: Easing.linear,
@@ -216,25 +239,31 @@ const Game = ({ navigation }) => {
           if (asteroid.positionY.value < screenHeight + 50) {
             requestAnimationFrame(checkForCollision);
           } else {
-            asteroid.active.current = false; // Deactivate asteroid when off-screen
+            asteroid.active.current = false;
           }
         };
 
-        checkForCollision(); // Start checking collisions
+        checkForCollision();
       }, 1000);
     };
 
-    // Start each asteroid fall with intervals
-    asteroids.forEach((asteroid) => {
-      const initialDelay = Math.random() * 5000;
-      const repeatDelay = 7000;
+    const startAsteroidFall = () => {
+      const numAsteroids = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < numAsteroids; i++) {
+        const asteroid = asteroids[Math.floor(Math.random() * asteroids.length)];
+        if (!asteroid.active.current) {
+          animateAsteroid(asteroid);
+        }
+      }
+    };
 
-      setTimeout(() => {
-        animateAsteroid(asteroid);
-        const interval = setInterval(() => animateAsteroid(asteroid), repeatDelay);
-        gameIntervals.current.push(interval);
-      }, initialDelay);
-    });
+    const asteroidInterval = setInterval(() => {
+      startAsteroidFall();
+    }, Math.random() * 5000 + 3000);
+
+    gameIntervals.current.push(asteroidInterval);
+
+    return () => clearInterval(asteroidInterval);
   }, []);
 
   // Continuously check for enemy-player collision
@@ -247,32 +276,29 @@ const Game = ({ navigation }) => {
 
   // Quit button handler
   const handleQuit = () => {
-    gameIntervals.current.forEach(clearInterval); // Clear all intervals
-    navigation.goBack(); // Go back to the previous screen
+    gameIntervals.current.forEach(clearInterval);
+    navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
-      {/* Quit Button */}
       <TouchableOpacity style={styles.quitButton} onPress={handleQuit}>
         <Text style={styles.quitText}>Quit</Text>
       </TouchableOpacity>
 
       <PlayerShip playerPositionX={playerPositionX} playerPositionY={playerPositionY} />
 
-      {/* Render enemies and warnings */}
       {enemies.map((enemy, index) =>
-        enemy.active.current ? (
+        enemy.active ? (
           <Enemy
             key={index}
             enemyPositionX={enemy.positionX}
             enemyPositionY={enemy.positionY}
-            warning={enemy.warning.current}
+            warning={enemy.warning}
           />
         ) : null
       )}
 
-      {/* Render warning lines before asteroids fall */}
       {asteroids.map((asteroid, index) =>
         asteroid.warningLine.current !== null ? (
           <View
@@ -282,41 +308,24 @@ const Game = ({ navigation }) => {
         ) : null
       )}
 
-      {/* Render the falling asteroids */}
       {asteroids.map((asteroid, index) => (
         <Asteroid key={`asteroid-${index}`} positionX={asteroid.positionX} positionY={asteroid.positionY} />
       ))}
 
-      {/* Controls */}
       <View style={styles.controls}>
-        <View style={styles.leftControls}>
-          <TouchableOpacity
-            style={styles.buttonLarge}
-            onPressIn={() => setIsMovingLeft(true)}
-            onPressOut={() => setIsMovingLeft(false)}
-          >
-            <Text style={styles.buttonText}>{"<"}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.buttonLarge}
-            onPressIn={() => setIsMovingRight(true)}
-            onPressOut={() => setIsMovingRight(false)}
-          >
-            <Text style={styles.buttonText}>{">"}</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.buttonLarge} onPressIn={() => movePlayer('left')}>
+          <Text style={styles.buttonText}>{"<"}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonLarge} onPressIn={() => movePlayer('right')}>
+          <Text style={styles.buttonText}>{">"}</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-  },
+  container: { flex: 1, backgroundColor: 'black' },
   quitButton: {
     position: 'absolute',
     top: 20,
@@ -324,39 +333,20 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'red',
     borderRadius: 5,
-    zIndex: 1, // Ensure the button is on top
+    zIndex: 1,
   },
-  quitText: {
-    color: 'white',
-    fontSize: 16,
-  },
+  quitText: { color: 'white', fontSize: 16 },
   controls: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+    position: 'absolute',
+    bottom: 30,
     padding: 20,
   },
-  leftControls: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-  },
-  buttonLarge: {
-    backgroundColor: 'gray',
-    borderRadius: 10,
-    padding: 10,
-    width: 200,
-    marginRight: 20,
-  },
-  buttonText: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 24,
-  },
-  warningLine: {
-    position: 'absolute',
-    width: 5,
-    backgroundColor: 'red',
-  },
+  buttonLarge: { backgroundColor: 'gray', borderRadius: 10, padding: 10, width: '20%' },
+  buttonText: { color: 'white', textAlign: 'center', fontSize: 24 },
+  warningLine: { position: 'absolute', width: 5, backgroundColor: 'red' },
 });
 
 export default Game;
