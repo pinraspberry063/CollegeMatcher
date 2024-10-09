@@ -392,9 +392,10 @@ const checkIsRecruiter = async (uid) => {
 
           {/* === Identifier Input === */}
           <TextInput
-            style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            // style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            style={[styles.input, { borderColor: theme.color, color: '#000000' }]}
             placeholder="Username, Email, or Phone Number"
-            placeholderTextColor={theme.color}
+            placeholderTextColor={'#000000'}
             value={identifier}
             onChangeText={setIdentifier}
             keyboardType="email-address" // Optional: change dynamically based on input
@@ -404,9 +405,9 @@ const checkIsRecruiter = async (uid) => {
           {/* === Password Input with Toggle === */}
           <View style={styles.passwordContainer}>
             <TextInput
-              style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: theme.color }]}
+              style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: '#000000' }]}
               placeholder="Password"
-              placeholderTextColor={theme.color}
+              placeholderTextColor={'#000000'}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
