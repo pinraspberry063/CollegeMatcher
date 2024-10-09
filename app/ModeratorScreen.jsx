@@ -1,36 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Alert } from 'react-native';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
 
 const ModeratorScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchReports();
   }, []);
 
   const fetchReports = async () => {
-    const reportsRef = collection(firestore, 'Reports');
-    const q = query(reportsRef, where('status', '==', 'pending'));
-    const querySnapshot = await getDocs(q);
-    const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
-      const reportData = doc.data();
-      const userRef = collection(firestore, 'Users');
-      let userQuery = query(userRef, where('Username', '==', reportData.reportedUser));
-      let userSnapshot = await getDocs(userQuery);
+    setIsLoading(true);
+    try {
+      const reportsRef = collection(firestore, 'Reports');
+      const q = query(reportsRef, where('status', '==', 'pending'));
+      const querySnapshot = await getDocs(q);
+      const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
+        const reportData = doc.data();
+        const userRef = collection(firestore, 'Users');
+        let userQuery = query(userRef, where('Username', '==', reportData.reportedUser));
+        let userSnapshot = await getDocs(userQuery);
 
-      if (userSnapshot.empty) {
-        userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
-        userSnapshot = await getDocs(userQuery);
-      }
+        if (userSnapshot.empty) {
+          userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
+          userSnapshot = await getDocs(userQuery);
+        }
 
-      const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
-      return { id: doc.id, ...reportData, isBanned };
-    }));
-    setReports(reportsList);
+        const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+        return { id: doc.id, ...reportData, isBanned };
+      }));
+
+      // Sort reports by createdAt timestamp (most recent first)
+      reportsList.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+      setReports(reportsList);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      Alert.alert('Error', 'Failed to fetch reports. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      fetchReports(); // If search term is empty, fetch all reports
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const reportsRef = collection(firestore, 'Reports');
+      const q = query(reportsRef,
+        where('status', '==', 'pending'),
+        where('reportedUser', '==', searchTerm.trim())
+      );
+      const querySnapshot = await getDocs(q);
+      const reportsList = await Promise.all(querySnapshot.docs.map(async doc => {
+        const reportData = doc.data();
+        const userRef = collection(firestore, 'Users');
+        let userQuery = query(userRef, where('User_UID', '==', reportData.reportedUser));
+        let userSnapshot = await getDocs(userQuery);
+
+        const isBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+        return { id: doc.id, ...reportData, isBanned };
+      }));
+
+      // Sort reports by createdAt timestamp (most recent first)
+      reportsList.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+      setReports(reportsList);
+    } catch (error) {
+      console.error('Error searching reports:', error);
+      Alert.alert('Error', 'Failed to search reports. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBanUser = async (reportId, reportedUser) => {
@@ -116,16 +166,18 @@ const ModeratorScreen = ({ navigation }) => {
 
   const fetchUserActivity = async (reportedUser) => {
     try {
+      // Find the user document to get the username
       const usersRef = collection(firestore, 'Users');
-      let userQuery = query(usersRef, where('Username', '==', reportedUser));
+      let userQuery = query(usersRef, where('User_UID', '==', reportedUser));
       let querySnapshot = await getDocs(userQuery);
 
       if (querySnapshot.empty) {
-        userQuery = query(usersRef, where('User_UID', '==', reportedUser));
+        userQuery = query(usersRef, where('Username', '==', reportedUser));
         querySnapshot = await getDocs(userQuery);
       }
 
       if (querySnapshot.empty) {
+        console.log('User not found with given identifier:', reportedUser);
         throw new Error('User not found');
       }
 
@@ -136,60 +188,80 @@ const ModeratorScreen = ({ navigation }) => {
 
       const userActivity = { threads: [], posts: [] };
 
-      const collegeName = 'Louisiana Tech University';
-      const subgroupsToCheck = ['Recruiter Check', 'Test General'];
+      // Fetch all threads created by the user using Collection Group Query
+      const threadsQuery = query(
+        collectionGroup(firestore, 'threads'),
+        where('createdBy', '==', username)
+      );
+      const threadsSnapshot = await getDocs(threadsQuery);
 
-      for (const subgroupName of subgroupsToCheck) {
-        console.log('Checking subgroup:', subgroupName);
+      console.log(`Total user threads found: ${threadsSnapshot.size}`);
 
-        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', subgroupName, 'threads');
-        const threadsSnapshot = await getDocs(threadsRef);
+      threadsSnapshot.forEach((threadDoc) => {
+        const threadPath = threadDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1
+        const pathSegments = threadPath.split('/');
 
-        console.log('Threads found:', threadsSnapshot.size);
+        // Extract collegeName and subgroupName from the path
+        // Ensure the path has the expected structure
+        if (pathSegments.length >= 6) {
+          const collegeName = pathSegments[1];
+          const subgroupName = pathSegments[3];
 
-        // Fetch threads created by the user
-        const userThreadsQuery = query(threadsRef, where('createdBy', '==', username));
-        const userThreadsSnapshot = await getDocs(userThreadsQuery);
-
-        userThreadsSnapshot.forEach(threadDoc => {
           userActivity.threads.push({
             id: threadDoc.id,
             collegeName,
             subgroupName,
-            ...threadDoc.data()
+            ...threadDoc.data(),
           });
-        });
-
-        // Fetch posts for each thread in the subgroup
-        for (const threadDoc of threadsSnapshot.docs) {
-          const postsRef = collection(threadsRef, threadDoc.id, 'posts');
-          const postsQuery = query(postsRef, where('createdBy', '==', username));
-          const postsSnapshot = await getDocs(postsQuery);
-
-          console.log('Posts found in thread', threadDoc.id, ':', postsSnapshot.size);
-
-          postsSnapshot.forEach(postDoc => {
-            userActivity.posts.push({
-              id: postDoc.id,
-              threadId: threadDoc.id,
-              collegeName,
-              subgroupName,
-              ...postDoc.data()
-            });
-          });
+        } else {
+          console.warn(`Unexpected thread path structure: ${threadPath}`);
         }
-      }
+      });
 
-      console.log('User Activity:', userActivity);
+      // Fetch all posts created by the user using Collection Group Query
+      const postsQuery = query(
+        collectionGroup(firestore, 'posts'),
+        where('createdBy', '==', username)
+      );
+      const postsSnapshot = await getDocs(postsQuery);
+
+      console.log(`Total user posts found: ${postsSnapshot.size}`);
+
+      postsSnapshot.forEach((postDoc) => {
+        const postPath = postDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1/posts/Post 1
+        const pathSegments = postPath.split('/');
+
+        if (pathSegments.length >= 8) {
+          const collegeName = pathSegments[1];
+          const subgroupName = pathSegments[3];
+          const threadId = pathSegments[5];
+
+          userActivity.posts.push({
+            id: postDoc.id,
+            threadId,
+            collegeName,
+            subgroupName,
+            ...postDoc.data(),
+          });
+        } else {
+          console.warn(`Unexpected post path structure: ${postPath}`);
+        }
+      });
+
+      console.log('User Activity:', JSON.stringify(userActivity, null, 2));
       return userActivity;
     } catch (error) {
       console.error('Error fetching user activity:', error);
+      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
       return null;
     }
   };
 
   const handleViewUserActivity = async (reportedUser) => {
+    setIsLoading(true);
     const userActivity = await fetchUserActivity(reportedUser);
+    setIsLoading(false);
+
     if (userActivity) {
       navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
     } else {
@@ -213,11 +285,24 @@ const ModeratorScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pending Reports</Text>
-      <FlatList
-        data={reports}
-        renderItem={renderReportItem}
-        keyExtractor={item => item.id}
-      />
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by reported user UID"
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+        />
+        <Button title="Search" onPress={handleSearch} />
+      </View>
+      {isLoading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <FlatList
+          data={reports}
+          renderItem={renderReportItem}
+          keyExtractor={item => item.id}
+        />
+      )}
     </View>
   );
 };
@@ -231,6 +316,18 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginRight: 10,
   },
   reportItem: {
     marginBottom: 20,

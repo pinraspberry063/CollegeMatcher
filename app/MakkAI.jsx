@@ -8,7 +8,10 @@ import {
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  ImageBackground,
+  TouchableOpacity,
+  Image
 } from 'react-native';
 // import { collection, addDoc, getFirestore } from 'firebase/firestore';
 // import { getFirestore } from 'firebase/firestore';
@@ -129,12 +132,12 @@ const MakkAI = () => {
 
   // noinspection JSValidateTypes
   return (
-      <SafeAreaView style={{flex: 1}}>
+    <ImageBackground source={require('../assets/galaxy.jpg')} style={styles.container}>
         <KeyboardAvoidingView
             style={{flex: 1}}
             behavior={Platform.OS === "ios" ? "padding" : null}>
 
-          <View style={[styles.container, { backgroundColor: theme.background }]}>
+
             <FlatList
                 data={messages}
                 renderItem={({ item }) => (
@@ -146,25 +149,32 @@ const MakkAI = () => {
             />
             <View style={styles.inputContainer}>
               <TextInput
-                  style={[styles.input, { color: theme.color, borderColor: theme.color }]}
+                  style={[styles.input]}
                   value={input}
                   onChangeText={setInput}
                   placeholder="Chat with an AI assistant about your college questions!"
-                  placeholderTextColor={theme.color}
+                  placeholderTextColor='white'
+                  color='white'
               />
-              <Button title="Send" onPress={sendMessage} />
+
+                <TouchableOpacity onPress={sendMessage}>
+                  <Image source={require('../assets/arrow.png')}  style={{height: 45, width: 45}}/>
+
+                </TouchableOpacity>
+              {/* <Button title="Send" onPress={sendMessage} /> */}
               {/*<Button title="Send" onPress={run} />*/}
             </View>
-          </View>
+
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 10,
+    resizeMode: 'cover',
   },
   message: {
     padding: 10,
@@ -184,7 +194,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
-    paddingBottom: 40,
+
   },
   input: {
     flex: 1,
@@ -192,6 +202,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginRight: 10,
+    borderColor: 'white',
+    color: 'white'
   },
 });
 
