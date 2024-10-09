@@ -346,7 +346,14 @@ const Quiz = ({ navigation }) => {
   const renderPageTwo = () => (
     <View>
       <Text style={[styles.text, { color: theme.color }]}>Are you looking for a public or private school?</Text>
-      <DropdownComponent data={typeOfAreaData} value={schoolClassification} onChange={setType} />
+      <DropdownComponent
+      data={[
+          { label: 'Public', value: 'Public' },
+          { label: 'Private', value: 'Private' },
+      ]}
+      value={schoolClassification}
+      onChange={setType}
+      />
       <Slider
         value={classificationImportance || 0.5}
         onValueChange={setClassificationImportance}
@@ -408,6 +415,22 @@ const Quiz = ({ navigation }) => {
 
   const renderPageThree = () => (
     <View>
+        <Text style={[styles.text, { color: theme.color }]}>What size college are you looking for?</Text>
+        <DropdownComponent data={sizeData} value={size} onChange={setSize} />
+        <Slider
+           value={sizeImportance || 0.5}
+           onValueChange={setSizeImportance}
+           step={0.1}
+           minimumValue={0}
+           maximumValue={1}
+           thumbTintColor="silver"
+           minimumTrackTintColor="purple"
+      />
+      <View style={styles.sliderLabels}>
+          <Text>Not Important</Text>
+          <Text>Neutral</Text>
+          <Text>Very Important</Text>
+      </View>
       <Text style={[styles.text, { color: theme.color }]}>Are you looking for a school with sporting events?</Text>
       <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
       <Slider

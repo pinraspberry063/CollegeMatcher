@@ -53,16 +53,25 @@ const geoCodeAddress = async address => {
   }
 };
 
+// Importance Multiplier Function
+const importanceMultiplier = (importance) => {
+  if (importance < 0.8) {
+    return 0.75;
+  }
+  return importance;
+};
+
 const matchColleges = async studentPreferences => {
   const firestore = getFirestore(db);
   const collegeDataRef = collection(firestore, 'CompleteColleges');
   const querySnapshot = await getDocs(collegeDataRef);
   const colleges = querySnapshot.docs.map(doc => doc.data());
 
-  const maxScore = 235;
+  const maxScore = 200;
 
   const userCoords = await geoCodeAddress(studentPreferences.address);
 
+  // Tuition ranges for scoring
   const tuitionRanges = {
     '$0 - $10,000': [0, 10000],
     '$10,000 - $20,000': [10000, 20000],
@@ -151,10 +160,11 @@ const matchColleges = async studentPreferences => {
     // Tuition Cost Matching
     const tuition = parseFloat(college.tuition23);
     const [minTuition, maxTuition] = tuitionRanges[studentPreferences.tuition_cost] || [0, Infinity];
+    const tuitionImportance = importanceMultiplier(studentPreferences.tuition_importance); // Apply importance multiplier
     if (tuition >= minTuition && tuition <= maxTuition) {
-        score += 20 * studentPreferences.tuition_importance;
+        score += 20 * tuitionImportance;
     } else {
-        score += 5 * studentPreferences.tuition_importance;
+        score += 5 * tuitionImportance;
     }
 
     // Major Offered Matching
@@ -240,7 +250,7 @@ const matchColleges = async studentPreferences => {
         score += 20 * studentPreferences.urbanization_importance;
     }
 
-    // Distance from Home Matching (develop distance algorithm)
+    // Distance from Home Matching
     const distanceRanges = {
       '0-50 miles': [0, 50 * 1.60934],
       '50-200 miles': [50 * 1.60934, 200 * 1.60934],
@@ -254,24 +264,32 @@ const matchColleges = async studentPreferences => {
     };
     const distance = findDist(userCoords, collegeCoords);
     const [minDistance, maxDistance] = distanceRanges[studentPreferences.distance_from_college] || [0, Infinity];
+    const distanceImportance = importanceMultiplier(studentPreferences.distance_importance); // Apply importance multiplier
     if (distance >= minDistance && distance <= maxDistance) {
-        score += 60 * studentPreferences.distance_importance;
+        score += 60 * distanceImportance;
     }
 
-    // Diversity Matching (develop matching logic based on number of fields made)
+    // Diversity Matching (logic can be expanded later)
     score += 20;
 
-    // Specific State (match states with state field)
-    score += 20;
+    // Specific State Matching
+    const userSelectedStates = studentPreferences.state_choice; // This is an array if the user selected multiple states
+
+    if (userSelectedStates.includes('N/A')) {
+        score += 20;
+    } else if (userSelectedStates.length > 0 && userSelectedStates.includes(college.state)) {
+        score += 60 * studentPreferences.state_choice_importance;
+    }
 
     // Sport College Matching
+    const sportCollegeImportance = importanceMultiplier(studentPreferences.sport_college_importance); // Apply importance multiplier
     if (studentPreferences.sport_college === 'Yes') {
         if (
             college.school_NCAA === 'Yes' ||
             college.school_NAIA === 'Yes' ||
             college.school_NJCAA === 'Yes'
         ) {
-            score += 20 * studentPreferences.sport_college_importance;
+            score += 20 * sportCollegeImportance;
         }
     } else if (studentPreferences.sport_college === 'No') {
         if (
@@ -279,7 +297,7 @@ const matchColleges = async studentPreferences => {
             college.school_NAIA === 'No' &&
             college.school_NJCAA === 'No'
         ) {
-            score += 20 * studentPreferences.sport_college_importance;
+            score += 20 * sportCollegeImportance;
         }
     }
 
@@ -366,6 +384,7 @@ const matchColleges = async studentPreferences => {
         }
       }
     }
+
     const finalScore = Math.round((score / maxScore) * 100);
     return {college, score: finalScore};
   });
@@ -378,14 +397,13 @@ const matchColleges = async studentPreferences => {
       score: s.score,
       id: s.college.school_id,
     }));
+
   const resultsRef = collection(firestore, 'Users');
   const resultDoc = query(
     resultsRef,
     where('User_UID', '==', auth().currentUser.uid),
   );
   const docID = (await getDocs(resultDoc)).docs[0].ref;
-  // const docRef = doc(firestore, "Users", docID);
-  // const doc = await getDocs(docRef);
 
   try {
     await setDoc(
