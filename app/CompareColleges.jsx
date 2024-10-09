@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import CollegeSearch from '../app/SearchComp';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import themeContext from '../theme/themeContext';
+
 
 const getGrade = (value, ranges) => {
     for (let range of ranges) {
@@ -42,7 +45,8 @@ const calculateAverageGrade = (grades) => {
     return valueToGrade(average);
 };
 
-const CompareColleges = () => {
+const CompareColleges = ({ navigation }) => {
+    const theme = useContext(themeContext);
     const [college1, setCollege1] = useState(null);
     const [college2, setCollege2] = useState(null);
 
@@ -132,6 +136,9 @@ const CompareColleges = () => {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+            </TouchableOpacity>
             <Text style={styles.title}>Compare Colleges</Text>
 
             <Text>Select the first college:</Text>

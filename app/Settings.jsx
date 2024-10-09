@@ -12,6 +12,7 @@ import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Settings = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -95,6 +96,9 @@ const Settings = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+      </TouchableOpacity>
       <ScrollView>
         <TouchableOpacity onPress={() => navigation.navigate('Account')}>
           <Text style={[styles.item, { color: theme.color }]}>Account</Text>

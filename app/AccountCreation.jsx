@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch, TouchableOpacity  } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
 import { doc, setDoc, getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const firestore = getFirestore(db);
 
@@ -78,6 +79,9 @@ const AccountCreation = ({ navigation }) => {
 
    return (
       <View style={styles.container}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+          </TouchableOpacity>
         <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
         <TextInput
           style={[styles.input, { borderColor: theme.color, color: theme.color }]}

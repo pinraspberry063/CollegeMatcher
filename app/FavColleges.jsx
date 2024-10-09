@@ -1,13 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList, SafeAreaView, Button, Alert, TouchableOpacity } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { db } from '../config/firebaseConfig';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import themeContext from '../theme/themeContext';
 
 const firestore = getFirestore(db);  // Initialize Firestore
 
-const FavColleges = () => {
+const FavColleges = ({ navigation }) => {
     const { user } = useContext(UserContext);  // Get the current user from UserContext
+    const theme = useContext(themeContext);
     const [committedColleges, setCommittedColleges] = useState([]);
 
     useEffect(() => {
@@ -84,6 +87,9 @@ const FavColleges = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+            </TouchableOpacity>
             <Text style={styles.title}>Your Committed Colleges</Text>
             {committedColleges.length > 0 ? (
                 <FlatList

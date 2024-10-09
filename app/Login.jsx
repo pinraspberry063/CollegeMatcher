@@ -20,6 +20,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const Login = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -294,6 +295,9 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
 
   return (
       <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+        </TouchableOpacity>
         <Text style={[styles.title, {color: theme.color}]}>Login</Text>
         {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
         {loginMethod === 'email' && (

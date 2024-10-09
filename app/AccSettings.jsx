@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React, { useEffect , useState, useContext} from 'react'
 import { Button } from 'react-native-elements';
 //import ProfileImagePicker from '../components/ProfileImageComp';
 import auth from '@react-native-firebase/auth';
 import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
 import themeContext from '../theme/themeContext'
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 const Account = ({route, navigation}) => {
@@ -30,7 +31,9 @@ const Account = ({route, navigation}) => {
         return (
             
             <View style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
-        
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <MaterialCommunityIcons name="arrow-left" size={24} color={theme.color} />
+                </TouchableOpacity>
                 <Image
                 style={styles.profile}
                 source={{uri: url}
