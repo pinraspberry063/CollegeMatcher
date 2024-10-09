@@ -29,6 +29,7 @@ import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import Details from './app/Details';
+import EmailVerificationPrompt from './app/EmailVerificationPrompt';
 
 import ColForumSelector from './app/ColForumSelector';
 import ForumSelect from './app/ForumSelect';
@@ -222,13 +223,13 @@ const LaunchStack = createNativeStackNavigator();
 const TabStack = createNativeStackNavigator();
 const LaunchStackScreen = () => (
   <LaunchStack.Navigator screenOptions={screenOptions}>
-    <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
     <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
     <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
     <LaunchStack.Screen name="UsernamePrompt" component={UsernamePrompt} />
+    <LaunchStack.Screen name="EmailVerificationPrompt" component={EmailVerificationPrompt} />
   </LaunchStack.Navigator>
 );
 
@@ -239,7 +240,7 @@ const checkUserStatus = async (userId) => {
 
   if (userSnap.exists()) {
     const userData = userSnap.data();
-    if (userData.status === 'banned') {
+    if (userData.IsBanned === true) {
       auth().signOut();
       Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
       return 'banned';
