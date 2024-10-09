@@ -242,7 +242,6 @@ const RootStack = createNativeStackNavigator();
 const LaunchStack = createNativeStackNavigator();
 const LaunchStackScreen = () => (
   <LaunchStack.Navigator screenOptions={screenOptions}>
-    <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
     <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
