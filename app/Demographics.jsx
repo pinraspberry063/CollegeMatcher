@@ -1,9 +1,10 @@
 import {
+    ImageBackground,
 StyleSheet,
 Text,
 View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import {
@@ -15,6 +16,9 @@ where,
 } from 'firebase/firestore';
 import majorData from '../assets/major_data';
 import Constants from 'expo-constants';
+import { CollegesContext } from '../components/CollegeContext';
+import PieChart from 'react-native-pie-chart';
+import * as Progress from 'react-native-progress';
 
 const firestore = getFirestore(db);
 const collegesRef = collection(firestore, 'CompleteColleges');
@@ -29,20 +33,26 @@ const [userPref, setUserPref] = useState([]);
 const [circleData, setCircleData] = useState([]);
 const user = auth().currentUser.uid;
 const [majors, setMajors] = useState([]);
+const {colleges, loading} = useContext(CollegesContext);
 
 useEffect(() => {
-    const func = async () => {
-    const collegeQuery = query(
-        collegesRef,
-        where('school_id', '==', parseInt(collegeID)),
-    );
+    const func =  () => {
+    // const collegeQuery = query(
+    //     collegesRef,
+    //     where('school_id', '==', parseInt(collegeID)),
+    // );
     try {
-        const querySnapshot = await getDocs(collegeQuery);
+        // const querySnapshot = await getDocs(collegeQuery);
 
-        if (!querySnapshot.empty) {
-        const firstDoc = querySnapshot.docs[0];
-        const collegeData = firstDoc.data();
-        const sToF = collegeData.student_to_Faculty_Ratio;
+        // if (!querySnapshot.empty) {
+        // const firstDoc = querySnapshot.docs[0];
+        // const collegeData = firstDoc.data();
+        const college = colleges.find(college => college.school_id == parseInt(collegeID));
+        if(college != null)
+        {
+            const sToF = college.student_to_Faculty_Ratio;
+        
+        
 
         const uniqueMajors = [];
         const majorSet = new Set();
@@ -50,7 +60,7 @@ useEffect(() => {
         majorData.forEach(major => {
             const majorCategory = major.categories || [' '];
             const field = 'percent_' + major.categories;
-            const percent = collegeData[field];
+            const percent = college[field];
 
             if (!majorSet.has(majorCategory) && percent) {
             majorSet.add(majorCategory);
@@ -70,6 +80,7 @@ useEffect(() => {
         setMajors(uniqueMajors);
 
         setSToF(sToF);
+        
         } else {
         console.log('No matching document found.');
         }
@@ -79,7 +90,7 @@ useEffect(() => {
     };
     func();
     // console.log(sToF)
-}, [sToF, majors]);
+}, []);
 
 useEffect(() => {
     const func = async () => {
@@ -102,7 +113,7 @@ useEffect(() => {
     };
     func();
     // console.log(userPref)
-}, [userPref]);
+}, []);
 
 // useEffect(() => {
 //   const generateCircleData = () => {
@@ -143,6 +154,7 @@ useEffect(() => {
 // }, [sToF]);
 
 return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}> 
     <View style={styles.contentContainer}>
     <View>
         <Text style={styles.subTitle}>Student to Faculty Ratio: {sToF} </Text>
@@ -160,20 +172,23 @@ return (
         />
         ))}
     </Svg> */}
+    <View style={{padding: 20}}>
+        <Text style={styles.subTitle}>Major Break Down</Text>
+        {majors.map((major, index) => (
+            <View key={index}>
+            <Text style={{color: '#eae8e5'}}> {major[0]} :</Text>
+            <Progress.Bar progress={parseInt(major[1])/100} width={100}/>
+            </View>
+        ))}
 
-    <Text style={styles.subTitle}>Major Break Down</Text>
-    {majors.map((major, index) => (
-        <View key={index}>
-        <Text> {major[0]} :</Text>
-        <Text> {major[1]} % </Text>
-        </View>
-    ))}
-    <Text> </Text>
-    <Text> </Text>
+    </View>
+    
+    
     <Text style={styles.subTitle}>Diversity: </Text>
-    <Text> To Be Calculated </Text>
+    <Text style={{color: '#eae8e5'}}> To Be Calculated </Text>
     <Text></Text>
     </View>
+    </ImageBackground>
 );
 };
 
@@ -183,7 +198,7 @@ export default Demographics
 const styles = StyleSheet.create({
 container: {
     flex: 1,
-    marginTop: Constants.statusBarHeight,
+    resizeMode: 'cover',
 },
 star: {
     width: 50,
@@ -224,6 +239,13 @@ subTitle: {
     fontSize: 25,
     fontWeight: 'bold',
     fontStyle: 'italic',
-    color: 'black',
+    color: 'white',
 },
+progressBar: {
+    height: 50,
+    width: '90%',
+    borderRadius: 10,
+    backgroundColor: 'darkgrey',
+    color: 'darkgreen', // For Android
+  },
 });

@@ -94,13 +94,13 @@ const OverView = React.lazy(() => import('./Overview'));
         props: {collegeID: collegeID},
       },
       {
-        tabLabel: 'Admissions',
-        component: () => <Admissions collegeID={collegeID} />,
+        tabLabel: 'Demographics',
+        component: () => <Demographics collegeID={collegeID} />,
         props: {collegeID: collegeID},
       },
       {
-        tabLabel: 'Demographics',
-        component: () => <Demographics collegeID={collegeID} />,
+        tabLabel: 'Admissions',
+        component: () => <Admissions collegeID={collegeID} />,
         props: {collegeID: collegeID},
       },
     ];
