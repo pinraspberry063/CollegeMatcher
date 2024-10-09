@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, ScrollView,TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard, ImageBackground} from 'react-native';
+import {StyleSheet, Text, View, ScrollView,TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard,} from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -10,7 +10,6 @@ import matchColleges from '../src/utils/matchingAlgorithm';
 import majorData from '../assets/major_data';
 import Slider from '@react-native-community/slider';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
-import stateData from '../assets/state_data';
 
 const firestore = getFirestore(db);
 
@@ -578,14 +577,11 @@ const Quiz = ({ navigation }) => {
         query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
       />
 
-            <View style={styles.buttonContainer}>
-                <Button
-                    onPress={handleSubmit}
-                    title="Submit"
-                />
-            </View>
-        </View>
-    );
+      <View style={styles.buttonContainer}>
+        <Button onPress={handleSubmit} title="Submit" />
+      </View>
+    </View>
+  );
 
   const renderContent = () => {
     if (currentPage === 1) return renderPageOne();
@@ -600,7 +596,6 @@ const Quiz = ({ navigation }) => {
   const handleBack = () => setCurrentPage((prev) => prev - 1);
 
   return (
-    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.container}>
         <FlatList
@@ -617,7 +612,6 @@ const Quiz = ({ navigation }) => {
         />
       </SafeAreaView>
     </TouchableWithoutFeedback>
-   </ImageBackground>
   );
 };
 
@@ -635,7 +629,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     padding: 10,
     marginVertical: 10,
-    color: 'white',
   },
   text: {
     fontSize: 18,
@@ -652,11 +645,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-  },
-  background: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
   },
 });
 

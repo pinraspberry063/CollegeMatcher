@@ -5,7 +5,7 @@ title: Implementation of login/authentication options
 
 This document will walk you through the implementation of the login/authentication options feature.
 
-The feature provides multiple authentication methods including email/password, phone number, Google, Facebook, and email link <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken>. It also includes user status checks and error handling.
+The feature provides multiple authentication methods including email/password, phone number, Google, Facebook, and email link <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken>. It also includes user status checks and error handling.
 
 We will cover:
 
@@ -14,13 +14,13 @@ We will cover:
 3. Phone number login flow.
 4. Google login flow.
 5. Facebook login flow.
-6. Email link <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> flow.
+6. Email link <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> flow.
 7. User status check.
 8. Password reset functionality.
 
 # Initial setup and state management
 
-<SwmSnippet path="/app/Login.jsx" line="24">
+<SwmSnippet path="/app/Login.jsx" line="15">
 
 ---
 
@@ -32,11 +32,11 @@ const Login = ({ navigation }) => {
   const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState('options'); // 'options', 'email', or 'phone'
-  const [showMfaPrompt, setShowMfaPrompt] = useState(false);
-  const [mfaVerificationCode, setMfaVerificationCode] = useState('');
-  const [mfaConfirmation, setMfaConfirmation] = useState(null);
+  const [attempts, setAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
 ```
 
 ---
@@ -45,40 +45,53 @@ const Login = ({ navigation }) => {
 
 # Email/password login flow
 
-<SwmSnippet path="/app/Login.jsx" line="48">
+<SwmSnippet path="/app/Login.jsx" line="25">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="48:3:3" line-data="  const handleEmailLogin = async () =&gt; {">`handleEmailLogin`</SwmToken> function manages the email/password login process. It checks for input errors, handles login attempts, and locks the user out after a certain number of failed attempts.
+The <SwmToken path="/app/Login.jsx" pos="26:3:3" line-data="  const handleEmailLogin = async () =&gt; {">`handleEmailLogin`</SwmToken> function manages the email/password login process. It checks for input errors, handles login attempts, and locks the user out after a certain number of failed attempts.
 
 ```
+
   const handleEmailLogin = async () => {
     if (!email || !password) {
       Alert.alert('Input Error', 'Please enter both email and password.');
       return;
     }
 
+    if (attempts >= MAX_ATTEMPTS) {
+      setIsLocked(true); // Lock the user out
+      return;
+    }
 ```
 
 ---
 
 </SwmSnippet>
 
-<SwmSnippet path="/app/Login.jsx" line="65">
+<SwmSnippet path="/app/Login.jsx" line="36">
 
 ---
 
 The function sets the loading state, attempts to sign in with email and password, and checks if the user is allowed (not banned). If successful, it sets the user in context.
 
 ```
-        setShowMfaPrompt(true);
-        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+
+    setLoading(true);
+    try {
+      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      setLoading(false);
+      setAttempts(0);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+      if (isAllowed) {
+        setUser(userCredential.user); // Set the logged in user in context only if not banned
       } else {
-        // No MFA, proceed normally
-        await checkIsRecruiter(uid);
+        // If not allowed (banned), don't set the user or navigate
+        setUser(null);
       }
     } catch (error) {
-      console.error('Login Error:', error);
+      setLoading(false);
+      setAttempts(attempts + 1);
       Alert.alert('Login Failed', error.message);
     }
   };
@@ -90,22 +103,39 @@ The function sets the loading state, attempts to sign in with email and password
 
 # Phone number login flow
 
-<SwmSnippet path="app/Login.jsx" line="101">
+<SwmSnippet path="/app/Login.jsx" line="55">
 
 ---
 
 The <SwmToken path="/app/Login.jsx" pos="56:3:3" line-data="  const handlePhoneLogin = async () =&gt; {">`handlePhoneLogin`</SwmToken> function manages the phone number login process. It checks for input errors and sets the loading state. It then attempts to sign in with the phone number and navigates to the phone verification screen if successful.
 
 ```
-  const handlePhoneLogin = () => {
-      navigation.navigate('PhoneVerification');
-    };
 
-    useEffect(() => {
-      GoogleSignin.configure({
-        webClientId: '927238517919-c3vu6r24d30repq25jl1t6j7eoiqkb9a.apps.googleusercontent.com',
+  const handlePhoneLogin = async () => {
+    if (!phoneNumber) {
+      Alert.alert('Input Error', 'Please enter a phone number.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setLoading(false);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+            if (isAllowed) {
+              setUser(userCredential.user);
+            } else {
+              setUser(null);
+            }
+      navigation.navigate('Launch', {
+        screen: 'PhoneVerification',
+        params: { verificationId: confirmation.verificationId }
       });
-    }, []);
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Phone Login Failed', error.message);
+    }
+  };
 ```
 
 ---
@@ -114,13 +144,14 @@ The <SwmToken path="/app/Login.jsx" pos="56:3:3" line-data="  const handlePhoneL
 
 # Google login flow
 
-<SwmSnippet path="/app/Login.jsx" line="105">
+<SwmSnippet path="/app/Login.jsx" line="81">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="111:3:3" line-data="  const handleGoogleLogin = async () =&gt; {">`handleGoogleLogin`</SwmToken> function manages the Google login process. It configures Google <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken>, ensures the user is prompted to pick an account, and handles the login process. It also checks if the user is allowed and sets the user in context if successful.
+The <SwmToken path="/app/Login.jsx" pos="88:3:3" line-data="  const handleGoogleLogin = async () =&gt; {">`handleGoogleLogin`</SwmToken> function manages the Google login process. It configures Google <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken>, ensures the user is prompted to pick an account, and handles the login process. It also checks if the user is allowed and sets the user in context if successful.
 
 ```
+
     useEffect(() => {
       GoogleSignin.configure({
         webClientId: '927238517919-c3vu6r24d30repq25jl1t6j7eoiqkb9a.apps.googleusercontent.com',
@@ -134,20 +165,15 @@ The <SwmToken path="/app/Login.jsx" pos="111:3:3" line-data="  const handleGoogl
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
-      const user = userCredential.user;
-
-      // Check if user document exists
-      const userDocRef = doc(firestore, 'Users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Prompt for username
-        navigation.navigate('UsernamePrompt', { user });
-      } else {
-        // User document exists, proceed to main app
-        setUser(user);
-        navigation.navigate('Main');
-      }
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+                  if (isAllowed) {
+                    setUser(userCredential.user);
+                  } else {
+                    setUser(null);
+                  }
+      console.log('User signed in successfully:', userCredential.user.displayName);
+      Alert.alert('Google Login Successful');
+      navigation.navigate('Main');
     } catch (error) {
       console.error('Google Sign-In Error:', error);
       Alert.alert('Google Login Failed', error.message);
@@ -161,13 +187,14 @@ The <SwmToken path="/app/Login.jsx" pos="111:3:3" line-data="  const handleGoogl
 
 # Facebook login flow
 
-<SwmSnippet path="/app/Login.jsx" line="138">
+<SwmSnippet path="/app/Login.jsx" line="109">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="138:3:3" line-data="  const handleFacebookLogin = async () =&gt; {">`handleFacebookLogin`</SwmToken> function manages the Facebook login process. It handles the login permissions, obtains the access token, and signs in with Facebook credentials. It checks if the user is allowed and sets the user in context if successful.
+The <SwmToken path="/app/Login.jsx" pos="110:3:3" line-data="  const handleFacebookLogin = async () =&gt; {">`handleFacebookLogin`</SwmToken> function manages the Facebook login process. It handles the login permissions, obtains the access token, and signs in with Facebook credentials. It checks if the user is allowed and sets the user in context if successful.
 
 ```
+
   const handleFacebookLogin = async () => {
     try {
       const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
@@ -179,21 +206,15 @@ The <SwmToken path="/app/Login.jsx" pos="138:3:3" line-data="  const handleFaceb
         throw new Error('Something went wrong obtaining access token');
       }
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
-      const userCredential = await auth().signInWithCredential(facebookCredential);
-      const user = userCredential.user;
-
-      // Check if user document exists
-      const userDocRef = doc(firestore, 'Users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Prompt for username
-        navigation.navigate('UsernamePrompt', { user });
-      } else {
-        // User document exists, proceed to main app
-        setUser(user);
-        navigation.navigate('Main');
-      }
+      await auth().signInWithCredential(facebookCredential);
+      const isAllowed = await checkIsRecruiter(userCredential.user.uid);
+                  if (isAllowed) {
+                    setUser(userCredential.user);
+                  } else {
+                    setUser(null);
+                  }
+      Alert.alert('Facebook Login Successful');
+      navigation.navigate('Main');
     } catch (error) {
       Alert.alert('Facebook Login Failed', error.message);
     }
@@ -204,21 +225,23 @@ The <SwmToken path="/app/Login.jsx" pos="138:3:3" line-data="  const handleFaceb
 
 </SwmSnippet>
 
-# Email link <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> flow
+# Email link <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> flow
 
-<SwmSnippet path="/app/Login.jsx" line="169">
+<SwmSnippet path="/app/Login.jsx" line="134">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="169:3:3" line-data=" const handleEmailLinkSignIn = async () =&gt; {">`handleEmailLinkSignIn`</SwmToken> function manages the email link <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> process. It checks for input errors, generates a dynamic link, and sends a <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> link to the user's email. It also stores the email for <SwmToken path="/app/Login.jsx" pos="133:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> and handles errors.
+The <SwmToken path="/app/Login.jsx" pos="135:3:3" line-data=" const handleEmailLinkSignIn = async () =&gt; {">`handleEmailLinkSignIn`</SwmToken> function manages the email link <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> process. It checks for input errors, generates a dynamic link, and sends a <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> link to the user's email. It also stores the email for <SwmToken path="/app/Login.jsx" pos="105:8:10" line-data="      console.error(&#39;Google Sign-In Error:&#39;, error);">`Sign-In`</SwmToken> and handles errors.
 
 ```
+
  const handleEmailLinkSignIn = async () => {
    if (!email) {
      Alert.alert('Input Error', 'Please enter your email address.');
      return;
    }
 
+   setLoading(true);
    try {
      const link = await dynamicLinks().buildLink({
        link: 'https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}',
@@ -233,11 +256,9 @@ The <SwmToken path="/app/Login.jsx" pos="169:3:3" line-data=" const handleEmailL
 
 </SwmSnippet>
 
-<SwmSnippet path="/app/Login.jsx" line="183">
+<SwmSnippet path="/app/Login.jsx" line="150">
 
 ---
-
-&nbsp;
 
 ```
 
@@ -259,13 +280,12 @@ The <SwmToken path="/app/Login.jsx" pos="169:3:3" line-data=" const handleEmailL
 
 </SwmSnippet>
 
-<SwmSnippet path="/app/Login.jsx" line="197">
+<SwmSnippet path="/app/Login.jsx" line="163">
 
 ---
 
-&nbsp;
-
 ```
+
      console.log('Action code settings:', actionCodeSettings);
 
      await auth().sendSignInLinkToEmail(email, actionCodeSettings);
@@ -276,6 +296,8 @@ The <SwmToken path="/app/Login.jsx" pos="169:3:3" line-data=" const handleEmailL
      console.error('Error code:', error.code);
      console.error('Error message:', error.message);
      Alert.alert('Error', 'Failed to send email: ${error.message}');
+   } finally {
+     setLoading(false);
    }
  };
 ```
@@ -286,13 +308,14 @@ The <SwmToken path="/app/Login.jsx" pos="169:3:3" line-data=" const handleEmailL
 
 # User status check
 
-<SwmSnippet path="/app/Login.jsx" line="210">
+<SwmSnippet path="/app/Login.jsx" line="178">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="210:2:2" line-data="const checkIsRecruiter = async (uid) =&gt; { // change func name after demo">`checkIsRecruiter`</SwmToken> function checks if the user is a recruiter or banned. It queries the Firestore database for the user's status and navigates accordingly. If the user is banned, it signs them out and shows an alert.
+The <SwmToken path="/app/Login.jsx" pos="179:2:2" line-data="const checkIsRecruiter = async (uid) =&gt; { // change func name after demo">`checkIsRecruiter`</SwmToken> function checks if the user is a recruiter or banned. It queries the Firestore database for the user's status and navigates accordingly. If the user is banned, it signs them out and shows an alert.
 
 ```
+
 const checkIsRecruiter = async (uid) => { // change func name after demo
   const firestore = getFirestore(db);
   const usersRef = collection(firestore, 'Users');
@@ -310,7 +333,7 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
     }
     if (data.IsRecruiter) {
       navigation.navigate('Main', {
-        screen: 'Message',
+        screen: 'Messages',
         params: { screen: 'RecConvs' }
       });
     } else {
@@ -328,11 +351,11 @@ const checkIsRecruiter = async (uid) => { // change func name after demo
 
 # Password reset functionality
 
-<SwmSnippet path="/app/Login.jsx" line="237">
+<SwmSnippet path="/app/Login.jsx" line="206">
 
 ---
 
-The <SwmToken path="/app/Login.jsx" pos="238:3:3" line-data="  const handleForgotPassword = () =&gt; {">`handleForgotPassword`</SwmToken> function manages the password reset process. It checks for input errors and sends a password reset email. It handles success and error cases with appropriate alerts.
+The <SwmToken path="/app/Login.jsx" pos="207:3:3" line-data="  const handleForgotPassword = () =&gt; {">`handleForgotPassword`</SwmToken> function manages the password reset process. It checks for input errors and sends a password reset email. It handles success and error cases with appropriate alerts.
 
 ```
 

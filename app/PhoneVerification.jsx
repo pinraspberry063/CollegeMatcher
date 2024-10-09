@@ -1,98 +1,58 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TextInput, Button, StyleSheet, Alert} from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { UserContext } from '../components/UserContext';
-import { doc, writeBatch, getDoc } from 'firebase/firestore';
-import { getFirestore } from 'firebase/firestore';
-import { db } from '../config/firebaseConfig';
-import themeContext from '../theme/themeContext';
 
-const firestore = getFirestore(db);
-
-const PhoneVerification = ({ navigation }) => {
-  const theme = useContext(themeContext);
-  const { setUser } = useContext(UserContext);
+const PhoneVerification = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [confirm, setConfirm] = useState(null);
+  const [verificationId, setVerificationId] = useState(null);
 
-  const signInWithPhoneNumber = async () => {
-    if (!phoneNumber) {
-      Alert.alert('Input Error', 'Please enter your phone number.');
-      return;
-    }
-
-    setLoading(true);
+  const handleSendCode = async () => {
     try {
       const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      setConfirm(confirmation);
-      Alert.alert('Verification Sent', 'Please check your phone for the verification code.');
+      setVerificationId(confirmation.verificationId);
+      Alert.alert('Verification code sent');
     } catch (error) {
-      console.error('Phone Sign-In Error:', error);
-      Alert.alert('Error', 'Failed to send verification code.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Error', error.message);
     }
   };
 
-  const confirmCode = async () => {
-    if (!verificationCode) {
-      Alert.alert('Input Error', 'Please enter the verification code.');
-      return;
-    }
-
-    setLoading(true);
+  const handleVerifyCode = async () => {
     try {
-      const userCredential = await confirm.confirm(verificationCode);
-      const user = userCredential.user;
-      setUser(user); // Set the logged-in user in context
-
-      // Navigate to Username Prompt
-      navigation.navigate('UsernamePrompt', { user });
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationId,
+        verificationCode,
+      );
+      await auth().signInWithCredential(credential);
+      Alert.alert('Phone authentication successful');
+      navigation.navigate('Main');
     } catch (error) {
-      console.error('Code Confirmation Error:', error);
-      Alert.alert('Error', 'Invalid verification code.');
-    } finally {
-      setLoading(false);
+      Alert.alert('Error', error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      {!confirm ? (
+      <Text style={styles.title}>Phone Verification</Text>
+      {!verificationId ? (
         <>
-          <Text style={[styles.title, { color: theme.color }]}>Phone Verification</Text>
           <TextInput
-            style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            style={styles.input}
             placeholder="Phone Number"
-            placeholderTextColor={theme.color}
-            keyboardType="phone-pad"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
           />
-          {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            <Button title="Send Verification Code" onPress={signInWithPhoneNumber} />
-          )}
+          <Button title="Send Verification Code" onPress={handleSendCode} />
         </>
       ) : (
         <>
-          <Text style={[styles.title, { color: theme.color }]}>Enter Verification Code</Text>
           <TextInput
-            style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            style={styles.input}
             placeholder="Verification Code"
-            placeholderTextColor={theme.color}
-            keyboardType="number-pad"
             value={verificationCode}
             onChangeText={setVerificationCode}
           />
-          {loading ? (
-            <ActivityIndicator size="large" color="#0000ff" />
-          ) : (
-            <Button title="Confirm Code" onPress={confirmCode} />
-          )}
+          <Button title="Verify Code" onPress={handleVerifyCode} />
         </>
       )}
     </View>
@@ -112,6 +72,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
+    borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 12,
     padding: 10,

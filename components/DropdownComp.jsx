@@ -45,7 +45,7 @@ const DropdownComponent = ({ data, value, onChange, style, multiSelect = false }
                 {renderSelectedValues()}
             </ScrollView>
             <Dropdown
-                style={styles.dropdown}
+                style={[styles.dropdown, style]}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}

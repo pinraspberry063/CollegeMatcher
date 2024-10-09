@@ -77,6 +77,3 @@ yarn-error.log
 .expo
 dist/
 web-build/
-
-# private 
-/private

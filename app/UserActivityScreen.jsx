@@ -1,12 +1,14 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
 
-const UserActivityScreen = ({ route }) => {
-  const { userActivity, reportedUser } = route.params;
+const UserActivityScreen = ({route}) => {
+  const {userActivity, reportedUser} = route.params;
 
-  const renderItem = ({ item, type }) => (
+  const renderItem = ({item, type}) => (
     <View style={styles.item}>
-      <Text style={styles.itemTitle}>{type === 'thread' ? item.title : item.content}</Text>
+      <Text style={styles.itemTitle}>
+        {type === 'thread' ? item.title : item.content}
+      </Text>
       <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
     </View>
   );
@@ -17,13 +19,13 @@ const UserActivityScreen = ({ route }) => {
       <Text style={styles.sectionTitle}>Threads:</Text>
       <FlatList
         data={userActivity.threads}
-        renderItem={({ item }) => renderItem({ item, type: 'thread' })}
+        renderItem={({item}) => renderItem({item, type: 'thread'})}
         keyExtractor={item => item.id}
       />
       <Text style={styles.sectionTitle}>Posts:</Text>
       <FlatList
         data={userActivity.posts}
-        renderItem={({ item }) => renderItem({ item, type: 'post' })}
+        renderItem={({item}) => renderItem({item, type: 'post'})}
         keyExtractor={item => item.id}
       />
     </View>
