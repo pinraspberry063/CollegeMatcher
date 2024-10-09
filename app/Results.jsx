@@ -321,8 +321,8 @@ const Results = ({route, navigation}) => {
                 <Text style={[{color: 'white'}]}>Search</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={showFilters}>
-              <Text> Filter Search</Text>
+        <TouchableOpacity onPress={showFilters} style={{ borderBlockColor: 'white', borderWidth: 2, width: 175, marginLeft: 10, borderRadius: 10, marginTop: 10}}>
+              <Text style={{color: 'white', fontSize: 20, marginLeft: 20, marginTop: 10}}> Filter Search</Text>
           </TouchableOpacity>
         {showFilter && 
         
@@ -610,10 +610,11 @@ const Results = ({route, navigation}) => {
       width: '95%',
       height: 600,
       borderBlockColor: 'green',
-      borderWidth: 3,
+      backgroundColor: 'white',
       justifyContent: 'flex-start', 
       alignItems: 'flex-start',
       paddingTop: 15,
+      marginTop: 10
     
     
     },
