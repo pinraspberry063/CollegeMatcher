@@ -1,7 +1,9 @@
+
+import college_data from './college_data';
 const majorData = [
     { label: 'Aerospace Engineering', value: 'Aerospace Engineering' , categories: 'EngineeringDegrees'  },
     { label: 'Accounting', value: 'Accounting' , categories:  'Business_Management_Marketing_and_RelatedDegrees' },
-    { label: 'Agriculture', value: 'Agriculture', categories:  'AgriculturalDegrees'  },
+    { label: 'Agriculture', value: 'Agriculture', categories:  'agriculturalDegrees'  },
     { label: 'Architecture', value: 'Architecture',  categories: 'ArchitectureDegrees' },
     { label: 'Biology', value: 'Biology', categories: 'Biological_and_BiomedicalSciencesDegrees'  },
     { label: 'Biomedical Engineering', value: 'Biomedical Engineering', categories: 'Biological_and_BiomedicalSciencesDegrees' },
@@ -71,4 +73,29 @@ const majorData = [
     { label: 'Visual Arts', value: 'Visual Arts' , categories:'Visual_and_PerformingArtsDegrees'},
 ];
 
-export default majorData;
+const unique_Majors = async() => {
+
+    const uniqueMajors = [];
+    const majorSet = new Set();
+    majorData.forEach(major => {
+        const majorCategory = major.categories || [' '];
+
+        if (!majorSet.has(majorCategory)) {
+          majorSet.add(majorCategory);
+          uniqueMajors.push(majorCategory);
+        }
+      });
+      uniqueMajors.reduce((acc, curr) => {
+        const majorCategory = curr.categories;
+
+        if (!acc.some(major => major.categories === majorCategory)) {
+          acc.push(curr);
+        }
+
+        return acc;
+      }, []);
+    
+    return uniqueMajors;
+}
+
+export default  majorData;

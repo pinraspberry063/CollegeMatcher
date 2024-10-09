@@ -1,18 +1,10 @@
-import {
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  setDoc,
-  getFirestore,
-  query,
-  where,
-} from 'firebase/firestore';
-import {db} from '../../config/firebaseConfig';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { db } from '../../config/firebaseConfig';
 import axios from 'axios';
 import {useState} from 'react';
 import auth from '@react-native-firebase/auth';
 import majorData from '../../assets/major_data';
+import { useState } from 'react';
 
 const findDist = (coords1, coords2) => {
   const toRad = x => (x * Math.PI) / 180;
