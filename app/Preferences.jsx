@@ -9,7 +9,7 @@ const Preferences = () => {
   const [darkMode, setDarkMode] = useState(true);
   return (
     <View styles={[styles.container, {backgroundColor: theme.backgroundColor}]}>
-      <TouchableOpacity styles={[styles.container, {backgroundColor: theme.background}]}>
+      {/* <TouchableOpacity styles={[styles.container, {backgroundColor: theme.background}]}>
         <Text style={[styles.item, {color: theme.color}]}>Dark Mode</Text>
         <Switch
           value={darkMode}
@@ -19,7 +19,7 @@ const Preferences = () => {
 
           }}
         />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
     </View>
   )
 }

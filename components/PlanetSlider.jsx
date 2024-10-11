@@ -1,5 +1,5 @@
 import React from "react";
-import { View, SafeAreaView, Text, Dimensions, TouchableOpacity } from "react-native";
+import { View, SafeAreaView, Text, Dimensions, TouchableOpacity , Image, StyleSheet} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
 
+
 const { width, height } = Dimensions.get("screen");
 
 const textColor = "white";
@@ -21,42 +22,45 @@ const gray = "#A0A0A0";
 const planetWidth = (width/4) * 0.75;
 const planetHeight = (height/4) * 0.5;
 
+
 const slides = [
   {
     // Take the Quiz
-    icon: "lead-pencil",
+    icon: (<Image source={require('../assets/quizIcon.png')} style={ {width:100, 
+      height: 100, 
+      borderRadius:100}}/>),
     page: 'QuizButton'
   },
-  {
-    // QuickSearch
-    icon: "magnify",
-    page: 'QuizStack'
-  },
-  {
-    // Compare Colleges
-    icon: "compare-vertical",
-    page: 'CompareColleges'
-  },
-  {
-    // Direct Messages
-    icon: "message",
-    page: 'Messages'
-  },
-  {
-    // Forums
-    icon: "earth",
-    page: 'ColForumSelectorTab'
-  },
-  {
-    // AI
-    icon: "head",
-    page: 'AI'
-  },
-  {
-    // Settings
-    icon: "star-settings-outline",
-    page: 'Settings'
-  },
+  // {
+  //   // QuickSearch
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'QuizStack'
+  // },
+  // {
+  //   // Compare Colleges
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'CompareColleges'
+  // },
+  // {
+  //   // Direct Messages
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'Messages'
+  // },
+  // {
+  //   // Forums
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'ColForumSelectorTab'
+  // },
+  // {
+  //   // AI
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'AI'
+  // },
+  // {
+  //   // Settings
+  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
+  //   page: 'Settings'
+  // },
 ];
 
 const Slide = ({ slide, scrollOffset, index , navigation}) => {
@@ -106,16 +110,16 @@ const Slide = ({ slide, scrollOffset, index , navigation}) => {
     >
       <TouchableOpacity style={{flex: 1}} onPress={()=>{navigation.navigate(slide.page)}}>
       <View
-        style={{
-          padding: 5,
-          alignItems: "center",
-          backgroundColor: 'purple',
-          borderRadius: 100,
-          height: '80%',
-          justifyContent: "center",
-        }}
+        // style={{
+        //   padding: 5,
+        //   alignItems: "center",
+        //   backgroundColor: 'purple',
+        //   borderRadius: 100,
+        //   height: '80%',
+        //   justifyContent: "center",
+        // }}
       >
-        <MaterialCommunityIcons name={slide.icon} size={25} color={textColor} />
+        {slide.icon}
     
       </View>
       </TouchableOpacity>
@@ -203,4 +207,13 @@ const PlanetSwiper = ({navigation}) => {
   );
 };
 
+
+
+const styles = StyleSheet.create({
+  tabIcon:{
+    width:20, 
+    height: 20, 
+    borderRadius:10
+  }
+});
 export default PlanetSwiper;

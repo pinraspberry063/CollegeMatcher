@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     borderRadius: 225,
-    backgroundColor: 'orange',
+    backgroundColor: '#a372f0',
     position: 'absolute', 
     alignSelf: 'center' 
   },
