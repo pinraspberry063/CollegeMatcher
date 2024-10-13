@@ -19,48 +19,67 @@ const { width, height } = Dimensions.get("screen");
 
 const textColor = "white";
 const gray = "#A0A0A0";
-const planetWidth = (width/4) * 0.75;
-const planetHeight = (height/4) * 0.5;
+const planetWidth = (width/3.5) * 0.75;
+const planetHeight = (height/3.5) * 0.5;
 
 
 const slides = [
   {
     // Take the Quiz
     icon: (<Image source={require('../assets/quizIcon.png')} style={ {width:100, 
-      height: 100, 
-      borderRadius:100}}/>),
+    height: 100, 
+    borderRadius:100 }}/>),
+    label: 'Quiz',
     page: 'QuizButton'
   },
-  // {
-  //   // QuickSearch
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'QuizStack'
-  // },
-  // {
-  //   // Compare Colleges
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'CompareColleges'
-  // },
-  // {
-  //   // Direct Messages
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'Messages'
-  // },
-  // {
-  //   // Forums
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'ColForumSelectorTab'
-  // },
-  // {
-  //   // AI
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'AI'
-  // },
-  // {
-  //   // Settings
-  //   icon: (<Image source={require('../assets/quizIcon.png')}  style={styles.tabIcon}/>),
-  //   page: 'Settings'
-  // },
+  {
+    // QuickSearch
+    icon: (<Image source={require('../assets/quizIcon.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'Search',
+    page: 'QuizStack'
+  },
+  {
+    // Compare Colleges
+    icon: (<Image source={require('../assets/compare.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'Compare',
+    page: 'CompareColleges'
+  },
+  {
+    // Direct Messages
+    icon: (<Image source={require('../assets/quizIcon.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'Message',
+    page: 'Messages'
+  },
+  {
+    // Forums
+    icon: (<Image source={require('../assets/quizIcon.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'Forums',
+    page: 'ColForumSelectorTab'
+  },
+  {
+    // AI
+    icon: (<Image source={require('../assets/quizIcon.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'AI',
+    page: 'AI'
+  },
+  {
+    // Settings
+    icon: (<Image source={require('../assets/quizIcon.png')}  style={{width:100, 
+    height: 100, 
+    borderRadius:100}}/>),
+    label: 'Settings',
+    page: 'Settings'
+  },
 ];
 
 const Slide = ({ slide, scrollOffset, index , navigation}) => {
@@ -120,6 +139,7 @@ const Slide = ({ slide, scrollOffset, index , navigation}) => {
         // }}
       >
         {slide.icon}
+        <Text style={{alignSelf: 'center', color: 'white', fontSize: 20}}>{slide.label}</Text>
     
       </View>
       </TouchableOpacity>

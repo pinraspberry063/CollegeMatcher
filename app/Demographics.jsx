@@ -17,17 +17,49 @@ where,
 import majorData from '../assets/major_data';
 import Constants from 'expo-constants';
 import { CollegesContext } from '../components/CollegeContext';
-import PieChart from 'react-native-pie-chart';
 import * as Progress from 'react-native-progress';
-
+import {Circle, Svg} from 'react-native-svg'
 const firestore = getFirestore(db);
-const collegesRef = collection(firestore, 'CompleteColleges');
 const usersRef = collection(firestore, 'Users');
 
-
+  const doCirclesOverlap = (circle1, circle2) => {
+    const dx = circle1.cx - circle2.cx;
+    const dy = circle1.cy - circle2.cy;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const combinedRadii = circle1.r + circle2.r + 6;
+    return distance < combinedRadii;
+  };
+  
+//   const favoriteCollege = async ({ID}) => {
+//     const collegeID = parseInt(ID);
+  
+//     const userQuery = query(usersRef, where('User_UID', '==', user));
+  
+//     try {
+//       const querySnapshot = await getDocs(userQuery);
+  
+//       if (!querySnapshot.empty) {
+//         const firstDoc = querySnapshot.docs[0];
+//         const userData = firstDoc.data();
+//         const currentFavorited = userData.favorited_colleges;
+//         currentFavorited.push(collegeID);
+  
+//         await setDoc(
+//           firstDoc.ref,
+//           {
+//             favorited_colleges: currentFavorited,
+//           },
+//           {merge: true},
+//         );
+  
+//         alert('College added to Favorites!');
+//       }
+//     } catch (error) {
+//       console.error('Error adding college to favorites: ', error);
+//     }
+//   };
 
 const Demographics = ({navigation, collegeID}) => {
-// const collegeID = route.params.collegeID;
 const [sToF, setSToF] = useState(0);
 const [userPref, setUserPref] = useState([]);
 const [circleData, setCircleData] = useState([]);
@@ -37,17 +69,11 @@ const {colleges, loading} = useContext(CollegesContext);
 
 useEffect(() => {
     const func =  () => {
-    // const collegeQuery = query(
-    //     collegesRef,
-    //     where('school_id', '==', parseInt(collegeID)),
-    // );
-    try {
-        // const querySnapshot = await getDocs(collegeQuery);
 
-        // if (!querySnapshot.empty) {
-        // const firstDoc = querySnapshot.docs[0];
-        // const collegeData = firstDoc.data();
-        const college = colleges.find(college => college.school_id == parseInt(collegeID));
+    try {
+     
+        const selColleges = colleges.filter(college => college.school_id == parseInt(collegeID));
+        const college = selColleges[0];
         if(college != null)
         {
             const sToF = college.student_to_Faculty_Ratio;
@@ -89,7 +115,7 @@ useEffect(() => {
     }
     };
     func();
-    // console.log(sToF)
+
 }, []);
 
 useEffect(() => {
@@ -112,46 +138,46 @@ useEffect(() => {
     }
     };
     func();
-    // console.log(userPref)
+
 }, []);
 
-// useEffect(() => {
-//   const generateCircleData = () => {
-//     const data = [];
-//     const Xmin = 145;
-//     const Xmax = 350;
-//     const Ymin = 20;
-//     const Ymax = 155;
-//     const radius = 15; // Radius of the circles
+useEffect(() => {
+  const generateCircleData = () => {
+    const data = [];
+    const Xmin = 145;
+    const Xmax = 350;
+    const Ymin = 20;
+    const Ymax = 155;
+    const radius = 15; // Radius of the circles
 
-//     while (data.length < sToF) {
-//       const newCircle = {
-//         cx: Math.random() * (Xmax - Xmin) + Xmin,
-//         cy: Math.random() * (Ymax - Ymin) + Ymin,
-//         r: radius,
-//       };
+    while (data.length < sToF) {
+      const newCircle = {
+        cx: Math.random() * (Xmax - Xmin) + Xmin,
+        cy: Math.random() * (Ymax - Ymin) + Ymin,
+        r: radius,
+      };
 
-//       // Check if the new circle overlaps with any existing circles
-//       let overlap = false;
-//       for (let i = 0; i < data.length; i++) {
-//         if (doCirclesOverlap(newCircle, data[i])) {
-//           overlap = true;
-//           break;
-//         }
-//       }
+      // Check if the new circle overlaps with any existing circles
+      let overlap = false;
+      for (let i = 0; i < data.length; i++) {
+        if (doCirclesOverlap(newCircle, data[i])) {
+          overlap = true;
+          break;
+        }
+      }
 
-//       // Add the circle if no overlap was detected
-//       if (!overlap) {
-//         data.push(newCircle);
-//       }
-//     }
-//     setCircleData(data);
-//   };
+      // Add the circle if no overlap was detected
+      if (!overlap) {
+        data.push(newCircle);
+      }
+    }
+    setCircleData(data);
+  };
 
-//   if (sToF > 0) {
-//     generateCircleData();
-//   }
-// }, [sToF]);
+  if (sToF > 0) {
+    generateCircleData();
+  }
+}, [sToF]);
 
 return (
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}> 
@@ -159,7 +185,7 @@ return (
     <View>
         <Text style={styles.subTitle}>Student to Faculty Ratio: {sToF} </Text>
     </View>
-    {/* <Svg height="250" width="100%">
+    <Svg height="250" width="100%">
         <Circle cx="50" cy="100" r="50" fill="blue" />
 
         {circleData.map((circle, index) => (
@@ -171,7 +197,7 @@ return (
             fill="pink"
         />
         ))}
-    </Svg> */}
+    </Svg>
     <View style={{paddingVertical: 20}}>
         <Text style={styles.subTitle}>Major Break Down</Text>
         {majors.map((major, index) => (

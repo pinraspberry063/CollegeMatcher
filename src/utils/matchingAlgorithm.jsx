@@ -1,7 +1,9 @@
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, setDoc , getFirestore, query, where} from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import auth from '@react-native-firebase/auth';
+
 
 const findDist= (coords1, coords2) => {
     const toRad = (x) => (x * Math.PI) / 180;
@@ -36,11 +38,11 @@ const geoCodeAddress = async (address) => {
     }
 };
 
-const matchColleges = async (studentPreferences) => {
+const matchColleges = async (studentPreferences, colleges) => {
     const firestore = getFirestore(db);
-    const collegeDataRef = collection(firestore, 'CompleteColleges');
-    const querySnapshot = await getDocs(collegeDataRef);
-    const colleges = querySnapshot.docs.map(doc => doc.data());
+    // const collegeDataRef = collection(firestore, 'CompleteColleges');
+    // const querySnapshot = await getDocs(collegeDataRef);
+    // const colleges = querySnapshot.docs.map(doc => doc.data());
 
     const maxScore = 235;
 
@@ -265,16 +267,30 @@ const matchColleges = async (studentPreferences) => {
     });
 
     scores.sort((a, b) => b.score - a.score);
-    const top5Colleges = scores.slice(0, 5).map((s) => ({ name: s.college.shool_name, score: s.score }));
-    const resultsRef = collection(firestore, 'Results');
-    
-    try {
-      
-        await addDoc(resultsRef, {
-            userPreferences: studentPreferences,
-            top5Colleges,
-            
-        });
+  const top100Colleges = scores
+    .slice(0, 50)
+    .map(s => ({
+      name: s.college.shool_name,
+      score: s.score,
+      id: s.college.school_id,
+    }));
+
+  const resultsRef = collection(firestore, 'Users');
+  const resultDoc = query(
+    resultsRef,
+    where('User_UID', '==', auth().currentUser.uid),
+  );
+  const docID = (await getDocs(resultDoc)).docs[0].ref;
+
+  try {
+    await setDoc(
+      docID,
+      {
+        userPreferences: studentPreferences,
+        top100Colleges: top100Colleges,
+      },
+      {merge: true},
+    );
 
         alert("Algo submitted successfully!");
         
@@ -284,7 +300,7 @@ const matchColleges = async (studentPreferences) => {
     }
     
     
-    return {top5Colleges};
+    return {top100Colleges};
 };
 
 export default matchColleges;

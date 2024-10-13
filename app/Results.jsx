@@ -12,7 +12,6 @@ import { CollegesContext } from '../components/CollegeContext';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const collegeRef = collection(firestore, 'CompleteColleges'); // Initialize Firestore
 
 const favoriteCollege = async ({ID}) => {
   const collegeID = parseInt(ID);

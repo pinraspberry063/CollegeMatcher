@@ -61,6 +61,8 @@ import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
 import ProfilePage from './app/ProfilePage';
 
+
+
 const firestore = getFirestore(db);
 
 
@@ -116,7 +118,7 @@ const QuizStackScreen = () => (
 const ResultStack = createNativeStackNavigator();
 const ResultStackScreen = ({route}) => {
   const Top100 = route.params.Top100;
-  console.log('Top100' + Top100);
+  // console.log('Top100' + Top100);
   return (
     <ResultStack.Navigator screenOptions={screenOptions}>
       <ResultStack.Screen
@@ -164,7 +166,7 @@ const Tab = createBottomTabNavigator();
 const TabScreen = () => {
   const [topColleges, setTopColleges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const user = auth().currentUser.uid;
+  // const user = auth().currentUser.uid;
 
   useEffect(() => {
     const checkQuiz = async () => {
@@ -258,9 +260,9 @@ const checkUserStatus = async (userId) => {
 };
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(true);
-  const [takenQuiz, setTakenQuiz] = useState(false);
-  const [topColleges, setTopColleges] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
+  // const [takenQuiz, setTakenQuiz] = useState(false);
+  // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
 
@@ -317,7 +319,7 @@ const App = () => {
         })
         .catch(error => console.error('Error checking initial link:', error));
 
-      return () => unsubscribe();
+      return unsubscribe;
     }, []);
 
     if (initializing) return null;
@@ -345,4 +347,3 @@ const App = () => {
 
 export default registerRootComponent(App);
 
-const styles = StyleSheet.create({});

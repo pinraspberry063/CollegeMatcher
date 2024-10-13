@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity } from 'react-native';
-import { fetchColleges } from '../app/AccessCollegeData';
 import { CollegesContext } from '../components/CollegeContext';
 
 const CollegeSearch = ({ onCollegeSelect }) => {
