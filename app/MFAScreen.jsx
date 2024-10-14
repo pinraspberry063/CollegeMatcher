@@ -13,7 +13,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import themeContext from '../theme/themeContext';
 
-const MFAScreen = ({ navigation }) => {
+const MFAScreen = ({ navigation, route }) => {
   const theme = useContext(themeContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
@@ -21,6 +21,7 @@ const MFAScreen = ({ navigation }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
   const firestore = getFirestore(db);
+  const nextScreen = route?.params?.nextScreen || 'Main';
 
   const handleSendVerificationCode = async () => {
     // Input validation for phone number
@@ -75,8 +76,8 @@ const MFAScreen = ({ navigation }) => {
       });
 
       Alert.alert('Success', 'Multi-Factor Authentication has been enabled.');
-      // Navigate to the main app screen
-      navigation.navigate('Main');
+      // Navigate to the next screen
+      navigation.navigate(nextScreen);
     } catch (error) {
       console.error('Verification Error:', error);
       Alert.alert('Verification Failed', 'Invalid verification code.');

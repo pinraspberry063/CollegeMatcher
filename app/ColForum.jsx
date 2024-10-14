@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   Alert,
   Image,
-  ImageBackground
+  ImageBackground,
+  Modal,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
@@ -53,6 +54,8 @@ const ColForum = ({route, navigation}) => {
     const [images, setImages] = useState([]); // add state to store selected image
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
+    const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+    const [currentReportData, setCurrentReportData] = useState(null);
 
     // add floating button & animation
     const [showAddThread, setShowAddThread] = useState(false);
@@ -339,22 +342,50 @@ const ColForum = ({route, navigation}) => {
     }
   };
 
- const handleReportSubmission = async (reportType, threadId, postId = null, reportedUsername) => {
+ const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername) => {
+   setCurrentReportData({ reportType, threadId, postId, reportedUsername });
+   setIsReportModalVisible(true);
+ };
 
-   const reportData = {
-     threadId,
-     postId,
-     reportedUser: reportedUsername,
-     source: 'forum',
-     type: reportType
-   };
+ const ReportModal = ({ isVisible, onClose, onSubmit }) => {
+   const [selectedReason, setSelectedReason] = useState('');
+   const reasons = [
+     'Inappropriate content',
+     'Spam',
+     'Harassment',
+     'False information',
+     'Other'
+   ];
 
-   const success = await handleReport(reportData);
-   if (success) {
-     Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-   } else {
-     Alert.alert('Error', 'Failed to submit report. Please try again.');
-   }
+   return (
+     <Modal visible={isVisible} transparent animationType="slide">
+       <View style={styles.modalContainer}>
+         <View style={styles.modalContent}>
+           <Text style={styles.modalTitle}>Select a reason for reporting:</Text>
+           {reasons.map((reason) => (
+             <TouchableOpacity
+               key={reason}
+               style={[
+                 styles.reasonButton,
+                 selectedReason === reason && styles.selectedReasonButton
+               ]}
+               onPress={() => setSelectedReason(reason)}
+             >
+               <Text>{reason}</Text>
+             </TouchableOpacity>
+           ))}
+           <View style={styles.modalButtons}>
+             <Button title="Cancel" onPress={onClose} />
+             <Button
+               title="Submit"
+               onPress={() => onSubmit(selectedReason)}
+               disabled={!selectedReason}
+             />
+           </View>
+         </View>
+       </View>
+     </Modal>
+   );
  };
 
    return (
@@ -385,9 +416,32 @@ const ColForum = ({route, navigation}) => {
                 </Text>
               </View>
             ))}
-
-
           </ScrollView>
+          <ReportModal
+        isVisible={isReportModalVisible}
+        onClose={() => setIsReportModalVisible(false)}
+        onSubmit={async (reason) => {
+          setIsReportModalVisible(false);
+          if (currentReportData) {
+            const { reportType, threadId, postId, reportedUsername } = currentReportData;
+            const reportData = {
+              threadId,
+              postId,
+              reportedUser: reportedUsername,
+              source: 'forum',
+              type: reportType,
+              reason: reason
+            };
+
+            const success = await handleReport(reportData);
+            if (success) {
+              Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+            } else {
+              Alert.alert('Error', 'Failed to submit report. Please try again.');
+            }
+          }
+        }}
+      />
           {/* Animated Add Thread Section */}
                     <Animated.View
                       style={[
@@ -568,6 +622,43 @@ const ColForum = ({route, navigation}) => {
       width: 24,
       height: 24,
     },
-  });
+  imageContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 10,
+      },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  reasonButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  selectedReasonButton: {
+    backgroundColor: '#e0e0e0',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+});
 
   export default ColForum;

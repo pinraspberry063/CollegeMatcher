@@ -36,7 +36,6 @@ const FavColleges = () => {
                 Alert.alert('Error', 'You must be logged in to commit to a college.');
                 return;
             }
-
             const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
             const querySnapshot = await getDocs(usersQuery);
 
@@ -51,7 +50,8 @@ const FavColleges = () => {
                     await updateDoc(userDocRef, {
                         Committed_Colleges: arrayRemove(collegeName),
                     });
-                    Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}`);
+                    Alert.alert('Commitment Removed', `You have removed your commitment to ${collegeName}
+                    \n Please inform your possible roommates of this decision!`);
                 } else {
                     // Add the college if it doesn't exist in the committed list
                     updatedCommittedColleges = [...committedColleges, collegeName];

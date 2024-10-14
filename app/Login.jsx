@@ -10,6 +10,11 @@ import {
   TouchableOpacity,
   Linking,
   Animated,
+  ImageBackground,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
@@ -24,17 +29,22 @@ import dynamicLinks from '@react-native-firebase/dynamic-links';
 const Login = ({ navigation }) => {
   const theme = useContext(themeContext);
   const { setUser } = useContext(UserContext);
-  const [email, setEmail] = useState('');
+
+  // === Unified Input Fields State ===
+  const [identifier, setIdentifier] = useState(''); // Username, Email, or Phone Number
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState('options'); // 'options', 'email', or 'phone'
+
+  // MFA states
   const [showMfaPrompt, setShowMfaPrompt] = useState(false);
   const [mfaVerificationCode, setMfaVerificationCode] = useState('');
   const [mfaConfirmation, setMfaConfirmation] = useState(null);
+
   const firestore = getFirestore(db);
 
   // Add animation
   const slideAnim = useRef(new Animated.Value(-1000)).current; //start off screen
+  const astronautAnim = useRef(new Animated.ValueXY({ x: -200, y: 800 })).current;
 
   useEffect(() => {
       Animated.timing(slideAnim, {
@@ -42,38 +52,138 @@ const Login = ({ navigation }) => {
           duration: 1000, // Duration of the animation
           useNativeDriver: true, // Optimize performance
       }).start();
-    }, [slideAnim]);
+
+    // Astronaut
+      Animated.timing(astronautAnim, {
+          toValue: { x: 0, y: 700 },
+          duration: 1000,
+          useNativeDriver: true,
+          }).start();
+    }, []);
   // End animation
 
-  const handleEmailLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Input Error', 'Please enter both email and password.');
+  // === Helper Functions to Validate Input ===
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isValidPhoneNumber = (phone) => {
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    return phoneRegex.test(phone);
+  };
+
+
+  const getEmailFromUsername = async (username) => {
+    try {
+      console.log('Fetching email for username:', username);
+
+      // Trim the username to remove accidental leading/trailing spaces
+      const trimmedUsername = username.trim();
+
+      const q = query(collection(firestore, 'Users'), where('Username', '==', trimmedUsername));
+      const querySnapshot = await getDocs(q);
+
+      console.log('Number of documents found:', querySnapshot.size);
+
+      if (!querySnapshot.empty) {
+        const userData = querySnapshot.docs[0].data();
+        console.log('User data retrieved:', userData);
+
+        // Ensure the Email field exists
+        if (userData.Email) {
+          return userData.Email;
+        } else {
+          console.error('Email field is missing in the user document.');
+          return null;
+        }
+      } else {
+        console.warn('No user found with the provided username.');
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error fetching email from username:', error);
+      return null;
+    }
+  };
+
+  // === Handle Login ===
+  const handleLogin = async () => {
+    if (!identifier) {
+      Alert.alert('Input Error', 'Please enter your login details');
       return;
     }
 
     try {
-      const userCredential = await auth().signInWithEmailAndPassword(email, password);
-      const uid = userCredential.user.uid;
-
-      // Check if MFA is enabled for the user
-      const userDoc = await getDoc(doc(firestore, 'Users', uid));
-      if (userDoc.exists() && userDoc.data().mfaEnabled) {
-        // Send MFA verification code
-        const phoneNumber = userDoc.data().phoneNumber;
-        const confirmationResult = await auth().verifyPhoneNumber(phoneNumber);
-        setMfaConfirmation(confirmationResult);
-        setShowMfaPrompt(true);
-        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+      let userCredential;
+      if (isValidEmail(identifier)) {
+        // Login with Email
+        userCredential = await auth().signInWithEmailAndPassword(identifier, password);
+      } else if (isValidPhoneNumber(identifier)) {
+        // Navigate to PhoneVerification screen
+        navigation.navigate('PhoneVerification', { phoneNumber: identifier });
+        return;
       } else {
-        // No MFA, proceed normally
-        await checkIsRecruiter(uid);
+        // Assume it's a username
+        const email = await getEmailFromUsername(identifier);
+        if (email) {
+          userCredential = await auth().signInWithEmailAndPassword(email, password);
+        } else {
+          Alert.alert('Login Error', 'Invalid username or email.');
+          return;
+        }
       }
+      const { user } = userCredential;
+         setUser(user);
+      if (user) {
+        const uid = user.uid;
+        // Check if MFA is enabled for the user
+        const userDoc = await getDoc(doc(firestore, 'Users', uid));
+        if (userDoc.exists() && userDoc.data().mfaEnabled) {
+          // Send MFA verification code
+          const phoneNumber = userDoc.data().phoneNumber;
+          const confirmationResult = await auth().verifyPhoneNumber(phoneNumber);
+          setMfaConfirmation(confirmationResult);
+          setShowMfaPrompt(true);
+          Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+        } else {
+          // No MFA, proceed normally
+          await checkIsRecruiter(uid);
+        }
+      } else {
+        Alert.alert('Login Error', 'Failed to retrieve user information.');
+      }
+      Alert.alert('Login Successful');
+      //navigation.navigate('Main');
     } catch (error) {
       console.error('Login Error:', error);
       Alert.alert('Login Failed', error.message);
     }
   };
 
+  // === Handle Forgot Password ===
+  const handleForgotPassword = () => {
+    if (!identifier) {
+      Alert.alert('Input Error', 'Please enter your email address to reset your password.');
+      return;
+    }
+
+    if (!isValidEmail(identifier)) {
+      Alert.alert('Format Error', 'Please enter a valid email address.');
+      return;
+    }
+
+    auth().sendPasswordResetEmail(identifier)
+      .then(() => {
+        Alert.alert('Password Reset', 'A password reset email has been sent to your email address.');
+      })
+      .catch((error) => {
+        Alert.alert('Error', error.message);
+      });
+  };
+
+  // === Handle MFA Verification ===
   const handleMfaVerification = async () => {
     if (!mfaVerificationCode) {
       Alert.alert('Input Error', 'Please enter the verification code.');
@@ -117,15 +227,21 @@ const Login = ({ navigation }) => {
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      // Check if user document exists
-      const userDocRef = doc(firestore, 'Users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Prompt for username
-        navigation.navigate('UsernamePrompt', { user });
+      // === Check if MFA is Enabled ===
+      const uid = user.uid;
+      const userDoc = await getDoc(doc(firestore, 'Users', uid));
+      if (userDoc.exists() && userDoc.data().mfaEnabled) {
+        const phoneNumber = userDoc.data().phoneNumber;
+        if (!phoneNumber) {
+          Alert.alert('MFA Error', 'No phone number associated with this account.');
+          return;
+        }
+        const confirmationResult = await auth().signInWithPhoneNumber(phoneNumber);
+        setMfaConfirmation(confirmationResult);
+        setShowMfaPrompt(true);
+        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
       } else {
-        // User document exists, proceed to main app
+        // User document exists with a username, proceed to main app
         setUser(user);
         navigation.navigate('Main');
       }
@@ -149,13 +265,19 @@ const Login = ({ navigation }) => {
       const userCredential = await auth().signInWithCredential(facebookCredential);
       const user = userCredential.user;
 
-      // Check if user document exists
-      const userDocRef = doc(firestore, 'Users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Prompt for username
-        navigation.navigate('UsernamePrompt', { user });
+      // === Check if MFA is Enabled ===
+      const uid = user.uid;
+      const userDoc = await getDoc(doc(firestore, 'Users', uid));
+      if (userDoc.exists() && userDoc.data().mfaEnabled) {
+        const phoneNumber = userDoc.data().phoneNumber;
+        if (!phoneNumber) {
+          Alert.alert('MFA Error', 'No phone number associated with this account.');
+          return;
+        }
+        const confirmationResult = await auth().signInWithPhoneNumber(phoneNumber);
+        setMfaConfirmation(confirmationResult);
+        setShowMfaPrompt(true);
+        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
       } else {
         // User document exists, proceed to main app
         setUser(user);
@@ -166,7 +288,7 @@ const Login = ({ navigation }) => {
     }
   };
 
- const handleEmailLinkSignIn = async () => {
+ const handleEmailLinkLogin = async () => {
    if (!email) {
      Alert.alert('Input Error', 'Please enter your email address.');
      return;
@@ -196,8 +318,22 @@ const Login = ({ navigation }) => {
 
      console.log('Action code settings:', actionCodeSettings);
 
-     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
+     const userCredential =  auth().sendSignInLinkToEmail(email, actionCodeSettings);
      await AsyncStorage.setItem('emailForSignIn', email);
+     const user = userCredential.user;
+
+           // Check if user document exists
+           const userDocRef = doc(firestore, 'Users', user.uid);
+           const userDoc = await getDoc(userDocRef);
+
+           if (!userDoc.exists()) {
+             // Prompt for username
+             navigation.navigate('UsernamePrompt', { user });
+           } else {
+             // User document exists, proceed to main app
+             setUser(user);
+             navigation.navigate('Main');
+           }
      Alert.alert('Email Sent', 'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.');
    } catch (error) {
      console.error('Email link sign-in error:', error);
@@ -207,152 +343,185 @@ const Login = ({ navigation }) => {
    }
  };
 
-const checkIsRecruiter = async (uid) => { // change func name after demo
-  const firestore = getFirestore(db);
-  const usersRef = collection(firestore, 'Users');
-  const userQuery = query(usersRef, where('User_UID', '==', uid));
+const checkIsRecruiter = async (uid) => {
+  try {
+    const firestore = getFirestore(db);
+    const usersRef = collection(firestore, 'Users');
+    const userQuery = query(usersRef, where('User_UID', '==', uid));
 
-  const querySnapshot = await getDocs(userQuery);
-  if (!querySnapshot.empty) {
-    const userDoc = querySnapshot.docs[0];
-    const data = userDoc.data();
-    if (data.status === 'banned') {
-      await auth().signOut();
-      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
-      // Don't navigate anywhere for banned users
-      return false;
+    const querySnapshot = await getDocs(userQuery);
+    if (!querySnapshot.empty) {
+      const userDoc = querySnapshot.docs[0];
+      const data = userDoc.data();
+      if (data.IsBanned === true) {
+        await auth().signOut();
+        Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
+        // Don't navigate anywhere for banned users
+        return false;
+      }
+      if (data.IsRecruiter) {
+        navigation.navigate('Main', {
+          screen: 'Message',
+          params: { screen: 'RecConvs' }
+        });
+      } else {
+        navigation.navigate('Main');
+      }
+      return true;
     }
-    if (data.IsRecruiter) {
-      navigation.navigate('Main', {
-        screen: 'Message',
-        params: { screen: 'RecConvs' }
-      });
-    } else {
-      navigation.navigate('Main');
-    }
-    return true;
+    return false; // User not found
+  } catch (error) {
+    console.error('Error checking recruiter status:', error);
+    return false;
   }
-  return false; // User not found
 };
 
-  const handleForgotPassword = () => {
-    if (!email) {
-      Alert.alert('Input Error', 'Please enter your email address to reset your password.');
-      return;
-    }
-
-    auth().sendPasswordResetEmail(email)
-      .then(() => {
-        Alert.alert('Password Reset', 'A password reset email has been sent to your email address.');
-      })
-      .catch((error) => {
-        Alert.alert('Error', error.message);
-      });
-  };
-
-  const renderEmailLogin = () => (
-      <>
-        <TextInput
-          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-          placeholder="Email"
-          placeholderTextColor={theme.color}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={[styles.input, styles.passwordInput, { borderColor: theme.color, color: theme.color }]}
-            placeholder="Password"
-            placeholderTextColor={theme.color}
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-            style={styles.toggleButton}
-          >
-            <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
-          </TouchableOpacity>
-        </View>
-        <Button title="Login" onPress={handleEmailLogin} />
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={{ color: theme.color, marginTop: 10 }}>Forgot Password?</Text>
-        </TouchableOpacity>
-      </>
-    );
-
-    const renderLoginOptions = () => (
-      <>
-        <Button title="Login with Email" onPress={() => setLoginMethod('email')} />
-        <Button title="Login with Phone" onPress={handlePhoneLogin} />
-        <Button title="Login with Google" onPress={handleGoogleLogin} />
-        <Button title="Login with Facebook" onPress={handleFacebookLogin} />
-        <Button title="Login with Email Link" onPress={handleEmailLinkSignIn} />
-      </>
-    );
-
   return (
-      <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
-        <Text style={[styles.title, {color: theme.color}]}>Login</Text>
-        {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
-        {loginMethod === 'email' && (
-          <TouchableOpacity onPress={() => setLoginMethod('options')}>
-            <Text style={{color: theme.color, marginTop: 20}}>
-              Other login options
-            </Text>
-          </TouchableOpacity>
-        )}
-        {showMfaPrompt && (
-          <View style={styles.mfaContainer}>
-            <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
+    >
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
+          {/* === Title === */}
+          <Text style={styles.title}>Login</Text>
+
+          {/* === Identifier Input === */}
+          <TextInput
+            style={[styles.input, { borderColor: 'black', color: 'black' }]}
+            placeholder="Username, Email, or Phone Number"
+            placeholderTextColor='black'
+            value={identifier}
+            onChangeText={setIdentifier}
+            keyboardType="email-address" // Optional: change dynamically based on input
+            autoCapitalize="none"
+          />
+
+          {/* === Password Input with Toggle === */}
+          <View style={styles.passwordContainer}>
             <TextInput
-              style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-              placeholder="Verification Code"
-              value={mfaVerificationCode}
-              onChangeText={setMfaVerificationCode}
+              style={[styles.input, styles.passwordInput, { borderColor: 'black', color: 'black' }]}
+              placeholder="Password"
+              placeholderTextColor='black'
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              autoCapitalize="none"
             />
-            <Button title="Verify Code" onPress={handleMfaVerification} />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.toggleButton}
+            >
+              <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </Animated.View>
-    );
-  };
+
+          {/* === Forgot Password === */}
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <Text style={{ color: '#1E90FF', marginBottom: 20, textAlign: 'right' }}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          {/* === Login Button === */}
+          <Button title="Login" onPress={handleLogin} />
+
+          {/* === Divider === */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.line} />
+            <Text style={styles.orText}>OR</Text>
+            <View style={styles.line} />
+          </View>
+
+          {/* === Social Logins === */}
+          <>
+            {/* === Google Sign-In === */}
+            <TouchableOpacity
+              style={[styles.socialButton, { backgroundColor: '#DB4437' }]}
+              onPress={handleGoogleLogin}
+            >
+              <Text style={styles.socialButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+
+            {/* === Facebook Sign-In === */}
+            <TouchableOpacity
+              style={[styles.socialButton, { backgroundColor: '#4267B2' }]}
+              onPress={handleFacebookLogin}
+            >
+              <Text style={styles.socialButtonText}>Continue with Facebook</Text>
+            </TouchableOpacity>
+
+            {/* === Email Link Login === */}
+            <TouchableOpacity
+              style={[styles.socialButton, { backgroundColor: '#34A853' }]}
+              onPress={handleEmailLinkLogin}
+            >
+              <Text style={styles.socialButtonText}>Continue with Email Link</Text>
+            </TouchableOpacity>
+          </>
+
+          {/* === Account Creation Button === */}
+          <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
+            <Text style={{ color: '#1E90FF', marginTop: 20, textAlign: 'center' }}>Create Account</Text>
+          </TouchableOpacity>
+
+          {/* === MFA Prompt === */}
+          {showMfaPrompt && (
+            <View style={styles.mfaContainer}>
+              <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
+              <TextInput
+                style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+                placeholder="Verification Code"
+                value={mfaVerificationCode}
+                onChangeText={setMfaVerificationCode}
+                keyboardType="number-pad"
+              />
+              <Button title="Verify Code" onPress={handleMfaVerification} />
+            </View>
+          )}
+        </Animated.View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#fff', // Optional: set a background color
   },
   title: {
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   input: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'black',
     borderWidth: 1,
+    borderRadius: 8,
     marginBottom: 12,
-    padding: 10,
+    paddingHorizontal: 10,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9', // Optional: softer background for inputs
   },
   passwordContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 12,
   },
   passwordInput: {
     flex: 1,
+    color: 'black'
   },
   toggleButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 10,
-  },
-  lockedText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 10,
   },
   mfaContainer: {
     marginTop: 20,
@@ -363,7 +532,47 @@ const styles = StyleSheet.create({
   mfaTitle: {
     fontSize: 18,
     marginBottom: 12,
+    textAlign: 'center',
+    fontWeight: '600',
   },
+  socialButton: {
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  socialButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ccc',
+  },
+  orText: {
+    marginHorizontal: 10,
+    fontSize: 16,
+    color: '#555',
+  },
+  background: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      },
+  astronaut: {
+      position: 'absolute',
+      width: 150,
+      height: 150,
+      bottom: 50,
+      left: '45%',
+      },
 });
 
 export default Login;
