@@ -1,6 +1,6 @@
 // Displays the threads and posts of the selected subgroup.
 
-import React, {useState, useEffect, useContext} from 'react';
+import React, {useState, useEffect, useContext, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,8 +8,11 @@ import {
   ScrollView,
   TextInput,
   Button,
+  Animated,
+  TouchableOpacity,
   Alert,
   Image,
+  ImageBackground
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
@@ -50,6 +53,21 @@ const ColForum = ({route, navigation}) => {
     const [images, setImages] = useState([]); // add state to store selected image
     const [uploading, setUploading] = useState(false);
     const [transferred, setTransferred] = useState(0);
+
+    // add floating button & animation
+    const [showAddThread, setShowAddThread] = useState(false);
+    const animationValue = useRef(new Animated.Value(0)).current;
+
+    //hide add thread from top
+    const toggleAddThread = () => {
+        setShowAddThread(!showAddThread);
+        Animated.spring(animationValue, {
+          toValue: showAddThread ? 0 : 1, // Toggle between 0 and 1
+          friction: 5,
+          useNativeDriver: false, // set false for layout animations
+        }).start();
+        setShowAddThread(!showAddThread);
+      };
 
     // Function to handle image selection
     const selectImage = async () => {
@@ -339,232 +357,217 @@ const ColForum = ({route, navigation}) => {
    }
  };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.newThreadContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Thread Title"
-            value={newThreadTitle}
-            onChangeText={setNewThreadTitle}
-          />
-          <Button title="Add Thread" onPress={handleAddThread} />
+   return (
+        <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+        <SafeAreaView style={styles.container}>
+          <ScrollView>
+            {/* Render all threads */}
+            {threads.map((thread) => (
+              <View key={thread.id} style={styles.threadItem}>
+                <View style={styles.threadHeader}>
+                  <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
 
-          {/*Button to select images */}
-          <Button title="Select Images" onPress={selectImage} />
-
-          {/*Display selected images */}
-          {images.length > 0 && (
-                      <View>
-                        {images.map((imageUri, index) => (
-                          <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
-                        ))}
-                        {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
-                      </View>
-                    )}
-        </View>
-        {threads.map(thread => (
-          <View key={thread.id} style={styles.threadItem}>
-            <View style={styles.threadHeader}>
-              <View style={styles.threadTitleRow}>
-                <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
-              </View>
-
-              {/* Render the uploaded images */}
-              {thread.imageUrls && thread.imageUrls.length > 0 && (
-                  <View style={styles.imageContainer}>
+                  {/* Render thread images */}
+                  {thread.imageUrls && thread.imageUrls.length > 0 && (
+                    <View style={styles.imageContainer}>
                       {thread.imageUrls.map((url, index) => (
-                          <Image key={index} source={{ uri:url }} style={styles.imageBox} />
+                        <Image key={index} source={{ uri: url }} style={styles.imageBox} />
                       ))}
-                  </View>
-              )}
-
-              {images.length > 0 && (
-                <View>
-                  {images.map((imageUri, index) => (
-                    <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
-                  ))}
-                  {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
+                    </View>
+                  )}
                 </View>
-              )}
 
-              <Button
-                title="Report Thread"
-                onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
-                disabled={thread.createdBy === username}
-                style={styles.reportButton}
-              />
-            </View>
-            <Text style={[
-              styles.threadCreatedBy,
-              { color: theme.textColor },
-              thread.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
-            ]}>
-              Created by: {thread.createdBy}
-            </Text>
-            <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
-            {thread.posts.map(post => (
-              <View key={post.id} style={styles.postItem}>
-                <Text style={[styles.postContent, {color: theme.textColor}]}>
-                  {post.content}
+                <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>
+                  Created by: {thread.createdBy}
                 </Text>
-
-                {/* Render post images */}
-                {post.imageUrls && post.imageUrls.length > 0 && (
-                  <View style={styles.imageContainer}>
-                    {post.imageUrls.map((url, index) => (
-                      <Image key={index} source={{ uri: url }} style={styles.imageBox} />
-                    ))}
-                  </View>
-                )}
-
-                <Text
-                  style={[
-                    styles.postCreatedBy,
-                    {color: theme.textColor},
-                    post.isRecruiter && styles.recruiterHighlight, // Highlight if the user is a recruiter
-                  ]}>
-                  Posted by: {post.createdBy}
+                <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
+                  Created at: {thread.createdAt.toDate().toLocaleString()}
                 </Text>
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
-                <Button
-                  title="Report Post"
-                  onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
-                  disabled={post.createdBy === username}
-                />
               </View>
             ))}
-            <View style={styles.newPostContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Post Content"
-                value={newPostContent[thread.id] || ''}
-                onChangeText={text =>
-                  setNewPostContent(prev => ({...prev, [thread.id]: text}))
-                }
-              />
-              <Button title="Select Post Images" onPress={() => selectPostImage(thread.id)} />
 
-              {/* Display selected post images */}
-                {postImages[thread.id]?.length > 0 && (
-                  <View>
-                    {postImages[thread.id].map((imageUri, index) => (
-                      <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
-                    ))}
-                    {uploadingPost ? <Progress.Bar progress={transferredPost} width={300} /> : null}
-                  </View>
-                )}
 
-              <Button
-                title="Add Post"
-                onPress={() => handleAddPost(thread.id)}
-              />
-              <Button title="Add Post" onPress={() => handleAddPost(thread.id)} />
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+          </ScrollView>
+          {/* Animated Add Thread Section */}
+                    <Animated.View
+                      style={[
+                        styles.newThreadContainer,
+                        {
+                          transform: [
+                            {
+                              translateY: animationValue.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [300, 0], // Slide up the add thread section
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Thread Title"
+                        value={newThreadTitle}
+                        onChangeText={setNewThreadTitle}
+                      />
+                      <Button title="Add Thread" onPress={handleAddThread} />
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  newThreadContainer: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  threadHeader: {
-      flexDirection: 'column',
-      marginBottom: 8,
+                      {/* Button to select images */}
+                      <Button title="Select Images" onPress={selectImage} />
+
+                      {/* Display selected images */}
+                      {images.length > 0 && (
+                        <View>
+                          {images.map((imageUri, index) => (
+                            <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
+                          ))}
+                          {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
+                        </View>
+                      )}
+
+                      {/* Cancel Buttonon */}
+                      <Button title="Cancel" onPress={toggleAddThread} color="red" />
+                    </Animated.View>
+
+          {/* Floating button at bottom-right corner */}
+          <TouchableOpacity style={styles.floatingButton} onPress={toggleAddThread}>
+            <Image source={require('../assets/pencil.png')} style={styles.floatingButtonImage} />
+          </TouchableOpacity>
+        </SafeAreaView>
+        </ImageBackground>
+      );
+    };
+
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
     },
-    threadTitleRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
+    newThreadContainer: {
+      position: 'absolute',
+      left: '10%',
+      right: '10%',
+      top: '30%',
+      padding: 20,
+      backgroundColor: '#fff',
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.8,
+      shadowRadius: 3,
+      elevation: 5,  // Shadow for Android
+    },
+    threadHeader: {
+        flexDirection: 'column',
+        marginBottom: 8,
+      },
+      threadTitleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      },
+      threadTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        flex: 1,
+        marginRight: 8,
+      },
+      reportButton: {
+        marginTop: 4,
+      },
+    newPostContainer: {
+      marginTop: 12,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 8,
+    },
+    input: {
+      borderWidth: 1,
+      borderColor: '#ccc',
+      padding: 8,
+      marginBottom: 8,
+      borderRadius: 4,
+    },
+    threadItem: {
+      marginBottom: 16,
+      padding: 16,
+      borderWidth: 1,
+      backgroundColor: '#000080',
+      borderRadius: 8,
     },
     threadTitle: {
       fontSize: 18,
       fontWeight: 'bold',
-      flex: 1,
-      marginRight: 8,
+      color: '#fff',
     },
-    reportButton: {
+    threadCreatedBy: {
+      fontSize: 14,
+      marginTop: 4,
+      color: '#fff',
+    },
+    threadCreatedAt: {
+      fontSize: 14,
+      marginTop: 4,
+      color: '#fff',
+    },
+    postItem: {
+      marginTop: 12,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 8,
+    },
+    postContent: {
+      fontSize: 16,
+      color: '#fff',
+    },
+    postCreatedBy: {
+      fontSize: 14,
       marginTop: 4,
     },
-  newPostContainer: {
-    marginTop: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 8,
-    borderRadius: 4,
-  },
-  threadItem: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  threadTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  threadCreatedBy: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  threadCreatedAt: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  postItem: {
-    marginTop: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
-  postContent: {
-    fontSize: 16,
-  },
-  postCreatedBy: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  postCreatedAt: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  recruiterHighlight: {
-    fontWeight: 'bold',
-    color: '#ff9900', // Highlight color for recruiters
-  },
-  imageBox: {
-      width: 200,
-      height: 200,
-      marginVertical: 10,
+    postCreatedAt: {
+      fontSize: 14,
+      marginTop: 4,
+    },
+    recruiterHighlight: {
+      fontWeight: 'bold',
+      color: '#ff9900', // Highlight color for recruiters
+    },
+    imageBox: {
+        width: 200,
+        height: 200,
+        marginVertical: 10,
+        },
+    imageContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 10,
+        },
+    background: {
+        flex: 1,
+        resizeMode: 'cover'
       },
-  imageContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 10,
-      },
-});
+  floatingButton: {
+      position: 'absolute',
+      bottom: 30,
+      right: 16,
+      backgroundColor: '#ff9900',
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: 'center',
+      alignItems: 'center',
+      elevation: 8,
+    },
+    floatingButtonImage: {
+      width: 24,
+      height: 24,
+    },
+  });
 
-export default ColForum;
+  export default ColForum;

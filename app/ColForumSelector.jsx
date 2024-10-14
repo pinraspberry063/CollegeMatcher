@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, Button, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Button, Alert, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -53,6 +53,7 @@ const ColForumSelector = ({ navigation }) => {
   };
 
   return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {colleges.length > 0 ? (
@@ -77,6 +78,7 @@ const ColForumSelector = ({ navigation }) => {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </ImageBackground>
   );
 };
 
@@ -100,6 +102,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
+  background: {
+      flex: 1,
+      resizeMode: 'cover'
+    },
 });
 
 export default ColForumSelector;

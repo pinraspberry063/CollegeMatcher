@@ -1,7 +1,7 @@
 // College selected. Display the different subgroups within the college's forum.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -157,6 +157,7 @@ const ForumSelect = ({ route, navigation }) => {
     };
 
   return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <ScrollView>
         {subgroups.map(subgroup => (
@@ -204,6 +205,7 @@ const ForumSelect = ({ route, navigation }) => {
                 </View>
       </ScrollView>
     </SafeAreaView>
+    </ImageBackground>
   );
 };
 
@@ -266,6 +268,10 @@ const styles = StyleSheet.create({
     color: '#ff9900', // Highlight color for recruiters
     fontWeight: 'bold',
   },
+  background: {
+      flex: 1,
+      resizeMode: 'cover'
+    },
 });
 
 export default ForumSelect;
