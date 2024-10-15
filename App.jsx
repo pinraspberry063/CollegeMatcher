@@ -28,7 +28,6 @@ import RoomateMatcher from './app/RoomateMatcher';
 import RoomateResults from './app/RoomateResults';
 import Message from './app/Message';
 import RoomateMessage from './app/RoomateMessage';
-import RoomateViewQuiz from './app/RoomateViewQuiz';
 import RecConvs from './app/RecConvs';
 import MakkAI from './app/MakkAI';
 import Login from './app/Login';
@@ -144,7 +143,6 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
     <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
     <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
-    <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
   </ForumStack.Navigator>
 );
 
