@@ -120,7 +120,11 @@ const ModeratorScreen = ({ navigation }) => {
       Alert.alert('User Banned', 'The user has been banned successfully.');
     } catch (error) {
       console.error('Error banning user: ', error);
-      Alert.alert('Error', 'Failed to ban user. Please try again.');
+      if (error.code === 'permission-denied') {
+        Alert.alert('Permission Denied', 'You do not have the necessary permissions to ban users.');
+      } else {
+        Alert.alert('Error', `Failed to ban user: ${error.message}`);
+      }
     }
   };
 
@@ -160,7 +164,13 @@ const ModeratorScreen = ({ navigation }) => {
       Alert.alert('User Unbanned', 'The user has been unbanned successfully.');
     } catch (error) {
       console.error('Error unbanning user: ', error);
-      Alert.alert('Error', 'Failed to unban user. Please try again.');
+      if (error.code === 'permission-denied') {
+        Alert.alert('Permission Denied', 'You do not have the necessary permissions to unban users.');
+      } else if (error.code === 'network-request-failed') {
+        Alert.alert('Network Error', 'Please check your internet connection and try again.');
+      } else {
+        Alert.alert('Error', `Failed to unban user: ${error.message}`);
+      }
     }
   };
 
@@ -252,20 +262,29 @@ const ModeratorScreen = ({ navigation }) => {
       return userActivity;
     } catch (error) {
       console.error('Error fetching user activity:', error);
-      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
+      if (error.code === 'network-request-failed') {
+        Alert.alert('Network Error', 'Please check your internet connection and try again.');
+      } else {
+        Alert.alert('Error', `Failed to fetch user activity: ${error.message}`);
+      }
       return null;
     }
   };
 
   const handleViewUserActivity = async (reportedUser) => {
     setIsLoading(true);
-    const userActivity = await fetchUserActivity(reportedUser);
-    setIsLoading(false);
-
-    if (userActivity) {
-      navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
-    } else {
-      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
+    try {
+      const userActivity = await fetchUserActivity(reportedUser);
+      if (userActivity) {
+        navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
+      }
+      // No else needed as fetchUserActivity already handles the alert
+    } catch (error) {
+      // Additional catch in case fetchUserActivity throws
+      console.error('Error in handleViewUserActivity:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -278,7 +297,11 @@ const ModeratorScreen = ({ navigation }) => {
         title={item.isBanned ? "Unban User" : "Ban User"}
         onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
       />
-      <Button title="View User Activity" onPress={() => handleViewUserActivity(item.reportedUser)} />
+      <Button
+        title="View User Activity"
+        onPress={() => handleViewUserActivity(item.reportedUser)}
+        disabled={isLoading} // Prevent multiple taps
+      />
     </View>
   );
 
