@@ -27,7 +27,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 
 const Login = ({ navigation }) => {
-  const theme = useContext(themeContext);
+
   const { setUser } = useContext(UserContext);
 
   // === Unified Input Fields State ===
@@ -404,7 +404,7 @@ const checkIsRecruiter = async (uid) => {
           {/* === Password Input with Toggle === */}
           <View style={styles.passwordContainer}>
             <TextInput
-              style={[styles.input, styles.passwordInput, { borderColor: 'black', color: 'black' }]}
+              style={[styles.input]}
               placeholder="Password"
               placeholderTextColor='black'
               secureTextEntry={!showPassword}
@@ -416,7 +416,7 @@ const checkIsRecruiter = async (uid) => {
               onPress={() => setShowPassword(!showPassword)}
               style={styles.toggleButton}
             >
-              <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
+              <Text >{showPassword ? 'Hide' : 'Show'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -472,7 +472,7 @@ const checkIsRecruiter = async (uid) => {
             <View style={styles.mfaContainer}>
               <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
               <TextInput
-                style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+                style={styles.input}
                 placeholder="Verification Code"
                 value={mfaVerificationCode}
                 onChangeText={setMfaVerificationCode}
@@ -515,10 +515,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-  },
-  passwordInput: {
-    flex: 1,
-    color: 'black'
   },
   toggleButton: {
     padding: 10,

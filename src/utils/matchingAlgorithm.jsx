@@ -268,7 +268,7 @@ const matchColleges = async (studentPreferences, colleges) => {
 
     scores.sort((a, b) => b.score - a.score);
   const top100Colleges = scores
-    .slice(0, 50)
+    .slice(0, 100)
     .map(s => ({
       name: s.college.shool_name,
       score: s.score,
