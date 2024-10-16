@@ -61,7 +61,7 @@ const usersRef = collection(firestore, 'Users');
 
 const Demographics = ({navigation, collegeID}) => {
 
-    const collegeID = JSON.parse(collegeID);
+    const college = collegeID;
 const [sToF, setSToF] = useState(0);
 const [userPref, setUserPref] = useState([]);
 const [circleData, setCircleData] = useState([]);
@@ -75,7 +75,7 @@ useEffect(() => {
     try {
     
         
-        const sToF = collegeID.student_to_Faculty_Ratio;
+        const sToF = college.student_to_Faculty_Ratio;
         
         
 
@@ -85,7 +85,7 @@ useEffect(() => {
         majorData.forEach(major => {
             const majorCategory = major.categories || [' '];
             const field = 'percent_' + major.categories;
-            const percent = collegeID[field];
+            const percent = college[field];
 
             if (!majorSet.has(majorCategory) && percent) {
             majorSet.add(majorCategory);

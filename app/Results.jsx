@@ -157,7 +157,8 @@ const Results = ({route, navigation}) => {
 
   function FindCollege(ID){
     const selColleges = colleges.find(college => college.school_id === parseInt(ID))
-    return selColleges[0]
+    const selColleges[0]
+    return college[0];
   }
 
   const renderItem = ({item}) => {

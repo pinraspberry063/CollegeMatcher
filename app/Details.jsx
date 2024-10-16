@@ -87,7 +87,8 @@ const OverView = React.lazy(() => import('./Overview'));
     const collName = route.params.college;
     const collegeobj = route.params.obj;
     // const Star = require('../assets/pinkstar.png');
-  
+    
+    console.log(collegeobj);
     const data = [
       {
         tabLabel: 'Overview',
