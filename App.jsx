@@ -17,12 +17,8 @@ import Settings from './app/Settings';
 import Home from './app/index';
 import Account from './app/AccSettings';
 import Picker from './app/ProfileImageComp';
-import {
-  DarkTheme,
-  DefaultTheme,
-  NavigationContainer,
-} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
 import ColForum from './app/ColForum';
@@ -38,7 +34,13 @@ import Login from './app/Login';
 import AccountCreation from './app/AccountCreation';
 import Results from './app/Results';
 import Details from './app/Details';
-import {db} from './config/firebaseConfig';
+import EmailVerificationPrompt from './app/EmailVerificationPrompt';
+
+import ColForumSelector from './app/ColForumSelector';
+import ForumSelect from './app/ForumSelect';
+import FollowedForums from './app/FollowedForums';
+import PhoneVerification from './app/PhoneVerification';
+import ModeratorScreen from './app/ModeratorScreen';
 import {
   collection,
   // addDoc,
@@ -50,12 +52,7 @@ import {
   where,
   getDoc,
 } from 'firebase/firestore';
-import FavoritedColleges from './app/FavoritedColleges';
-import ColForumSelector from './app/ColForumSelector';
-import ForumSelect from './app/ForumSelect';
-import FollowedForums from './app/FollowedForums';
-import PhoneVerification from './app/PhoneVerification';
-import ModeratorScreen from './app/ModeratorScreen';
+import { db } from './config/firebaseConfig';
 import UserActivityScreen from './app/UserActivityScreen';
 import RecruiterVerification from './app/RecruiterVerification';
 import AddRecs from './app/AddRecs';
@@ -75,14 +72,14 @@ const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
   tabBarStyle: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     left: 0,
     elevation: 0,
     height: 60,
-    background: '#fff',
-  },
+    background: "#fff"
+  }
 };
 
 const HomeStack = createNativeStackNavigator();
@@ -93,8 +90,6 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker} />
     <HomeStack.Screen name="Preferences" component={Preferences} />
-    <HomeStack.Screen name="FavColleges" component={FavoritedColleges} />
-    <HomeStack.Screen name="DetailsFav" component={Details} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
@@ -120,6 +115,8 @@ const QuizStackScreen = () => (
     <QuizStack.Screen name="Details" component={Details} />
   </QuizStack.Navigator>
 );
+
+
 const ResultStack = createNativeStackNavigator();
 const ResultStackScreen = ({route}) => {
   const Top100 = route.params.Top100;
@@ -149,6 +146,7 @@ const ForumStackScreen = () => (
   </ForumStack.Navigator>
 );
 
+
 const AIStack = createNativeStackNavigator();
 const AIStackScreen = () => (
   <AIStack.Navigator screenOptions={screenOptions}>
@@ -159,7 +157,7 @@ const AIStackScreen = () => (
 const icons = {
   Home: 'home',
   QuizStack: 'magnify',
-  ColForumSelector: 'forum',
+  ColForumSelectorTab: 'forum',
   Messages: 'message',
   // AI: 'head', AI: 'brain', AI: 'space-invaders', AI: 'clippy',
   AI: 'chat-question',
@@ -206,62 +204,42 @@ const TabScreen = () => {
       </View>
     );
   }
-  return (
-    <Tab.Navigator
-      screenOptions={({route}) => ({
-        tabBarIcon: ({color, size}) => {
-          return (
-            <MaterialCommunityIcons
-              name={icons[route.name]}
-              color={color}
-              size={size}
-            />
-          )
-        },
-        tabBarShowLabel: false,
-        headerShown: false,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 0,
-          right: 0,
-          left: 0,
-          elevation: 0,
-          height: 60,
-          background: '#fff',
-        },
-      })}>
-      <Tab.Screen name="Home" component={HomeStackScreen} />
-      <Tab.Screen
+  return(
+  <TabStack.Navigator
+    screenOptions={screenOptions}
+  >
+    <TabStack.Screen name="Home" component={HomeStackScreen} />
+    <TabStack.Screen
         name="QuizStack"
         initialParams={{Top100: topColleges}}
         component={ResultStackScreen}
       />
-      <Tab.Screen name="ColForumSelector" component={ForumStackScreen} />
-      <Tab.Screen name="Messages" component={MessageStackScreen} />
-      <Tab.Screen name="AI" component={AIStackScreen} />
-      {/*     {checkUserStatus === 'moderator' && ( */}
-      <Tab.Screen name="Moderation" component={ModeratorScreen} />
-      {/*             )} */}
-      <Tab.Screen
-        name="UserActivityScreen"
-        component={UserActivityScreen}
-        options={{tabBarButton: () => null}}
-      />
-    </Tab.Navigator>
-  );
-};
+    <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+    <TabStack.Screen name="Messages" component={MessageStackScreen} />
+    <TabStack.Screen name="AI" component={AIStackScreen} />
+{/*     {checkUserStatus === 'moderator' && ( */}
+              <Tab.Screen name="Moderation" component={ModeratorScreen} />
+{/*             )} */}
+        <TabStack.Screen
+              name="UserActivityScreen"
+              component={UserActivityScreen}
+              options={{ tabBarButton: () => null }}
+            />
+  </TabStack.Navigator>
+)};
 
 const RootStack = createNativeStackNavigator();
 const LaunchStack = createNativeStackNavigator();
+const TabStack = createNativeStackNavigator();
 const LaunchStackScreen = () => (
   <LaunchStack.Navigator screenOptions={screenOptions}>
-    <LaunchStack.Screen name="LaunchScreen" component={Launch} />
     <LaunchStack.Screen name="Login" component={Login} />
     <LaunchStack.Screen name="CreateAccount" component={AccountCreation} />
-    <LaunchStack.Screen
-      name="PhoneVerification"
-      component={PhoneVerification}
-    />
+    <LaunchStack.Screen name="PhoneVerification" component={PhoneVerification} />
+    <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
+    <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
+    <LaunchStack.Screen name="UsernamePrompt" component={UsernamePrompt} />
+    <LaunchStack.Screen name="EmailVerificationPrompt" component={EmailVerificationPrompt} />
   </LaunchStack.Navigator>
 );
 
@@ -273,12 +251,9 @@ const checkUserStatus = async (userId) => {
 
   if (userSnap.exists()) {
     const userData = userSnap.data();
-    if (userData.status === 'banned') {
+    if (userData.IsBanned === true) {
       auth().signOut();
-      Alert.alert(
-        'Account Banned',
-        'Your account has been banned. Please contact support for more information.',
-      );
+      Alert.alert('Account Banned', 'Your account has been banned. Please contact support for more information.');
       return 'banned';
     } else if (userData.isModerator) {
       return 'moderator';
@@ -288,7 +263,7 @@ const checkUserStatus = async (userId) => {
 };
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [takenQuiz, setTakenQuiz] = useState(false);
   const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
@@ -306,7 +281,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    const listener = EventRegister.addEventListener('Change Theme', data => {
+    const listener = EventRegister.addEventListener('Change Theme', (data) => {
       setDarkMode(data);
     });
     return () => {
@@ -337,7 +312,7 @@ const App = () => {
     return subscriber; // unsubscribe on unmount
   }, [user, initializing]);
 
-  const handleDynamicLink = async link => {
+  const handleDynamicLink = async (link) => {
     if (link.url) {
       console.log('Received dynamic link:', link.url);
       if (auth().isSignInWithEmailLink(link.url)) {
@@ -361,19 +336,19 @@ const App = () => {
   };
 
   useEffect(() => {
-    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+      const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
 
-    dynamicLinks()
-      .getInitialLink()
-      .then(link => {
-        if (link) {
-          handleDynamicLink(link);
-        }
-      })
-      .catch(error => console.error('Error checking initial link:', error));
+      dynamicLinks()
+        .getInitialLink()
+        .then(link => {
+          if (link) {
+            handleDynamicLink(link);
+          }
+        })
+        .catch(error => console.error('Error checking initial link:', error));
 
-    return () => unsubscribe();
-  }, []);
+      return () => unsubscribe();
+    }, []);
 
   if (initializing) return null;
   if (showOnboarding) {
@@ -437,32 +412,26 @@ const App = () => {
     );
   }
 
-
-  return (
-    <UserProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <themeContext.Provider
-          value={darkMode === true ? theme.dark : theme.light}>
-          <NavigationContainer
-            theme={darkMode === true ? DarkTheme : DefaultTheme}>
-            <RootStack.Navigator screenOptions={screenOptions}>
-              <RootStack.Screen
-                name="Launch"
-                component={LaunchStackScreen}
-                options={{headerShown: false}}
-              />
-              <RootStack.Screen
-                name="Main"
-                component={TabScreen}
-                options={{headerShown: false}}
-              />
-            </RootStack.Navigator>
-          </NavigationContainer>
-        </themeContext.Provider>
-      </GestureHandlerRootView>
-    </UserProvider>
-  );
-};
+    return (
+      <CollegesProvider>
+        <UserProvider>
+          <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
+            <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+              <RootStack.Navigator screenOptions={screenOptions}>
+  {/*                */}{/* {user ? ( */}
+  {/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
+  {/*               ) : ( */}
+  {/*                 <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} /> */}
+  {/*               )} */}
+                <RootStack.Screen name="Launch" component={LaunchStackScreen} options={{ headerShown: false }} />
+                <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
+              </RootStack.Navigator>
+            </NavigationContainer>
+          </themeContext.Provider>
+        </UserProvider>
+      </CollegesProvider>
+    )
+  }
 
 export default registerRootComponent(App);
 

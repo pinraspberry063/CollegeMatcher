@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext} from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   TextInput,
@@ -6,11 +6,16 @@ import {
   FlatList,
   Text,
   StyleSheet,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ImageBackground,
+  TouchableOpacity,
+  Image
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
-import {collection, addDoc, getFirestore} from 'firebase/firestore';
-import {db} from '../config/firebaseConfig';
+// import { collection, addDoc, getFirestore } from 'firebase/firestore';
+// import { getFirestore } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 import themeContext from '../theme/themeContext';
 
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai-preview";
@@ -48,6 +53,7 @@ const MakkAI = () => {
   const theme = useContext(themeContext);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [chatSession, setchatSession] = useState(null);
 
   useEffect(() => {
     const initializeChatSession = () => {
@@ -69,64 +75,19 @@ const MakkAI = () => {
     }
   }, []);
 
-  const loadMessages = async () => {
-    try {
-      const storedMessages = await AsyncStorage.getItem('messages');
-      if (storedMessages) setMessages(JSON.parse(storedMessages));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const saveMessages = async newMessages => {
-    try {
-      await AsyncStorage.setItem('messages', JSON.stringify(newMessages));
-      await saveMessagesToFirestore(newMessages);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const saveMessagesToFirestore = async newMessages => {
-    try {
-      const collectionRef = collection(firestore, 'chatbot');
-      for (let message of newMessages) {
-        await addDoc(collectionRef, message);
-      }
-    } catch (error) {
-      console.error('Error saving messages to Firestore: ', error);
-    }
-  };
-
   const sendMessage = async () => {
-    if (input.trim()) {
-      const userMessage = {
-        id: Date.now().toString(),
-        text: input,
-        sender: 'user',
-      };
-      const newMessages = [...messages, userMessage];
-      setMessages(newMessages);
-      setInput('');
-
-      await saveMessages(newMessages);
-
-      const aiResponse = await getAIResponse(input);
-      const aiMessage = {
-        id: Date.now().toString(),
-        text: aiResponse,
-        sender: 'ai',
-      };
-      const updatedMessages = [...newMessages, aiMessage];
-      setMessages(updatedMessages);
-
-      await saveMessages(updatedMessages);
-    }
+    const userMessage = { sender: 'user', text: input, id: Date.now().toString() };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    setInput('');
+    console.log("here is the user message sent: ", userMessage.text);
+    console.log("and here is the whole thing: ", userMessage);
+    await getAIResponse(userMessage.text);
   };
 
-  const getAIResponse = async message => {
-    const API_KEY = '';
-    const apiUrl = `https://api.openai.com/v1/chat/completions`;
+  const getAIResponse = async (userText) => {
+    if (!chatSession) {
+      console.error("Chat session not initialized.");
+    }
 
     try {
       // streaming response type chat (didn't work, come back and fix later)
@@ -165,14 +126,11 @@ const MakkAI = () => {
       setMessages(prevMessages => [...prevMessages, aiMessage]);
       // console.log("final Ai Response: ", finalResponse.text());
     } catch (error) {
-      console.error(
-        'Error fetching AI response: ',
-        error.response ? error.response.data : error.message,
-      );
-      return "Sorry, I couldn't process your request.";
+      console.error('Error getAIResponse:', error);
     }
   };
 
+  // noinspection JSValidateTypes
   return (
     <ImageBackground source={require('../assets/galaxy.jpg')} style={styles.container}>
         <KeyboardAvoidingView
@@ -215,7 +173,8 @@ const MakkAI = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    paddingHorizontal: 10,
+    resizeMode: 'cover',
   },
   message: {
     padding: 10,
@@ -235,6 +194,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
+
   },
   input: {
     flex: 1,
