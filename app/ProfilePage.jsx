@@ -41,22 +41,22 @@ const ProfilePage = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
-                <Text styles={styles.buttonText}>
+                <Text style={styles.buttonText}>
                     User Profile Page
                 </Text>
-                <Text styles={styles.buttonText}>
+                <Text style={styles.buttonText}>
                     Username: {userName}
                 </Text>
-                <Text styles={styles.smallerText}>
+                <Text style={styles.smallerText}>
                     Account Creation:
                 </Text>
-                <Text styles={styles.smallerText}>
+                <Text style={styles.smallerText}>
                     Name:
                 </Text>
-                <Text styles={styles.smallerText}>
+                <Text style={styles.smallerText}>
                     Contact info: {Email}
                 </Text>
-                <Text styles={styles.smallerText}>
+                <Text style={styles.smallerText}>
                     Status:
                 </Text>
             </ScrollView>
