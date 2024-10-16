@@ -5,35 +5,35 @@ import { CollegesContext } from '../components/CollegeContext';
 
 
 const OverView = ({collegeID}) => {
+    const collegeID = JSON.parse(collegeID);
     const [address, setAddress] = useState([]);
     const [urbanLevel, setUrbanLevel] = useState([]);
-    const [admRate, setAdmRate] = useState(0.0);
+    const [admRate, setAdmRate] = useState(collegeID.adm_rate);
     const {colleges, loading} = useContext(CollegesContext);
   
     useEffect(() => {
       const func = async () => {
 
         try {
-          const selCollege = colleges.filter(college => college.school_id == parseInt(collegeID));
-          const college = selCollege[0];
-          const admissionRate = parseFloat(college.adm_rate);
-          const addy = college.address;
-          const urban = college.ubanization_level;
-          const getCity = college.city;
-          const getState = college.state;
+          
+          
+          const addy = collegeID.address;
+          const urban = collegeID.ubanization_level;
+          const getCity = collegeID.city;
+          const getState = collegeID.state;
 
           const getAddy = [addy, getCity, getState];
 
           setAddress(getAddy);
           setUrbanLevel(urban.split(':'));
-          setAdmRate(admissionRate);
+       
         
         } catch (error) {
           console.error('Error retrieving document:', error);
         }
       };
       func();
-    }, [loading]);
+    }, []);
   
     return (
       <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>

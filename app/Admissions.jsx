@@ -25,6 +25,8 @@ const collegesRef = collection(firestore, 'CompleteColleges');
 
 const Admissions = ({navigation, collegeID}) => {
 
+const collegeID = JSON.parse(collegeID);
+
 const [admUrl, setAdmUrl] = useState('');
 const [finAidUrl, setFinAidUrl] = useState('');
 const [priceCalcUrl, setPriceCalcUrl] = useState('');
@@ -32,28 +34,28 @@ const [showWebView, setShowWebView] = useState(null);
 const {colleges, loading} = useContext(CollegesContext);
 const [viewWeb, setViewWeb] = useState(false);
 
-useEffect(() => {
-    const func = async () => {
+// useEffect(() => {
+//     const func = async () => {
     
-    try {
-        const selCollege = colleges.filter(college => college.school_id == parseInt(collegeID));
-        const college = selCollege[0];
-        const admissionWebsite = college.admission_website;
-        const finAidWebsite = college.fincAid_website;
-        const priceCalcWebsite = college.priceCalculator_website;
+//     try {
+//         const selCollege = colleges.filter(college => college.school_id == parseInt(collegeID));
+//         const college = selCollege[0];
+//         const admissionWebsite = college.admission_website;
+//         const finAidWebsite = college.fincAid_website;
+//         const priceCalcWebsite = college.priceCalculator_website;
 
-        setAdmUrl(admissionWebsite);
-        setFinAidUrl(finAidWebsite);
-        setPriceCalcUrl(priceCalcWebsite);
+//         setAdmUrl(admissionWebsite);
+//         setFinAidUrl(finAidWebsite);
+//         setPriceCalcUrl(priceCalcWebsite);
        
         
-    } catch (error) {
-        console.error('Error retrieving document:', error);
-    }
-    };
-    func();
-    // console.log(admUrl)
-}, []);
+//     } catch (error) {
+//         console.error('Error retrieving document:', error);
+//     }
+//     };
+//     func();
+//     // console.log(admUrl)
+// }, []);
 
 function handleAdmButton() {
     setShowWebView('admissions')
@@ -110,9 +112,9 @@ const AdmOverView = () => {
 return (
     <View>
     {showWebView === null && <AdmOverView />}
-    {showWebView === 'admissions' && <Link uri={admUrl} />}
-    {showWebView === 'finAid' && <Link uri={finAidUrl} />}
-    {showWebView === 'priceCalc' && <Link uri={priceCalcUrl} />}
+    {showWebView === 'admissions' && <Link uri={collegeID.admission_website} />}
+    {showWebView === 'finAid' && <Link uri={collegeID.fincAid_website} />}
+    {showWebView === 'priceCalc' && <Link uri={collegeID.priceCalculator_website} />}
     </View>
 );
 };

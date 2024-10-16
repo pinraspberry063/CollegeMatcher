@@ -60,6 +60,8 @@ const usersRef = collection(firestore, 'Users');
 //   };
 
 const Demographics = ({navigation, collegeID}) => {
+
+    const collegeID = JSON.parse(collegeID);
 const [sToF, setSToF] = useState(0);
 const [userPref, setUserPref] = useState([]);
 const [circleData, setCircleData] = useState([]);
@@ -71,12 +73,9 @@ useEffect(() => {
     const func =  () => {
 
     try {
-     
-        const selColleges = colleges.filter(college => college.school_id == parseInt(collegeID));
-        const college = selColleges[0];
-        if(college != null)
-        {
-            const sToF = college.student_to_Faculty_Ratio;
+    
+        
+        const sToF = collegeID.student_to_Faculty_Ratio;
         
         
 
@@ -86,7 +85,7 @@ useEffect(() => {
         majorData.forEach(major => {
             const majorCategory = major.categories || [' '];
             const field = 'percent_' + major.categories;
-            const percent = college[field];
+            const percent = collegeID[field];
 
             if (!majorSet.has(majorCategory) && percent) {
             majorSet.add(majorCategory);
@@ -106,10 +105,7 @@ useEffect(() => {
         setMajors(uniqueMajors);
 
         setSToF(sToF);
-        
-        } else {
-        console.log('No matching document found.');
-        }
+    
     } catch (error) {
         console.error('Error retrieving document:', error);
     }

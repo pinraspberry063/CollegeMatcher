@@ -166,6 +166,11 @@ const Results = ({route, navigation}) => {
     }
 };
 
+  function FindCollege(ID){
+    const selColleges = colleges.find(college => college.school_id === parseInt(ID))
+    return selColleges[0]
+  }
+
   const renderItem = ({item}) => {
     const isCommitted = committedColleges.includes(item.name);
     
@@ -193,8 +198,12 @@ const Results = ({route, navigation}) => {
                     
       
       <TouchableOpacity
-        onPress={() =>
-          navigation.push('Details', {college: item.name, id: item.id})
+        onPress={() => {
+          const college = JSON.stringify(FindCollege(item.id))
+          navigation.push('Details', {college: item.name, id: item.id, obj: {college}})
+        }
+          
+          
         }>
         <Text style={styles.collegeName}>{item.name}</Text>
         <Text style={styles.collegeScore}> {(item.score != null)? "Match Percent: " + item.score + "%": "No Previous Matches"}</Text>

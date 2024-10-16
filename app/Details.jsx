@@ -85,22 +85,23 @@ const OverView = React.lazy(() => import('./Overview'));
   const Details = ({route}) => {
     const collegeID = route.params.id;
     const collName = route.params.college;
+    const collegeobj = route.params.obj;
     // const Star = require('../assets/pinkstar.png');
   
     const data = [
       {
         tabLabel: 'Overview',
-        component: () => <OverView collegeID={collegeID} />,
+        component: () => <OverView collegeID={collegeobj} />,
         props: {collegeID: collegeID},
       },
       {
         tabLabel: 'Demographics',
-        component: () => <Demographics collegeID={collegeID} />,
+        component: () => <Demographics collegeID={collegeobj} />,
         props: {collegeID: collegeID},
       },
       {
         tabLabel: 'Admissions',
-        component: () => <Admissions collegeID={collegeID} />,
+        component: () => <Admissions collegeID={collegeobj} />,
         props: {collegeID: collegeID},
       },
     ];
