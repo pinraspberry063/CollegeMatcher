@@ -6,11 +6,11 @@ import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
 
-const RoomateViewQuiz = ( { roomate_UID } ) => {
+const RoomateViewQuiz = ( { route } ) => {
      const theme = useContext(themeContext);
      console.log("RoomateViewQuiz");
-     const roomateUID = roomate_UID;
-     console.log(roomate_UID);
+     const roomateUID = route.params.roomate_UID;
+     console.log(roomateUID);
      const firestore = getFirestore(db);
 
      const [bedtime, setBedtime] = useState('');
@@ -30,17 +30,17 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
      const [shareDuties, setShareDuties] = useState('');
      const [collegeName, setCollegeName] = useState('');
      const [userName, setUsername] = useState('');
-     const handleFindRoomateAns = async (roomate_UID) =>{
-         /*
+     const handleFindRoomateAns = async (roomateUID) =>{
+
         const roomateDataRef = collection(firestore, 'RoomateMatcher');
         const currRoomateQuery = query(
                     roomateDataRef,
-                     where('userId', '==', roomate_UID)
+                     where('userId', '==', roomateUID)
                 );
         const currRoomateSnapshot = await getDocs(currRoomateQuery);
 
         console.log("handleFindRoomateAns");
-        console.log(roomate_UID);
+        console.log(roomateUID);
         if(currRoomateSnapshot.docs[0].bedtime = 1){
             setBedtime('Prefer Otherwise');
             }
@@ -59,9 +59,9 @@ const RoomateViewQuiz = ( { roomate_UID } ) => {
         else{
             setBedtime('AHHHH');
             }
-        */
+
      };
-    handleFindRoomateAns(roomate_UID);
+    handleFindRoomateAns(roomateUID);
     return (
         <SafeAreaView style={styles.container}>
             <Text style={[styles.text, { color: theme.color }]}>Do you want your roommate to have a consistent bedtime?</Text>
