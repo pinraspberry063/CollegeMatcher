@@ -13,7 +13,36 @@ import {collection, addDoc, getFirestore} from 'firebase/firestore';
 import {db} from '../config/firebaseConfig';
 import themeContext from '../theme/themeContext';
 
-const firestore = getFirestore(db);
+import { getVertexAI, getGenerativeModel } from "firebase/vertexai-preview";
+// import { getVertexAI, getGenerativeModel, startChat, sendMessageStream } from "firebase/vertexai-preview";
+
+// const firestore = getFirestore(db);
+
+// Initialize the Vertex AI service
+const vertexAI = getVertexAI(db);
+
+// Initializes the generative model
+
+// system instructions text
+const si = {
+    role: "system",
+    parts: [
+        {
+            text:
+`You are a friendly and helpful assistant for a college matching app.
+You are tasked with helping high school graduates find information about colleges and universities.
+You are playing the role of a college recruiter and advisor.
+Ensure your answers are complete, unless the user requests a more concise approach.
+When presented with inquiries seeking information, provide answers that reflect a deep understanding of the field, guaranteeing their correctness.
+For any non-english queries, respond in the same language as the prompt unless otherwise specified by the user.
+For prompts involving reasoning, provide a clear explanation of each step in the reasoning process before presenting the final answer.
+Ground your responses about university facts and figures using data from the internet.
+Provide users links to university websites when appropriate.
+Limit your responses to an amount appropriate for a mobile app screen.`,
+        }
+    ]
+}
+const model = getGenerativeModel(vertexAI, {model: "gemini-1.5-flash", systemInstruction: si});
 
 const MakkAI = () => {
   const theme = useContext(themeContext);
@@ -21,7 +50,23 @@ const MakkAI = () => {
   const [input, setInput] = useState('');
 
   useEffect(() => {
-    loadMessages();
+    const initializeChatSession = () => {
+      try {
+        const chat =  model.startChat({ generationConfig: {maxOutputTokens: 500 } });
+        console.log("model started chat: ", chat);
+        setchatSession(chat);
+      } catch (error) {
+        console.error("error starting chat session: ", error);
+      }
+    };
+
+    initializeChatSession();
+
+    return () => {
+      if (chatSession) {
+        console.log("something something? cleanup?");
+      }
+    }
   }, []);
 
   const loadMessages = async () => {
@@ -84,29 +129,41 @@ const MakkAI = () => {
     const apiUrl = `https://api.openai.com/v1/chat/completions`;
 
     try {
-      const response = await axios.post(
-        apiUrl,
-        {
-          model: 'gpt-3.5-turbo',
-          messages: [{role: 'user', content: message}],
-          max_tokens: 150,
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${API_KEY}`,
-          },
-        },
-      );
-      if (
-        response.data &&
-        response.data.choices &&
-        response.data.choices[0].message
-      ) {
-        return response.data.choices[0].message.content.trim();
-      } else {
-        return "Sorry, I couldn't process your request.";
-      }
+      // streaming response type chat (didn't work, come back and fix later)
+
+      // const { stream, response } = chatSession.sendMessageStream(userText);
+      // if (!stream.text()) {
+      //   console.error("stream is undefined.");
+      //   return;
+      // }
+      // for await (const partials of stream) {
+      //   if (!partials) {
+      //     console.error('rx undefined partials.');
+      //     // continue;
+      //   }
+      //   const aiMessage = {
+      //     sender: 'ai',
+      //     text: partials.text() || "No response text",
+      //     id: Date.now().toString(),
+      //   };
+      //   setMessages(prevMessages => [...prevMessages, aiMessage]);
+      // }
+      // const finalResponse = await response;
+      // if (!finalResponse) {
+      //   console.error("Final response is undefined.")
+        // return;
+      // }
+
+      const result = await chatSession.sendMessage(userText);
+      const response = result.response;
+      const aiMessage = {
+        sender: "ai",
+        text: response.text(),
+        id: Date.now().toString(),
+      };
+
+      setMessages(prevMessages => [...prevMessages, aiMessage]);
+      // console.log("final Ai Response: ", finalResponse.text());
     } catch (error) {
       console.error(
         'Error fetching AI response: ',
@@ -117,31 +174,41 @@ const MakkAI = () => {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.background}]}>
-      <FlatList
-        data={messages}
-        renderItem={({item}) => (
-          <Text
-            style={[
-              styles.message,
-              item.sender === 'user' ? styles.user : styles.ai,
-            ]}>
-            {item.text}
-          </Text>
-        )}
-        keyExtractor={item => item.id}
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={[styles.input, {color: theme.color, borderColor: theme.color}]}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Type your message"
-          placeholderTextColor={theme.color}
-        />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
-    </View>
+    <ImageBackground source={require('../assets/galaxy.jpg')} style={styles.container}>
+        <KeyboardAvoidingView
+            style={{flex: 1}}
+            behavior={Platform.OS === "ios" ? "padding" : null}>
+
+
+            <FlatList
+                data={messages}
+                renderItem={({ item }) => (
+                    <Text style={[styles.message, item.sender === 'user' ? styles.user : styles.ai]}>
+                      {item.text}
+                    </Text>
+                )}
+                keyExtractor={item => item.id}
+            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                  style={[styles.input]}
+                  value={input}
+                  onChangeText={setInput}
+                  placeholder="Chat with an AI assistant about your college questions!"
+                  placeholderTextColor='white'
+                  color='white'
+              />
+
+                <TouchableOpacity onPress={sendMessage}>
+                  <Image source={require('../assets/arrow.png')}  style={{height: 45, width: 45}}/>
+
+                </TouchableOpacity>
+              {/* <Button title="Send" onPress={sendMessage} /> */}
+              {/*<Button title="Send" onPress={run} />*/}
+            </View>
+
+        </KeyboardAvoidingView>
+      </ImageBackground>
   );
 };
 
@@ -175,6 +242,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginRight: 10,
+    borderColor: 'white',
+    color: 'white'
   },
 });
 

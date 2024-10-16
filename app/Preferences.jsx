@@ -5,7 +5,7 @@ import themeContext from '../theme/themeContext';
 
 const Preferences = () => {
   const theme = useContext(themeContext);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   return (
     <View styles={[styles.container, {backgroundColor: theme.backgroundColor}]}>
       <TouchableOpacity

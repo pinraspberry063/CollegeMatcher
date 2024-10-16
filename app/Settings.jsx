@@ -43,9 +43,15 @@ const Settings = ({navigation}) => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
-          <Text style={[styles.item, {color: theme.color}]}>
-            Favorited Colleges
-          </Text>
+          <Text style={[styles.item, { color: theme.color }]}>Committed Colleges</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('ProfilePage')}>
+            <Text style={[styles.item, { color: theme.color }]}>Profile Page</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => console.log('Saved MAKK Chats')}>
+          <Text style={[styles.item, { color: theme.color }]}>Saved MAKK Chats</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Privacy')}>
