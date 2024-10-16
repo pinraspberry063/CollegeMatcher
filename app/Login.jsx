@@ -271,113 +271,17 @@ const Login = ({navigation}) => {
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
-          {/* === Title === */}
-          <Text style={styles.title}>Login</Text>
-
-          {/* === Identifier Input === */}
-          <TextInput
-            style={[styles.input, { borderColor: 'black', color: 'black' }]}
-            placeholder="Username, Email, or Phone Number"
-            placeholderTextColor='black'
-            value={identifier}
-            onChangeText={setIdentifier}
-            keyboardType="email-address" // Optional: change dynamically based on input
-            autoCapitalize="none"
-          />
-
-          {/* === Password Input with Toggle === */}
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={[styles.input, styles.passwordInput, { borderColor: 'black', color: 'black' }]}
-              placeholder="Password"
-              placeholderTextColor='black'
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.toggleButton}
-            >
-              <Text style={{ color: theme.color }}>{showPassword ? 'Hide' : 'Show'}</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* === Forgot Password === */}
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={{ color: '#1E90FF', marginBottom: 20, textAlign: 'right' }}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          {/* === Login Button === */}
-          <Button title="Login" onPress={handleLogin} />
-
-          {/* === Divider === */}
-          <View style={styles.dividerContainer}>
-            <View style={styles.line} />
-            <Text style={styles.orText}>OR</Text>
-            <View style={styles.line} />
-          </View>
-
-          {/* === Social Logins === */}
-          <>
-            {/* === Google Sign-In === */}
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#DB4437' }]}
-              onPress={handleGoogleLogin}
-            >
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-
-            {/* === Facebook Sign-In === */}
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#4267B2' }]}
-              onPress={handleFacebookLogin}
-            >
-              <Text style={styles.socialButtonText}>Continue with Facebook</Text>
-            </TouchableOpacity>
-
-            {/* === Email Link Login === */}
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#34A853' }]}
-              onPress={handleEmailLinkLogin}
-            >
-              <Text style={styles.socialButtonText}>Continue with Email Link</Text>
-            </TouchableOpacity>
-          </>
-
-          {/* === Account Creation Button === */}
-          <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-            <Text style={{ color: '#1E90FF', marginTop: 20, textAlign: 'center' }}>Create Account</Text>
-          </TouchableOpacity>
-
-          {/* === MFA Prompt === */}
-          {showMfaPrompt && (
-            <View style={styles.mfaContainer}>
-              <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
-              <TextInput
-                style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-                placeholder="Verification Code"
-                value={mfaVerificationCode}
-                onChangeText={setMfaVerificationCode}
-                keyboardType="number-pad"
-              />
-              <Button title="Verify Code" onPress={handleMfaVerification} />
-            </View>
-          )}
-        </Animated.View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    <View style={styles.container}>
+      <Text style={[styles.title, {color: theme.color}]}>Login</Text>
+      {loginMethod === 'email' ? renderEmailLogin() : renderLoginOptions()}
+      {loginMethod === 'email' && (
+        <TouchableOpacity onPress={() => setLoginMethod('options')}>
+          <Text style={{color: theme.color, marginTop: 20}}>
+            Other login options
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
   );
 };
 
@@ -394,7 +298,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    borderColor: 'black',
+    borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 12,
     padding: 10,
@@ -405,7 +309,6 @@ const styles = StyleSheet.create({
   },
   passwordInput: {
     flex: 1,
-    color: 'black'
   },
   toggleButton: {
     justifyContent: 'center',
