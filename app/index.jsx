@@ -91,9 +91,9 @@ const Index = ({ navigation }) => {
         </Text>
       </SafeAreaView>
         
-        <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 100}}>
+        <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 150}}>
            {/* Orange central view */}
-        <View style={{marginTop: -30}} >
+        <View style={{marginTop: -100}} >
           <View style={styles.orangeCircle} />
         </View>
           
@@ -108,7 +108,7 @@ const Index = ({ navigation }) => {
       
 
       <View style={styles.buttonContainer}>
-        <Button
+        {/* <Button
           style={[styles.button, { textShadowColor: theme.color }]}
           onPress={() => {
             navigation.push('QuizButton');
@@ -116,7 +116,7 @@ const Index = ({ navigation }) => {
           title="Take the Quiz"
           color="#841584"
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
-        />
+        /> */}
 
         {/* Conditionally render the SuperRec button */}
         {isSuperRec && (
@@ -175,8 +175,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'light',
   },
   orangeCircle: {
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 300,
     borderRadius: 225,
     backgroundColor: '#a372f0',
     position: 'absolute', 

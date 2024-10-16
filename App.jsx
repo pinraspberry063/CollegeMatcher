@@ -5,8 +5,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import { UserProvider } from './components/UserContext';
-import themeContext from './theme/themeContext';
-import theme from './theme/theme';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,7 +13,7 @@ import Settings from './app/Settings';
 import Home from './app/index';
 import Account from './app/AccSettings';
 import Picker from './app/ProfileImageComp';
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
@@ -325,10 +323,10 @@ const App = () => {
     if (initializing) return null;
 
     return (
-      <CollegesProvider>
+
         <UserProvider>
-          <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-            <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+        <CollegesProvider>
+            <NavigationContainer>
               <RootStack.Navigator screenOptions={screenOptions}>
   {/*                */}{/* {user ? ( */}
   {/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
@@ -339,9 +337,9 @@ const App = () => {
                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
               </RootStack.Navigator>
             </NavigationContainer>
-          </themeContext.Provider>
+          </CollegesProvider>
         </UserProvider>
-      </CollegesProvider>
+      
     )
   }
 

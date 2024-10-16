@@ -49,8 +49,10 @@ const Results = ({route, navigation}) => {
   const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
-  const [colllegeList, setCollegeList] = useState(top100);
+  const [colllegeList, setCollegeList] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
+  const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
   const {colleges, loading} = useContext(CollegesContext);
   const [isLoading, setisLoading] = useState(false);
@@ -76,7 +78,19 @@ const Results = ({route, navigation}) => {
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
   
-  
+  useEffect(() => {
+    setCollegeList(top100.slice(0, loadCount)); // Load initial colleges
+  }, [top100, loadCount]);
+
+  const loadMoreColleges = () => {
+    if (hasMore) {
+      const newLoadCount = loadCount + 20; // Increase load count by 20
+      if (newLoadCount >= top100.length) {
+        setHasMore(false); // No more colleges to load
+      }
+      setLoadCount(newLoadCount);
+    }
+  };
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -97,31 +111,6 @@ const Results = ({route, navigation}) => {
 
     fetchCommittedColleges();
 }, [user]);
-
-  // useEffect(() => {
-    
-  //   const loadData = async() => {
-
-  //     try{
-  //     await college_data()
-  //     .then((data)=>{
-  //       const collegeData = (data.docs.map(doc=> doc.data()));
-  //       setColleges(collegeData);
-  //       setisLoading(false);
-
-  //     })
-
-  //     }catch(error) {
-  //       Alert.alert("Error Message: " + error);
-  //     }
-      
-  //   }
-  //   setisLoading(true);
-  //   loadData();
-    
-  
-    
-  // }, [])
 
   const handleCommit = async (collegeName) => {
     try {
@@ -176,7 +165,7 @@ const Results = ({route, navigation}) => {
     
     return(
     
-    <ScrollView style={styles.card}>
+    <View style={styles.card}>
       {/* <TouchableOpacity
         style={styles.button}
         onPress={() => {
@@ -192,7 +181,7 @@ const Results = ({route, navigation}) => {
       <TouchableOpacity
         onPress={() => handleCommit(item.name)}
       >
-        {isCommitted ? <Image source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/> : <Image source={require('../assets/rocket.png')} style={[styles.commitButton]}/>}
+        {isCommitted ? <Image source={require('../assets/rocket.png')} style={[styles.commitButton]}/> : <Image source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/>}
 
       </TouchableOpacity>
                     
@@ -209,7 +198,7 @@ const Results = ({route, navigation}) => {
         <Text style={styles.collegeScore}> {(item.score != null)? "Match Percent: " + item.score + "%": "No Previous Matches"}</Text>
       </TouchableOpacity>
       
-    </ScrollView>
+    </View>
   )};
 
 
@@ -521,8 +510,11 @@ const Results = ({route, navigation}) => {
         <FlatList
           data={colllegeList}
           renderItem={renderItem}
-          // keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.list}
+          onEndReached={loadMoreColleges} // Call function to load more colleges
+          onEndReachedThreshold={0.5} // Threshold for when to call loadMoreColleges
+          ListFooterComponent={hasMore ? <ActivityIndicator size="small" color="#0000ff" /> : null} // Show loading indicator
         />
       </View>
       </ImageBackground>

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo} from 'react';
 import {db} from '../config/firebaseConfig';
 import {
   collection,
@@ -11,6 +11,7 @@ import {
   query,
   where,
 } from 'firebase/firestore';
+import { ActivityIndicator, View } from 'react-native';
 
 
 export const CollegesContext = createContext();
@@ -39,8 +40,14 @@ export const CollegesProvider = ({ children }) => {
   }, []);
 
   return (
-    <CollegesContext.Provider value={{ colleges, loading }}>
-      {children}
+    <CollegesContext.Provider value={useMemo(() => ({ colleges, loading }), [colleges, loading])}>
+       {loading ? (
+      <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size={100} /> 
+      </View>
+    ) : (
+      children
+    )}
     </CollegesContext.Provider>
   );
 };
