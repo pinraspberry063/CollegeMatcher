@@ -67,7 +67,7 @@ const matchColleges = async studentPreferences => {
   const querySnapshot = await getDocs(collegeDataRef);
   const colleges = querySnapshot.docs.map(doc => doc.data());
 
-  const maxScore = 200;
+  const maxScore = 125;
 
   const userCoords = await geoCodeAddress(studentPreferences.address);
 
@@ -118,43 +118,43 @@ const matchColleges = async studentPreferences => {
     const acceptanceRate = parseFloat(college.adm_rate);
     if (isNaN(acceptanceRate)) {
       if (gpa < 3.0) {
-        score += 20;
+        score += 25;
       } else {
-        score += 5;
+        score += 10;
       }
     } else if (gpa >= 4.0 && acceptanceRate >= 0 && acceptanceRate <= 15) {
-      score += 20;
+      score += 25;
     } else if (
       gpa >= 3.75 &&
       gpa < 4.0 &&
       acceptanceRate >= 15 &&
       acceptanceRate <= 35
     ) {
-      score += 20;
+      score += 25;
     } else if (
       gpa >= 3.5 &&
       gpa < 3.75 &&
       acceptanceRate >= 35 &&
       acceptanceRate <= 49
     ) {
-      score += 20;
+      score += 25;
     } else if (
       gpa >= 3.0 &&
       gpa < 3.5 &&
       acceptanceRate >= 50 &&
       acceptanceRate <= 75
     ) {
-      score += 20;
+      score += 25;
     } else if (gpa < 3.0 && acceptanceRate >= 76) {
-      score += 20;
+      score += 25;
     } else if (gpa >= 4.0 && acceptanceRate > 15) {
-      score += 5;
+      score += 25;
     } else if (gpa >= 3.75 && gpa < 4.0 && acceptanceRate > 35) {
-      score += 5;
+      score += 25;
     } else if (gpa >= 3.5 && gpa < 3.75 && acceptanceRate > 49) {
-      score += 5;
+      score += 25;
     } else if (gpa >= 3.0 && gpa < 3.5 && acceptanceRate > 75) {
-      score += 5;
+      score += 25;
     }
 
     // Tuition Cost Matching
@@ -162,9 +162,9 @@ const matchColleges = async studentPreferences => {
     const [minTuition, maxTuition] = tuitionRanges[studentPreferences.tuition_cost] || [0, Infinity];
     const tuitionImportance = importanceMultiplier(studentPreferences.tuition_importance); // Apply importance multiplier
     if (tuition >= minTuition && tuition <= maxTuition) {
-        score += 20 * tuitionImportance;
+        score += 25 * tuitionImportance;
     } else {
-        score += 5 * tuitionImportance;
+        score += 10 * tuitionImportance;
     }
 
     // Major Offered Matching
@@ -179,11 +179,11 @@ const matchColleges = async studentPreferences => {
               const majorPercentage = parseFloat(college[majorInfo.categories]);
 
               if (majorPercentage > 4) {
-                score += 20 * studentPreferences.major_importance;
+                score += 25 * studentPreferences.major_importance;
                 majorMatch = true;
               }
               else if (majorPercentage >= 0.1 && majorPercentage <= 3.99) {
-                score += 5 * studentPreferences.major_importance;
+                score += 10 * studentPreferences.major_importance;
                 majorMatch = true;
               }
             }
@@ -196,17 +196,17 @@ const matchColleges = async studentPreferences => {
     // Religious Affiliation Matching
     if (studentPreferences.religious_affiliation === 'N/A') {
         if (college.religious_affiliation === 'Not applicable') {
-            score += 20 * studentPreferences.religious_affiliation_importance;
+            score += 25 * studentPreferences.religious_affiliation_importance;
         }
     } else if (
         college.religious_affiliation === studentPreferences.religious_affiliation
     ) {
-        score += 20 * studentPreferences.religious_affiliation_importance;
+        score += 25 * studentPreferences.religious_affiliation_importance;
     }
 
     // Size Matching
     if (studentPreferences.size === 'N/A') {
-        score += 20;
+        score += 25;
     } else {
         const selectedSizeRange = Object.keys(sizeRanges).find(size =>
             sizeRanges[size].includes(studentPreferences.size),
@@ -219,11 +219,11 @@ const matchColleges = async studentPreferences => {
         const collegeSizeRangeIndex =
             Object.keys(sizeRanges).indexOf(collegeSizeRange);
         if (selectedSizeRange === collegeSizeRange) {
-            score += 20 * studentPreferences.size_importance;
+            score += 25 * studentPreferences.size_importance;
         } else if (
             Math.abs(selectedSizeRangeIndex - collegeSizeRangeIndex) === 1
         ) {
-            score += 5 * studentPreferences.size_importance;
+            score += 10 * studentPreferences.size_importance;
         }
     }
 
@@ -233,21 +233,21 @@ const matchColleges = async studentPreferences => {
             college.school_classification === 'Private not-for-profit' ||
             college.school_classification === 'Private for-profit'
         ) {
-            score += 20 * studentPreferences.school_classification_importance;
+            score += 25 * studentPreferences.school_classification_importance;
         }
     } else if (
         college.school_classification === studentPreferences.school_classification
     ) {
-        score += 20 * studentPreferences.school_classification_importance;
+        score += 25 * studentPreferences.school_classification_importance;
     }
 
     // Urbanization Level Matching
     if (studentPreferences.urbanization_level === 'N/A') {
-        score += 20;
+        score += 25;
     } else if (
         college.ubanization_level === studentPreferences.urbanization_level
     ) {
-        score += 20 * studentPreferences.urbanization_importance;
+        score += 25 * studentPreferences.urbanization_importance;
     }
 
     // Distance from Home Matching
@@ -266,19 +266,19 @@ const matchColleges = async studentPreferences => {
     const [minDistance, maxDistance] = distanceRanges[studentPreferences.distance_from_college] || [0, Infinity];
     const distanceImportance = importanceMultiplier(studentPreferences.distance_importance); // Apply importance multiplier
     if (distance >= minDistance && distance <= maxDistance) {
-        score += 60 * distanceImportance;
+        score += 25 * distanceImportance;
     }
 
     // Diversity Matching (logic can be expanded later)
-    score += 20;
+    score += 25;
 
     // Specific State Matching
     const userSelectedStates = studentPreferences.state_choice; // This is an array if the user selected multiple states
 
     if (userSelectedStates.includes('N/A')) {
-        score += 20;
+        score += 10;
     } else if (userSelectedStates.length > 0 && userSelectedStates.includes(college.state)) {
-        score += 60 * studentPreferences.state_choice_importance;
+        score += 25 * studentPreferences.state_choice_importance;
     }
 
     // Sport College Matching
@@ -289,7 +289,7 @@ const matchColleges = async studentPreferences => {
             college.school_NAIA === 'Yes' ||
             college.school_NJCAA === 'Yes'
         ) {
-            score += 20 * sportCollegeImportance;
+            score += 25 * sportCollegeImportance;
         }
     } else if (studentPreferences.sport_college === 'No') {
         if (
@@ -297,7 +297,7 @@ const matchColleges = async studentPreferences => {
             college.school_NAIA === 'No' &&
             college.school_NJCAA === 'No'
         ) {
-            score += 20 * sportCollegeImportance;
+            score += 25 * sportCollegeImportance;
         }
     }
 
@@ -308,7 +308,7 @@ const matchColleges = async studentPreferences => {
     const actComposite75 = parseFloat(college.act_Composite75);
     let actScoreMatched = false;
     if (!isNaN(actComposite75) && actScore === actComposite75) {
-      score += 35;
+      score += 25;
       actScoreMatched = true;
     } else if (
       !isNaN(actComposite50) &&
@@ -316,7 +316,7 @@ const matchColleges = async studentPreferences => {
       actScore > actComposite50 &&
       actScore < actComposite75
     ) {
-      score += 25;
+      score += 15;
       actScoreMatched = true;
     } else if (
       !isNaN(actComposite25) &&
@@ -333,7 +333,7 @@ const matchColleges = async studentPreferences => {
       actScore > actComposite25 &&
       actScore < actComposite25 + 2
     ) {
-      score += 15;
+      score += 25;
       actScoreMatched = true;
     } else if (
       !isNaN(actComposite50) &&
@@ -341,7 +341,7 @@ const matchColleges = async studentPreferences => {
       actScore > actComposite50 &&
       actScore < actComposite50 + 2
     ) {
-      score += 25;
+      score += 15;
       actScoreMatched = true;
     } else if (
       !isNaN(actComposite75) &&
@@ -349,7 +349,7 @@ const matchColleges = async studentPreferences => {
       actScore > actComposite75 - 2 &&
       actScore < actComposite75
     ) {
-      score += 25;
+      score += 15;
       actScoreMatched = true;
     } else if (
       !isNaN(actComposite50) &&
@@ -379,7 +379,7 @@ const matchColleges = async studentPreferences => {
       for (const range in satScoreRanges) {
         const [min, max] = satScoreRanges[range];
         if (satScore >= min && satScore <= max) {
-          score += 20;
+          score += 25;
           break;
         }
       }

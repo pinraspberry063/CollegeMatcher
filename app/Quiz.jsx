@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View, ScrollView,TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard,} from 'react-native';
+import {StyleSheet, Text, View, ScrollView,TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -162,7 +162,8 @@ const Quiz = ({ navigation }) => {
    ];
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [address, setAddress] = useState('');
+  const [tookACT, setTookACT] = useState('');
+  const [tookSAT, setTookSAT] = useState('');
   const [gpa, setGpa] = useState('');
   const [satScore, setSatScore] = useState('');
   const [satMath, setSatMath] = useState('');
@@ -195,7 +196,8 @@ const Quiz = ({ navigation }) => {
   const [sizeImportance, setSizeImportance] = useState(0.5);
   const [classificationImportance, setClassificationImportance] = useState(0.5);
   const [urbanizationImportance, setUrbanizationImportance] = useState(0.5);
-  const [placeSearch, setPlaceSearch] = useState("123 Main St...");
+  const [address, setAddress] = useState('');
+  const [placeSearch, setPlaceSearch] = useState('');
 
   const handleSubmit = async () => {
       const missingFields = [];
@@ -475,113 +477,148 @@ const Quiz = ({ navigation }) => {
     </View>
   );
 
-  const renderPageFour = () => (
-    <View>
-        <Text style={[styles.text, { color: theme.color }]}>ACT Composite score?</Text>
-        <TextInput
-             style={[styles.textInput, { borderColor: theme.color }]}
-             value={actScore}
-             onChangeText={setActScore}
-             placeholder="Ex: 25..."
+  const renderPageFour = () => {
+    return (
+      <View>
+        <Text style={[styles.text, { color: theme.color }]}>Did you take the ACT?</Text>
+        <DropdownComponent
+          data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+          value={tookACT}
+          onChange={(value) => {
+            setTookACT(value);
+
+            if (value.includes('No')) {
+              setActScore('');
+              setActMath('');
+              setActEnglish('');
+              setActReading('');
+              setActScience('');
+              setActWriting('');
+            }
+          }}
         />
-      <Text style={[styles.text, { color: theme.color }]}>ACT Math score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={actMath}
-               onChangeText={setActMath}
-               placeholder='Ex: 25...'
-      />
 
-      <Text style={[styles.text, { color: theme.color }]}>ACT English score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={actEnglish}
-               onChangeText={setActEnglish}
-               placeholder='Ex: 25...'
-      />
+        {tookACT.includes('Yes') && (
+          <>
+            <Text style={[styles.text, { color: theme.color }]}>ACT Composite score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actScore}
+              onChangeText={setActScore}
+              placeholder="Ex: 25..."
+            />
 
-      <Text style={[styles.text, { color: theme.color }]}>ACT Reading score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={actReading}
-               onChangeText={setActReading}
-               placeholder='Ex: 25...'
-      />
+            <Text style={[styles.text, { color: theme.color }]}>ACT Math score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actMath}
+              onChangeText={setActMath}
+              placeholder="Ex: 25..."
+            />
 
-      <Text style={[styles.text, { color: theme.color }]}>ACT Science score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={actScience}
-               onChangeText={setActScience}
-               placeholder='Ex: 25...'
-      />
+            <Text style={[styles.text, { color: theme.color }]}>ACT English score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actEnglish}
+              onChangeText={setActEnglish}
+              placeholder="Ex: 25..."
+            />
 
-      <Text style={[styles.text, { color: theme.color }]}>ACT Writing score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={actWriting}
-               onChangeText={setActWriting}
-               placeholder='Ex: 25...'
-      />
-    </View>
-  );
+            <Text style={[styles.text, { color: theme.color }]}>ACT Reading score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actReading}
+              onChangeText={setActReading}
+              placeholder="Ex: 25..."
+            />
+
+            <Text style={[styles.text, { color: theme.color }]}>ACT Science score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actScience}
+              onChangeText={setActScience}
+              placeholder="Ex: 25..."
+            />
+
+            <Text style={[styles.text, { color: theme.color }]}>ACT Writing score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={actWriting}
+              onChangeText={setActWriting}
+              placeholder="Ex: 25..."
+            />
+          </>
+        )}
+      </View>
+    );
+  };
 
   const renderPageFive = () => (
-    <View>
-      <Text style={[styles.text, { color: theme.color }]}>SAT Composite score?</Text>
-      <TextInput
+      <View>
+        <Text style={[styles.text, { color: theme.color }]}>Did you take the SAT?</Text>
+        <DropdownComponent
+          data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+          value={tookSAT}
+          onChange={(value) => {
+            setTookSAT(value);
+            if (value.includes('No')) {
+              setSatScore(''); setSatMath(''); setSatCriticalReading(''); setSatWriting('');
+            }
+          }}
+        />
+
+        {tookSAT.includes('Yes') && (
+          <>
+            <Text style={[styles.text, { color: theme.color }]}>SAT Composite score?</Text>
+            <TextInput
               style={[styles.textInput, { borderColor: theme.color }]}
               value={satScore}
               onChangeText={setSatScore}
               placeholder="Ex: 1200..."
-      />
+            />
+            <Text style={[styles.text, { color: theme.color }]}>SAT Math score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={satMath}
+              onChangeText={setSatMath}
+              placeholder="Ex: 600..."
+            />
+            <Text style={[styles.text, { color: theme.color }]}>SAT Critical Reading score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={satCriticalReading}
+              onChangeText={setSatCriticalReading}
+              placeholder="Ex: 600..."
+            />
+            <Text style={[styles.text, { color: theme.color }]}>SAT Writing score?</Text>
+            <TextInput
+              style={[styles.textInput, { borderColor: theme.color }]}
+              value={satWriting}
+              onChangeText={setSatWriting}
+              placeholder="Ex: 600..."
+            />
+          </>
+        )}
 
-      <Text style={[styles.text, { color: theme.color }]}>SAT Math score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={satMath}
-               onChangeText={setSatMath}
-               placeholder='Ex: 1200...'
-      />
+        <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
+        <GooglePlacesAutocomplete
+          placeholder="123 Main St..."
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            setAddress(details?.formatted_address || data.description);
+          }}
+          value={address}
+          textInputProps={{ value: placeSearch, onChangeText: setPlaceSearch }}
+          query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
+          styles={{ listView: { maxHeight: 200 } }}
+        />
 
-      <Text style={[styles.text, { color: theme.color }]}>SAT Critical Reading score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={satCriticalReading}
-               onChangeText={setSatCriticalReading}
-               placeholder='Ex: 1200...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>SAT Writing score?</Text>
-      <TextInput
-               style={[styles.textInput, { borderColor: theme.color }]}
-               value={satWriting}
-               onChangeText={setSatWriting}
-               placeholder='Ex: 1200...'
-      />
-
-      <Text style={[styles.text, { color: theme.color }]}>What is your address?</Text>
-      <GooglePlacesAutocomplete
-        placeholder="123 Main St..."
-        fetchDetails={true}
-        onPress={(data, details = null) => {
-          if (details && details.formatted_address) {
-            setPlaceSearch(details.formatted_address);
-            setAddress(details.formatted_address);
-          } else {
-            setAddress(data.description);
-          }
-        }}
-        value={address}
-        textInputProps={{ value: placeSearch, onChangeText: setPlaceSearch }}
-        query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
-      />
-
-      <View style={styles.buttonContainer}>
-        <Button onPress={handleSubmit} title="Submit" />
+        <View style={styles.buttonContainer}>
+          <Button onPress={handleSubmit} title="Submit" />
+        </View>
       </View>
-    </View>
   );
+
 
   const renderContent = () => {
     if (currentPage === 1) return renderPageOne();
@@ -591,27 +628,49 @@ const Quiz = ({ navigation }) => {
     if (currentPage === 5) return renderPageFive();
   };
 
-
   const handleNext = () => setCurrentPage((prev) => prev + 1);
   const handleBack = () => setCurrentPage((prev) => prev - 1);
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <SafeAreaView style={styles.container}>
-        <FlatList
-          data={[{ key: 'quizContent' }]}
-          renderItem={renderContent}
-          keyExtractor={(item) => item.key}
-          keyboardShouldPersistTaps="handled"
-          ListFooterComponent={() => (
-            <View style={styles.buttonContainer}>
-              {currentPage < 5 && <Button onPress={handleNext} title="Next" />}
-              {currentPage > 1 && <Button onPress={handleBack} title="Back" />}
-            </View>
-          )}
-        />
-      </SafeAreaView>
-    </TouchableWithoutFeedback>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          behavior="height"
+          style={styles.container}
+        >
+          <SafeAreaView style={styles.container}>
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 100 }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {renderContent()}
+
+              {currentPage === 5 ? (
+                <View style={styles.lastPageButtonContainer}>
+                  <View style={styles.largeButtonContainer}>
+                    <Button onPress={handleSubmit} title="Submit" style={styles.button} />
+                  </View>
+                  <View style={styles.largeButtonContainer}>
+                    <Button onPress={handleBack} title="Back" style={styles.button} />
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.buttonContainer}>
+                  {currentPage > 1 && (
+                    <View style={styles.largeButtonContainer}>
+                      <Button onPress={handleBack} title="Back" style={styles.button} />
+                    </View>
+                  )}
+                  {currentPage < 5 && (
+                    <View style={styles.largeButtonContainer}>
+                      <Button onPress={handleNext} title="Next" style={styles.button} />
+                    </View>
+                  )}
+                </View>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
   );
 };
 
@@ -635,16 +694,23 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   buttonContainer: {
-    paddingTop: 30,
-    margin: 10,
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    marginHorizontal: 5,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
   },
   sliderLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
   },
-  button: {
-    marginTop: 20,
-  },
 });
+
 
