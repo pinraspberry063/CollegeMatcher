@@ -84,3 +84,6 @@ web-build/
 # Firebase Configuration
 android/app/google-services.json
 ios/*.plist
+
+# private
+/private

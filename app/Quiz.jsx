@@ -1,15 +1,27 @@
-import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import React, { useState, useContext, useEffect } from 'react'
-import DropdownComponent from '../components/DropdownComp'
-import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext'
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Button,
+  FlatList,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ImageBackground,
+} from 'react-native';
+import React, {useState, useContext, useEffect} from 'react';
+import DropdownComponent from '../components/DropdownComp';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import themeContext from '../theme/themeContext';
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, addDoc, getDocs, doc, setDoc , getFirestore} from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, query, deleteDoc, where, setDoc , getFirestore} from 'firebase/firestore';
 import matchColleges from '../src/utils/matchingAlgorithm';
 import majorData from '../assets/major_data';
+import { UserContext } from '../components/UserContext';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import stateData from '../assets/state_data';
+import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
 
@@ -144,6 +156,25 @@ const Quiz = ({navigation}) => {
             urbanization_level: urbanizationLevel,
             userId: auth().currentUser.uid,
         };
+          const deleteItem = async(uid) => {
+              const quizesRef = collection(firestore, 'Quiz');
+              const q = query(quizesRef, where('userId', '==', uid));
+              const querySnapshot = await getDocs(q);
+              //onst quizCount = await querySnapshot.count;
+              //console.log(quizCount);
+              try{
+              if (!querySnapshot.empty) {
+                  const userDoc = querySnapshot.docs[0];
+                  const userData = userDoc.data();
+                  deleteDoc(userDoc.ref)
+                   } else {
+                       //console.error('No user found with the given UID.');
+                   }
+               } catch (error) {
+                   console.error('Error deleting repeat quiz:', error);
+               }
+           };
+       await deleteItem(auth().currentUser.uid);
 
         try {
             await addDoc(collectionref, answers);
@@ -290,61 +321,69 @@ const Quiz = ({navigation}) => {
         if (currentPage === 3) return renderPageThree();
     };
 
-    return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SafeAreaView style={styles.container}>
-                <FlatList
-                    data={[{ key: 'quizContent' }]}
-                    renderItem={renderContent}
-                    keyExtractor={(item) => item.key}
-                    ListFooterComponent={() => (
-                        <View style={styles.buttonContainer}>
-                            {currentPage < 3 && (
-                                <Button
-                                    style={styles.button}
-                                    onPress={() => setCurrentPage(currentPage + 1)}
-                                    title="Next"
-                                />
-                            )}
-                            {currentPage > 1 && (
-                                <Button
-                                    style={styles.button}
-                                    onPress={() => setCurrentPage(currentPage - 1)}
-                                    title="Back"
-                                />
-                            )}
-                        </View>
-                    )}
+  return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          data={[{key: 'quizContent'}]}
+          renderItem={renderContent}
+          keyExtractor={item => item.key}
+          ListFooterComponent={() => (
+            <View style={styles.buttonContainer}>
+              {currentPage < 3 && (
+                <Button
+                  style={styles.button}
+                  onPress={() => setCurrentPage(currentPage + 1)}
+                  title="Next"
                 />
-            </SafeAreaView>
-        </TouchableWithoutFeedback>
-    );
+              )}
+              {currentPage > 1 && (
+                <Button
+                  style={styles.button}
+                  onPress={() => setCurrentPage(currentPage - 1)}
+                  title="Back"
+                />
+              )}
+            </View>
+          )}
+        />
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
+   </ImageBackground>
+  );
 };
 
 export default Quiz;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 20,
-        paddingHorizontal: 16,
-    },
-    textInput: {
-        height: 40,
-        borderWidth: 1,
-        fontSize: 18,
-        padding: 10,
-        marginVertical: 10,
-    },
-    text: {
-        fontSize: 18,
-        paddingVertical: 10,
-    },
-    buttonContainer: {
-        paddingTop: 30,
-        margin: 10,
-    },
-    button: {
-        marginTop: 20,
-    },
+  container: {
+    flex: 1,
+    paddingTop: 20,
+    paddingHorizontal: 16,
+  },
+  textInput: {
+    height: 40,
+    borderWidth: 1,
+    fontSize: 18,
+    padding: 10,
+    marginVertical: 10,
+    color: 'white',
+  },
+  text: {
+    fontSize: 18,
+    paddingVertical: 10,
+  },
+  buttonContainer: {
+    paddingTop: 30,
+    margin: 10,
+  },
+  button: {
+    marginTop: 20,
+  },
+  background: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
 });

@@ -1,13 +1,68 @@
-import React from 'react';
-import { StyleSheet, Text, View, FlatList, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
+import themeContext from '../theme/themeContext';
+import { db } from '../config/firebaseConfig';
+import { UserContext } from '../components/UserContext';
 
-const RoomateResults = ({ route }) => {
+const RoomateResults = ({ route, navigation }) => {
     const top5  = route.params.top5;
-    console.log("top5: " + top5);
+    const { user } = useContext(UserContext);
+    const [conversations, setConversations] = useState([]);
+    const [usernames, setUsernames] = useState({});
+    const handleMessageNavigation = useCallback(
+        async (userUID,roomateUID) => {
+          const firestore = getFirestore(db);
+          // Check if a conversation already exists between the user and the recruiter
+          const messagingRef = collection(firestore, 'Messaging');
+          const existingConvoInQuery = query(
+            messagingRef,
+            where('Roomate_UID', '==', userUID),
+            where('User_UID', '==', roomateUID)
+          );
+          const existingConvoOutQuery = query(
+            messagingRef,
+            where('Roomate_UID', '==', roomateUID),
+            where('User_UID', '==', userUID)
+          );
+          const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
+          const existingConvoOutSnapshot = await getDocs(existingConvoOutQuery);
+          if (!existingConvoInSnapshot.empty || !existingConvoOutSnapshot.empty) {
+            // Conversation already exists, navigate to the existing conversation
+            if(!existingConvoInSnapshot.empty){
+                const conversationId = existingConvoInSnapshot.docs[0].id;
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
+            else if(!existingConvoOutSnapshot.empty){
+                const conversationId = existingConvoOutSnapshot.docs[0].id;
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
+          } else {
+            // No conversation exists, create a new one
+            const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
+              Roomate_UID: roomateUID,
+              User_UID: userUID,
+            });
+
+            // Create a sub-collection 'conv' within the new conversation document
+            await addDoc(collection(newConvoRef, 'conv'), {});
+
+            // Navigate to the newly created conversation
+            navigation.navigate('RoomateMessage', { conversationId: newConvoRef.id });
+          }
+        },
+        [db, user, navigation] // Dependencies for useCallback
+      );
     const renderItem = ({ item }) => (
         <View style={styles.card}>
             <Text style={styles.username}>{item.name}</Text>
             <Text style={styles.roomateScore}>Match Accuracy: {item.score}%</Text>
+            <Button
+                style={styles.button}
+                onPress={() => handleMessageNavigation(user.uid,item.roomate_uid)}
+                title="Message"
+            />
         </View>
     );
 
@@ -17,7 +72,7 @@ const RoomateResults = ({ route }) => {
             <FlatList
                 data={top5}
                 renderItem={renderItem}
-                // keyExtractor={(item, index) => index.toString()}
+                //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
@@ -58,6 +113,9 @@ const styles = StyleSheet.create({
     roomateScore: {
         fontSize: 16,
         color: '#555',
+    },
+    button: {
+        marginTop: 20,
     },
 });
 
