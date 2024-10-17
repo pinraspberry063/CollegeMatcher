@@ -451,53 +451,6 @@ const Login = ({ navigation }) => {
    };
  }, []);
 
-
-              }
-const handleEmailLinkLogin = async () => {
-  if (!email) {
-    Alert.alert('Input Error', 'Please enter your email address.');
-    return;
-  }
-
-  try {
-    // Build the dynamic link for email sign-in
-    const link = await dynamicLinks().buildLink({
-      link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}`,
-      domainUriPrefix: 'https://collegematcher46019.page.link',
-      android: {
-        packageName: 'com.cm_app',
-      },
-    });
-
-    console.log('Generated dynamic link:', link);
-
-    const actionCodeSettings = {
-      url: link,
-      handleCodeInApp: true,
-      android: {
-        packageName: 'com.cm_app',
-        installApp: false,
-        minimumVersion: '12',
-      },
-      dynamicLinkDomain: 'collegematcher46019.page.link',
-    };
-
-    console.log('Action code settings:', actionCodeSettings);
-
-    // Send the sign-in email link
-    await auth().sendSignInLinkToEmail(email, actionCodeSettings);
-    await AsyncStorage.setItem('emailForSignIn', email);
-
-    Alert.alert(
-      'Email Sent',
-      'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
-    );
-  } catch (error) {
-    console.error('Email Link Sign-In Error:', error);
-    Alert.alert('Email Link Login Failed', error.message);
-  }
-};
-
 // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
 useEffect(() => {
   const handleDynamicLink = async (link) => {
