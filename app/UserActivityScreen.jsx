@@ -1,8 +1,14 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
 
 const UserActivityScreen = ({ route }) => {
   const { userActivity, reportedUser } = route.params;
+
+  if (!userActivity || !reportedUser) {
+    Alert.alert('Error', 'Invalid user activity data.');
+    navigation.goBack();
+    return null;
+  }
 
   const renderItem = ({ item, type }) => (
     <View style={styles.item}>

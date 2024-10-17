@@ -38,7 +38,13 @@ const MFAScreen = ({ navigation, route }) => {
       Alert.alert('Verification Code Sent', 'Please enter the code sent to your phone.');
     } catch (error) {
       console.error('Error sending verification code:', error);
-      Alert.alert('Error', 'Failed to send verification code. Please try again.');
+      if (error.code === 'auth/invalid-phone-number') {
+        Alert.alert('Invalid Phone Number', 'The phone number entered is invalid. Please check and try again.');
+      } else if (error.code === 'auth/quota-exceeded') {
+        Alert.alert('Quota Exceeded', 'You have exceeded the number of verification attempts. Please try again later.');
+      } else {
+        Alert.alert('Error', 'Failed to send verification code. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +86,13 @@ const MFAScreen = ({ navigation, route }) => {
       navigation.navigate(nextScreen);
     } catch (error) {
       console.error('Verification Error:', error);
-      Alert.alert('Verification Failed', 'Invalid verification code.');
+      if (error.code === 'auth/invalid-verification-code') {
+        Alert.alert('Invalid Code', 'The verification code entered is incorrect.');
+      } else if (error.code === 'auth/code-expired') {
+        Alert.alert('Code Expired', 'The verification code has expired. Please request a new one.');
+      } else {
+        Alert.alert('Verification Failed', 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
