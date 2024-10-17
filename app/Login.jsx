@@ -221,8 +221,7 @@ const Login = ({ navigation }) => {
   const handleGoogleLogin = async () => {
     try {
       // Ensure the user is signed out before initiating sign-in
-      await auth().signOut();
-
+      await GoogleSignin.signOut();
       // Initiate the Google sign-in process
       await GoogleSignin.hasPlayServices();
       const { idToken } = await GoogleSignin.signIn();
@@ -243,8 +242,8 @@ const Login = ({ navigation }) => {
         // User document doesn't exist; navigate to UsernamePrompt
         navigation.navigate('UsernamePrompt', {
           user,
-          isMfaEnabled: false, // Adjust based on your logic
-          isRecruiter: false,  // Adjust based on your logic
+          isMfaEnabled: false,
+          isRecruiter: false,
           nextScreen: determineNextScreen(),
         });
       } else {
