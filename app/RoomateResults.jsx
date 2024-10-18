@@ -11,23 +11,7 @@ const RoomateResults = ({ route, navigation }) => {
     const { user } = useContext(UserContext);
     const [conversations, setConversations] = useState([]);
     const [usernames, setUsernames] = useState({});
-    //const [roomate_uid, setRoomateUid] = useState('');
-    //const [conversationId, setConversationId] = useState('');
     const handleRoomateViewQuiz =  async (roomate_uid) => {
-        /*
-        const roomateUIDPass = roomate_uid;
-
-            const firestore = getFirestore(db);
-            const roomateDataRef = collection(firestore, 'RoomateMatcher');
-            const currRoomateQuery = query(
-                        roomateDataRef,
-                         where('userId', '==', roomate_uid)
-                    );
-            const currRoomateSnapshot = await getDocs(currRoomateQuery);
-            console.log("START.......................");
-            console.log(currRoomateSnapshot);
-            console.log('PASSING..................');
-            */
             console.log("handleRoomateViewQuiz");
             console.log(roomate_uid);
             navigation.navigate('RoomateViewQuiz', { roomate_UID: roomate_uid});
@@ -35,7 +19,6 @@ const RoomateResults = ({ route, navigation }) => {
     const handleMessageNavigation = useCallback(
         async (userUID,roomateUID) => {
           const firestore = getFirestore(db);
-          // Check if a conversation already exists between the user and the recruiter
           const messagingRef = collection(firestore, 'Messaging');
           const existingConvoInQuery = query(
             messagingRef,

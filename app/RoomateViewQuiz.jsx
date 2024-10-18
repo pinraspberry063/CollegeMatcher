@@ -42,24 +42,260 @@ const RoomateViewQuiz = ( { route } ) => {
         console.log("handleFindRoomateAns");
         console.log(roomateUID);
         if(currRoomateSnapshot.docs[0].bedtime = 1){
-            setBedtime('Prefer Otherwise');
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
             }
         else if(currRoomateSnapshot.docs[0].bedtime = 2){
-            setBedtime('Do Not Care');
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
             }
         else if(currRoomateSnapshot.docs[0].bedtime = 3){
-            setBedtime('Occasionally Tolerable Otherwise');
+            setBedtime('Do not care one way or another');
             }
         else if(currRoomateSnapshot.docs[0].bedtime = 4){
-            setBedtime('Would Prefer');
+            setBedtime('It would make the day more consistent and easy to work around');
             }
         else if(currRoomateSnapshot.docs[0].bedtime = 5){
-            setBedtime('Necessary');
-            }
-        else{
-            setBedtime('AHHHH');
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
             }
 
+        if(currRoomateSnapshot.docs[0].tenpmSleep = 1){
+            setTenpmSleep('Would rather they not set a "lights out" time');
+            }
+        else if(currRoomateSnapshot.docs[0].tenpmSleep = 2){
+            setTenpmSleep('Could tolerate it within reason');
+            }
+        else if(currRoomateSnapshot.docs[0].tenpmSleep = 3){
+            setTenpmSleep('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].tenpmSleep = 4){
+            setTenpmSleep('It would be nice if there was an agreed "lights out" time');
+            }
+        else if(currRoomateSnapshot.docs[0].tenpmSleep = 5){
+            setTenpmSleep('There NEEDS to be an agreed time for "lights out');
+            }
+
+        if(currRoomateSnapshot.docs[0].nightSilence = 1){
+            setNightSilence('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
+
+        if(currRoomateSnapshot.docs[0].bedtime = 1){
+            setBedtime('Prefer they do not, would be a bit annoying to deal with');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 2){
+            setBedtime('So long as their sleeping is reasonable or they are not too needy about it');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 3){
+            setBedtime('Do not care one way or another');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 4){
+            setBedtime('It would make the day more consistent and easy to work around');
+            }
+        else if(currRoomateSnapshot.docs[0].bedtime = 5){
+            setBedtime('They NEED to have a constant sleep schedule so I can plan around it consistently');
+            }
      };
     handleFindRoomateAns(roomateUID);
     return (
