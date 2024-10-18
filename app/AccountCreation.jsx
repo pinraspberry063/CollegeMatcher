@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch, Dimensions } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
@@ -8,6 +8,7 @@ import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get the device's dimensions
 
 const AccountCreation = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -124,96 +125,96 @@ const AccountCreation = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
-      <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-        placeholder="Email"
-        placeholderTextColor={theme.color}
-        keyboardType="email-address"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-        placeholder="Password"
-        placeholderTextColor={theme.color}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-        placeholder="Confirm Password"
-        placeholderTextColor={theme.color}
-        secureTextEntry
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-      />
-      <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
-        placeholder="Username"
-        placeholderTextColor={theme.color}
-        value={username}
-        onChangeText={setUsername}
-      />
-      <View style={styles.switchContainer}>
-        <Text style={[styles.label, { color: theme.color }]}>
-          Enable Multi-Factor Authentication (MFA)
-        </Text>
-        <Switch
-          value={isMfaEnabled}
-          onValueChange={setIsMfaEnabled}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isMfaEnabled ? theme.buttonColor : '#f4f3f4'}
+      <View style={styles.container}>
+        <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
+        <TextInput
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Email"
+          placeholderTextColor={theme.color}
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
         />
-      </View>
-
-      <View style={styles.switchContainer}>
-        <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
-        <Switch
-          value={isRecruiter}
-          onValueChange={setIsRecruiter}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
+        <TextInput
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Password"
+          placeholderTextColor={theme.color}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
+        <TextInput
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Confirm Password"
+          placeholderTextColor={theme.color}
+          secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+        />
+        <TextInput
+          style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+          placeholder="Username"
+          placeholderTextColor={theme.color}
+          value={username}
+          onChangeText={setUsername}
+        />
+        <View style={styles.switchContainer}>
+          <Text style={[styles.label, { color: theme.color }]}>
+            Enable Multi-Factor Authentication (MFA)
+          </Text>
+          <Switch
+            value={isMfaEnabled}
+            onValueChange={setIsMfaEnabled}
+            trackColor={{ false: '#767577', true: theme.buttonColor }}
+            thumbColor={isMfaEnabled ? theme.buttonColor : '#f4f3f4'}
+          />
+        </View>
+
+        <View style={styles.switchContainer}>
+          <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
+          <Switch
+            value={isRecruiter}
+            onValueChange={setIsRecruiter}
+            trackColor={{ false: '#767577', true: theme.buttonColor }}
+            thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
+          />
+        </View>
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <Button title="Sign Up" onPress={handleSignUp} />
+        )}
       </View>
+    );
+  };
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Button title="Sign Up" onPress={handleSignUp} />
-      )}
-    </View>
-  );
-};
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingHorizontal: width * 0.05, // Adjust padding based on screen width
+    },
+    title: {
+      fontSize: height * 0.03, // Scale text size based on screen height
+      marginBottom: height * 0.02, // Adjust margin based on screen height
+      textAlign: 'center',
+    },
+    input: {
+      height: height * 0.06, // Scale input field height
+      borderWidth: 1,
+      marginBottom: height * 0.015, // Adjust margin between inputs
+      paddingHorizontal: width * 0.02, // Adjust input padding based on screen width
+    },
+    switchContainer: {
+      flexDirection: 'row',
+      marginBottom: height * 0.02, // Adjust margin based on screen height
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    label: {
+      fontSize: height * 0.02, // Scale label size based on screen height
+    },
+  });
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: 16,
-  },
-});
-
-export default AccountCreation;
+  export default AccountCreation;

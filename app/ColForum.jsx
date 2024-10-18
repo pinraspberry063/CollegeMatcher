@@ -12,9 +12,9 @@ import {
   Image,
   Modal,
   TouchableOpacity,
+  Dimensions
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import {db} from '../config/firebaseConfig';
 import {
   collection,
@@ -38,6 +38,7 @@ import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const ColForum = ({route, navigation}) => {
     const {collegeName, forumName} = route.params;
@@ -45,7 +46,6 @@ const ColForum = ({route, navigation}) => {
     const [newThreadTitle, setNewThreadTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState({});
     const {user} = useContext(UserContext);
-    const theme = useContext(themeContext);
     const [username, setUsername] = useState('');
     const [isRecruiter, setIsRecruiter] = useState(false);
     const [isModerator, setIsModerator] = useState(false);
@@ -400,7 +400,7 @@ const ColForum = ({route, navigation}) => {
           <View key={thread.id} style={styles.threadItem}>
             <View style={styles.threadHeader}>
               <View style={styles.threadTitleRow}>
-                <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
+                <Text style={[styles.threadTitle, { color: '#fff' }]}>{thread.title}</Text>
               </View>
 
               {/* Render the uploaded images */}
@@ -430,15 +430,15 @@ const ColForum = ({route, navigation}) => {
             </View>
             <Text style={[
               styles.threadCreatedBy,
-              { color: theme.textColor },
+              { color: '#fff' },
               thread.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
             ]}>
               Created by: {thread.createdBy}
             </Text>
-            <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
+            <Text style={[styles.threadCreatedAt, { color: '#fff' }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
             {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
-                <Text style={[styles.postContent, {color: theme.textColor}]}>
+                <Text style={[styles.postContent, {color: '#fff'}]}>
                   {post.content}
                 </Text>
 
@@ -454,12 +454,12 @@ const ColForum = ({route, navigation}) => {
                 <Text
                   style={[
                     styles.postCreatedBy,
-                    {color: theme.textColor},
+                    {color: '#fff'},
                     post.isRecruiter && styles.recruiterHighlight, // Highlight if the user is a recruiter
                   ]}>
                   Posted by: {post.createdBy}
                 </Text>
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
+                <Text style={[styles.postCreatedAt, { color: '#fff' }]}>{post.createdAt.toDate().toLocaleString()}</Text>
                 <Button
                   title="Report Post"
                   onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
@@ -492,7 +492,6 @@ const ColForum = ({route, navigation}) => {
                 title="Add Post"
                 onPress={() => handleAddPost(thread.id)}
               />
-              <Button title="Add Post" onPress={() => handleAddPost(thread.id)} />
             </View>
           </View>
         ))}
@@ -528,31 +527,36 @@ const ColForum = ({route, navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 16,
-  },
+      flex: 1,
+      padding: width * 0.04, // Dynamic padding
+      backgroundColor: '#000',
+    },
   newThreadContainer: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
+      marginBottom: height * 0.02, // Dynamic margin bottom
+      padding: height * 0.02, // Dynamic padding
+      borderWidth: 1,
+      borderColor: '#ccc', // Light gray border
+      borderRadius: 8,
+      backgroundColor: '#333', // Dark gray background
+    },
   threadHeader: {
       flexDirection: 'column',
       marginBottom: 8,
+      color: '#fff',
     },
     threadTitleRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       flexWrap: 'wrap',
+      color: '#fff',
     },
     threadTitle: {
       fontSize: 18,
       fontWeight: 'bold',
       flex: 1,
       marginRight: 8,
+      color: '#fff',
     },
     reportButton: {
       marginTop: 4,
@@ -565,63 +569,71 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 8,
-    borderRadius: 4,
-  },
+      borderWidth: 1,
+      borderColor: '#888', // Light gray border for textboxes
+      padding: height * 0.015, // Dynamic padding
+      marginBottom: height * 0.02, // Dynamic margin
+      borderRadius: 4,
+      color: '#fff', // White text
+      backgroundColor: '#444', // Dark gray background for textboxes
+    },
   threadItem: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+      marginBottom: height * 0.02, // Dynamic margin bottom
+      padding: height * 0.02, // Dynamic padding
+      borderWidth: 1,
+      borderColor: '#888', // Light gray border
+      borderRadius: 8,
+      backgroundColor: '#333', // Dark gray background for threads
   },
   threadTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+      fontSize: height * 0.025, // Dynamic font size
+      fontWeight: 'bold',
+      color: '#fff', // White text
+      marginBottom: height * 0.01, // Dynamic margin bottom
+    },
   threadCreatedBy: {
-    fontSize: 14,
-    marginTop: 4,
-  },
+      fontSize: height * 0.02, // Dynamic font size
+      color: '#fff', // White text
+    },
   threadCreatedAt: {
     fontSize: 14,
     marginTop: 4,
   },
   postItem: {
-    marginTop: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-  },
+      marginTop: height * 0.01, // Dynamic margin top
+      padding: height * 0.02, // Dynamic padding
+      borderWidth: 1,
+      borderColor: '#888',
+      borderRadius: 8,
+      backgroundColor: '#444',
+    },
   postContent: {
-    fontSize: 16,
-  },
+      fontSize: height * 0.022, // Dynamic font size
+      color: '#fff',
+    },
   postCreatedBy: {
-    fontSize: 14,
-    marginTop: 4,
-  },
+      fontSize: height * 0.018, // Dynamic font size
+      color: '#fff',
+    },
   postCreatedAt: {
-    fontSize: 14,
+    fontSize: height * 0.015, // Dynamic font size
     marginTop: 4,
+    color: '#fff',
   },
   recruiterHighlight: {
     fontWeight: 'bold',
     color: '#ff9900', // Highlight color for recruiters
   },
   imageBox: {
-      width: 200,
-      height: 200,
-      marginVertical: 10,
-      },
+      width: width * 0.5, // Dynamic width for images
+      height: width * 0.5, // Dynamic height for images
+      marginVertical: height * 0.01, // Dynamic margin
+    },
   imageContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 10,
-      },
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -647,7 +659,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   selectedReasonButton: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#000',
   },
   modalButtons: {
     flexDirection: 'row',

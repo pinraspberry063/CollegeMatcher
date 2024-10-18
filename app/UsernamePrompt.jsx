@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import { doc, setDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
@@ -8,6 +8,7 @@ import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const UsernamePrompt = ({ navigation, route }) => {
   const theme = useContext(themeContext);
@@ -107,18 +108,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
+    fontSize: height * 0.03, // Dynamic font size based on screen height
+    marginBottom: height * 0.02, // Dynamic margin
     textAlign: 'center',
   },
   input: {
-    height: 40,
+    height: height * 0.06, // Dynamic height
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
+    marginBottom: height * 0.02, // Dynamic margin
+    padding: width * 0.03, // Dynamic padding inside input
   },
 });
 

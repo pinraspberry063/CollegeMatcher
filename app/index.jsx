@@ -1,14 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View, Button, Dimensions, Animated, TouchableWithoutFeedback , TouchableOpacity, ImageBackground, Alert} from 'react-native';
-
-import Ionicons from '@expo/vector-icons/Ionicons';
+import {SafeAreaView, StyleSheet, Text, View, Button, Dimensions, ImageBackground, Alert} from 'react-native';
 import themeContext from '../theme/themeContext';
-import { UserContext } from '../components/UserContext';  // Import the UserContext
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';  // Firestore imports
-import { db } from '../config/firebaseConfig';  // Import Firebase configuration
+import { UserContext } from '../components/UserContext';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebaseConfig';
 import PlanetSwiper from '../components/PlanetSlider.jsx';
 
-const firestore = getFirestore(db);  // Initialize Firestore
+const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const Index = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -100,13 +99,6 @@ const Index = ({ navigation }) => {
           <PlanetSwiper navigation={navigation}/> 
         </View>
 
-        
-      
-      
-
-      
-      
-
       <View style={styles.buttonContainer}>
         <Button
           style={[styles.button, { textShadowColor: theme.color }]}
@@ -152,45 +144,47 @@ const Index = ({ navigation }) => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover'
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
   },
   container: {
     flex: 1,
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: 150,
+    paddingTop: height * 0.15, // Dynamic padding based on screen height
   },
   title: {
-    fontSize: 50,
+    fontSize: height * 0.06, // Dynamic font size based on screen height
     fontWeight: 'bold',
   },
   subtitle: {
-    fontSize: 20,
+    fontSize: height * 0.03, // Dynamic font size for subtitle
   },
-  icon: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: 'light',
+  planetContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: height * 0.1, // Adjust the top margin dynamically
   },
   orangeCircle: {
-    width: 250,
-    height: 250,
-    borderRadius: 225,
+    width: width * 0.65, // Dynamic width based on screen width
+    height: width * 0.65, // Dynamic height based on screen width (to make it circular)
+    borderRadius: (width * 0.65) / 2, // Ensure circular shape
     backgroundColor: 'orange',
-    position: 'absolute', 
-    alignSelf: 'center' 
+    position: 'absolute',
+    alignSelf: 'center',
   },
   buttonContainer: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 100,
+    paddingTop: height * 0.1, // Dynamic top padding
   },
   button: {
-    width: '50%',
-    margin: 10,
+    width: width * 0.5, // Dynamic button width
+    marginVertical: height * 0.02, // Dynamic margin between buttons
   },
 });
 
-export default Index
+export default Index;

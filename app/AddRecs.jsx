@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, FlatList, Button, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, Button, TextInput, StyleSheet, Alert, Dimensions } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import { UserContext } from '../components/UserContext';  // Import the UserContext
-import { db } from '../config/firebaseConfig';  // Import Firebase config
+import { UserContext } from '../components/UserContext';
+import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const AddRecs = () => {
   const { user } = useContext(UserContext);  // Get the current logged-in user
@@ -210,10 +211,10 @@ const AddRecs = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding
   },
   listItem: {
-    padding: 16,
+    padding: height * 0.02, // Dynamic padding
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     flexDirection: 'row',
@@ -221,21 +222,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emailText: {
-    fontSize: 16,
+    fontSize: height * 0.025, // Dynamic font size
+    color: '#fff',
   },
   addRecruiterContainer: {
-    marginBottom: 20,
+    marginBottom: height * 0.03, // Dynamic margin
     alignItems: 'center',
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: height * 0.03, // Dynamic margin
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: height * 0.06, // Dynamic height
+    borderColor: '#888',
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
+    marginBottom: height * 0.02, // Dynamic margin
+    paddingHorizontal: width * 0.02, // Dynamic padding
+    backgroundColor: '#444',
+    color: '#fff',
   },
 });
 

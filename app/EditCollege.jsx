@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Alert, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Button, Alert, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const EditCollege = ({ route, navigation }) => {
   const { collegeDocId } = route.params;  // Retrieve the document ID from the navigation parameters
@@ -132,22 +133,26 @@ const EditCollege = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
   },
   contentContainer: {
-    paddingBottom: 100,  // Ensure there's space at the bottom
+    paddingBottom: height * 0.1,  // Dynamic space at the bottom
   },
   field: {
-    marginBottom: 16,
+    marginBottom: height * 0.02, // Dynamic margin between fields
   },
   label: {
-    fontSize: 18,
-    marginBottom: 8,
+    fontSize: height * 0.025,  // Dynamic font size for labels
+    marginBottom: height * 0.01,  // Dynamic margin below label
+    color: '#fff',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
+    borderColor: '#888',
+    padding: height * 0.015,  // Dynamic padding inside text box
+    color: '#fff',
+    backgroundColor: '#666',
+    borderRadius: 5,
   },
 });
 

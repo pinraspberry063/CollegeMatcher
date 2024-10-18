@@ -1,15 +1,16 @@
 // This will be where the Profile Page is created.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, query, where, getFirestore, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, getFirestore } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window');
 
 const ProfilePage = ({ navigation }) => {
 
@@ -67,38 +68,28 @@ const ProfilePage = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    fontSize: 24,
-    color: '#FFFFFFF',
-  },
-  buttonContainer: {
-    marginBottom: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    padding: width * 0.04, // Dynamic padding based on screen width
+    backgroundColor: '#000',
   },
   buttonText: {
-    fontSize: 32,
+    fontSize: height * 0.04, // Dynamic font size for larger text
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#FFFFFFF',
+    marginBottom: height * 0.02, // Dynamic margin bottom
+    color: '#fff',
   },
   smallerText: {
-      fontSize: 20,
-      color: '#FFFFFFF'
+    fontSize: height * 0.025, // Dynamic font size for smaller text
+    marginBottom: height * 0.02, // Dynamic margin between text fields
+    color: '#fff',
   },
-  buttonSubText: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  recruiterHighlight: {
-    color: '#ff9900', // Highlight color for recruiters
-    fontWeight: 'bold',
+  input: {
+    height: height * 0.06, // Dynamic height for input fields
+    borderColor: '#000',
+    borderWidth: 1,
+    paddingHorizontal: width * 0.03, // Dynamic padding inside text box
+    backgroundColor: '#666', // Gray background for input boxes
+    color: '#fff',
+    borderRadius: 5,
   },
 });
 
