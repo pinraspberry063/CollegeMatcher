@@ -1,10 +1,11 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions } from 'react-native';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';  // Import Firestore functions
 import { UserContext } from '../components/UserContext';  // Import the UserContext to get the UID
 import { db } from '../config/firebaseConfig';  // Import your Firebase configuration
 
 const firestore = getFirestore(db);  // Initialize Firestore
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RecruiterVerification = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -54,28 +55,28 @@ const RecruiterVerification = ({ navigation }) => {
       <Text style={styles.title}>Recruiter Verification</Text>
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, {color:'#fff'}]}
         placeholder="Your Full Name"
         value={name}
         onChangeText={setName}
       />
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, {color:'#fff'}]}
         placeholder="Institutional Email"
         value={email}
         onChangeText={setEmail}
       />
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, {color:'#fff'}]}
         placeholder="School Name"
         value={schoolName}
         onChangeText={setSchoolName}  // New input for the school name
       />
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, {color:'#fff'}]}
         placeholder="LinkedIn Profile URL"
         value={linkedIn}
         onChangeText={setLinkedIn}

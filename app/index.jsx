@@ -91,7 +91,6 @@ const Index = ({ navigation }) => {
       </SafeAreaView>
         
         <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 100}}>
-           {/* Orange central view */}
         <View style={{marginTop: -30}} >
           <View style={styles.orangeCircle} />
         </View>
@@ -110,7 +109,6 @@ const Index = ({ navigation }) => {
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
 
-        {/* Conditionally render the SuperRec button */}
         {isSuperRec && (
           <>
             <Button
@@ -123,11 +121,10 @@ const Index = ({ navigation }) => {
               accessibilityLabel="Access who is considered a recruiter within your institution."
             />
 
-            {/* New Edit College Button */}
             <Button
               style={[styles.button, { textShadowColor: theme.color }]}
               onPress={() => {
-                navigation.push('EditCollege', { collegeDocId });  // Navigate to EditCollege page with the document ID
+                navigation.push('EditCollege', { collegeDocId });
               }}
               title="Edit College"
               color="#841584"
@@ -156,7 +153,7 @@ const styles = StyleSheet.create({
     paddingTop: height * 0.15, // Dynamic padding based on screen height
   },
   title: {
-    fontSize: height * 0.06, // Dynamic font size based on screen height
+    fontSize: height * 0.08, // Dynamic font size based on screen height
     fontWeight: 'bold',
   },
   subtitle: {
@@ -169,8 +166,8 @@ const styles = StyleSheet.create({
     marginTop: height * 0.1, // Adjust the top margin dynamically
   },
   orangeCircle: {
-    width: width * 0.65, // Dynamic width based on screen width
-    height: width * 0.65, // Dynamic height based on screen width (to make it circular)
+    width: width * 0.6, // Dynamic width based on screen width
+    height: width * 0.6, // Dynamic height based on screen width (to make it circular)
     borderRadius: (width * 0.65) / 2, // Ensure circular shape
     backgroundColor: 'orange',
     position: 'absolute',

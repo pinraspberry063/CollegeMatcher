@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { StyleSheet, Text, View, Button, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button, ScrollView, Alert, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
+
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RecConvs = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -59,11 +61,11 @@ const RecConvs = ({ navigation }) => {
       const firestore = getFirestore(db);
       let recruiterUIDs = [];
 
-      // Loop through each committed college and match it by 'school_name' in 'CompleteColleges' collection
+      // Loop through each committed college and match it by 'shool_name' in 'CompleteColleges' collection
       for (const collegeName of committedColleges) {
         const collegesQuery = query(
           collection(firestore, 'CompleteColleges'),
-          where('school_name', '==', collegeName)
+          where('shool_name', '==', collegeName)
         );
         const collegeSnapshot = await getDocs(collegesQuery);
 
@@ -136,7 +138,7 @@ const RecConvs = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>
+      <Text style={[styles.title, { color: '#fff' }]}>
         {isRecruiter ? 'Conversations with Users' : 'Available Recruiters'}
       </Text>
       <ScrollView style={styles.conversationsContainer}>
@@ -145,19 +147,19 @@ const RecConvs = ({ navigation }) => {
           conversations.length > 0 ? (
             conversations.map(conv => (
               <View key={conv.id} style={styles.conversation}>
-                <Text style={styles.conversationText}>User: {usernames[conv.User_UID] || conv.User_UID}</Text>
+                <Text style={[styles.conversationText, {color: '#fff'}]}>User: {usernames[conv.User_UID] || conv.User_UID}</Text>
                 <Button title="Message" onPress={() => navigation.navigate('Message', { conversationId: conv.id })} />
               </View>
             ))
           ) : (
-            <Text style={styles.noConversationsText}>No conversations found.</Text>
+            <Text style={[styles.noConversationsText, {color: '#fff' }]}>No conversations found.</Text>
           )
         ) : (
           // If not a recruiter, display available recruiters
           recruiters.length > 0 ? (
             recruiters.map(uid => (
               <View key={uid} style={styles.conversation}>
-                <Text style={styles.conversationText}>Recruiter: {usernames[uid] || uid}</Text>
+                <Text style={[styles.conversationText, {color: '#fff'}]}>Recruiter: {usernames[uid] || uid}</Text>
                 <Button title="Message" onPress={() => handleMessageNavigation(uid)} />
               </View>
             ))
