@@ -25,8 +25,8 @@ const collegesRef = collection(firestore, 'CompleteColleges');
 
 const Admissions = ({navigation, collegeID}) => {
 
-const college = collegeID;
-
+// const college = route.params.collegeID;
+const college = JSON.parse(collegeID)
 const [admUrl, setAdmUrl] = useState('');
 const [finAidUrl, setFinAidUrl] = useState('');
 const [priceCalcUrl, setPriceCalcUrl] = useState('');
@@ -112,9 +112,9 @@ const AdmOverView = () => {
 return (
     <View>
     {showWebView === null && <AdmOverView />}
-    {showWebView === 'admissions' && <Link uri={college.admission_website} />}
-    {showWebView === 'finAid' && <Link uri={college.fincAid_website} />}
-    {showWebView === 'priceCalc' && <Link uri={college.priceCalculator_website} />}
+    {showWebView === 'admissions' && <Link uri={collegeID.admission_website} />}
+    {showWebView === 'finAid' && <Link uri={collegeID.fincAid_website} />}
+    {showWebView === 'priceCalc' && <Link uri={collegeID.priceCalculator_website} />}
     </View>
 );
 };

@@ -156,9 +156,9 @@ const Results = ({route, navigation}) => {
 };
 
   function FindCollege(ID){
-    const selColleges = colleges.find(college => college.school_id === parseInt(ID))
-    const selColleges[0]
-    return college[0];
+    const college = colleges.find(college => college.school_id == ID)
+    // const college = selColleges[0];
+    return college;
   }
 
   const renderItem = ({item}) => {
@@ -190,7 +190,7 @@ const Results = ({route, navigation}) => {
       <TouchableOpacity
         onPress={() => {
           const college = JSON.stringify(FindCollege(item.id))
-          navigation.push('Details', {college: item.name, id: item.id, obj: {college}})
+          navigation.push('Details', {college: item.name, id: item.id, obj: college})
         }
           
           

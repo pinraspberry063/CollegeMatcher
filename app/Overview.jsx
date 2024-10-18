@@ -5,11 +5,12 @@ import { CollegesContext } from '../components/CollegeContext';
 
 
 const OverView = ({collegeID}) => {
-    const college = collegeID;
+    // const college = route.params.collegeID;
+    const college = JSON.parse(collegeID);
     const [address, setAddress] = useState([]);
     const [urbanLevel, setUrbanLevel] = useState([]);
-    const [admRate, setAdmRate] = useState(college.adm_rate);
-    const {colleges, loading} = useContext(CollegesContext);
+    const [admRate, setAdmRate] = useState(collegeID.adm_rate);
+    // const {colleges, loading} = useContext(collegeID);
   
     useEffect(() => {
       const func = async () => {
@@ -17,10 +18,10 @@ const OverView = ({collegeID}) => {
         try {
           
           
-          const addy = college.address;
-          const urban = college.ubanization_level;
-          const getCity = college.city;
-          const getState = college.state;
+          const addy = collegeID.address;
+          const urban = collegeID.ubanization_level;
+          const getCity = collegeID.city;
+          const getState = collegeID.state;
 
           const getAddy = [addy, getCity, getState];
 
