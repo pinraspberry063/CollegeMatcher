@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { useFocusEffect } from '@react-navigation/native';
 
 const firestore = getFirestore(db);
 
@@ -10,9 +11,25 @@ const ModeratorScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
+  // useFocusEffect runs the effect when the screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true; // Set to true when the user navigates to the screen (the screen mounts)
+
+      const fetchReportsData = async () => {
+        if (isActive) {
+          await fetchReports();
+        }
+      };
+
+      fetchReportsData();
+
+      // If the user navigates away from the screen (the screen unmounts), the cleanup function is called:
+      return () => {
+        isActive = false; // Set isActive to false to avoid updating the state on an inactive screen
+      };
+    }, [])
+  );
 
   const fetchReports = async () => {
     setIsLoading(true);

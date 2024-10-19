@@ -96,6 +96,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
     <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
+    <HomeStack.Screen name="ModeratorScreen" component={ModeratorScreen} />
   </HomeStack.Navigator>
 );
 
