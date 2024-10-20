@@ -102,8 +102,7 @@ const OverView = React.lazy(() => import('./Overview'));
       },
       {
         tabLabel: 'Admissions',
-        component: () => <Admissions collegeID={collegeobj}/>,
-       
+        component: () => <Admissions collegeID={collegeobj} />,
       },
     ];
   
