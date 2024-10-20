@@ -597,10 +597,6 @@ const Quiz = ({navigation}) => {
               query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
               styles={{ listView: { maxHeight: 200 } }}
             />
-    
-            <View style={styles.buttonContainer}>
-              <Button onPress={handleSubmit} title="Submit" />
-            </View>
           </View>
       );
     
@@ -622,42 +618,32 @@ const Quiz = ({navigation}) => {
             behavior="height"
             style={styles.container}
           >
-            
-              <ScrollView
-                contentContainerStyle={{ paddingBottom: 100 }}
-                keyboardShouldPersistTaps="handled"
-              >
-                {renderContent()}
-  
-                {currentPage === 5 ? (
-                  <View style={styles.lastPageButtonContainer}>
-                    <View style={styles.largeButtonContainer}>
-                      <Button onPress={handleSubmit} title="Submit" style={styles.button} />
-                    </View>
-                    <View style={styles.largeButtonContainer}>
-                      <Button onPress={handleBack} title="Back" style={styles.button} />
-                    </View>
-                  </View>
-                ) : (
-                  <View style={styles.buttonContainer}>
-                    {currentPage > 1 && (
-                      <View style={styles.largeButtonContainer}>
-                        <Button onPress={handleBack} title="Back" style={styles.button} />
-                      </View>
-                    )}
-                    {currentPage < 5 && (
-                      <View style={styles.largeButtonContainer}>
-                        <Button onPress={handleNext} title="Next" style={styles.button} />
-                      </View>
-                    )}
-                  </View>
-                )}
-              </ScrollView>
-            
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 100 }}
+              keyboardShouldPersistTaps="handled"
+            >
+              {renderContent()}
+
+              {currentPage === 5 ? (
+                <View style={styles.lastPageButtonContainer}>
+                  <Button onPress={handleSubmit} title="Submit" style={styles.button} />
+                  <Button onPress={handleBack} title="Back" style={styles.button} />
+                </View>
+              ) : (
+                <View style={styles.buttonContainer}>
+                  {currentPage > 1 && (
+                    <Button onPress={handleBack} title="Back" style={styles.button} />
+                  )}
+                  {currentPage < 5 && (
+                    <Button onPress={handleNext} title="Next" style={styles.button} />
+                  )}
+                </View>
+              )}
+            </ScrollView>
           </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
-    );
-  };
+      );
+};
   
   export default Quiz
   
