@@ -11,8 +11,8 @@ import {
   query,
   where,
 } from 'firebase/firestore';
-import { ActivityIndicator, View } from 'react-native';
-
+import { ActivityIndicator, View , NativeModules} from 'react-native';
+// const {CollegeModule} = NativeModules;
 
 export const CollegesContext = createContext();
 
@@ -24,6 +24,24 @@ export const CollegesProvider = ({ children }) => {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+  // useEffect(() => {
+  //   const loadData = async () => {
+  //     try {
+  //       // Fetch colleges using a promise-based approach
+  //       const fetchedColleges = await CollegeModule.fetchColleges();
+  //       setColleges(fetchedColleges); // Update state with the fetched data
+  //       setLoading(false); // Data is now ready
+  //     } catch (error) {
+  //       console.error('Error fetching colleges: ', error);
+  //     }
+  //   };
+  
+  //   // Set the Firestore instance configuration
+  //   CollegeModule.setConfig(firestore);
+  //   loadData(); // Fetch colleges in the background when the app starts
+  // }, []);
+  
   useEffect(() => {
     const fetchColleges = async () => {
       try {

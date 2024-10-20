@@ -61,7 +61,7 @@ const usersRef = collection(firestore, 'Users');
 
 const Demographics = ({navigation, collegeID}) => {
 
-    const college = collegeID;
+    const college = JSON.parse(collegeID);
 const [sToF, setSToF] = useState(0);
 const [userPref, setUserPref] = useState([]);
 const [circleData, setCircleData] = useState([]);

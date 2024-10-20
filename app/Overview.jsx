@@ -5,7 +5,7 @@ import { CollegesContext } from '../components/CollegeContext';
 
 
 const OverView = ({collegeID}) => {
-    const college = collegeID;
+    const college = JSON.parse(collegeID);
     const [address, setAddress] = useState([]);
     const [urbanLevel, setUrbanLevel] = useState([]);
     const [admRate, setAdmRate] = useState(college.adm_rate);
@@ -16,9 +16,9 @@ const OverView = ({collegeID}) => {
 
         try {
           
-          
+          console.log(college);
           const addy = college.address;
-          const urban = college.ubanization_level;
+          const urban = college.ubanization_level || '';
           const getCity = college.city;
           const getState = college.state;
 

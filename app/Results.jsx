@@ -12,6 +12,7 @@ import { CollegesContext } from '../components/CollegeContext';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
+const collegesRef = collection(firestore, 'CompleteColleges');
 
 const favoriteCollege = async ({ID}) => {
   const collegeID = parseInt(ID);
@@ -156,9 +157,8 @@ const Results = ({route, navigation}) => {
 };
 
   function FindCollege(ID){
-    const selColleges = colleges.find(college => college.school_id === parseInt(ID))
-    const selColleges[0]
-    return college[0];
+    const college = colleges.find(college => college.school_id === parseInt(ID))
+    return college;
   }
 
   const renderItem = ({item}) => {
@@ -190,7 +190,7 @@ const Results = ({route, navigation}) => {
       <TouchableOpacity
         onPress={() => {
           const college = JSON.stringify(FindCollege(item.id))
-          navigation.push('Details', {college: item.name, id: item.id, obj: {college}})
+          navigation.push('Details', {college: item.name, id: item.id, obj: college})
         }
           
           
@@ -202,7 +202,22 @@ const Results = ({route, navigation}) => {
     </View>
   )};
 
+// const handleQuerySearch = async () => {
 
+//     const wm = womenOnly? 1 : 0;
+//     const prv = privateSchool? 'Private': 'Public'; 
+//     const mp = mealPlan? 'Yes': 'No';
+//     const queriedColleges = query(collegesRef, 
+//       where('women_only', '==', wm),
+//       // where('state', 'in', stateChoice),
+//       where('school_classification', '>=', prv),
+//       where('mealplan', '==', mp)
+//     );
+
+
+//     const colleges = await getDocs(queriedColleges);
+//       setCollegeList(colleges.map(doc => ({name: doc.shool_name, id: doc.school_id})))
+// }
   const handleFilterSearch = () => {
     setShowFilter(false);
     const filtered = colleges.filter(college=> 
@@ -295,7 +310,7 @@ const Results = ({route, navigation}) => {
 
   }
 
-  if(isLoading || loading){
+  if(isLoading){
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size={100}/>

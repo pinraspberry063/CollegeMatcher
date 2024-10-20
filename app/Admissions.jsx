@@ -25,7 +25,7 @@ const collegesRef = collection(firestore, 'CompleteColleges');
 
 const Admissions = ({navigation, collegeID}) => {
 
-const college = collegeID;
+const college = JSON.parse(collegeID);
 
 const [admUrl, setAdmUrl] = useState('');
 const [finAidUrl, setFinAidUrl] = useState('');
