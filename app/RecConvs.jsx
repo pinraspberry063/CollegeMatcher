@@ -136,30 +136,32 @@ const RecConvs = ({ navigation }) => {
     [db, user, navigation] // Dependencies for useCallback
   );
 
-  return (
+ return (
     <SafeAreaView style={styles.container}>
       <Text style={[styles.title, { color: '#fff' }]}>
         {isRecruiter ? 'Conversations with Users' : 'Available Recruiters'}
       </Text>
       <ScrollView style={styles.conversationsContainer}>
         {isRecruiter ? (
-          // If recruiter, display conversations with users
           conversations.length > 0 ? (
             conversations.map(conv => (
               <View key={conv.id} style={styles.conversation}>
-                <Text style={[styles.conversationText, {color: '#fff'}]}>User: {usernames[conv.User_UID] || conv.User_UID}</Text>
+                <Text style={[styles.conversationText, { color: '#fff' }]}>
+                  User: {usernames[conv.User_UID] || conv.User_UID}
+                </Text>
                 <Button title="Message" onPress={() => navigation.navigate('Message', { conversationId: conv.id })} />
               </View>
             ))
           ) : (
-            <Text style={[styles.noConversationsText, {color: '#fff' }]}>No conversations found.</Text>
+            <Text style={[styles.noConversationsText, { color: '#fff' }]}>No conversations found.</Text>
           )
         ) : (
-          // If not a recruiter, display available recruiters
           recruiters.length > 0 ? (
             recruiters.map(uid => (
               <View key={uid} style={styles.conversation}>
-                <Text style={[styles.conversationText, {color: '#fff'}]}>Recruiter: {usernames[uid] || uid}</Text>
+                <Text style={[styles.conversationText, { color: '#fff' }]}>
+                  Recruiter: {usernames[uid] || uid}
+                </Text>
                 <Button title="Message" onPress={() => handleMessageNavigation(uid)} />
               </View>
             ))
@@ -175,34 +177,35 @@ const RecConvs = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: width * 0.05, // Scaled horizontal padding
+    paddingTop: height * 0.02, // Scaled top padding
   },
   title: {
-    fontSize: 24,
+    fontSize: height * 0.03, // Scaled font size for title
     fontWeight: 'bold',
-    marginVertical: 20,
+    marginVertical: height * 0.02, // Scaled vertical margin for title
   },
   conversationsContainer: {
     flex: 1,
   },
   conversation: {
-    padding: 10,
+    padding: height * 0.02, // Scaled padding
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    marginVertical: 5,
+    marginVertical: height * 0.01, // Scaled vertical margin
   },
   conversationText: {
-    fontSize: 16,
+    fontSize: height * 0.025, // Scaled font size
   },
   noConversationsText: {
-    fontSize: 16,
+    fontSize: height * 0.02, // Scaled font size for no conversations message
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: height * 0.05, // Scaled top margin for no conversations message
   },
   noRecruitersText: {
-    fontSize: 16,
+    fontSize: height * 0.02, // Scaled font size for no recruiters message
     textAlign: 'center',
-    marginTop: 20,
+    marginTop: height * 0.05, // Scaled top margin for no recruiters message
   },
 });
 

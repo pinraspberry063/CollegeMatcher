@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, Dimensions } from 'react-native';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';  // Import Firestore functions
-import { UserContext } from '../components/UserContext';  // Import the UserContext to get the UID
-import { db } from '../config/firebaseConfig';  // Import your Firebase configuration
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { UserContext } from '../components/UserContext';
+import { db } from '../config/firebaseConfig';
 
-const firestore = getFirestore(db);  // Initialize Firestore
-const { width, height } = Dimensions.get('window'); // Get device dimensions
+const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window');
 
 const RecruiterVerification = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -37,7 +37,7 @@ const RecruiterVerification = ({ navigation }) => {
         RecruiterInst: email,  // Recruiter's institutional email
         RecruiterSchoolName: schoolName,  // Name of the school the recruiter works for
         RecruiterLinkN: linkedIn,  // Recruiter's LinkedIn profile link
-        RecruiterUID: user.uid,  // Use the UID from context
+        RecruiterUID: user.uid,
       });
 
       setLoading(false);
@@ -55,29 +55,33 @@ const RecruiterVerification = ({ navigation }) => {
       <Text style={styles.title}>Recruiter Verification</Text>
 
       <TextInput
-        style={[styles.input, {color:'#fff'}]}
+        style={styles.input}
         placeholder="Your Full Name"
+        placeholderTextColor="#fff"
         value={name}
         onChangeText={setName}
       />
 
       <TextInput
-        style={[styles.input, {color:'#fff'}]}
+        style={styles.input}
         placeholder="Institutional Email"
+        placeholderTextColor="#fff"
         value={email}
         onChangeText={setEmail}
       />
 
       <TextInput
-        style={[styles.input, {color:'#fff'}]}
+        style={styles.input}
         placeholder="School Name"
+        placeholderTextColor="#fff"
         value={schoolName}
-        onChangeText={setSchoolName}  // New input for the school name
+        onChangeText={setSchoolName}
       />
 
       <TextInput
-        style={[styles.input, {color:'#fff'}]}
+        style={styles.input}
         placeholder="LinkedIn Profile URL"
+        placeholderTextColor="#fff"
         value={linkedIn}
         onChangeText={setLinkedIn}
       />
@@ -94,19 +98,25 @@ const RecruiterVerification = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: width * 0.05, // Scaled horizontal padding
+    paddingTop: height * 0.03, // Scaled top padding
+    backgroundColor: '#000',
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
+    fontSize: height * 0.035, // Scaled font size for title
+    marginBottom: height * 0.03, // Scaled margin for title
     textAlign: 'center',
+    color: '#fff',
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
+    height: height * 0.06, // Scaled input height
+    borderColor: '#ccc',
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
+    marginBottom: height * 0.02, // Scaled margin for input
+    padding: height * 0.015, // Scaled padding for input
+    color: '#fff',
+    backgroundColor: '#444',
+    borderRadius: 8, // Rounded corners
   },
 });
 
