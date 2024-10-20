@@ -240,7 +240,14 @@ const LaunchStackScreen = () => (
     <LaunchStack.Screen name="RecruiterVerification" component={RecruiterVerification} />
     <LaunchStack.Screen name="MFAScreen" component={MFAScreen} />
     <LaunchStack.Screen name="UsernamePrompt" component={UsernamePrompt} />
-    <LaunchStack.Screen name="EmailVerificationPrompt" component={EmailVerificationPrompt} />
+    <LaunchStack.Screen
+      name="EmailVerificationPrompt"
+      component={EmailVerificationPrompt}
+      options={{
+        headerLeft: () => null, // Hide back button on Android
+        gestureEnabled: false // Disable swipe back gesture on IOS
+      }}
+    />
   </LaunchStack.Navigator>
 );
 

@@ -86,7 +86,13 @@ const AccountCreation = ({ navigation }) => {
       // await user.sendEmailVerification();
       // Alert.alert('Account Created', 'Please verify your email before proceeding.');
 
-      // Navigate directly to the next screen based on user type
+//       navigation.navigate('EmailVerificationPrompt', {
+//         isMfaEnabled,
+//         isRecruiter,
+//         nextScreen: determineNextScreen(),
+//       });
+
+
       const nextScreen = determineNextScreen();
       navigation.navigate(nextScreen, {
         isMfaEnabled,

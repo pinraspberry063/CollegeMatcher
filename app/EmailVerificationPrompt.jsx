@@ -1,9 +1,23 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, Button, StyleSheet, Alert, BackHandler } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import { useFocusEffect } from '@react-navigation/native';
 
 const EmailVerificationPrompt = ({ navigation, route }) => {
-  const { isMfaEnabled, isRecruiter } = route.params || {};
+  const { isMfaEnabled, isRecruiter, nextScreen } = route.params || {};
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Prevent going back only while on this screen
+        return true;
+      };
+      // Listen for Android hardware back press
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [])
+  );
 
   const checkEmailVerified = async () => {
     try {
@@ -22,13 +36,14 @@ const EmailVerificationPrompt = ({ navigation, route }) => {
   };
 
   const proceedAfterVerification = () => {
-    if (route.params.nextScreen === 'MFAScreen') {
+    if (nextScreen === 'MFAScreen') {
       navigation.navigate('MFAScreen', {
         nextScreen: isRecruiter ? 'RecruiterVerification' : 'Main',
-        ...route.params
+        isMfaEnabled,
+        isRecruiter,
       });
     } else {
-      navigation.navigate(route.params.nextScreen);
+      navigation.navigate(nextScreen);
     }
   };
 
