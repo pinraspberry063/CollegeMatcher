@@ -9,6 +9,7 @@ import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
 import { CollegesContext } from '../components/CollegeContext';
+import {useQuery} from 'react-query';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -54,9 +55,13 @@ const Results = ({route, navigation}) => {
   const [showFilter, setShowFilter] = useState(false);
   const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
   const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
-  // const [colleges, setColleges] = useState([]);
-  const {colleges, loading} = useContext(CollegesContext);
-  const [isLoading, setisLoading] = useState(false);
+  const [colleges, setColleges] = useState([]);
+  // const {colleges, loading} = useContext(CollegesContext);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Use the useQuery hook outside of useEffect
+  const { data: collegesData, isLoading: queryLoading } = useQuery('colleges', fetchAllColleges);
+  
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
   const [privateSchool, setPrivate] = useState (false);
@@ -92,6 +97,21 @@ const Results = ({route, navigation}) => {
       setLoadCount(newLoadCount);
     }
   };
+
+  const fetchAllColleges = async () => {
+    const snapshot = await collection(firestore, 'CompleteColleges').getDocs()
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+  }
+  useEffect(()=>{
+
+    if (collegesData) {
+      setColleges(collegesData);
+    }
+    setIsLoading(queryLoading);
+  }, [collegesData, queryLoading]);
+    
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {

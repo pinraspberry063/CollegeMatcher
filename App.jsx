@@ -13,7 +13,7 @@ import Settings from './app/Settings';
 import Home from './app/index';
 import Account from './app/AccSettings';
 import Picker from './app/ProfileImageComp';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
@@ -74,7 +74,8 @@ const screenOptions = {
     left: 0,
     elevation: 0,
     height: 60,
-    background: "#fff"
+    background: "#fff",
+
   }
 };
 
@@ -84,7 +85,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Index" component={Home} />
     <HomeStack.Screen name="Settings" component={Settings} />
     <HomeStack.Screen name="Account" component={Account} />
-    <HomeStack.Screen name="Picker" component={Picker} />
+    <HomeStack.Screen name="Picker" component={Picker}  />
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
@@ -161,6 +162,73 @@ const icons = {
 };
 
 const Tab = createBottomTabNavigator();
+// const MainNav = () => {
+//   const [topColleges, setTopColleges] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   // const user = auth().currentUser.uid;
+
+//   useEffect(() => {
+//     const checkQuiz = async () => {
+//       const usersRef = collection(firestore, 'Users');
+//       const userQuery = query(
+//         usersRef,
+//         where('User_UID', '==', auth().currentUser.uid),
+//       );
+//       try {
+//         const querySnapshot = await getDocs(userQuery);
+
+//         if (!querySnapshot.empty) {
+//           const firstDoc = querySnapshot.docs[0];
+//           const collegeData = firstDoc.data();
+//           const top100 = collegeData.top100Colleges;
+
+//           setTopColleges(top100);
+//         } else {
+//           console.log('No matching document found.');
+//         }
+//         setIsLoading(false);
+//       } catch (error) {
+//         console.error('Error retrieving document:', error);
+//       }
+//     };
+//     checkQuiz();
+//   }, [topColleges, isLoading]);
+
+//   if (isLoading) {
+//     return (
+//       <View>
+//         <Text>Loading</Text>
+//       </View>
+//     );
+//   }
+//   return(
+//   <TabStack.Navigator
+//     screenOptions={screenOptions}
+//   >
+//     <TabStack.Screen name="Home" component={HomeStackScreen} />
+//     <TabStack.Screen
+//         name="QuizStack"
+//         initialParams={{Top100: topColleges}}
+//         component={ResultStackScreen}
+//       />
+//     <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+//     <TabStack.Screen name="Messages" component={MessageStackScreen} />
+//     <TabStack.Screen name="AI" component={AIStackScreen} />
+// {/*     {checkUserStatus === 'moderator' && ( */}
+//               <TabStack.Screen name="Moderation" component={ModeratorScreen} />
+// {/*             )} */}
+//         <TabStack.Screen
+//               name="UserActivityScreen"
+//               component={UserActivityScreen}
+//               options={{ tabBarButton: () => null }}
+//             />
+//             <TabStack.Screen
+//               name="Planets"
+//               component={TabScreen}
+//               options={{ tabBarButton: () => null }}
+//             />
+//   </TabStack.Navigator>
+// )};
 const TabScreen = () => {
   const [topColleges, setTopColleges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -193,6 +261,20 @@ const TabScreen = () => {
     checkQuiz();
   }, [topColleges, isLoading]);
 
+  // Function to determine tab bar visibility
+const getTabBarVisibility = (route) => {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
+
+  if (
+    routeName === 'Index' ||
+    routeName === 'Picker'
+  ) {
+    return { display: 'none' }; // Hide tab bar for specific routes
+  }
+  console.log(routeName)
+  return { display: 'flex' }; // Show tab bar for other routes
+};
+
   if (isLoading) {
     return (
       <View>
@@ -201,27 +283,34 @@ const TabScreen = () => {
     );
   }
   return(
-  <TabStack.Navigator
-    screenOptions={screenOptions}
+  <Tab.Navigator
+    screenOptions={({ route }) => {
+        
+      return {
+        ...screenOptions,
+        tabBarStyle: getTabBarVisibility(route),
+        tabBarIcon: () => {
+          return (
+            <MaterialCommunityIcons
+              name={icons[route.name]}
+              size={20}
+            />
+          );
+        },
+  
+      };
+      
+    }}
   >
-    <TabStack.Screen name="Home" component={HomeStackScreen} />
-    <TabStack.Screen
+    <Tab.Screen name="Home" component={HomeStackScreen}/>
+    <Tab.Screen
         name="QuizStack"
         initialParams={{Top100: topColleges}}
         component={ResultStackScreen}
       />
-    <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
-    <TabStack.Screen name="Messages" component={MessageStackScreen} />
-    <TabStack.Screen name="AI" component={AIStackScreen} />
-{/*     {checkUserStatus === 'moderator' && ( */}
-              <Tab.Screen name="Moderation" component={ModeratorScreen} />
-{/*             )} */}
-        <TabStack.Screen
-              name="UserActivityScreen"
-              component={UserActivityScreen}
-              options={{ tabBarButton: () => null }}
-            />
-  </TabStack.Navigator>
+    <Tab.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+    <Tab.Screen name="Messages" component={MessageStackScreen} />
+  </Tab.Navigator>
 )};
 
 const RootStack = createNativeStackNavigator();
@@ -325,7 +414,7 @@ const App = () => {
     return (
 
         <UserProvider>
-        <CollegesProvider>
+        {/* <CollegesProvider> */}
             <NavigationContainer>
               <RootStack.Navigator screenOptions={screenOptions}>
   {/*                */}{/* {user ? ( */}
@@ -337,7 +426,7 @@ const App = () => {
                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
               </RootStack.Navigator>
             </NavigationContainer>
-          </CollegesProvider>
+          {/* </CollegesProvider> */}
         </UserProvider>
       
     )
