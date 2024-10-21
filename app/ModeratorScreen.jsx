@@ -213,7 +213,7 @@ const ModeratorScreen = ({ navigation }) => {
       const userUID = userDoc.data().User_UID;
       console.log('Found user:', username, 'UID:', userUID);
 
-      const userActivity = { threads: [], posts: [] };
+      const userActivity = { threads: [], posts: [], messages: [] };
 
       // Fetch all threads created by the user using Collection Group Query
       const threadsQuery = query(
@@ -274,6 +274,46 @@ const ModeratorScreen = ({ navigation }) => {
           console.warn(`Unexpected post path structure: ${postPath}`);
         }
       });
+
+      // Fetch messages from Messaging collection
+      const messagingRef = collection(firestore, 'Messaging');
+      const userMessagesQuery = query(
+        messagingRef,
+        where('User_UID', '==', userUID)
+      );
+      const roomateMessagesQuery = query(
+        messagingRef,
+        where('Roomate_UID', '==', userUID)
+      );
+      const recruiterMessagesQuery = query(
+        messagingRef,
+        where('Recruiter_UID', '==', userUID)
+      );
+
+      const [userMessagesSnapshot, roomateMessagesSnapshot, recruiterMessagesSnapshot] = await Promise.all([
+        getDocs(userMessagesQuery),
+        getDocs(roomateMessagesQuery),
+        getDocs(recruiterMessagesQuery)
+      ]);
+
+      const fetchMessagesFromConversation = async (conversationDoc) => {
+        const messagesRef = collection(conversationDoc.ref, 'conv');
+        const messagesSnapshot = await getDocs(messagesRef);
+        return messagesSnapshot.docs.map(messageDoc => ({
+          id: messageDoc.id,
+          conversationId: conversationDoc.id,
+          ...messageDoc.data()
+        }));
+      };
+
+      const userMessages = await Promise.all(userMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+      const roomateMessages = await Promise.all(roomateMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+      const recruiterMessages = await Promise.all(recruiterMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+
+      userActivity.messages = [...userMessages.flat(), ...roomateMessages.flat(), ...recruiterMessages.flat()];
+
+      // Filter out any undefined or null messages
+      userActivity.messages = userActivity.messages.filter(message => message && message.content);
 
       console.log('User Activity:', JSON.stringify(userActivity, null, 2));
       return userActivity;
