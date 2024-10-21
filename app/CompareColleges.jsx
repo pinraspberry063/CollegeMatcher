@@ -154,7 +154,6 @@ const CompareColleges = () => {
 
             {college1 && college2 && (
                 <View>
-                    <Text style={styles.title}>Comparison</Text>
 
                     <View style={styles.schoolNamesContainer}>
                         <Text style={styles.schoolNameColumnLeft}>{college1.shool_name}</Text>
