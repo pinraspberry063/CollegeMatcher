@@ -9,7 +9,8 @@ import {
   Keyboard,
   ImageBackground,
   KeyboardAvoidingView,
-  ScrollView
+  ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
@@ -262,6 +263,7 @@ const Quiz = ({navigation}) => {
             value={major}
             onChange={setMajor}
             multiSelect={true}
+            maxSelect={3}
           />
           <Slider
             value={majorImportance || 0.5}
@@ -279,7 +281,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Are you looking to attend college in a specific state?</Text>
-          <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} />
+          <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} maxSelect={3} />
           <Slider
             value={stateChoiceImportance || 0.5}
             onValueChange={setStateChoiceImportance}
@@ -296,7 +298,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>How far from home do you want your college to be?</Text>
-          <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
+          <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} multiSelect={true} maxSelect={3} />
           <Slider
             value={distanceImportance || 0.5}
             onValueChange={setDistanceImportance}
@@ -313,7 +315,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>How much are you willing to pay for tuition?</Text>
-          <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
+          <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} multiSelect={true} maxSelect={3} />
           <Slider
             value={tuitionImportance || 0.5}
             onValueChange={setTuitionImportance}
@@ -341,6 +343,8 @@ const Quiz = ({navigation}) => {
           ]}
           value={schoolClassification}
           onChange={setType}
+          multiSelect={true}
+          maxSelect={2}
           />
           <Slider
             value={classificationImportance || 0.5}
@@ -366,6 +370,8 @@ const Quiz = ({navigation}) => {
              ]}
              value={collegeDiversity}
              onChange={setDiverse}
+             multiSelect={true}
+             maxSelect={3}
           />
           <Slider
             value={diversityImportance || 0.5}
@@ -383,7 +389,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Do you wish to attend a college with a specific religious affiliation?</Text>
-          <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
+          <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} multiSelect={true} maxSelect={3} />
           <Slider
             value={religiousAffilImportance || 0.5}
             onValueChange={setReligiousAffilImportance}
@@ -404,7 +410,7 @@ const Quiz = ({navigation}) => {
       const renderPageThree = () => (
         <View>
             <Text style={[styles.text]}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} multiSelect={true} maxSelect={3} />
             <Slider
                value={sizeImportance || 0.5}
                onValueChange={setSizeImportance}
@@ -420,7 +426,7 @@ const Quiz = ({navigation}) => {
               <Text>Very Important</Text>
           </View>
           <Text style={[styles.text]}>Are you looking for a school with sporting events?</Text>
-          <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
+          <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} multiSelect={true} maxSelect={2} />
           <Slider
             value={sportEventsImportance || 0.5}
             onValueChange={setSportEventsImportance}
@@ -437,7 +443,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Are you looking for a college in a specific type of area?</Text>
-          <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
+          <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} multiSelect={true} maxSelect={3} />
           <Slider
             value={urbanizationImportance || 0.5}
             onValueChange={setUrbanizationImportance}
@@ -645,9 +651,9 @@ const Quiz = ({navigation}) => {
       );
 };
   
-  export default Quiz
-  
-  const styles = StyleSheet.create({
+export default Quiz
+
+const styles = StyleSheet.create({
     container: {
       flex: 1,
       paddingTop: 20,
@@ -678,10 +684,27 @@ const Quiz = ({navigation}) => {
       borderRadius: 5,
     },
     sliderLabels: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingHorizontal: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
     },
-  });
-  
-  
+    choiceBoxContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 10,
+    },
+    choiceBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        marginRight: 5,
+        marginBottom: 5,
+    },
+    choiceBoxText: {
+        marginRight: 5,
+    },
+});
+
