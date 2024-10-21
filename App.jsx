@@ -1,7 +1,7 @@
 // noinspection JSUnusedLocalSymbols
 
-import React, { useState, useEffect } from 'react';
-import {StyleSheet, Text, View, Alert, Image} from 'react-native';
+import React, { useState, useEffect, useContext} from 'react';
+import {StyleSheet, Text, View, Alert, Image, ActivityIndicator, useWindowDimensions} from 'react-native';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -277,8 +277,29 @@ const App = () => {
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const {loading} = useContext(CollegesContext);
+  const {height: height, width: width} = useWindowDimensions();
 
-  // Function to clear AsyncStorage
+  const ui_styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+    },
+    imageContainer: {
+      marginBottom: 20,
+    },
+    image: {
+      width: width * 0.8,
+      height: height * 0.4,
+      resizeMode: 'contain',
+    },
+    title: {
+      marginBottom: 10,
+    },
+  });
+
   const clearAsyncStorage = async () => {
     try {
       await AsyncStorage.clear();
@@ -298,13 +319,12 @@ const App = () => {
     };
   }, [darkMode]);
 
-  // Dependency on data
+  // onboarding checks
   useEffect(() => {
-    if (__DEV__) {  // evals to true when on a dev build
-      clearAsyncStorage();
-      // setShowOnboarding(false); // uncomment to hide onboarding
+    if (__DEV__) {
+      AsyncStorage.removeItem('hasOnboarded'); // always shows onboarding for dev
+      // setShowOnboarding(false); // can hide onboarding here for testing purposes
     }
-
     const checkOnboarding = async () => {
       const value = await AsyncStorage.getItem('hasOnboarded');
       if (value === null) {
@@ -312,7 +332,10 @@ const App = () => {
       }
     };
     checkOnboarding();
+  }, []);
 
+  // Dependency on data
+  useEffect(() => {
     const subscriber = auth().onAuthStateChanged(()=> setUser(user));
     if (initializing){
       setInitializing(false);
