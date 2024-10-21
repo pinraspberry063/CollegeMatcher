@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup, Timestamp } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { useFocusEffect } from '@react-navigation/native';
 
@@ -225,11 +225,10 @@ const ModeratorScreen = ({ navigation }) => {
       console.log(`Total user threads found: ${threadsSnapshot.size}`);
 
       threadsSnapshot.forEach((threadDoc) => {
-        const threadPath = threadDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1
+        const threadData = threadDoc.data();
+        const threadPath = threadDoc.ref.path;
         const pathSegments = threadPath.split('/');
 
-        // Extract collegeName and subgroupName from the path
-        // Ensure the path has the expected structure
         if (pathSegments.length >= 6) {
           const collegeName = pathSegments[1];
           const subgroupName = pathSegments[3];
@@ -238,7 +237,10 @@ const ModeratorScreen = ({ navigation }) => {
             id: threadDoc.id,
             collegeName,
             subgroupName,
-            ...threadDoc.data(),
+            title: threadData.title,
+            createdAt: threadData.createdAt,
+            imageUrls: threadData.imageUrls || [], // Include imageUrls
+            ...threadData
           });
         } else {
           console.warn(`Unexpected thread path structure: ${threadPath}`);
@@ -299,11 +301,15 @@ const ModeratorScreen = ({ navigation }) => {
       const fetchMessagesFromConversation = async (conversationDoc) => {
         const messagesRef = collection(conversationDoc.ref, 'conv');
         const messagesSnapshot = await getDocs(messagesRef);
-        return messagesSnapshot.docs.map(messageDoc => ({
-          id: messageDoc.id,
-          conversationId: conversationDoc.id,
-          ...messageDoc.data()
-        }));
+        return messagesSnapshot.docs.map(messageDoc => {
+          const data = messageDoc.data();
+          return {
+            id: messageDoc.id,
+            conversationId: conversationDoc.id,
+            ...data,
+            createdAt: data.createdAt || Timestamp.now() // Provide a default value if createdAt is missing
+          };
+        });
       };
 
       const userMessages = await Promise.all(userMessagesSnapshot.docs.map(fetchMessagesFromConversation));
