@@ -115,6 +115,11 @@ const Login = ({ navigation }) => {
       return;
     }
 
+    if (!password) {
+        Alert.alert('Input Error', 'Please enter your password.');
+        return;
+    }
+
     try {
       let userCredential;
       if (isValidEmail(identifier)) {
