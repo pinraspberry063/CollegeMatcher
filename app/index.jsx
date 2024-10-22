@@ -118,6 +118,16 @@ const Index = ({ navigation }) => {
           accessibilityLabel="Take the quiz to be matched with colleges automatically"
         />
 
+        <Button
+          style={[styles.button, { textShadowColor: theme.color }]}
+          onPress={() => {
+            navigation.push('ViewMessage');
+          }}
+          title="View Messages"
+          color="#841584"
+          accessibilityLabel="Take the quiz to be matched with colleges automatically"
+        />
+
         {/* Conditionally render the SuperRec button */}
         {isSuperRec && (
           <>

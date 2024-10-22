@@ -27,6 +27,7 @@ import RoomateMatcher from './app/RoomateMatcher';
 // noinspection SpellCheckingInspection
 import RoomateResults from './app/RoomateResults';
 import Message from './app/Message';
+import ViewMessage from './app/ViewMessage'
 import RoomateMessage from './app/RoomateMessage';
 import RoomateViewQuiz from './app/RoomateViewQuiz';
 import RecConvs from './app/RecConvs';
@@ -97,6 +98,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
     <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
+    <MessageStack.Screen name="ViewMessage" component={ViewMessage}/>
   </HomeStack.Navigator>
 );
 
