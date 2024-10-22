@@ -1,62 +1,105 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 
-const ViewMessage = ( { route } ) => {
-     const theme = useContext(themeContext);
-    return (
-        <SafeAreaView style={styles.container}>
-            <Text style={[styles.text, { color: theme.color }]}>testing</Text>
-        </SafeAreaView>
-    );
-}
+const firestore = getFirestore(db);
+
+const ViewMessage = ( { navigation } ) => {
+  const { user } = useContext(UserContext);  // Get the current user from UserContext
+  const [colleges, setColleges] = useState([]);
+  const theme = useContext(themeContext);
+
+  useEffect(() => {
+    const fetchCommittedColleges = async () => {
+      if (!user || !user.uid) {
+        Alert.alert('Error', 'User not logged in.');
+        return;
+      }
+
+      try {
+        // Query the "Users" collection for the document where "User_UID" matches the current user's UID
+        const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
+        const querySnapshot = await getDocs(usersQuery);
+
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0];  // Get the first matching document
+          const data = userDoc.data();
+
+          // Set the colleges from the user's Committed_Colleges field
+          setColleges(data.Committed_Colleges || []);
+        } else {
+          Alert.alert('Error', 'User data not found.');
+        }
+      } catch (error) {
+        console.error('Error fetching committed colleges:', error);
+        Alert.alert('Error', 'Something went wrong while fetching committed colleges.');
+      }
+    };
+
+    fetchCommittedColleges();
+  }, [user]);
+
+  const handleNavigation = async (collegeName) => {
+    // Navigate to the ForumSelect screen for the selected college
+    navigation.navigate('ForumSelect', { collegeName });
+  };
+
+  const handleFollowedForumsNavigation = () => {
+    navigation.navigate('FollowedForums');
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView>
+        {colleges.length > 0 ? (
+          colleges.map((college) => (
+            <View key={college} style={styles.buttonContainer}>
+              <Button
+                title={college}
+                onPress={() => handleNavigation(college)}
+                color={theme.buttonColor}
+              />
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noCollegesText}>No committed colleges found.</Text>
+        )}
+        <View style={styles.followedForumsButtonContainer}>
+          <Button
+            title="View Followed Forums"
+            onPress={handleFollowedForumsNavigation}
+            color={theme.buttonColor}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#030303',
-        padding: 20,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    list: {
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: '#f8f8f8',
-        padding: 20,
-        borderRadius: 10,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
-    },
-    username: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    roomateScore: {
-        fontSize: 16,
-        color: '#555',
-    },
-    text: {
-        fontSize: 18,
-        paddingVertical: 10,
-    },
-    button: {
-        marginTop: 20,
-    },
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  buttonContainer: {
+    marginBottom: 16,
+  },
+  noCollegesText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#555',
+  },
+  followedForumsButtonContainer: {
+    marginTop: 20,
+    padding: 10,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    borderWidth: 1,
+  },
 });
 
 export default ViewMessage;
