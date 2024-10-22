@@ -11,6 +11,7 @@ const firestore = getFirestore(db);
 const ViewMessage = ( { navigation } ) => {
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [colleges, setColleges] = useState([]);
+  const [activeMessages, setActiveMessages] = useState([]);
   const theme = useContext(themeContext);
 
   useEffect(() => {
@@ -22,7 +23,8 @@ const ViewMessage = ( { navigation } ) => {
 
       try {
         // Query the "Users" collection for the document where "User_UID" matches the current user's UID
-        const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
+        const usersQuery = query(collection(firestore, 'Users'),
+            where('User_UID', '==', user.uid));
         const querySnapshot = await getDocs(usersQuery);
 
         if (!querySnapshot.empty) {
