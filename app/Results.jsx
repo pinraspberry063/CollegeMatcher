@@ -81,7 +81,11 @@ const Results = ({route, navigation}) => {
   const collegeImagesArray = [
     require('../assets/red.png'),
     require('../assets/gre.png'),
-    require('../assets/pur.png')
+    require('../assets/pur.png'),
+    require('../assets/brn.png'),
+    require('../assets/cyn.png'),
+    require('../assets/pnk.png'),
+    require('../assets/blu.png')
   ];
   
 
