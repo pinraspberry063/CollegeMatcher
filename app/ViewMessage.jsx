@@ -18,30 +18,6 @@ const ViewMessage = ( { navigation } ) => {
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
   const theme = useContext(themeContext);
-
-        const fetchUsername = async (uid) => {
-               try {
-                 const usersRef = collection(firestore, 'Users');
-                 const q = query(usersRef, where('User_UID', '==', uid));
-                 const querySnapshot = await getDocs(q);
-                 if (!querySnapshot.empty) {
-                   const userDoc = querySnapshot.docs[0];
-                   const userData = userDoc.data();
-                   setUsername(userData.Username);
-                   setActiveMessages(userData.activeMessages);
-                 } else {
-                   console.error('(RoomateMatcher/username)No user found with the given UID.');
-                 }
-               } catch (error) {
-                 console.error('Error Fetching Username and CollegeName:', error);
-               }
-           console.log("Loop inside of fetch username");
-             };
-         //};
-
-  fetchUsername(auth().currentUser.uid);
-         //console.log("LOOP");
-
   useEffect(() => {
     const fetchCommittedColleges = async () => {
       if (!user || !user.uid) {
@@ -51,8 +27,7 @@ const ViewMessage = ( { navigation } ) => {
 
       try {
         // Query the "Users" collection for the document where "User_UID" matches the current user's UID
-        const usersQuery = query(collection(firestore, 'Users'),
-            where('User_UID', '==', user.uid));
+        const usersQuery = query(collection(firestore, 'Users'), where('User_UID', '==', user.uid));
         const querySnapshot = await getDocs(usersQuery);
 
         if (!querySnapshot.empty) {
@@ -60,7 +35,7 @@ const ViewMessage = ( { navigation } ) => {
           const data = userDoc.data();
 
           // Set the colleges from the user's Committed_Colleges field
-          setActiveMessages(data.activeMessaages || []);
+          setColleges(data.Committed_Colleges || []);
         } else {
           Alert.alert('Error', 'User data not found.');
         }
@@ -68,7 +43,6 @@ const ViewMessage = ( { navigation } ) => {
         console.error('Error fetching committed colleges:', error);
         Alert.alert('Error', 'Something went wrong while fetching committed colleges.');
       }
-        console.log("LOOP INSIDE USEEFFECT");
     };
 
     fetchCommittedColleges();
@@ -81,17 +55,16 @@ const ViewMessage = ( { navigation } ) => {
 
   const handleFollowedForumsNavigation = () => {
     navigation.navigate('FollowedForums');
-    console.log("LOOP AT END");
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {activeMessages.length > 0 ? (
-          activeMessages.map((activeMessages) => (
-            <View key={activeMessages} style={styles.buttonContainer}>
+        {colleges.length > 0 ? (
+          colleges.map((college) => (
+            <View key={college} style={styles.buttonContainer}>
               <Button
-                title={activeMessages}
+                title={college}
                 onPress={() => handleNavigation(college)}
                 color={theme.buttonColor}
               />
@@ -111,7 +84,6 @@ const ViewMessage = ( { navigation } ) => {
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
