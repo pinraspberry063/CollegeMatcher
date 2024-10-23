@@ -160,7 +160,6 @@ const icons = {
   QuizStack: 'magnify',
   ColForumSelectorTab: 'forum',
   Messages: 'message',
-  // AI: 'head', AI: 'brain', AI: 'space-invaders', AI: 'clippy',
   AI: 'chat-question',
   Moderation: 'shield-account'
 };
@@ -385,7 +384,6 @@ const App = () => {
   if (showOnboarding) {
     return (
         <Onboarding
-            // bottomBarColor={'#40FF00'}
             onDone={async () => {
               await AsyncStorage.setItem('hasOnboarded', 'true');
               setShowOnboarding(false);
@@ -398,7 +396,7 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 image: <Image source={require('./assets/Launch.png')}
-                              style={styles.image}
+                              style={ui_styles.image}
                 />,
                 title: 'Welcome to Universe college matcher!',
                 subtitle: '',
@@ -407,7 +405,7 @@ const App = () => {
                 backgroundColor: '#fff',
                 size: '',
                 image: <Image source={require('./assets/Form.png')}
-                              style={styles.image}
+                              style={ui_styles.image}
                 />,
                 title: 'College Matcher Quiz',
                 subtitle: 'Check out our college matching quiz today!',
@@ -415,7 +413,7 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 image: <Image source={require('./assets/Community.png')}
-                              style={styles.image}
+                              style={ui_styles.image}
                 />,
                 title: 'Forums',
                 subtitle: 'Chat with other students in the forums!',
@@ -423,7 +421,7 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 image: <Image source={require('./assets/Chatbot.png')}
-                              style={styles.image}
+                              style={ui_styles.image}
                 />,
                 title: 'Get Help',
                 subtitle: 'Chat with an AI assistant or connect with recruiters!',
@@ -431,14 +429,14 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 image: <Image source={require('./assets/Secure-login.png')}
-                              style={styles.image}
+                              style={ui_styles.image}
                 />,
                 title: 'Login to get started!',
                 subtitle: '',
               },
             ]}
-            containerStyles={styles.container}
-            imageContainerStyles={styles.imageContainer}
+            containerStyles={ui_styles.container}
+            imageContainerStyles={ui_styles.imageContainer}
         />
     );
   }
