@@ -193,15 +193,15 @@ const Quiz = ({navigation}) => {
         const answers = {
             address,
             gpa,
-            sat: satScore || 'N/A',
-            act: actScore || 'N/A',
-            sat_critical_reading: satCriticalReading || 'N/A',
-            act: actScore || 'N/A',
-            act_math: actMath || 'N/A',
-            act_science: actScience || 'N/A',
-            act_reading: actReading || 'N/A',
-            act_english: actEnglish || 'N/A',
-            act_writing: actWriting || 'N/A',
+            sat: satScore || 'N/A'|| 'NA',
+            act: actScore || 'N/A' || 'NA',
+            sat_critical_reading: satCriticalReading || 'N/A' || 'NA',
+            act: actScore || 'N/A' || 'NA',
+            act_math: actMath || 'N/A' || 'NA',
+            act_science: actScience || 'N/A' || 'NA',
+            act_reading: actReading || 'N/A' || 'NA',
+            act_english: actEnglish || 'N/A' || 'NA',
+            act_writing: actWriting || 'N/A' || 'NA',
             distance_from_college: distanceFromCollege,
             distance_importance: distanceImportance,
             major,
@@ -520,40 +520,75 @@ const Quiz = ({navigation}) => {
                 <TextInput
                   style={[styles.textInput]}
                   value={actMath}
-                  onChangeText={setActMath}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActMath(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT English score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actEnglish} 
-                  onChangeText={setActEnglish}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActEnglish(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Reading score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actReading}
-                  onChangeText={setActReading}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActReading(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Science score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actScience}
-                  onChangeText={setActScience}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActScience(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Writing score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actWriting}
-                  onChangeText={setActWriting}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActWriting(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
               </>
             )}
@@ -569,7 +604,7 @@ const Quiz = ({navigation}) => {
               onChange={(value) => {
                 setTookSAT(value);
                 if (value.includes('No')) {
-                  setSatScore(''); setSatMath(''); setSatCriticalReading(''); setSatWriting('');
+                  setSatScore(''); setSatMath(''); setSatCriticalReading('');
                 }
               }}
             />
@@ -580,22 +615,43 @@ const Quiz = ({navigation}) => {
                 <TextInput
                   style={[styles.textInput ]}
                   value={satScore}
-                  onChangeText={setSatScore}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 400 && value <= 1600)) {
+                          setSatScore(formatted);
+                      }
+                  }}
                   placeholder="Ex: 1200..."
+                  keyboardType="numeric"
                 />
                 <Text style={[styles.text,]}>SAT Math score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={satMath}
-                  onChangeText={setSatMath}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 200 && value <= 800)) {
+                          setSatMath(formatted);
+                      }
+                  }}
                   placeholder="Ex: 600..."
+                  keyboardType="numeric"
                 />
                 <Text style={[styles.text, ]}>SAT Evidence Based Reading and Writing score?</Text>
                 <TextInput
-                  style={[styles.textInput, ]}
+                  style={[styles.textInput]}
                   value={satCriticalReading}
-                  onChangeText={setSatCriticalReading}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 200 && value <= 800)) {
+                          setSatCriticalReading(formatted);
+                      }
+                  }}
                   placeholder="Ex: 600..."
+                  keyboardType="numeric"
                 />
               </>
             )}
