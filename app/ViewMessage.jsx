@@ -10,6 +10,7 @@ import { UserContext } from '../components/UserContext';
 const firestore = getFirestore(db);
 
 const ViewMessage = ( { navigation } ) => {
+    console.log("Looping entire ViewMessaage");
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [colleges, setColleges] = useState([]);
   const [collegeName, setCollegeName] = useState('');
@@ -34,14 +35,12 @@ const ViewMessage = ( { navigation } ) => {
                } catch (error) {
                  console.error('Error Fetching Username and CollegeName:', error);
                }
+           console.log("Loop inside of fetch username");
              };
-         fetchUsername(auth().currentUser.uid);
-         console.log(activeMessages);
+         //};
 
-
-
-
-
+  fetchUsername(auth().currentUser.uid);
+         //console.log("LOOP");
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -69,6 +68,7 @@ const ViewMessage = ( { navigation } ) => {
         console.error('Error fetching committed colleges:', error);
         Alert.alert('Error', 'Something went wrong while fetching committed colleges.');
       }
+        console.log("LOOP INSIDE USEEFFECT");
     };
 
     fetchCommittedColleges();
@@ -81,6 +81,7 @@ const ViewMessage = ( { navigation } ) => {
 
   const handleFollowedForumsNavigation = () => {
     navigation.navigate('FollowedForums');
+    console.log("LOOP AT END");
   };
 
   return (
@@ -110,6 +111,7 @@ const ViewMessage = ( { navigation } ) => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
