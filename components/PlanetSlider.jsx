@@ -61,13 +61,13 @@ const slides = [
     icon: "head",
     page: 'AI',
     image: greImage,
-    iconColor: "yellow",
+    iconColor: "orange",
   },
   {
     icon: "star-settings-outline",
     page: 'Settings',
     image: cynImage,
-    iconColor: "yellow",
+    iconColor: "orange",
   },
 ];
 
