@@ -63,10 +63,10 @@ import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
 import ProfilePage from './app/ProfilePage';
+import Onboarding from 'react-native-onboarding-swiper';
 
 const firestore = getFirestore(db);
 
-import Onboarding from 'react-native-onboarding-swiper';
 
 const screenOptions = {
   tabBarShowLabel: false,
