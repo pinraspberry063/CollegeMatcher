@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   sunContainer: {
     position: 'absolute',
-    top: height * 0.3,
+    top: height * 0.35,
     left: width * 0.1,
     width: width * 0.8,
     height: width * 0.8,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   planetContainer: {
     position: 'absolute',
-    top: height * 0.25,
+    top: height * 0.3,
     left: 0,
     right: 0,
     zIndex: 1,
