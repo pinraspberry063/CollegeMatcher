@@ -61,22 +61,14 @@ const RoomateResults = ({ route, navigation }) => {
                    const roomateDocRef = doc(firestore, 'Users', roomateDoc.id);
                    const userData = userDoc.data();
                    const roomateData = roomateDoc.data();
-                   //userData.activeMessages.arrayUnion(roomateUID);
-                   //roomateData.activeMessages.arrayUnion(userUID);
-                   //console.log("chhecking usesr active messages");
-                   //console.log(userData.activeMessages);
-                   //console.log(roomateUID);
+                   //populate the users active messages with the roomates uid
                    await updateDoc(userDocRef, {
                         activeMessages: arrayUnion(roomateUID),
                     })
-                   //console.log(userData.actievMessaages[0]);
-                   console.log("checking roomate active messages");
+                    //populate the roomates active messages with the users uid
                    await updateDoc(roomateDocRef, {
                         activeMessages: arrayUnion(userUID),
                     })
-                   //console.log(roomateData.activeMessages);
-                   //setUsername(userData.Username);
-                   //setActiveMessages(userData.activeMessages);
                  } else {
                    console.error('(RoomateMatcher/username)No user found with the given UID.');
                  }

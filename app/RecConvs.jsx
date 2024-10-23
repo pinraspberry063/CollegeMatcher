@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, Button, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, updateDoc, doc, arrayUnion, arrayRemove, getDocs, where, addDoc } from 'firebase/firestore';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
@@ -63,7 +63,7 @@ const RecConvs = ({ navigation }) => {
       for (const collegeName of committedColleges) {
         const collegesQuery = query(
           collection(firestore, 'CompleteColleges'),
-          where('school_name', '==', collegeName)
+          where('shool_name', '==', collegeName)
         );
         const collegeSnapshot = await getDocs(collegesQuery);
 
@@ -118,7 +118,36 @@ const RecConvs = ({ navigation }) => {
         const conversationId = existingConvoSnapshot.docs[0].id;
         navigation.navigate('Message', { conversationId });
       } else {
+        //populate recruiter and users active messages
+               try {
+                 const usersRef = collection(firestore, 'Users');
+                 const q = query(usersRef, where('User_UID', '==', user.uid));
+                 const k = query(usersRef,where('User_UID', '==', recruiterUID));
+                 const queryUserSnapshot = await getDocs(q);
+                 const queryRecruiterSnapshot = await getDocs(k);
+                 if (!queryUserSnapshot.empty && !queryRecruiterSnapshot.empty) {
+                   const userDoc = queryUserSnapshot.docs[0];
+                   const userDocRef = doc(firestore, 'Users', userDoc.id);
+                   const recruiterDoc = queryRecruiterSnapshot.docs[0];
+                   const recruiterDocRef = doc(firestore, 'Users', recruiterDoc.id);
+                   const userData = userDoc.data();
+                   const recruiterData = recruiterDoc.data();
+                   //populate the users active messages with the recruiters uid
+                   await updateDoc(userDocRef, {
+                        activeMessages: arrayUnion(recruiterUID),
+                    })
+                    //populate the recruiters active messages with the users uid
+                   await updateDoc(recruiterDocRef, {
+                        activeMessages: arrayUnion(user.uid),
+                    })
+                 } else {
+                   console.error('No user found with the given UID.');
+                 }
+               } catch (error) {
+                 console.error('Error Fetching Username:', error);
+               }
         // No conversation exists, create a new one
+
         const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
           Recruiter_UID: recruiterUID,
           User_UID: user.uid,
