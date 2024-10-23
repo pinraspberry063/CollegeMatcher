@@ -53,13 +53,25 @@ const ViewMessage = ( { navigation } ) => {
 
     fetchCommittedColleges();
   }, [user]);
+
     const handleMessageNavigation = useCallback(
         async (userUID,otherUID) => {
-          //add
 
           //navigate to the roomate's messaging page
           const firestore = getFirestore(db);
           const messagingRef = collection(firestore, 'Messaging');
+          //Get recruiter status of the other user
+          const otherQuery = query(collection(firestore, 'Users'), where('User_UID', '==', otherUID));
+          const otherSnapshot = await getDocs(otherQuery);
+          if(!otherSnapshot.empty){
+              const otherData = otherSnapshot.docs[0].data();
+            setIsRecruiter(otherData.IsRecruiter);
+          if(otherData.IsRecruiter == true){
+              console.log("IsRecruiter");
+              }
+          console.log("Not Recruiter");
+          }
+          //const messagingRef = collection(firestore, 'Messaging');
           const existingConvoInQuery = query(
             messagingRef,
             where('Roomate_UID', '==', userUID),
