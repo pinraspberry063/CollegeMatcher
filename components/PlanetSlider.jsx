@@ -31,7 +31,7 @@ const slides = [
     icon: "lead-pencil",
     page: 'QuizButton',
     image: redImage,
-    iconColor: "white",
+    iconColor: "yellow",
   },
   {
     icon: "magnify",
@@ -43,31 +43,31 @@ const slides = [
     icon: "compare-vertical",
     page: 'CompareColleges',
     image: pnkImage,
-    iconColor: "black",
+    iconColor: "yellow",
   },
   {
     icon: "message",
     page: 'Messages',
     image: bluImage,
-    iconColor: "orange",
+    iconColor: "yellow",
   },
   {
     icon: "earth",
     page: 'ColForumSelectorTab',
     image: brnImage,
-    iconColor: "white",
+    iconColor: "yellow",
   },
   {
     icon: "head",
     page: 'AI',
     image: greImage,
-    iconColor: "red",
+    iconColor: "yellow",
   },
   {
     icon: "star-settings-outline",
     page: 'Settings',
     image: cynImage,
-    iconColor: "red",
+    iconColor: "yellow",
   },
 ];
 
