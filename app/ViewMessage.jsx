@@ -19,27 +19,6 @@ const ViewMessage = ( { navigation } ) => {
   const [activeMessages, setActiveMessages] = useState([]);
   const theme = useContext(themeContext);
 
-        const fetchUsername = async (uid) => {
-               try {
-                 const usersRef = collection(firestore, 'Users');
-                 const q = query(usersRef, where('User_UID', '==', uid));
-                 const querySnapshot = await getDocs(q);
-                 if (!querySnapshot.empty) {
-                   const userDoc = querySnapshot.docs[0];
-                   const userData = userDoc.data();
-                   setUsername(userData.Username);
-                   setActiveMessages(userData.activeMessages);
-                 } else {
-                   console.error('(RoomateMatcher/username)No user found with the given UID.');
-                 }
-               } catch (error) {
-                 console.error('Error Fetching Username and CollegeName:', error);
-               }
-           console.log("Loop inside of fetch username");
-             };
-         //};
-
-  fetchUsername(auth().currentUser.uid);
          //console.log("LOOP");
 
   useEffect(() => {
@@ -70,6 +49,28 @@ const ViewMessage = ( { navigation } ) => {
       }
         console.log("LOOP INSIDE USEEFFECT");
     };
+        const fetchUsername = async (uid) => {
+               try {
+                 const usersRef = collection(firestore, 'Users');
+                 const q = query(usersRef, where('User_UID', '==', uid));
+                 const querySnapshot = await getDocs(q);
+                 if (!querySnapshot.empty) {
+                   const userDoc = querySnapshot.docs[0];
+                   const userData = userDoc.data();
+                   setUsername(userData.Username);
+                   setActiveMessages(userData.activeMessages);
+                   console.log("HEY, FETCH USERNAME!");
+                 } else {
+                   console.error('(RoomateMatcher/username)No user found with the given UID.');
+                 }
+               } catch (error) {
+                 console.error('Error Fetching Username and CollegeName:', error);
+               }
+           console.log("Loop inside of fetch username");
+             }
+         //};
+
+        fetchUsername(auth().currentUser.uid);
 
     fetchCommittedColleges();
   }, [user]);
