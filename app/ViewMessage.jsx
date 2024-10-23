@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, Button, Alert } from 'react-native';
+import { StyleSheet, Text, FlatList, View, ScrollView, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -17,6 +17,7 @@ const ViewMessage = ( { navigation } ) => {
   const [userName, setUsername] = useState('');
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
+  const [isRecruiter, setIsRecruiter] = useState(false);
   const theme = useContext(themeContext);
 
          //console.log("LOOP");
@@ -63,32 +64,32 @@ const ViewMessage = ( { navigation } ) => {
     console.log("LOOP AT END");
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {activeMessages.length > 0 ? (
-          activeMessages.map((activeMessages) => (
-            <View key={activeMessages} style={styles.buttonContainer}>
+
+  //console.log(getDocs(query(collection(firestore,'Users'),where('Users_UID', '==',item)))).docs[0].data().Username);
+      const renderItem = ({ item }) => (
+          <View style={styles.card}>
+              <Text style={styles.username}>{
+              item}</Text>
               <Button
-                title={activeMessages}
-                onPress={() => handleNavigation(college)}
-                color={theme.buttonColor}
+                  style={styles.button}
+                  onPress={() => handleMessageNavigation(user.uid,item)}
+                  title="Message"
               />
-            </View>
-          ))
-        ) : (
-          <Text style={styles.noCollegesText}>No committed colleges found.</Text>
-        )}
-        <View style={styles.followedForumsButtonContainer}>
-          <Button
-            title="View Followed Forums"
-            onPress={handleFollowedForumsNavigation}
-            color={theme.buttonColor}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+          </View>
+      );
+
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Top 5 Roomate Matches</Text>
+            <FlatList
+                data={activeMessages}
+                renderItem={renderItem}
+                //keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={styles.list}
+            />
+        </SafeAreaView>
+    );
 };
 
 
@@ -97,6 +98,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+    card: {
+        backgroundColor: '#8f8f8f',
+        padding: 20,
+        borderRadius: 10,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
   buttonContainer: {
     marginBottom: 16,
   },
@@ -112,6 +124,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
+      username: {
+          fontSize: 18,
+          fontWeight: 'bold',
+          marginBottom: 5,
+      },
 });
 
 export default ViewMessage;
