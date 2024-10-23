@@ -58,10 +58,31 @@ import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
 import ProfilePage from './app/ProfilePage';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 
 
 const firestore = getFirestore(db);
+
+// Create a query client instance
+const queryClient = new QueryClient();
+
+const fetchAllColleges = async () => {
+  const snapshot = await getDocs(collection(firestore, 'CompleteColleges'))
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+};
+// Pre-fetch the data before rendering the app
+queryClient.prefetchQuery({
+    queryKey: ['colleges'], // Now an array inside an object
+    queryFn: fetchAllColleges, // Query function passed as part of the object
+  })
+  .then(() => {
+    console.log('Data has been pre-fetched');
+  })
+  .catch((error) => {
+    console.error('Error pre-fetching data:', error);
+  });
 
 
 const screenOptions = {
@@ -271,7 +292,7 @@ const getTabBarVisibility = (route) => {
   ) {
     return { display: 'none' }; // Hide tab bar for specific routes
   }
-  console.log(routeName)
+  
   return { display: 'flex' }; // Show tab bar for other routes
 };
 
@@ -346,12 +367,21 @@ const checkUserStatus = async (userId) => {
   return 'regular';
 };
 
+
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const queryClient = new QueryClient();
   // const [takenQuiz, setTakenQuiz] = useState(false);
   // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['colleges'], // Key for the cached query
+      queryFn: fetchAllColleges, // The function to fetch the data
+    });
+  }, [queryClient]);
 
   useEffect(() => {
     const listener = EventRegister.addEventListener('Change Theme', (data) => {
@@ -414,7 +444,9 @@ const App = () => {
     return (
 
         <UserProvider>
-        {/* <CollegesProvider> */}
+        <QueryClientProvider client={queryClient}>
+          <CollegesProvider>
+        
             <NavigationContainer>
               <RootStack.Navigator screenOptions={screenOptions}>
   {/*                */}{/* {user ? ( */}
@@ -426,7 +458,9 @@ const App = () => {
                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
               </RootStack.Navigator>
             </NavigationContainer>
-          {/* </CollegesProvider> */}
+            
+            </CollegesProvider>
+          </QueryClientProvider>
         </UserProvider>
       
     )

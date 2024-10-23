@@ -1,5 +1,5 @@
 import firebase from 'firebase/compat/app';
-import {getFirestore} from 'firebase/firestore';
+import {getFirestore  } from 'firebase/firestore';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import '@react-native-firebase/dynamic-links';
 
@@ -11,6 +11,7 @@ const firebaseConfig = {
   messagingSenderId: "927238517919",
   appId: "1:927238517919:android:0109f3299db0f46c5cdeaa"
 };
-const db = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
+const db = !firebase.apps.length ? firebase.initializeApp(firebaseConfig, {experimentalForceLongPolling: true, useFetchStreams: false}) : firebase.app();
+
 export default { db};
 
