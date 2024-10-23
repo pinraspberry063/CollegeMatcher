@@ -23,7 +23,7 @@ const ViewMessage = ( { navigation } ) => {
          //console.log("LOOP");
 
   useEffect(() => {
-    const fetchCommittedColleges = async () => {
+    const fetchActiveMessages = async () => {
       if (!user || !user.uid) {
         Alert.alert('Error', 'User not logged in.');
         return;
@@ -51,7 +51,7 @@ const ViewMessage = ( { navigation } ) => {
         console.log("LOOP INSIDE USEEFFECT");
     };
 
-    fetchCommittedColleges();
+    fetchActiveMessages();
   }, [user]);
 
     const handleMessageNavigation = useCallback(
