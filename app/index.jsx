@@ -22,7 +22,6 @@ const Index = ({ navigation }) => {
       }
 
       try {
-        // Step 1: Query the "Users" collection to find the logged-in user and check if they are a Super Recruiter
         const userQuery = query(
           collection(firestore, 'Users'),
           where('User_UID', '==', user.uid)
@@ -33,11 +32,9 @@ const Index = ({ navigation }) => {
         if (!userSnapshot.empty) {
           const userData = userSnapshot.docs[0].data();
 
-          // Check if the user is a Super Recruiter
           if (userData.SuperRecruiter) {
             setIsSuperRec(true);
 
-            // Step 2: Use the "RecruiterInstitution" field to find the college in "CompleteColleges"
             const recruiterInstitution = userData.RecruiterInstitution;
 
             const collegeQuery = query(
@@ -47,7 +44,6 @@ const Index = ({ navigation }) => {
 
             const collegeSnapshot = await getDocs(collegeQuery);
 
-            // If a matching college document is found, save the document ID
             if (!collegeSnapshot.empty) {
               setCollegeDocId(collegeSnapshot.docs[0].id);
             } else {
@@ -64,76 +60,71 @@ const Index = ({ navigation }) => {
     };
 
     checkSuperRec();
-  }, [user]);  // Run the check when the component mounts or user changes
+  }, [user]);
 
   return (
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
-    <View style={styles.container}>
-      <View style={styles.icon}>
-        {/* <Ionicons
-          color='white'
-          raised
-          name="settings-outline"
-          size={40}
-          onPress={() => {
-            navigation.push('Settings');
-          }}
-        /> */}
-      </View>
+      <View style={styles.container}>
+        <SafeAreaView style={styles.titleContainer}>
+          <Text style={[styles.title, {color: 'purple'}]}>
+            College Matcher
+          </Text>
+          <Text style={[styles.subtitle, {color: 'white'}]}>
+            Let colleges find you today!
+          </Text>
+        </SafeAreaView>
 
-      <SafeAreaView style={styles.titleContainer}>
-        <Text style={[styles.title, {color: 'purple'}]}>
-          College Matcher
-        </Text>
-        <Text style={[styles.subtitle, {color: 'white'}]}>
-          Let colleges find you today!
-        </Text>
-      </SafeAreaView>
-        
-        <View style={{flex:1, justifyContent: 'center', alignItems: 'center', marginTop: 100}}>
-        <View style={{marginTop: -30}} >
-          <View style={styles.orangeCircle} />
-        </View>
-          
-          <PlanetSwiper navigation={navigation}/> 
+        {/* Place the sun image as a background */}
+        <View style={styles.sunContainer}>
+          <ImageBackground
+            source={require('../assets/sun.png')}
+            style={styles.sunImage}
+            resizeMode="contain"
+          />
         </View>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          style={[styles.button, { textShadowColor: theme.color }]}
-          onPress={() => {
-            navigation.push('QuizButton');
-          }}
-          title="Take the Quiz"
-          color="#841584"
-          accessibilityLabel="Take the quiz to be matched with colleges automatically"
-        />
+        {/* PlanetSwiper is positioned over the sun */}
+        <View style={styles.planetContainer}>
+          <PlanetSwiper navigation={navigation} />
+        </View>
 
-        {isSuperRec && (
-          <>
-            <Button
-              style={[styles.button, { textShadowColor: theme.color }]}
-              onPress={() => {
-                navigation.push('AddRecs');  // Navigate to AddRecs screen
-              }}
-              title="Add Recruiters to Institution"
-              color="#841584"
-              accessibilityLabel="Access who is considered a recruiter within your institution."
-            />
+        {/* Buttons placed below the planets and sun */}
+        <View style={styles.buttonContainer}>
+          <Button
+            style={[styles.button, { textShadowColor: theme.color }]}
+            onPress={() => {
+              navigation.push('QuizButton');
+            }}
+            title="Take the Quiz"
+            color="#841584"
+            accessibilityLabel="Take the quiz to be matched with colleges automatically"
+          />
 
-            <Button
-              style={[styles.button, { textShadowColor: theme.color }]}
-              onPress={() => {
-                navigation.push('EditCollege', { collegeDocId });
-              }}
-              title="Edit College"
-              color="#841584"
-              accessibilityLabel="Edit your college details"
-            />
-          </>
-        )}
+          {isSuperRec && (
+            <>
+              <Button
+                style={[styles.button, { textShadowColor: theme.color }]}
+                onPress={() => {
+                  navigation.push('AddRecs');
+                }}
+                title="Add Recruiters to Institution"
+                color="#841584"
+                accessibilityLabel="Access who is considered a recruiter within your institution."
+              />
+
+              <Button
+                style={[styles.button, { textShadowColor: theme.color }]}
+                onPress={() => {
+                  navigation.push('EditCollege', { collegeDocId });
+                }}
+                title="Edit College"
+                color="#841584"
+                accessibilityLabel="Edit your college details"
+              />
+            </>
+          )}
+        </View>
       </View>
-    </View>
     </ImageBackground>
   );
 };
@@ -150,7 +141,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: 'center',
-    paddingTop: height * 0.15, // Dynamic padding based on screen height
+    paddingTop: height * 0.1, // Dynamic padding based on screen height
   },
   title: {
     fontSize: height * 0.08, // Dynamic font size based on screen height
@@ -159,28 +150,39 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: height * 0.03, // Dynamic font size for subtitle
   },
-  planetContainer: {
-    flex: 1,
+  sunContainer: {
+    position: 'absolute',
+    top: height * 0.3,
+    left: width * 0.1,
+    width: width * 0.8,
+    height: width * 0.8,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: height * 0.1, // Adjust the top margin dynamically
   },
-  orangeCircle: {
-    width: width * 0.6, // Dynamic width based on screen width
-    height: width * 0.6, // Dynamic height based on screen width (to make it circular)
-    borderRadius: (width * 0.65) / 2, // Ensure circular shape
-    backgroundColor: 'orange',
+  sunImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: (width * 0.8) / 2,
+  },
+  planetContainer: {
     position: 'absolute',
-    alignSelf: 'center',
+    top: height * 0.25,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+    height: height * 0.5,
   },
   buttonContainer: {
-    flex: 1,
+    position: 'absolute',
+    bottom: height * 0.1,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    paddingTop: height * 0.1, // Dynamic top padding
+    justifyContent: 'center',
   },
   button: {
-    width: width * 0.5, // Dynamic button width
-    marginVertical: height * 0.02, // Dynamic margin between buttons
+    width: width * 0.5,
+    marginVertical: height * 0.02,
   },
 });
 

@@ -177,31 +177,40 @@ const Results = ({route, navigation}) => {
     }
 };
 
-     // Function to get or set a random image for a college
+  // Function to get or set a random image for a college, with a fallback image to prevent null source
   const getRandomImage = (collegeName) => {
     if (!collegeImages[collegeName]) {
       const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
       setCollegeImages(prevState => ({ ...prevState, [collegeName]: randomImage }));
     }
-    return collegeImages[collegeName];
+    return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
   };
 
 
-  const renderItem = ({ item }) => {
-    const isCommitted = committedColleges.includes(item.name);
-    const collegeImage = getRandomImage(item.name);
-    
-    return (
-      <ScrollView style={styles.card}>
+
+const renderItem = ({ item }) => {
+  const isCommitted = committedColleges.includes(item.name);
+  const collegeImage = getRandomImage(item.name); // Always get a valid image
+
+  return (
+    <ScrollView style={styles.card}>
+      <View style={styles.collegeRow}>
+        {/* Tapping on the planet will commit/decommit */}
         <TouchableOpacity onPress={() => handleCommit(item.name)}>
-          {/* Display random image, and overlay flag if committed */}
-          <ImageBackground source={collegeImage} style={styles.collegeImage}>
+          <ImageBackground
+            source={collegeImage}
+            style={styles.collegeImage}
+            resizeMode="contain"
+          >
             {isCommitted && (
               <Image source={require('../assets/flag.png')} style={styles.flagImage} />
             )}
           </ImageBackground>
         </TouchableOpacity>
+
+        {/* Tapping on the text will navigate to the college details */}
         <TouchableOpacity
+          style={styles.collegeTextContainer}
           onPress={() => navigation.push('Details', { college: item.name, id: item.id })}
         >
           <Text style={styles.collegeName}>{item.name}</Text>
@@ -209,9 +218,11 @@ const Results = ({route, navigation}) => {
             {(item.score != null) ? `Match Percent: ${item.score}%` : "No Previous Matches"}
           </Text>
         </TouchableOpacity>
-      </ScrollView>
-    );
-  };
+      </View>
+    </ScrollView>
+  );
+};
+
 
 
   const handleFilterSearch = () => {
@@ -562,24 +573,30 @@ const Results = ({route, navigation}) => {
       width: '95%',
       alignSelf: 'center'
     },
+    collegeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
     collegeName: {
       fontSize: 18,
       fontWeight: 'bold',
       color: 'white',
-      marginBottom: 5,
     },
     collegeImage: {
-      width: 70,
-      height: 48,
-      alignSelf: 'flex-end',
+      width: 50,
+      height: 50,
       borderRadius: 15,
+      marginRight: 10,
+      },
+    collegeTextContainer: {
+      flex: 1,
     },
     flagImage: {
       width: 50,
       height: 50,
       position: 'absolute',
       top: 0,
-      right: 10,
+      right: 0,
     },
     collegeScore: {
       fontSize: 16,
