@@ -7,3 +7,6 @@ Icon Kitchen
 App Icon Generator
 https://icon.kitchen/
 
+Illustration Kit
+The Halo icon set
+https://illustrationkit.com/illustrations/halo
