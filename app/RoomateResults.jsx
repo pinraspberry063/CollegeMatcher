@@ -17,8 +17,8 @@ const RoomateResults = ({ route, navigation }) => {
             navigation.navigate('RoomateViewQuiz', { roomate_UID: roomate_uid});
     };
     const handleMessageNavigation = useCallback(
-        async (userUID,roomateUID) => {
-          //add
+        async (userUID,otherUID) => {
+          //Detect if
 
           //navigate to the roomate's messaging page
           const firestore = getFirestore(db);
@@ -26,11 +26,11 @@ const RoomateResults = ({ route, navigation }) => {
           const existingConvoInQuery = query(
             messagingRef,
             where('Roomate_UID', '==', userUID),
-            where('User_UID', '==', roomateUID)
+            where('User_UID', '==', otherUID)
           );
           const existingConvoOutQuery = query(
             messagingRef,
-            where('Roomate_UID', '==', roomateUID),
+            where('Roomate_UID', '==', otherUID),
             where('User_UID', '==', userUID)
           );
           const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
@@ -51,22 +51,22 @@ const RoomateResults = ({ route, navigation }) => {
                try {
                  const usersRef = collection(firestore, 'Users');
                  const q = query(usersRef, where('User_UID', '==', userUID));
-                 const k = query(usersRef,where('User_UID', '==', roomateUID));
+                 const k = query(usersRef,where('User_UID', '==', otherUID));
                  const queryUserSnapshot = await getDocs(q);
                  const queryRoomateSnapshot = await getDocs(k);
                  if (!queryUserSnapshot.empty && !queryRoomateSnapshot.empty) {
                    const userDoc = queryUserSnapshot.docs[0];
                    const userDocRef = doc(firestore, 'Users', userDoc.id);
-                   const roomateDoc = queryRoomateSnapshot.docs[0];
-                   const roomateDocRef = doc(firestore, 'Users', roomateDoc.id);
+                   const otherDoc = queryRoomateSnapshot.docs[0];
+                   const otherDocRef = doc(firestore, 'Users', otherDoc.id);
                    const userData = userDoc.data();
-                   const roomateData = roomateDoc.data();
+                   const otherData = otherDoc.data();
                    //populate the users active messages with the roomates uid
                    await updateDoc(userDocRef, {
-                        activeMessages: arrayUnion(roomateUID),
+                        activeMessages: arrayUnion(otherUID),
                     })
                     //populate the roomates active messages with the users uid
-                   await updateDoc(roomateDocRef, {
+                   await updateDoc(otherDocRef, {
                         activeMessages: arrayUnion(userUID),
                     })
                  } else {
@@ -78,7 +78,7 @@ const RoomateResults = ({ route, navigation }) => {
             // No conversation exists, create a new one
 
             const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
-              Roomate_UID: roomateUID,
+              Roomate_UID: otherUID,
               User_UID: userUID,
             });
 
