@@ -54,7 +54,7 @@ const ViewMessage = ( { navigation } ) => {
     fetchCommittedColleges();
   }, [user]);
     const handleMessageNavigation = useCallback(
-        async (userUID,roomateUID) => {
+        async (userUID,otherUID) => {
           //add
 
           //navigate to the roomate's messaging page
@@ -63,11 +63,11 @@ const ViewMessage = ( { navigation } ) => {
           const existingConvoInQuery = query(
             messagingRef,
             where('Roomate_UID', '==', userUID),
-            where('User_UID', '==', roomateUID)
+            where('User_UID', '==', otherUID)
           );
           const existingConvoOutQuery = query(
             messagingRef,
-            where('Roomate_UID', '==', roomateUID),
+            where('Roomate_UID', '==', otherUID),
             where('User_UID', '==', userUID)
           );
           const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
@@ -86,11 +86,11 @@ const ViewMessage = ( { navigation } ) => {
           } else {
               console.log("No existing convo");
               console.log(userUID);
-              console.log(roomateUID);
+              console.log(otherUID);
             // No conversation exists, create a new one
 
             const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
-              Roomate_UID: roomateUID,
+              Roomate_UID: otherUID,
               User_UID: userUID,
             });
 
@@ -125,7 +125,7 @@ const ViewMessage = ( { navigation } ) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Top 5 Roomate Matches</Text>
+            <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
                 data={activeMessages}
                 renderItem={renderItem}
@@ -142,6 +142,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+      title: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          marginBottom: 20,
+          color: '#faf7f7',
+          textAlign: 'center',
+      },
     card: {
         backgroundColor: '#8f8f8f',
         padding: 20,
