@@ -8,7 +8,7 @@ const firestore = getFirestore(db);
 export const handleReport = async (reportData) => {
   try {
     // Input Validation
-    if (!reportData.reportedUser || !reportData.reason) {
+    if (!reportData.reportedUsername || !reportData.reason || !reportData.reportType || !reportData.threadId) {
       throw new Error('Incomplete report data');
     }
 
@@ -21,7 +21,7 @@ export const handleReport = async (reportData) => {
 
     // Fetch the reported user's User_UID
     const usersRef = collection(firestore, 'Users');
-    const q = query(usersRef, where('Username', '==', reportData.reportedUser));
+    const q = query(usersRef, where('Username', '==', reportData.reportedUsername));
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
@@ -36,8 +36,7 @@ export const handleReport = async (reportData) => {
       reportedUser: reportedUserUID,
       reportedBy: currentUser.uid,
       createdAt: Timestamp.now(),
-      status: 'pending',
-      reason: reportData.reason // Include the reason in the report
+      status: 'pending'
     };
 
     await addDoc(reportRef, report);
@@ -50,7 +49,7 @@ export const handleReport = async (reportData) => {
     } else if (error.message === 'Reported user not found') {
       Alert.alert('Error', 'The user you are trying to report does not exist.');
     } else {
-      return false;
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
     return false;
   }

@@ -36,6 +36,8 @@ import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
+import { Ionicons } from '@expo/vector-icons';
+import { handleBanUser, fetchUserActivity } from './ModeratorScreen';
 
 const firestore = getFirestore(db);
 
@@ -113,8 +115,97 @@ const ColForum = ({route, navigation}) => {
   }, [user]);
 
   useEffect(() => {
-    fetchThreadsAndPosts();
-  }, [collegeName, forumName, isModerator]);
+    const fetchData = async () => {
+      try {
+        console.log('Fetching threads and posts');
+        const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
+        const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
+        const threadsSnapshot = await getDocs(threadsQuery);
+        const threadsList = [];
+
+        console.log(`Found ${threadsSnapshot.size} threads`);
+
+        for (const threadDoc of threadsSnapshot.docs) {
+          const threadData = threadDoc.data();
+          const threadId = threadDoc.id;
+
+          console.log(`Checking ban status for thread creator: ${threadData.createdBy}`);
+          const usersRef = collection(firestore, 'Users');
+          const userQuery = query(usersRef, where('Username', '==', threadData.createdBy));
+          const userQuerySnapshot = await getDocs(userQuery);
+
+          if (userQuerySnapshot.empty) {
+            console.log(`User document not found for: ${threadData.createdBy}`);
+            threadsList.push({
+              id: threadId,
+              ...threadData,
+              posts: []
+            });
+          } else {
+            const userDoc = userQuerySnapshot.docs[0];
+            const userData = userDoc.data();
+            console.log('Thread creator data:', userData);
+            const isThreadCreatorBanned = userData.IsBanned || false;
+            console.log(`Thread ${threadId} creator (${threadData.createdBy}) banned:`, isThreadCreatorBanned);
+
+            if (!isThreadCreatorBanned || isModerator) {
+              console.log(`Including thread ${threadId}`);
+              const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
+              const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
+              const postsSnapshot = await getDocs(postsQuery);
+              const postsList = [];
+
+              for (const postDoc of postsSnapshot.docs) {
+                const postData = postDoc.data();
+                const postCreatorQuery = query(usersRef, where('Username', '==', postData.createdBy));
+                const postCreatorSnapshot = await getDocs(postCreatorQuery);
+
+                if (!postCreatorSnapshot.empty) {
+                  const postCreatorData = postCreatorSnapshot.docs[0].data();
+                  const isPostCreatorBanned = postCreatorData.IsBanned || false;
+
+                  if (!isPostCreatorBanned || isModerator) {
+                    postsList.push({
+                      id: postDoc.id,
+                      ...postData
+                    });
+                  }
+                } else {
+                  console.log(`Post creator not found: ${postData.createdBy}`);
+                  postsList.push({
+                    id: postDoc.id,
+                    ...postData
+                  });
+                }
+              }
+
+              threadsList.push({
+                id: threadId,
+                ...threadData,
+                posts: postsList
+              });
+            } else {
+              console.log(`Excluding thread ${threadId} due to banned creator`);
+            }
+          }
+        }
+
+        console.log(`Setting ${threadsList.length} threads`);
+        setThreads(threadsList);
+
+        // Check if the user is a moderator
+        const userDoc = await getDoc(doc(firestore, 'Users', user.uid));
+        if (userDoc.exists()) {
+          setIsModerator(userDoc.data().IsModerator || false);
+        }
+      } catch (error) {
+        console.error('Error fetching threads and posts:', error);
+        Alert.alert('Error', 'Failed to load threads and posts. Please try again.');
+      }
+    };
+
+    fetchData();
+  }, [collegeName, forumName, user.uid, isModerator]);
 
   const fetchUsernameAndRecruiterStatus = async (uid) => {
     try {
@@ -135,94 +226,6 @@ const ColForum = ({route, navigation}) => {
     }
   };
 
-  const fetchThreadsAndPosts = async () => {
-    try {
-      console.log('Fetching threads and posts');
-      const threadsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads');
-      const threadsQuery = query(threadsRef, orderBy('createdAt', 'desc'));
-      const threadsSnapshot = await getDocs(threadsQuery);
-      const threadsList = [];
-
-      console.log(`Found ${threadsSnapshot.size} threads`);
-
-      for (const threadDoc of threadsSnapshot.docs) {
-        const threadData = threadDoc.data();
-        const threadId = threadDoc.id;
-
-        // Check if the thread creator is banned
-        console.log(`Checking ban status for thread creator: ${threadData.createdBy}`);
-        const usersRef = collection(firestore, 'Users');
-        const userQuery = query(usersRef, where('Username', '==', threadData.createdBy));
-        const userQuerySnapshot = await getDocs(userQuery);
-
-        if (userQuerySnapshot.empty) {
-          console.log(`User document not found for: ${threadData.createdBy}`);
-          // Decide how to handle threads with missing creator data
-          // For now include them to avoid losing data
-          threadsList.push({
-            id: threadId,
-            ...threadData,
-            posts: []
-          });
-        } else {
-          const userDoc = userQuerySnapshot.docs[0];
-          const userData = userDoc.data();
-          console.log('Thread creator data:', userData);
-          const isThreadCreatorBanned = userData.IsBanned || false;
-          console.log(`Thread ${threadId} creator (${threadData.createdBy}) banned:`, isThreadCreatorBanned);
-
-          if (!isThreadCreatorBanned || isModerator) {
-            console.log(`Including thread ${threadId}`);
-            const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
-            const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
-            const postsSnapshot = await getDocs(postsQuery);
-            const postsList = [];
-
-            for (const postDoc of postsSnapshot.docs) {
-              const postData = postDoc.data();
-              // Check if the post creator is banned
-              const postCreatorQuery = query(usersRef, where('Username', '==', postData.createdBy));
-              const postCreatorSnapshot = await getDocs(postCreatorQuery);
-
-              if (!postCreatorSnapshot.empty) {
-                const postCreatorData = postCreatorSnapshot.docs[0].data();
-                const isPostCreatorBanned = postCreatorData.IsBanned || false;
-
-                if (!isPostCreatorBanned || isModerator) {
-                  postsList.push({
-                    id: postDoc.id,
-                    ...postData
-                  });
-                }
-              } else {
-                console.log(`Post creator not found: ${postData.createdBy}`);
-                // Decide how to handle posts with missing creator data
-                // For now, we'll include them to avoid losing data
-                postsList.push({
-                  id: postDoc.id,
-                  ...postData
-                });
-              }
-            }
-
-            threadsList.push({
-              id: threadId,
-              ...threadData,
-              posts: postsList
-            });
-          } else {
-            console.log(`Excluding thread ${threadId} due to banned creator`);
-          }
-        }
-      }
-
-      console.log(`Setting ${threadsList.length} threads`);
-      setThreads(threadsList);
-    } catch (error) {
-      console.error('Error fetching threads and posts:', error);
-      Alert.alert('Error', 'Failed to load threads and posts. Please try again.');
-    }
-  };
   const handleAddThread = async () => {
     if (newThreadTitle.trim() && username) {
         let imageUrls = [];
@@ -329,11 +332,18 @@ const ColForum = ({route, navigation}) => {
   };
 
  const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername) => {
-   setCurrentReportData({ reportType, threadId, postId, reportedUsername });
+   setCurrentReportData({
+     reportType,
+     threadId,
+     postId,
+     reportedUsername,
+     reportedBy: username,
+     createdAt: Timestamp.now()
+   });
    setIsReportModalVisible(true);
  };
 
- const ReportModal = ({ isVisible, onClose, onSubmit }) => {
+ const ReportModal = ({ isVisible, onClose, onSubmit, isModerator, onBanUser, onViewActivity }) => {
    const [selectedReason, setSelectedReason] = useState('');
    const reasons = [
      'Inappropriate content',
@@ -357,21 +367,48 @@ const ColForum = ({route, navigation}) => {
                ]}
                onPress={() => setSelectedReason(reason)}
              >
-               <Text>{reason}</Text>
+               <Text style={selectedReason === reason ? styles.selectedReasonText : styles.reasonText}>{reason}</Text>
              </TouchableOpacity>
            ))}
            <View style={styles.modalButtons}>
-             <Button title="Cancel" onPress={onClose} />
+             <Button title="Cancel" onPress={onClose} color="#841584" />
              <Button
                title="Submit"
                onPress={() => onSubmit(selectedReason)}
                disabled={!selectedReason}
+               color="#841584"
              />
            </View>
+           {isModerator && (
+             <View style={styles.moderatorButtons}>
+               <Button title="Ban User" onPress={onBanUser} color="#FF0000" />
+               <Button title="View Activity" onPress={onViewActivity} color="#0000FF" />
+             </View>
+           )}
          </View>
        </View>
      </Modal>
    );
+ };
+
+ const handleBanUserAction = async () => {
+   if (currentReportData) {
+     const success = await handleBanUser(currentReportData.threadId, currentReportData.reportedUsername);
+     if (success) {
+       Alert.alert('User Banned', 'The user has been banned successfully.');
+     }
+   }
+   setIsReportModalVisible(false);
+ };
+
+ const handleViewUserActivityAction = async () => {
+   if (currentReportData) {
+     const userActivity = await fetchUserActivity(currentReportData.reportedUsername);
+     if (userActivity) {
+       navigation.navigate('UserActivityScreen', { userActivity, reportedUser: currentReportData.reportedUsername });
+     }
+   }
+   setIsReportModalVisible(false);
  };
 
   return (
@@ -408,28 +445,26 @@ const ColForum = ({route, navigation}) => {
 
               {/* Render the uploaded images */}
               {thread.imageUrls && thread.imageUrls.length > 0 && (
-                  <View style={styles.imageContainer}>
-                      {thread.imageUrls.map((url, index) => (
-                          <Image key={index} source={{ uri:url }} style={styles.imageBox} />
-                      ))}
-                  </View>
-              )}
-
-              {images.length > 0 && (
-                <View>
-                  {images.map((imageUri, index) => (
-                    <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
+                <View style={styles.imageContainer}>
+                  {thread.imageUrls.map((url, index) => (
+                    <Image key={index} source={{ uri:url }} style={styles.imageBox} />
                   ))}
-                  {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
                 </View>
               )}
 
-              <Button
-                title="Report Thread"
-                onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
-                disabled={thread.createdBy === username}
-                style={styles.reportButton}
-              />
+              <View style={styles.threadInfoRow}>
+                <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
+                  Created at: {thread.createdAt.toDate().toLocaleString()}
+                </Text>
+                {thread.createdBy !== username && (
+                  <TouchableOpacity
+                    style={styles.reportButton}
+                    onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
+                  >
+                    <Ionicons name="flag-outline" size={16} color="#999" />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
             <Text style={[
               styles.threadCreatedBy,
@@ -438,7 +473,6 @@ const ColForum = ({route, navigation}) => {
             ]}>
               Created by: {thread.createdBy}
             </Text>
-            <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>Created at: {thread.createdAt.toDate().toLocaleString()}</Text>
             {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
                 <Text style={[styles.postContent, {color: theme.textColor}]}>
@@ -454,20 +488,19 @@ const ColForum = ({route, navigation}) => {
                   </View>
                 )}
 
-                <Text
-                  style={[
-                    styles.postCreatedBy,
-                    {color: theme.textColor},
-                    post.isRecruiter && styles.recruiterHighlight, // Highlight if the user is a recruiter
-                  ]}>
-                  Posted by: {post.createdBy}
-                </Text>
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>{post.createdAt.toDate().toLocaleString()}</Text>
-                <Button
-                  title="Report Post"
-                  onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
-                  disabled={post.createdBy === username}
-                />
+                <View style={styles.postInfoRow}>
+                  <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>
+                    {post.createdAt.toDate().toLocaleString()}
+                  </Text>
+                  {post.createdBy !== username && (
+                    <TouchableOpacity
+                      style={styles.reportButton}
+                      onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
+                    >
+                      <Ionicons name="flag-outline" size={16} color="#999" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
             ))}
             <View style={styles.newPostContainer}>
@@ -506,24 +539,27 @@ const ColForum = ({route, navigation}) => {
         onSubmit={async (reason) => {
           setIsReportModalVisible(false);
           if (currentReportData) {
-            const { reportType, threadId, postId, reportedUsername } = currentReportData;
             const reportData = {
-              threadId,
-              postId,
-              reportedUser: reportedUsername,
-              source: 'forum',
-              type: reportType,
-              reason: reason
+              ...currentReportData,
+              reason: reason,
+              status: 'pending' // Add a status field
             };
-
-            const success = await handleReport(reportData);
-            if (success) {
-              Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-            } else {
-              Alert.alert('Error', 'Failed to submit report. Please try again.');
+            try {
+              const success = await handleReport(reportData);
+              if (success) {
+                Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+              } else {
+                Alert.alert('Error', 'Failed to submit report. Please try again.');
+              }
+            } catch (error) {
+              console.error('Error submitting report:', error);
+              Alert.alert('Error', 'An unexpected error occurred. Please try again.');
             }
           }
         }}
+        isModerator={isModerator}
+        onBanUser={handleBanUserAction}
+        onViewActivity={handleViewUserActivityAction}
       />
     </SafeAreaView>
   );
@@ -641,6 +677,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#000',
   },
   reasonButton: {
     padding: 10,
@@ -652,10 +689,37 @@ const styles = StyleSheet.create({
   selectedReasonButton: {
     backgroundColor: '#e0e0e0',
   },
+  reasonText: {
+    color: '#000',
+  },
+  selectedReasonText: {
+    color: '#841584',
+    fontWeight: 'bold',
+  },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+  moderatorButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  reportButton: {
+    padding: 5,
+  },
+  threadInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  postInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
   },
 });
 
