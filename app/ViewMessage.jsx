@@ -16,8 +16,6 @@ const ViewMessage = ( { navigation } ) => {
   const [userName, setUsername] = useState('');
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
-  const [isRecruiter, setIsRecruiter] = useState(false);
-  const [isRoomate, setIsRoomate] = useState(false);
   const theme = useContext(themeContext);
 
         const fetchUsername = async (uid) => {
@@ -31,7 +29,7 @@ const ViewMessage = ( { navigation } ) => {
                    setUsername(userData.Username);
                    setActiveMessages(userData.activeMessages);
                  } else {
-                   console.error('No user found with the given UID.');
+                   console.error('(RoomateMatcher/username)No user found with the given UID.');
                  }
                } catch (error) {
                  console.error('Error Fetching Username and CollegeName:', error);
@@ -39,6 +37,11 @@ const ViewMessage = ( { navigation } ) => {
              };
          fetchUsername(auth().currentUser.uid);
          console.log(activeMessages);
+
+
+
+
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -85,7 +88,7 @@ const ViewMessage = ( { navigation } ) => {
       <ScrollView>
         {activeMessages.length > 0 ? (
           activeMessages.map((activeMessages) => (
-            <View key={activeMessages} style={styles.card}>
+            <View key={activeMessages} style={styles.buttonContainer}>
               <Button
                 title={activeMessages}
                 onPress={() => handleNavigation(college)}
@@ -106,20 +109,9 @@ const ViewMessage = ( { navigation } ) => {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-    card: {
-        backgroundColor: '#f8f8f8',
-        padding: 20,
-        borderRadius: 10,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
-    },
   container: {
     flex: 1,
     padding: 16,
@@ -139,7 +131,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
   },
-
 });
 
 export default ViewMessage;
