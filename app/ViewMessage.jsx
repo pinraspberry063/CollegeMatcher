@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect,useCallback } from 'react';
 import { StyleSheet, Text, FlatList, View, ScrollView, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
@@ -53,12 +53,56 @@ const ViewMessage = ( { navigation } ) => {
 
     fetchCommittedColleges();
   }, [user]);
+    const handleMessageNavigation = useCallback(
+        async (userUID,roomateUID) => {
+          //add
 
-  const handleNavigation = async (collegeName) => {
-    // Navigate to the ForumSelect screen for the selected college
-    navigation.navigate('ForumSelect', { collegeName });
-  };
+          //navigate to the roomate's messaging page
+          const firestore = getFirestore(db);
+          const messagingRef = collection(firestore, 'Messaging');
+          const existingConvoInQuery = query(
+            messagingRef,
+            where('Roomate_UID', '==', userUID),
+            where('User_UID', '==', roomateUID)
+          );
+          const existingConvoOutQuery = query(
+            messagingRef,
+            where('Roomate_UID', '==', roomateUID),
+            where('User_UID', '==', userUID)
+          );
+          const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
+          const existingConvoOutSnapshot = await getDocs(existingConvoOutQuery);
+          if (!existingConvoInSnapshot.empty || !existingConvoOutSnapshot.empty) {
+            // Conversation already exists, navigate to the existing conversation
+            if(!existingConvoInSnapshot.empty){
+                const conversationId = existingConvoInSnapshot.docs[0].id;
 
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
+            else if(!existingConvoOutSnapshot.empty){
+                const conversationId = existingConvoOutSnapshot.docs[0].id;
+                navigation.navigate('RoomateMessage', { conversationId });
+                }
+          } else {
+              console.log("No existing convo");
+              console.log(userUID);
+              console.log(roomateUID);
+            // No conversation exists, create a new one
+
+            const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
+              Roomate_UID: roomateUID,
+              User_UID: userUID,
+            });
+
+            // Create a sub-collection 'conv' within the new conversation document
+            await addDoc(collection(newConvoRef, 'conv'), {});
+
+            // Navigate to the newly created conversation
+            navigation.navigate('RoomateMessage', { conversationId: newConvoRef.id });
+          }
+        },
+        [db, user, navigation] // Dependencies for useCallback
+      );
   const handleFollowedForumsNavigation = () => {
     navigation.navigate('FollowedForums');
     console.log("LOOP AT END");
