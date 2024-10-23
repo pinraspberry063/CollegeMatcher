@@ -276,7 +276,6 @@ const App = () => {
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const {loading} = useContext(CollegesContext);
   const {height: height, width: width} = useWindowDimensions();
 
   const ui_styles = StyleSheet.create({
