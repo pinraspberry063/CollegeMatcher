@@ -58,18 +58,22 @@ const RoomateResults = ({ route, navigation }) => {
                    const userDoc = queryUserSnapshot.docs[0];
                    const userDocRef = doc(firestore, 'Users', userDoc.id);
                    const roomateDoc = queryRoomateSnapshot.docs[0];
+                   const roomateDocRef = doc(firestore, 'Users', roomateDoc.id);
                    const userData = userDoc.data();
                    const roomateData = roomateDoc.data();
                    //userData.activeMessages.arrayUnion(roomateUID);
                    //roomateData.activeMessages.arrayUnion(userUID);
-                   console.log("chhecking usesr active messages");
+                   //console.log("chhecking usesr active messages");
                    //console.log(userData.activeMessages);
                    //console.log(roomateUID);
                    await updateDoc(userDocRef, {
                         activeMessages: arrayUnion(roomateUID),
                     })
                    //console.log(userData.actievMessaages[0]);
-                   //console.log("checking roomate active messages");
+                   console.log("checking roomate active messages");
+                   await updateDoc(roomateDocRef, {
+                        activeMessages: arrayUnion(userUID),
+                    })
                    //console.log(roomateData.activeMessages);
                    //setUsername(userData.Username);
                    //setActiveMessages(userData.activeMessages);
