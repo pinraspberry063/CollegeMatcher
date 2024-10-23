@@ -14,6 +14,7 @@ const ViewMessage = ( { navigation } ) => {
   const [colleges, setColleges] = useState([]);
   const [collegeName, setCollegeName] = useState('');
   const [userName, setUsername] = useState('');
+  const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
   const theme = useContext(themeContext);
 
@@ -60,7 +61,7 @@ const ViewMessage = ( { navigation } ) => {
           const data = userDoc.data();
 
           // Set the colleges from the user's Committed_Colleges field
-          setColleges(data.Committed_Colleges || []);
+          setActiveMessages(data.activeMessaages || []);
         } else {
           Alert.alert('Error', 'User data not found.');
         }
@@ -85,11 +86,11 @@ const ViewMessage = ( { navigation } ) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        {colleges.length > 0 ? (
-          colleges.map((college) => (
-            <View key={college} style={styles.buttonContainer}>
+        {activeMessages.length > 0 ? (
+          activeMessages.map((activeMessages) => (
+            <View key={activeMessages} style={styles.buttonContainer}>
               <Button
-                title={college}
+                title={activeMessages}
                 onPress={() => handleNavigation(college)}
                 color={theme.buttonColor}
               />
