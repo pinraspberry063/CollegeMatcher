@@ -175,7 +175,6 @@ const RoomateMatcher = ({ navigation }) => {
               const quizesRef = collection(firestore, 'RoomateMatcher');
               const q = query(quizesRef, where('userId', '==', uid));
               const querySnapshot = await getDocs(q);
-              //onst quizCount = await querySnapshot.count;
               try{
               if (!querySnapshot.empty) {
                   const userDoc = querySnapshot.docs[0];

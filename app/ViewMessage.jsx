@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
@@ -11,8 +12,35 @@ const firestore = getFirestore(db);
 const ViewMessage = ( { navigation } ) => {
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [colleges, setColleges] = useState([]);
+  const [collegeName, setCollegeName] = useState('');
+  const [userName, setUsername] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
   const theme = useContext(themeContext);
+
+        const fetchUsername = async (uid) => {
+               try {
+                 const usersRef = collection(firestore, 'Users');
+                 const q = query(usersRef, where('User_UID', '==', uid));
+                 const querySnapshot = await getDocs(q);
+                 if (!querySnapshot.empty) {
+                   const userDoc = querySnapshot.docs[0];
+                   const userData = userDoc.data();
+                   setUsername(userData.Username);
+                   setActiveMessages(userData.activeMessages);
+                 } else {
+                   console.error('(RoomateMatcher/username)No user found with the given UID.');
+                 }
+               } catch (error) {
+                 console.error('Error Fetching Username and CollegeName:', error);
+               }
+             };
+         fetchUsername(auth().currentUser.uid);
+         console.log(activeMessages);
+
+
+
+
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
