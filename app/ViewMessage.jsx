@@ -68,6 +68,53 @@ const ViewMessage = ( { navigation } ) => {
             setIsRecruiter(otherData.IsRecruiter);
           if(otherData.IsRecruiter == true){
               console.log("IsRecruiter");
+                  const existingConvoQuery = query(
+                      messagingRef,
+                      where('Recruiter_UID', '==', otherUID),
+                      where('User_UID', '==', user.uid)
+                    );
+                    const existingConvoSnapshot = await getDocs(existingConvoQuery);
+
+                    if (!existingConvoSnapshot.empty) {
+                      // Conversation already exists, navigate to the existing conversation
+                      const conversationId = existingConvoSnapshot.docs[0].id;
+                      navigation.navigate('Message', { conversationId });
+                    } else {
+                      //populate recruiter and users active messages
+                             try {
+                               const usersRef = collection(firestore, 'Users');
+                               const q = query(usersRef, where('User_UID', '==', user.uid));
+                               const k = query(usersRef,where('User_UID', '==', otherUID));
+                               const queryUserSnapshot = await getDocs(q);
+                               const queryRecruiterSnapshot = await getDocs(k);
+                               if (!queryUserSnapshot.empty && !queryRecruiterSnapshot.empty) {
+                                 const userDoc = queryUserSnapshot.docs[0];
+                                 const userDocRef = doc(firestore, 'Users', userDoc.id);
+                                 const recruiterDoc = queryRecruiterSnapshot.docs[0];
+                                 const recruiterDocRef = doc(firestore, 'Users', recruiterDoc.id);
+                                 const userData = userDoc.data();
+                                 const recruiterData = recruiterDoc.data();
+                                 //populate the users active messages with the recruiters uid
+                                 await updateDoc(userDocRef, {
+                                      activeMessages: arrayUnion(recruiterUID),
+                                  })
+                                  //populate the recruiters active messages with the users uid
+                                 await updateDoc(recruiterDocRef, {
+                                      activeMessages: arrayUnion(user.uid),
+                                  })
+                               } else {
+                                 console.error('No user found with the given UID.');
+                               }
+                             } catch (error) {
+                               console.error('Error Fetching Username:', error);
+                             }
+                      // No conversation exists, create a new one
+
+                      // Create a sub-collection 'conv' within the new conversation document
+
+                      // Navigate to the newly created conversation
+                      navigation.navigate('Message', { conversationId: newConvoRef.id });
+                    }
               }
           console.log("Not Recruiter");
           }
@@ -101,16 +148,7 @@ const ViewMessage = ( { navigation } ) => {
               console.log(otherUID);
             // No conversation exists, create a new one
 
-            const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
-              Roomate_UID: otherUID,
-              User_UID: userUID,
-            });
-
             // Create a sub-collection 'conv' within the new conversation document
-            await addDoc(collection(newConvoRef, 'conv'), {});
-
-            // Navigate to the newly created conversation
-            navigation.navigate('RoomateMessage', { conversationId: newConvoRef.id });
           }
         },
         [db, user, navigation] // Dependencies for useCallback
