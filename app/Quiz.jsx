@@ -26,6 +26,9 @@ import stateData from '../assets/state_data';
 import { handleReport } from '../src/utils/reportUtils';
 import Slider from '@react-native-community/slider';
 import { CollegesContext } from '../components/CollegeContext';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['VirtualizedLists should never be nested inside plain ScrollViews']);
 
 const firestore = getFirestore(db);
 
@@ -132,7 +135,6 @@ const Quiz = ({navigation}) => {
     const [actScore, setActScore] = useState('');
     const [satMath, setSatMath] = useState('');
     const [satCriticalReading, setSatCriticalReading] = useState('');
-    const [satWriting, setSatWriting] = useState('');
     const [actMath, setActMath] = useState('');
     const [actScience, setActScience] = useState('');
     const [actReading, setActReading] = useState('');
@@ -194,7 +196,6 @@ const Quiz = ({navigation}) => {
             sat: satScore || 'N/A',
             act: actScore || 'N/A',
             sat_critical_reading: satCriticalReading || 'N/A',
-            sat_writing: satWriting || 'N/A',
             act: actScore || 'N/A',
             act_math: actMath || 'N/A',
             act_science: actScience || 'N/A',
@@ -463,8 +464,16 @@ const Quiz = ({navigation}) => {
           <TextInput
               style={[styles.textInput]}
               value={gpa}
-              onChangeText={setGpa}
+              onChangeText={(text) => {
+                  const formatted = text.replace(/[^0-9.]/g, '');
+                  if (formatted.match(/^\d*\.?\d{0,2}$/)) {
+                      if (formatted === '' || (parseFloat(formatted) >= 0 && parseFloat(formatted) <= 4.00)) {
+                          setGpa(formatted);
+                      }
+                  }
+              }}
               placeholder="Ex: 3.6..."
+              keyboardType="numeric"
           />
         </View>
       );
@@ -496,8 +505,15 @@ const Quiz = ({navigation}) => {
                 <TextInput
                   style={[styles.textInput]}
                   value={actScore}
-                  onChangeText={setActScore}
+                  onChangeText={(text) => {
+                      const formatted = text.replace(/[^0-9]/g, '');
+                      const value = parseInt(formatted, 10);
+                      if (formatted === '' || (value >= 0 && value <= 36)) {
+                          setActScore(formatted);
+                      }
+                  }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Math score?</Text>
@@ -574,18 +590,11 @@ const Quiz = ({navigation}) => {
                   onChangeText={setSatMath}
                   placeholder="Ex: 600..."
                 />
-                <Text style={[styles.text, ]}>SAT Critical Reading score?</Text>
+                <Text style={[styles.text, ]}>SAT Evidence Based Reading and Writing score?</Text>
                 <TextInput
                   style={[styles.textInput, ]}
                   value={satCriticalReading}
                   onChangeText={setSatCriticalReading}
-                  placeholder="Ex: 600..."
-                />
-                <Text style={[styles.text, ]}>SAT Writing score?</Text>
-                <TextInput
-                  style={[styles.textInput, ]}
-                  value={satWriting}
-                  onChangeText={setSatWriting}
                   placeholder="Ex: 600..."
                 />
               </>
