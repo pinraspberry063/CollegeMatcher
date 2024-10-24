@@ -543,7 +543,7 @@ const ColForum = ({route, navigation}) => {
 
                 {/* Report Button */}
                 <TouchableOpacity onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}>
-                    <Image source={require('../assets/flag.png')} style={styles.iconButton} />
+                    <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
                 </TouchableOpacity>
 
                 {/* Add Post Button */}

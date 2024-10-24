@@ -345,7 +345,7 @@ const resetAddPostForm = () => {
                 <View style={styles.buttonContainer}>
                   {/* Report Button */}
                   <TouchableOpacity onPress={() => handleReportSubmission('post', post.id, post.createdBy)}>
-                    <Image source={require('../assets/flag.png')} style={styles.iconButton} />
+                    <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
                   </TouchableOpacity>
                 </View>
               </View>
