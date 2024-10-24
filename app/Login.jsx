@@ -559,6 +559,16 @@ const checkIsRecruiter = async (uid) => {
   }
 };
 
+const determineNextScreen = () => {
+    if (isMfaEnabled) {
+      return 'MFAScreen';
+    } else if (isRecruiter) {
+      return 'RecruiterVerification';
+    } else {
+      return 'Main';
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

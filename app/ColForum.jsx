@@ -331,14 +331,13 @@ const ColForum = ({route, navigation}) => {
     }
   };
 
- const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername) => {
+ const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername, content) => {
    setCurrentReportData({
      reportType,
      threadId,
      postId,
      reportedUsername,
-     reportedBy: username,
-     createdAt: Timestamp.now()
+     content  // Add this
    });
    setIsReportModalVisible(true);
  };
@@ -451,28 +450,30 @@ const ColForum = ({route, navigation}) => {
                   ))}
                 </View>
               )}
-
-              <View style={styles.threadInfoRow}>
-                <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
-                  Created at: {thread.createdAt.toDate().toLocaleString()}
-                </Text>
-                {thread.createdBy !== username && (
-                  <TouchableOpacity
-                    style={styles.reportButton}
-                    onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}
-                  >
-                    <Ionicons name="flag-outline" size={16} color="#999" />
-                  </TouchableOpacity>
-                )}
-              </View>
             </View>
+
             <Text style={[
               styles.threadCreatedBy,
               { color: theme.textColor },
-              thread.isRecruiter && styles.recruiterHighlight // Highlight if the user is a recruiter
+              thread.isRecruiter && styles.recruiterHighlight
             ]}>
               Created by: {thread.createdBy}
             </Text>
+
+            <View style={styles.threadInfoRow}>
+              <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
+                Created at: {thread.createdAt.toDate().toLocaleString()}
+              </Text>
+              {thread.createdBy !== username && (
+                <TouchableOpacity
+                  style={styles.reportButton}
+                  onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy, thread.title)}
+                >
+                  <Ionicons name="flag-outline" size={16} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
+
             {thread.posts.map(post => (
               <View key={post.id} style={styles.postItem}>
                 <Text style={[styles.postContent, {color: theme.textColor}]}>
@@ -495,7 +496,7 @@ const ColForum = ({route, navigation}) => {
                   {post.createdBy !== username && (
                     <TouchableOpacity
                       style={styles.reportButton}
-                      onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy)}
+                      onPress={() => handleReportSubmission('post', thread.id, post.id, post.createdBy, post.content)}
                     >
                       <Ionicons name="flag-outline" size={16} color="#999" />
                     </TouchableOpacity>
@@ -539,21 +540,21 @@ const ColForum = ({route, navigation}) => {
         onSubmit={async (reason) => {
           setIsReportModalVisible(false);
           if (currentReportData) {
+            const { reportType, threadId, postId, reportedUsername, content } = currentReportData;
             const reportData = {
-              ...currentReportData,
-              reason: reason,
-              status: 'pending' // Add a status field
+              threadId,
+              postId,
+              reportedUser: reportedUsername,
+              content: content,
+              source: 'forum',
+              type: reportType,
+              reason: reason
             };
-            try {
-              const success = await handleReport(reportData);
-              if (success) {
-                Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-              } else {
-                Alert.alert('Error', 'Failed to submit report. Please try again.');
-              }
-            } catch (error) {
-              console.error('Error submitting report:', error);
-              Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+            const success = await handleReport(reportData);
+            if (success) {
+              Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+            } else {
+              Alert.alert('Error', 'Failed to submit report. Please try again.');
             }
           }
         }}
