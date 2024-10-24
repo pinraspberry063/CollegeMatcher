@@ -162,8 +162,8 @@ const Message = ({ route, navigation }) => {
     }
   };
 
-  const handleReportMessage = (messageId, reportedUsername) => {
-    setCurrentReportData({ messageId, reportedUsername });
+  const handleReportMessage = (messageId, reportedUsername, messageContent) => {
+    setCurrentReportData({ messageId, reportedUsername, messageContent });
     setIsReportModalVisible(true);
   };
 
@@ -195,7 +195,7 @@ const Message = ({ route, navigation }) => {
               {message.sender_UID !== user.uid && (
                 <TouchableOpacity
                   style={styles.reportButton}
-                  onPress={() => handleReportMessage(message.id, usernames[message.sender_UID])}
+                  onPress={() => handleReportMessage(message.id, usernames[message.sender_UID], message.content)}
                 >
                   <Ionicons name="flag-outline" size={16} color="#999" />
                 </TouchableOpacity>
@@ -222,11 +222,13 @@ const Message = ({ route, navigation }) => {
         onSubmit={async (reason) => {
           setIsReportModalVisible(false);
           if (currentReportData) {
-            const { messageId, reportedUsername } = currentReportData;
+            const { messageId, reportedUsername, messageContent } = currentReportData;
             const reportData = {
               messageId,
               reportedUser: reportedUsername,
+              content: messageContent,
               source: 'message',
+              type: 'roommate_message',
               reason: reason
             };
 

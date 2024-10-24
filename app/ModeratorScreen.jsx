@@ -353,18 +353,25 @@ const ModeratorScreen = ({ navigation }) => {
 
   const renderReportItem = ({ item }) => (
     <View style={styles.reportItem}>
-      <Text>Reported User: {item.reportedUser}</Text>
-      <Text>Reported By: {item.reportedBy}</Text>
-      <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
-      <Button
-        title={item.isBanned ? "Unban User" : "Ban User"}
-        onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
-      />
-      <Button
-        title="View User Activity"
-        onPress={() => handleViewUserActivity(item.reportedUser)}
-        disabled={isLoading} // Prevent multiple taps
-      />
+      <Text style={styles.reportHeader}>Reported User: {item.reportedUser}</Text>
+      <Text style={styles.reportHeader}>Reported By: {item.reportedBy}</Text>
+      <Text style={styles.reportHeader}>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
+      <Text style={styles.reportReason}>Reason: {item.reason}</Text>
+      <View style={styles.contentContainer}>
+        <Text style={styles.contentLabel}>Reported Content:</Text>
+        <Text style={styles.reportedContent}>{item.content}</Text>
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title={item.isBanned ? "Unban User" : "Ban User"}
+          onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
+        />
+        <Button
+          title="View User Activity"
+          onPress={() => handleViewUserActivity(item.reportedUser)}
+          disabled={isLoading}
+        />
+      </View>
     </View>
   );
 
@@ -420,6 +427,36 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
+  },
+  reportHeader: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  reportReason: {
+    fontSize: 16,
+    marginVertical: 10,
+    fontWeight: '500',
+    color: '#666',
+  },
+  contentContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  contentLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 5,
+  },
+  reportedContent: {
+    fontSize: 15,
+    color: '#333',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
 });
 

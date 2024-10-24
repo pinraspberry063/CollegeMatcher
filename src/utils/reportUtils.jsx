@@ -7,8 +7,10 @@ const firestore = getFirestore(db);
 
 export const handleReport = async (reportData) => {
   try {
+    console.log('Received report data:', reportData);
     // Input Validation
     if (!reportData.reportedUser || !reportData.reason) {
+      console.log('Missing fields - reportedUser:', !reportData.reportedUser, 'reason:', !reportData.reason); // Add this
       throw new Error('Incomplete report data');
     }
 
