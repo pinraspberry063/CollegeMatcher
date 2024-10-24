@@ -76,17 +76,17 @@ const fetchAllColleges = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
 };
-// Pre-fetch the data before rendering the app
-queryClient.prefetchQuery({
-    queryKey: ['colleges'], // Now an array inside an object
-    queryFn: fetchAllColleges, // Query function passed as part of the object
-  })
-  .then(() => {
-    console.log('Data has been pre-fetched');
-  })
-  .catch((error) => {
-    console.error('Error pre-fetching data:', error);
-  });
+// // Pre-fetch the data before rendering the app
+// const colleges = queryClient.prefetchQuery({
+//     queryKey: ['colleges'], // Now an array inside an object
+//     queryFn: fetchAllColleges, // Query function passed as part of the object
+//   })
+//   .then(() => {
+//     console.log('Data has been pre-fetched');
+//   })
+//   .catch((error) => {
+//     console.error('Error pre-fetching data:', error);
+//   });
 
 
 const screenOptions = {
