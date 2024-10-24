@@ -48,17 +48,8 @@ const PhoneVerification = ({ navigation }) => {
       const user = userCredential.user;
       setUser(user); // Set the logged-in user in context
 
-      // Check if user document exists
-      const userDocRef = doc(firestore, 'Users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        // Navigate to UsernamePrompt to set up the user document
-        navigation.navigate('UsernamePrompt', { user });
-      } else {
-        // User document exists, navigate to main app
-        navigation.navigate('Main');
-      }
+      // Navigate to Username Prompt
+      navigation.navigate('UsernamePrompt', { user });
     } catch (error) {
       console.error('Code Confirmation Error:', error);
       Alert.alert('Error', 'Invalid verification code.');

@@ -7,7 +7,6 @@ import { UserContext } from '../components/UserContext';  // Import the UserCont
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';  // Firestore imports
 import { db } from '../config/firebaseConfig';  // Import Firebase configuration
 import PlanetSwiper from '../components/PlanetSlider.jsx';
-import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);  // Initialize Firestore
 
@@ -69,7 +68,7 @@ const Index = ({ navigation }) => {
   }, [user]);  // Run the check when the component mounts or user changes
 
   return (
-    <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <View style={styles.container}>
       <View style={styles.icon}>
         {/* <Ionicons
@@ -146,7 +145,7 @@ const Index = ({ navigation }) => {
         )}
       </View>
     </View>
-    </FastImage>
+    </ImageBackground>
   );
 };
 

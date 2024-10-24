@@ -11,6 +11,27 @@ const RoomateResults = ({ route, navigation }) => {
     const { user } = useContext(UserContext);
     const [conversations, setConversations] = useState([]);
     const [usernames, setUsernames] = useState({});
+    //const [roomate_uid, setRoomateUid] = useState('');
+    //const [conversationId, setConversationId] = useState('');
+    const handleRoomateViewQuiz =  async (roomate_uid) => {
+        /*
+        const roomateUIDPass = roomate_uid;
+
+            const firestore = getFirestore(db);
+            const roomateDataRef = collection(firestore, 'RoomateMatcher');
+            const currRoomateQuery = query(
+                        roomateDataRef,
+                         where('userId', '==', roomate_uid)
+                    );
+            const currRoomateSnapshot = await getDocs(currRoomateQuery);
+            console.log("START.......................");
+            console.log(currRoomateSnapshot);
+            console.log('PASSING..................');
+            */
+            console.log("handleRoomateViewQuiz");
+            console.log(roomate_uid);
+            navigation.navigate('RoomateViewQuiz', { roomate_UID: roomate_uid});
+    };
     const handleMessageNavigation = useCallback(
         async (userUID,roomateUID) => {
           const firestore = getFirestore(db);
@@ -58,6 +79,11 @@ const RoomateResults = ({ route, navigation }) => {
         <View style={styles.card}>
             <Text style={styles.username}>{item.name}</Text>
             <Text style={styles.roomateScore}>Match Accuracy: {item.score}%</Text>
+            <Button
+                style={styles.button}
+                onPress={() => handleRoomateViewQuiz(item.roomate_uid)}
+                title="View Roommate Quiz"
+            />
             <Button
                 style={styles.button}
                 onPress={() => handleMessageNavigation(user.uid,item.roomate_uid)}

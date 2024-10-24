@@ -6,33 +6,84 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Switch,
 } from 'react-native';
 import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const Settings = ({ navigation }) => {
   const theme = useContext(themeContext);
-  const [isModerator, setIsModerator] = useState(false);
 
+  // State variables for MFA
+  const [isMfaEnabled, setIsMfaEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch MFA status when the component mounts
   useEffect(() => {
-    const checkModeratorStatus = async () => {
-      const currentUser = auth().currentUser;
-      if (currentUser) {
+    const fetchMfaStatus = async () => {
+      try {
+        const uid = auth().currentUser.uid;
         const firestore = getFirestore(db);
-        const userDoc = await getDoc(doc(firestore, 'Users', currentUser.uid));
+        const userDocRef = doc(firestore, 'Users', uid);
+        const userDoc = await getDoc(userDocRef);
         if (userDoc.exists()) {
-          setIsModerator(userDoc.data().IsModerator || false);
+          const data = userDoc.data();
+          setIsMfaEnabled(data.mfaEnabled || false);
         }
+      } catch (error) {
+        console.error('Error fetching MFA status:', error);
       }
     };
-    checkModeratorStatus();
+    fetchMfaStatus();
   }, []);
+
+  // Handle MFA toggle
+  const handleToggleMfa = (value) => {
+    setIsMfaEnabled(value);
+    if (value) {
+      // Enabling MFA, navigate to MFAScreen for setup
+      navigation.navigate('MFAScreen');
+    } else {
+      // Disabling MFA
+      Alert.alert(
+        'Disable MFA',
+        'Are you sure you want to disable Multi-Factor Authentication?',
+        [
+          { text: 'Cancel', onPress: () => setIsMfaEnabled(true) },
+          {
+            text: 'Yes',
+            onPress: async () => {
+              try {
+                setLoading(true);
+                const uid = auth().currentUser.uid;
+                const firestore = getFirestore(db);
+                await updateDoc(doc(firestore, 'Users', uid), {
+                  mfaEnabled: false,
+                  phoneNumber: '',
+                });
+                Alert.alert('MFA Disabled', 'Multi-Factor Authentication has been disabled.');
+              } catch (error) {
+                console.error('Error disabling MFA:', error);
+                Alert.alert('Error', 'Failed to disable MFA.');
+                setIsMfaEnabled(true); // Revert the toggle switch
+              } finally {
+                setLoading(false);
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
 
   const handleLogout = async () => {
     try {
-      await auth().signOut();
+      const currentUser = auth().currentUser;
+      if (currentUser) {
+        await auth().signOut();
+      }
       navigation.reset({
         index: 0,
         routes: [{ name: 'Launch' }],
@@ -46,38 +97,44 @@ const Settings = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView>
         <TouchableOpacity onPress={() => navigation.navigate('Account')}>
-          <Text style={[styles.item, { color: 'black' }]}>Account</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Account</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
-          <Text style={[styles.item, { color: 'black' }]}>Preferences</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Preferences</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
-          <Text style={[styles.item, { color: 'black' }]}>Committed Colleges</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Committed Colleges</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('ProfilePage')}>
-          <Text style={[styles.item, { color: 'black' }]}>Profile Page</Text>
+            <Text style={[styles.item, { color: theme.color }]}>Profile Page</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Saved MAKK Chats')}>
-          <Text style={[styles.item, { color: 'black' }]}>Saved MAKK Chats</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Saved MAKK Chats</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Privacy')}>
-          <Text style={[styles.item, { color: 'black' }]}>Privacy</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Privacy</Text>
         </TouchableOpacity>
 
+        {/* MFA Toggle Switch */}
+        <View style={styles.switchContainer}>
+          <Text style={[styles.item, { color: theme.color }]}>Enable MFA</Text>
+          <Switch
+            value={isMfaEnabled}
+            onValueChange={handleToggleMfa}
+            trackColor={{ false: '#767577', true: theme.buttonColor }}
+            thumbColor={isMfaEnabled ? theme.buttonColor : '#f4f3f4'}
+            disabled={loading}
+          />
+        </View>
         <TouchableOpacity onPress={() => navigation.navigate('CompareColleges')}>
-          <Text style={[styles.item, { color: 'black' }]}>Compare Colleges</Text>
+          <Text style={[styles.item, { color: theme.color }]}>Compare Colleges</Text>
         </TouchableOpacity>
 
-        {isModerator && (
-          <TouchableOpacity onPress={() => navigation.navigate('ModeratorScreen')}>
-            <Text style={[styles.item, { color: 'black' }]}>Moderation Panel</Text>
-          </TouchableOpacity>
-        )}
 
         <TouchableOpacity onPress={handleLogout}>
           <Text style={[styles.item, { color: 'red' }]}>Logout</Text>
@@ -93,9 +150,14 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 18,
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    paddingVertical: 12,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
 });
 

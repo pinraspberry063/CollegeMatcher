@@ -1,17 +1,11 @@
 import { getFirestore, collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
-import { Alert } from 'react-native';
 
 const firestore = getFirestore(db);
 
 export const handleReport = async (reportData) => {
   try {
-    // Input Validation
-    if (!reportData.reportedUser || !reportData.reason) {
-      throw new Error('Incomplete report data');
-    }
-
     const reportRef = collection(firestore, 'Reports');
     const currentUser = auth().currentUser;
 
@@ -45,13 +39,6 @@ export const handleReport = async (reportData) => {
     return true;
   } catch (error) {
     console.error('Error submitting report: ', error);
-    if (error.message === 'Incomplete report data') {
-      Alert.alert('Input Error', 'Please provide all required information for the report.');
-    } else if (error.message === 'Reported user not found') {
-      Alert.alert('Error', 'The user you are trying to report does not exist.');
-    } else {
-      return false;
-    }
     return false;
   }
 };

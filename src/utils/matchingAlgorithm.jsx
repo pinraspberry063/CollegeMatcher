@@ -377,13 +377,14 @@ const matchColleges = async (studentPreferences, colleges) => {
     });
   
     scores.sort((a, b) => b.score - a.score);
-
     const top100Colleges = scores
+      .slice(0, 50)
       .map(s => ({
         name: s.college.shool_name,
         score: s.score,
         id: s.college.school_id,
       }));
+  
     const resultsRef = collection(firestore, 'Users');
     const resultDoc = query(
       resultsRef,
@@ -396,8 +397,7 @@ const matchColleges = async (studentPreferences, colleges) => {
         docID,
         {
           userPreferences: studentPreferences,
-          top100Colleges: top100Colleges.slice(0, 50),
-          collegeScores: top100Colleges
+          top100Colleges: top100Colleges,
         },
         {merge: true},
       );
@@ -406,8 +406,8 @@ const matchColleges = async (studentPreferences, colleges) => {
     } catch (error) {
       console.error('Error adding document: ', error);
     }
-    const top100 = top100Colleges.slice(0, 50);
-    return {top100};
+  
+    return {top100Colleges};
   };
   
   export default matchColleges;

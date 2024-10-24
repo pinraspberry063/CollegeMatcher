@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert, TextInput, ActivityIndicator } from 'react-native';
-import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, updateDoc, doc, collectionGroup } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import { useFocusEffect } from '@react-navigation/native';
 
 const firestore = getFirestore(db);
 
@@ -11,25 +10,9 @@ const ModeratorScreen = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // useFocusEffect runs the effect when the screen comes into focus
-  useFocusEffect(
-    React.useCallback(() => {
-      let isActive = true; // Set to true when the user navigates to the screen (the screen mounts)
-
-      const fetchReportsData = async () => {
-        if (isActive) {
-          await fetchReports();
-        }
-      };
-
-      fetchReportsData();
-
-      // If the user navigates away from the screen (the screen unmounts), the cleanup function is called:
-      return () => {
-        isActive = false; // Set isActive to false to avoid updating the state on an inactive screen
-      };
-    }, [])
-  );
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   const fetchReports = async () => {
     setIsLoading(true);
@@ -137,11 +120,7 @@ const ModeratorScreen = ({ navigation }) => {
       Alert.alert('User Banned', 'The user has been banned successfully.');
     } catch (error) {
       console.error('Error banning user: ', error);
-      if (error.code === 'permission-denied') {
-        Alert.alert('Permission Denied', 'You do not have the necessary permissions to ban users.');
-      } else {
-        Alert.alert('Error', `Failed to ban user: ${error.message}`);
-      }
+      Alert.alert('Error', 'Failed to ban user. Please try again.');
     }
   };
 
@@ -181,13 +160,7 @@ const ModeratorScreen = ({ navigation }) => {
       Alert.alert('User Unbanned', 'The user has been unbanned successfully.');
     } catch (error) {
       console.error('Error unbanning user: ', error);
-      if (error.code === 'permission-denied') {
-        Alert.alert('Permission Denied', 'You do not have the necessary permissions to unban users.');
-      } else if (error.code === 'network-request-failed') {
-        Alert.alert('Network Error', 'Please check your internet connection and try again.');
-      } else {
-        Alert.alert('Error', `Failed to unban user: ${error.message}`);
-      }
+      Alert.alert('Error', 'Failed to unban user. Please try again.');
     }
   };
 
@@ -213,7 +186,7 @@ const ModeratorScreen = ({ navigation }) => {
       const userUID = userDoc.data().User_UID;
       console.log('Found user:', username, 'UID:', userUID);
 
-      const userActivity = { threads: [], posts: [], messages: [] };
+      const userActivity = { threads: [], posts: [] };
 
       // Fetch all threads created by the user using Collection Group Query
       const threadsQuery = query(
@@ -225,10 +198,11 @@ const ModeratorScreen = ({ navigation }) => {
       console.log(`Total user threads found: ${threadsSnapshot.size}`);
 
       threadsSnapshot.forEach((threadDoc) => {
-        const threadData = threadDoc.data();
-        const threadPath = threadDoc.ref.path;
+        const threadPath = threadDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1
         const pathSegments = threadPath.split('/');
 
+        // Extract collegeName and subgroupName from the path
+        // Ensure the path has the expected structure
         if (pathSegments.length >= 6) {
           const collegeName = pathSegments[1];
           const subgroupName = pathSegments[3];
@@ -237,10 +211,7 @@ const ModeratorScreen = ({ navigation }) => {
             id: threadDoc.id,
             collegeName,
             subgroupName,
-            title: threadData.title,
-            createdAt: threadData.createdAt,
-            imageUrls: threadData.imageUrls || [], // Include imageUrls
-            ...threadData
+            ...threadDoc.data(),
           });
         } else {
           console.warn(`Unexpected thread path structure: ${threadPath}`);
@@ -277,77 +248,24 @@ const ModeratorScreen = ({ navigation }) => {
         }
       });
 
-      // Fetch messages from Messaging collection
-      const messagingRef = collection(firestore, 'Messaging');
-      const userMessagesQuery = query(
-        messagingRef,
-        where('User_UID', '==', userUID)
-      );
-      const roomateMessagesQuery = query(
-        messagingRef,
-        where('Roomate_UID', '==', userUID)
-      );
-      const recruiterMessagesQuery = query(
-        messagingRef,
-        where('Recruiter_UID', '==', userUID)
-      );
-
-      const [userMessagesSnapshot, roomateMessagesSnapshot, recruiterMessagesSnapshot] = await Promise.all([
-        getDocs(userMessagesQuery),
-        getDocs(roomateMessagesQuery),
-        getDocs(recruiterMessagesQuery)
-      ]);
-
-      const fetchMessagesFromConversation = async (conversationDoc) => {
-        const messagesRef = collection(conversationDoc.ref, 'conv');
-        const messagesSnapshot = await getDocs(messagesRef);
-        return messagesSnapshot.docs.map(messageDoc => {
-          const data = messageDoc.data();
-          return {
-            id: messageDoc.id,
-            conversationId: conversationDoc.id,
-            ...data,
-            createdAt: data.createdAt || Timestamp.now() // Provide a default value if createdAt is missing
-          };
-        });
-      };
-
-      const userMessages = await Promise.all(userMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-      const roomateMessages = await Promise.all(roomateMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-      const recruiterMessages = await Promise.all(recruiterMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-
-      userActivity.messages = [...userMessages.flat(), ...roomateMessages.flat(), ...recruiterMessages.flat()];
-
-      // Filter out any undefined or null messages
-      userActivity.messages = userActivity.messages.filter(message => message && message.content);
-
       console.log('User Activity:', JSON.stringify(userActivity, null, 2));
       return userActivity;
     } catch (error) {
       console.error('Error fetching user activity:', error);
-      if (error.code === 'network-request-failed') {
-        Alert.alert('Network Error', 'Please check your internet connection and try again.');
-      } else {
-        Alert.alert('Error', `Failed to fetch user activity: ${error.message}`);
-      }
+      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
       return null;
     }
   };
 
   const handleViewUserActivity = async (reportedUser) => {
     setIsLoading(true);
-    try {
-      const userActivity = await fetchUserActivity(reportedUser);
-      if (userActivity) {
-        navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
-      }
-      // No else needed as fetchUserActivity already handles the alert
-    } catch (error) {
-      // Additional catch in case fetchUserActivity throws
-      console.error('Error in handleViewUserActivity:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
-    } finally {
-      setIsLoading(false);
+    const userActivity = await fetchUserActivity(reportedUser);
+    setIsLoading(false);
+
+    if (userActivity) {
+      navigation.navigate('UserActivityScreen', { userActivity, reportedUser });
+    } else {
+      Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
     }
   };
 
@@ -360,11 +278,7 @@ const ModeratorScreen = ({ navigation }) => {
         title={item.isBanned ? "Unban User" : "Ban User"}
         onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
       />
-      <Button
-        title="View User Activity"
-        onPress={() => handleViewUserActivity(item.reportedUser)}
-        disabled={isLoading} // Prevent multiple taps
-      />
+      <Button title="View User Activity" onPress={() => handleViewUserActivity(item.reportedUser)} />
     </View>
   );
 
