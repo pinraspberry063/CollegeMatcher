@@ -76,7 +76,17 @@ const Results = ({route, navigation}) => {
   const [satSci, setSATSci] = useState();
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
-  
+  const [collegeImages, setCollegeImages] = useState({});
+
+  const collegeImagesArray = [
+    require('../assets/red.png'),
+    require('../assets/gre.png'),
+    require('../assets/pur.png'),
+    require('../assets/brn.png'),
+    require('../assets/cyn.png'),
+    require('../assets/pnk.png'),
+    require('../assets/blu.png')
+  ];
   
 
   useEffect(() => {
@@ -167,42 +177,52 @@ const Results = ({route, navigation}) => {
     }
 };
 
-  const renderItem = ({item}) => {
-    const isCommitted = committedColleges.includes(item.name);
-    
-    return(
-    
+  // Function to get or set a random image for a college, with a fallback image to prevent null source
+  const getRandomImage = (collegeName) => {
+    if (!collegeImages[collegeName]) {
+      const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
+      setCollegeImages(prevState => ({ ...prevState, [collegeName]: randomImage }));
+    }
+    return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
+  };
+
+
+
+const renderItem = ({ item }) => {
+  const isCommitted = committedColleges.includes(item.name);
+  const collegeImage = getRandomImage(item.name); // Always get a valid image
+
+  return (
     <ScrollView style={styles.card}>
-      {/* <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          favoriteCollege({ID: item.id});
-        }}>
-        <Image
-          style={{width: 20, height: 20, alignSelf: 'flex-end'}}
-          source={require('../assets/pinkstar.png')}
+      <View style={styles.collegeRow}>
+        {/* Tapping on the planet will commit/decommit */}
+        <TouchableOpacity onPress={() => handleCommit(item.name)}>
+          <ImageBackground
+            source={collegeImage}
+            style={styles.collegeImage}
+            resizeMode="contain"
+          >
+            {isCommitted && (
+              <Image source={require('../assets/flag.png')} style={styles.flagImage} />
+            )}
+          </ImageBackground>
+        </TouchableOpacity>
 
-          // onError={(error)=> console.log("Image error: " + error)}
-        />
-      </TouchableOpacity> */}
-      <TouchableOpacity
-        onPress={() => handleCommit(item.name)}
-      >
-        {isCommitted ? <Image source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/> : <Image source={require('../assets/rocket.png')} style={[styles.commitButton]}/>}
-
-      </TouchableOpacity>
-                    
-      
-      <TouchableOpacity
-        onPress={() =>
-          navigation.push('Details', {college: item.name, id: item.id})
-        }>
-        <Text style={styles.collegeName}>{item.name}</Text>
-        <Text style={styles.collegeScore}> {(item.score != null)? "Match Percent: " + item.score + "%": "No Previous Matches"}</Text>
-      </TouchableOpacity>
-      
+        {/* Tapping on the text will navigate to the college details */}
+        <TouchableOpacity
+          style={styles.collegeTextContainer}
+          onPress={() => navigation.push('Details', { college: item.name, id: item.id })}
+        >
+          <Text style={styles.collegeName}>{item.name}</Text>
+          <Text style={styles.collegeScore}>
+            {(item.score != null) ? `Match Percent: ${item.score}%` : "No Previous Matches"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
-  )};
+  );
+};
+
 
 
   const handleFilterSearch = () => {
@@ -304,14 +324,8 @@ const Results = ({route, navigation}) => {
       </View>
 
     );
-  
-    
-
   }
-  
- 
 
-  
     return (
       <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
@@ -530,11 +544,10 @@ const Results = ({route, navigation}) => {
       flex: 1,
       resizeMode: 'cover'
     },
-    // container: {
-    //   flex: 1,
-    //   backgroundColor: '#fff',
-    //   padding: 20,
-    // },
+    container: {
+      flex: 1,
+      padding: 20,
+    },
     title: {
       fontSize: 24,
       fontWeight: 'bold',
@@ -560,11 +573,30 @@ const Results = ({route, navigation}) => {
       width: '95%',
       alignSelf: 'center'
     },
+    collegeRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
     collegeName: {
       fontSize: 18,
       fontWeight: 'bold',
       color: 'white',
-      marginBottom: 5,
+    },
+    collegeImage: {
+      width: 50,
+      height: 50,
+      borderRadius: 15,
+      marginRight: 10,
+      },
+    collegeTextContainer: {
+      flex: 1,
+    },
+    flagImage: {
+      width: 50,
+      height: 50,
+      position: 'absolute',
+      top: 0,
+      right: 0,
     },
     collegeScore: {
       fontSize: 16,
@@ -593,7 +625,6 @@ const Results = ({route, navigation}) => {
       backgroundColor: '#fff',
       borderRadius: 50,
       paddingLeft: 25
-  
     },
     searchContainer:{
       width: '15%',
@@ -615,24 +646,19 @@ const Results = ({route, navigation}) => {
       alignItems: 'flex-start',
       paddingTop: 15,
       marginTop: 10
-    
-    
     },
      checkboxContainer:{
       flexDirection: 'row',
       marginBottom: 20,
       width: '95%',
       padding: 10
-  
     }, 
     checkbox:{
       alignSelf: 'center',
-  
     },
     label: {
       margin: 8,
       color: 'black'
-      
     },
     choices: {
       flexDirection: 'row',
@@ -640,13 +666,13 @@ const Results = ({route, navigation}) => {
       width: '90%'
     },
     choiceBox: {
-        width: 125,
-        height: 50,
-        borderBlockColor: 'black',
-        borderWidth: 1,
-        margin: 8,
-        alignSelf: 'center',
-        flexDirection: 'row'
+      width: 125,
+      height: 50,
+      borderBlockColor: 'black',
+      borderWidth: 1,
+      margin: 8,
+      alignSelf: 'center',
+      flexDirection: 'row'
     },
     input: {
       height: 30, 

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard } from 'react-native'
+import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFeedback, Keyboard, Dimensions } from 'react-native'
 import React, { useState, useContext, useEffect } from 'react'
 import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,7 @@ import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RoomateMatcher = ({ navigation }) => {
     const theme = useContext(themeContext);
@@ -175,7 +176,6 @@ const RoomateMatcher = ({ navigation }) => {
               const quizesRef = collection(firestore, 'RoomateMatcher');
               const q = query(quizesRef, where('userId', '==', uid));
               const querySnapshot = await getDocs(q);
-              //onst quizCount = await querySnapshot.count;
               try{
               if (!querySnapshot.empty) {
                   const userDoc = querySnapshot.docs[0];
@@ -324,27 +324,20 @@ const RoomateMatcher = ({ navigation }) => {
 export default RoomateMatcher;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: 20,
-        paddingHorizontal: 16,
-    },
-    textInput: {
-        height: 40,
-        borderWidth: 1,
-        fontSize: 18,
-        padding: 10,
-        marginVertical: 10,
-    },
-    text: {
-        fontSize: 18,
-        paddingVertical: 10,
-    },
-    buttonContainer: {
-        paddingTop: 30,
-        margin: 10,
-    },
-    button: {
-        marginTop: 20,
-    },
+  container: {
+    flex: 1,
+    paddingTop: height * 0.02, // Dynamic top padding
+    paddingHorizontal: width * 0.04, // Dynamic horizontal padding
+  },
+  text: {
+    fontSize: height * 0.025, // Dynamic font size
+    paddingVertical: height * 0.015, // Dynamic vertical padding
+  },
+  buttonContainer: {
+    paddingTop: height * 0.03, // Dynamic top padding for buttons
+    margin: height * 0.02, // Dynamic margin
+  },
+  button: {
+    marginTop: height * 0.02, // Dynamic margin top for buttons
+  },
 });

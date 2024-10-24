@@ -1,3 +1,5 @@
+// Display the different colleges for selection.
+
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, Button, Alert, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

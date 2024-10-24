@@ -16,9 +16,9 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Dimensions,
+  Dimensions
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import {db} from '../config/firebaseConfig';
 import {
   collection,
@@ -43,6 +43,7 @@ import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const ColForum = ({route, navigation}) => {
     const {collegeName, forumName} = route.params;
@@ -50,7 +51,6 @@ const ColForum = ({route, navigation}) => {
     const [newThreadTitle, setNewThreadTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState({});
     const {user} = useContext(UserContext);
-    const theme = useContext(themeContext);
     const [username, setUsername] = useState('');
     const [isRecruiter, setIsRecruiter] = useState(false);
     const [isModerator, setIsModerator] = useState(false);
@@ -871,10 +871,10 @@ const ColForum = ({route, navigation}) => {
       height: 30,
     },
   imageContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      marginBottom: 10,
-      },
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -900,7 +900,7 @@ const ColForum = ({route, navigation}) => {
     marginBottom: 5,
   },
   selectedReasonButton: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#000',
   },
   modalButtons: {
     flexDirection: 'row',

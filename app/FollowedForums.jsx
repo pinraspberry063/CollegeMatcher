@@ -1,7 +1,7 @@
 // After a college is selected, this screen allows the user to follow subgroups of their interest so they are easy to navigate to.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -9,6 +9,7 @@ import { collection, getDocs, doc, query, where, getFirestore, getDoc, updateDoc
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window');
 
 const FollowedForums = ({ navigation }) => {
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
@@ -140,26 +141,26 @@ const FollowedForums = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
+    backgroundColor: '#000',
   },
   buttonContainer: {
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: height * 0.02, // Dynamic margin bottom
+    padding: height * 0.02, // Dynamic padding inside button container
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     backgroundColor: '#000033',
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: height * 0.025, // Dynamic font size
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: 'white',
+    marginBottom: height * 0.01, // Dynamic margin bottom
+    color: '#fff',
   },
   collegeLabel: {
-    fontSize: 14,
-    color: '#555',
-    marginBottom: 8,
+    fontSize: height * 0.02, // Dynamic font size
+    marginBottom: height * 0.01, // Dynamic margin bottom
     color: 'white',
   },
   buttonRow: {
@@ -170,15 +171,15 @@ const styles = StyleSheet.create({
   viewButton: {
     flex: 3,
     backgroundColor: '#4CAF50',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: width * 0.02, // Dynamic margin between buttons
   },
   followButton: {
     flex: 1,
     backgroundColor: '#FF9800',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
   },
