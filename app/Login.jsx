@@ -225,30 +225,48 @@ const Login = ({ navigation }) => {
 
   const handleGoogleLogin = async () => {
     try {
-      await GoogleSignin.signOut(); // Ensures user is prompted to pick account
+      // Ensure the user is signed out before initiating sign-in
+      await GoogleSignin.signOut();
+      // Initiate the Google sign-in process
       await GoogleSignin.hasPlayServices();
       const { idToken } = await GoogleSignin.signIn();
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      // Sign in with Google credential
       const userCredential = await auth().signInWithCredential(googleCredential);
       const user = userCredential.user;
 
-      // === Check if MFA is Enabled ===
-      const uid = user.uid;
-      const userDoc = await getDoc(doc(firestore, 'Users', uid));
-      if (userDoc.exists() && userDoc.data().mfaEnabled) {
-        const phoneNumber = userDoc.data().phoneNumber;
-        if (!phoneNumber) {
-          Alert.alert('MFA Error', 'No phone number associated with this account.');
-          return;
-        }
-        const confirmationResult = await auth().signInWithPhoneNumber(phoneNumber);
-        setMfaConfirmation(confirmationResult);
-        setShowMfaPrompt(true);
-        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+      // Reference to Firestore
+      const firestore = getFirestore(db);
+
+      // Check if user document exists in Firestore
+      const userDocRef = doc(firestore, 'Users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // User document doesn't exist; navigate to UsernamePrompt
+        navigation.navigate('UsernamePrompt', {
+          user,
+          isMfaEnabled: false,
+          isRecruiter: false,
+          nextScreen: determineNextScreen(),
+        });
       } else {
-        // User document exists with a username, proceed to main app
-        setUser(user);
-        navigation.navigate('Main');
+        // User document exists; proceed with MFA check
+
+        const userData = userDoc.data();
+
+        if (userData.mfaEnabled) {
+          // If MFA is enabled, navigate to MFAScreen
+          navigation.navigate('MFAScreen', {
+            nextScreen: determineNextScreen(),
+            phoneNumber: userData.phoneNumber,
+          });
+        } else {
+          // If MFA is not enabled, proceed to main application
+          setUser(user); // Ensure setUser is defined in your context
+          navigation.navigate('Main');
+        }
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
@@ -258,37 +276,60 @@ const Login = ({ navigation }) => {
 
   const handleFacebookLogin = async () => {
     try {
+      // Initiate Facebook Login
       const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+
       if (result.isCancelled) {
         throw new Error('User cancelled the login process');
       }
+
+      // Get the Facebook access token
       const data = await AccessToken.getCurrentAccessToken();
       if (!data) {
         throw new Error('Something went wrong obtaining access token');
       }
+
+      // Create a Firebase credential with the Facebook access token
       const facebookCredential = auth.FacebookAuthProvider.credential(data.accessToken);
+
+      // Sign in with the credential
       const userCredential = await auth().signInWithCredential(facebookCredential);
       const user = userCredential.user;
 
-      // === Check if MFA is Enabled ===
-      const uid = user.uid;
-      const userDoc = await getDoc(doc(firestore, 'Users', uid));
-      if (userDoc.exists() && userDoc.data().mfaEnabled) {
-        const phoneNumber = userDoc.data().phoneNumber;
-        if (!phoneNumber) {
-          Alert.alert('MFA Error', 'No phone number associated with this account.');
-          return;
-        }
-        const confirmationResult = await auth().signInWithPhoneNumber(phoneNumber);
-        setMfaConfirmation(confirmationResult);
-        setShowMfaPrompt(true);
-        Alert.alert('MFA Required', 'A verification code has been sent to your phone.');
+      // Reference to Firestore
+      const firestore = getFirestore(db);
+
+      // Check if user document exists in Firestore
+      const userDocRef = doc(firestore, 'Users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // User document doesn't exist; navigate to UsernamePrompt
+        navigation.navigate('UsernamePrompt', {
+          user,
+          isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
+          isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
+          nextScreen: determineNextScreen(), // Ensure this function exists and returns the appropriate screen
+        });
       } else {
-        // User document exists, proceed to main app
-        setUser(user);
-        navigation.navigate('Main');
+        // User document exists; proceed with MFA check
+
+        const userData = userDoc.data();
+
+        if (userData.mfaEnabled) {
+          // If MFA is enabled, navigate to MFAScreen
+          navigation.navigate('MFAScreen', {
+            nextScreen: determineNextScreen(),
+            phoneNumber: userData.phoneNumber,
+          });
+        } else {
+          // If MFA is not enabled, proceed to main application
+          setUser(user); // Ensure setUser is defined in your context
+          navigation.navigate('Main');
+        }
       }
     } catch (error) {
+      console.error('Facebook Sign-In Error:', error);
       Alert.alert('Facebook Login Failed', error.message);
     }
   };
@@ -300,8 +341,9 @@ const Login = ({ navigation }) => {
    }
 
    try {
+     // Build the dynamic link for email sign-in
      const link = await dynamicLinks().buildLink({
-       link: 'https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}',
+       link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}`,
        domainUriPrefix: 'https://collegematcher46019.page.link',
        android: {
          packageName: 'com.cm_app',
@@ -316,37 +358,178 @@ const Login = ({ navigation }) => {
        android: {
          packageName: 'com.cm_app',
          installApp: false,
-         minimumVersion: '12'
+         minimumVersion: '12',
        },
-       dynamicLinkDomain: 'collegematcher46019.page.link'
+       dynamicLinkDomain: 'collegematcher46019.page.link',
      };
 
      console.log('Action code settings:', actionCodeSettings);
 
-     const userCredential =  auth().sendSignInLinkToEmail(email, actionCodeSettings);
+     // Send the sign-in email link
+     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
      await AsyncStorage.setItem('emailForSignIn', email);
-     const user = userCredential.user;
 
-           // Check if user document exists
-           const userDocRef = doc(firestore, 'Users', user.uid);
-           const userDoc = await getDoc(userDocRef);
-
-           if (!userDoc.exists()) {
-             // Prompt for username
-             navigation.navigate('UsernamePrompt', { user });
-           } else {
-             // User document exists, proceed to main app
-             setUser(user);
-             navigation.navigate('Main');
-           }
-     Alert.alert('Email Sent', 'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.');
+     Alert.alert(
+       'Email Sent',
+       'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
+     );
    } catch (error) {
-     console.error('Email link sign-in error:', error);
-     console.error('Error code:', error.code);
-     console.error('Error message:', error.message);
-     Alert.alert('Error', 'Failed to send email: ${error.message}');
+     console.error('Email Link Sign-In Error:', error);
+     Alert.alert('Email Link Login Failed', error.message);
    }
  };
+
+ // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
+ useEffect(() => {
+   const handleDynamicLink = async (link) => {
+     if (auth().isSignInWithEmailLink(link.url)) {
+       let email = await AsyncStorage.getItem('emailForSignIn');
+       if (!email) {
+         // Prompt the user to enter their email
+         Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
+           email = userEmail;
+         });
+       }
+
+       try {
+         // Complete the sign-in process
+         const userCredential = await auth().signInWithEmailLink(email, link.url);
+         const user = userCredential.user;
+
+         // Reference to Firestore
+         const firestore = getFirestore(db);
+
+         // Check if user document exists in Firestore
+         const userDocRef = doc(firestore, 'Users', user.uid);
+         const userDoc = await getDoc(userDocRef);
+
+         if (!userDoc.exists()) {
+           // User document doesn't exist; navigate to UsernamePrompt
+           navigation.navigate('UsernamePrompt', {
+             user,
+             isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
+             isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
+             nextScreen: determineNextScreen(),
+           });
+         } else {
+           // User document exists; proceed with MFA check
+
+           const userData = userDoc.data();
+
+           if (userData.mfaEnabled) {
+             // If MFA is enabled, navigate to MFAScreen
+             navigation.navigate('MFAScreen', {
+               nextScreen: determineNextScreen(),
+               phoneNumber: userData.phoneNumber,
+             });
+           } else {
+             // If MFA is not enabled, proceed to main application
+             setUser(user); // Ensure setUser is defined in your context
+             navigation.navigate('Main');
+           }
+         }
+
+         // Remove the email from storage
+         await AsyncStorage.removeItem('emailForSignIn');
+       } catch (error) {
+         console.error('Error completing email link sign-in:', error);
+         Alert.alert('Sign-In Failed', error.message);
+       }
+     }
+   };
+
+   // Subscribe to dynamic links
+   const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+
+   // Check if the app was opened with a link
+   dynamicLinks()
+     .getInitialLink()
+     .then((link) => {
+       if (link) {
+         handleDynamicLink(link);
+       }
+     });
+
+   return () => {
+     unsubscribe();
+   };
+ }, []);
+
+// Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
+useEffect(() => {
+  const handleDynamicLink = async (link) => {
+    if (auth().isSignInWithEmailLink(link.url)) {
+      let email = await AsyncStorage.getItem('emailForSignIn');
+      if (!email) {
+        // Prompt the user to enter their email
+        Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
+          email = userEmail;
+        });
+      }
+
+      try {
+        // Complete the sign-in process
+        const userCredential = await auth().signInWithEmailLink(email, link.url);
+        const user = userCredential.user;
+
+        // Reference to Firestore
+        const firestore = getFirestore(db);
+
+        // Check if user document exists in Firestore
+        const userDocRef = doc(firestore, 'Users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (!userDoc.exists()) {
+          // User document doesn't exist; navigate to UsernamePrompt
+          navigation.navigate('UsernamePrompt', {
+            user,
+            isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
+            isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
+            nextScreen: determineNextScreen(), // Ensure this function exists and returns the appropriate screen
+          });
+        } else {
+          // User document exists; proceed with MFA check
+
+          const userData = userDoc.data();
+
+          if (userData.mfaEnabled) {
+            // If MFA is enabled, navigate to MFAScreen
+            navigation.navigate('MFAScreen', {
+              nextScreen: determineNextScreen(),
+              phoneNumber: userData.phoneNumber,
+            });
+          } else {
+            // If MFA is not enabled, proceed to main application
+            setUser(user); // Ensure setUser is defined in your context
+            navigation.navigate('Main');
+          }
+        }
+
+        // Remove the email from storage
+        await AsyncStorage.removeItem('emailForSignIn');
+      } catch (error) {
+        console.error('Error completing email link sign-in:', error);
+        Alert.alert('Sign-In Failed', error.message);
+      }
+    }
+  };
+
+  // Subscribe to dynamic links
+  const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+
+  // Check if the app was opened with a link
+  dynamicLinks()
+    .getInitialLink()
+    .then((link) => {
+      if (link) {
+        handleDynamicLink(link);
+      }
+    });
+
+  return () => {
+    unsubscribe();
+  };
+}, []);
 
 const checkIsRecruiter = async (uid) => {
   try {
