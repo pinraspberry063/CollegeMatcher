@@ -13,11 +13,8 @@ import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const Settings = ({ navigation }) => {
-
-
-  // State variables for MFA
-  const [isMfaEnabled, setIsMfaEnabled] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const theme = useContext(themeContext);
+  const [isModerator, setIsModerator] = useState(false);
 
   useEffect(() => {
     const checkModeratorStatus = async () => {
@@ -49,47 +46,36 @@ const Settings = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView>
         <TouchableOpacity onPress={() => navigation.navigate('Account')}>
-          <Text style={[styles.item, { color: 'black'}]}>Account</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Account</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
-          <Text style={[styles.item, { color: 'black'}]}>Preferences</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Preferences</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
-          <Text style={[styles.item, { color: 'black'}]}>Committed Colleges</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Committed Colleges</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('ProfilePage')}>
-            <Text style={[styles.item, { color: 'black' }]}>Profile Page</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Profile Page</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Saved MAKK Chats')}>
-          <Text style={[styles.item, { color: 'black'}]}>Saved MAKK Chats</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Saved MAKK Chats</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Privacy')}>
           <Text style={[styles.item, { color: 'black' }]}>Privacy</Text>
         </TouchableOpacity>
 
-        {/* MFA Toggle Switch */}
-        <View style={styles.switchContainer}>
-          <Text style={[styles.item, { color: 'black'}]}>Enable MFA</Text>
-          <Switch
-            value={isMfaEnabled}
-            onValueChange={handleToggleMfa}
-            trackColor={{ false: '#767577', true: 'black'}}
-            thumbColor={isMfaEnabled ? 'black' : '#f4f3f4'}
-            disabled={loading}
-          />
-        </View>
         <TouchableOpacity onPress={() => navigation.navigate('CompareColleges')}>
-          <Text style={[styles.item, { color: 'black'}]}>Compare Colleges</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Compare Colleges</Text>
         </TouchableOpacity>
 
         {isModerator && (
           <TouchableOpacity onPress={() => navigation.navigate('ModeratorScreen')}>
-            <Text style={[styles.item, { color: theme.color }]}>Moderation Panel</Text>
+            <Text style={[styles.item, { color: 'black' }]}>Moderation Panel</Text>
           </TouchableOpacity>
         )}
 
