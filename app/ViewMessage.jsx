@@ -157,15 +157,32 @@ const ViewMessage = ( { navigation } ) => {
     navigation.navigate('FollowedForums');
     console.log("LOOP AT END");
   };
-fetchUsername
+   const handleUsername = async (uid) => {
+       console.log("HANDLEING USERNAME");
+       console.log(uid);
+       setUsername(uid);
+       console.log(userName);
+       };
+
 
   //console.log(getDocs(query(collection(firestore,'Users'),where('Users_UID', '==',item)))).docs[0].data().Username);
   const renderItem = ({ item }) => {
-      console.log("asdfasdf");
+      /*
+            const usersRef = collection(firestore, 'Users');
+            const q = query(usersRef, where('User_UID', '==', user.uid));
+            const querySnapshot =  await getDocs(q);
+            if (!querySnapshot.empty) {
+              const userDoc = querySnapshot.docs[0];
+              const userData = userDoc.data();
+              setUsername(userData.Username);
+              }
+          */
+          const mep = handleUsername(item);
+          console.log(mep);
+          console.log(userName);
       return(
       <View style={styles.card}>
-          <Text style={styles.username}>{
-          item}</Text>
+          <Text style={styles.username}>{userName}</Text>
           <Button
               style={styles.button}
               onPress={() => handleMessageNavigation(user.uid,item)}
