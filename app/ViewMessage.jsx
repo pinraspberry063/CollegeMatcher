@@ -18,7 +18,6 @@ const ViewMessage = ( { navigation } ) => {
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
   const [userNames, setUserNames] = useState([]);
-  const [someUserNames, setSomeUserNames] = useState([]);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const theme = useContext(themeContext);
 
@@ -57,10 +56,6 @@ const ViewMessage = ( { navigation } ) => {
                         const data = userNameDoc.data();
                         console.log("BELOW IS THE DATA.USERNAME VALUE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                        console.log(data.Username);
-                       const SOMETHING = data.Username;
-                       console.log(SOMETHING);
-                       someUserNames.push(SOMETHING);
-                       console.log(someUserNames);
                        console.log("ABOOOOOOOVE ISAS THE DATA!!!!!!!!!!!!!!!!!!!!!!!!!!")
                         }
                     console.log("Below should be other peoples usersnames");
@@ -196,12 +191,12 @@ const ViewMessage = ( { navigation } ) => {
   //console.log(getDocs(query(collection(firestore,'Users'),where('Users_UID', '==',item)))).docs[0].data().Username);
       const renderItem = ({ username, item }) => {
           const other = JSON.stringify(item);
-          console.log(item);
-          console.log(username);
+          console.log(other);
+          console.log(userNames.Username);
 
           return(
                     <View style={styles.card}>
-                        <Text style={styles.username}>{username}</Text>
+                        <Text style={styles.username}>{other.Username}</Text>
                         <Button
                             style={styles.button}
                             onPress={() => handleMessageNavigation(user.uid,item)}
@@ -217,7 +212,7 @@ const ViewMessage = ( { navigation } ) => {
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
-                data={someUserNames,activeMessages}
+                data={userNames,activeMessages}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
