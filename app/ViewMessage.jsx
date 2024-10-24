@@ -17,6 +17,7 @@ const ViewMessage = ( { navigation } ) => {
   const [userName, setUsername] = useState('');
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
+  const [userNames, setUserNames] = useState([]);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const theme = useContext(themeContext);
 
@@ -39,8 +40,24 @@ const ViewMessage = ( { navigation } ) => {
           const userDoc = querySnapshot.docs[0];  // Get the first matching document
           const data = userDoc.data();
 
-          // Set the colleges from the user's Committed_Colleges field
+          const activeUserNames = data.activeMessages || [];
           setActiveMessages(data.activeMessages || []);
+          setUserNames(activeUserNames.map(async(activeUser) => {
+              const userNamesQuery = query(collection(firestore, 'Users'),
+                          where('User_UID', '==', activeUser));
+              const querySnapshot = await getDocs(userNamesQuery);
+
+                      if (!querySnapshot.empty) {
+                        const userDoc = querySnapshot.docs[0];  // Get the first matching document
+                        const data = userDoc.data();
+                        //console.log(data.Username);
+                        }
+                        return data
+
+              }))
+
+          // Set the colleges from the user's Committed_Colleges field
+
         } else {
           Alert.alert('Error', 'User data not found.');
         }
@@ -52,7 +69,7 @@ const ViewMessage = ( { navigation } ) => {
     };
 
     fetchActiveMessages();
-  }, [user]);
+  }, []);
 
     const handleMessageNavigation = useCallback(
         async (userUID,otherUID) => {
@@ -157,46 +174,33 @@ const ViewMessage = ( { navigation } ) => {
     navigation.navigate('FollowedForums');
     console.log("LOOP AT END");
   };
-   const handleUsername = async (uid) => {
-       console.log("HANDLEING USERNAME");
-       console.log(uid);
-       setUsername(uid);
-       console.log(userName);
-       };
 
 
   //console.log(getDocs(query(collection(firestore,'Users'),where('Users_UID', '==',item)))).docs[0].data().Username);
-  const renderItem = ({ item }) => {
-      /*
-            const usersRef = collection(firestore, 'Users');
-            const q = query(usersRef, where('User_UID', '==', user.uid));
-            const querySnapshot =  await getDocs(q);
-            if (!querySnapshot.empty) {
-              const userDoc = querySnapshot.docs[0];
-              const userData = userDoc.data();
-              setUsername(userData.Username);
-              }
-          */
-          const mep = handleUsername(item);
-          console.log(mep);
-          console.log(userName);
-      return(
-      <View style={styles.card}>
-          <Text style={styles.username}>{userName}</Text>
-          <Button
-              style={styles.button}
-              onPress={() => handleMessageNavigation(user.uid,item)}
-              title="Message"
-          />
-      </View>
+      const renderItem = ({ username, item }) => {
+          const other = JSON.stringify(item);
+          console.log(other);
+          console.log(userNames.Username);
 
-  )};
+          return(
+                    <View style={styles.card}>
+                        <Text style={styles.username}>{other.Username}</Text>
+                        <Button
+                            style={styles.button}
+                            onPress={() => handleMessageNavigation(user.uid,item)}
+                            title="Message"
+                        />
+                    </View>
+                )
+
+          };
+
 
     return (
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
-                data={activeMessages}
+                data={userNames,activeMessages}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
