@@ -1,7 +1,7 @@
 // College selected. Display the different subgroups within the college's forum.
 
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground, Image, Dimensions } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground, Image, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -20,6 +20,24 @@ const ForumSelect = ({ route, navigation }) => {
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
+  const [subgroupName, setSubgroupName] = useState('');
+  const animationValue = useRef(new Animated.Value(0)).current; // Animation control
+  const [showAddSubgroup, setShowAddSubgroup] = useState(false);
+
+  // Function to toggle Add Subgroup form
+    const toggleAddSubgroup = () => {
+      Animated.spring(animationValue, {
+        toValue: showAddSubgroup ? 0 : 1, // Toggle between 0 (hidden) and 1 (visible)
+        friction: 5,
+        useNativeDriver: true, // set to true for animations
+      }).start();
+      setShowAddSubgroup(!showAddSubgroup);
+    };
+
+    // Function to reset Add Subgroup form
+    const resetAddSubgroupForm = () => {
+      setNewSubgroupName(''); // Clear the subgroup input field
+    };
 
   useEffect(() => {
     if (user) {
@@ -130,6 +148,8 @@ const ForumSelect = ({ route, navigation }) => {
           const docRef = await addDoc(subgroupsRef, newSubgroup);
           setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
           setNewSubgroupName('');
+          resetAddSubgroupForm();
+          toggleAddSubgroup();
         } catch (error) {
           console.error('Error adding new subgroup:', error);
         }
@@ -161,6 +181,14 @@ const ForumSelect = ({ route, navigation }) => {
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <ScrollView>
+          <View style={styles.roommateContainer}>
+            <Text style={styles.roommateText}>Click the alien to find a roommate using our Roommate Quiz!</Text>
+            <TouchableOpacity onPress={handleRoomateMatcherNavigation}>
+              <Image source={require('../assets/alien.png')} style={styles.roommateImage} />
+            </TouchableOpacity>
+          </View>
+
+
         {subgroups.map(subgroup => (
           <View key={subgroup.id} style={styles.buttonContainer}>
             <Text style={styles.buttonText}>{subgroup.forumName}</Text>
@@ -193,23 +221,52 @@ const ForumSelect = ({ route, navigation }) => {
             </View>
           </View>
         ))}
-        <View style={styles.newSubgroupContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="New Subgroup Name"
-            value={newSubgroupName}
-            onChangeText={setNewSubgroupName}
-          />
-          <Button title="Add Subgroup" onPress={handleAddSubgroup} style={styles.button} color="#841584" />
-        </View>
-                <View style={styles.followedForumsButtonContainer}>
+                {/*<View style={styles.followedForumsButtonContainer}>
                     <Button
                       title="Find a Roommate"
                        onPress={handleRoomateMatcherNavigation}
                        color="#841584"
                     />
-                </View>
+                </View>*/}
       </ScrollView>
+      <Animated.View
+              style={[
+                styles.newSubgroupContainer,
+                {
+                  transform: [
+                    {
+                      translateY: animationValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [600, 0], // Slide up the Add Subgroup form
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Subgroup Name"
+                value={newSubgroupName}
+                onChangeText={setNewSubgroupName}
+              />
+              <View style={styles.iconContainer}>
+                {/* Cancel Button */}
+                <TouchableOpacity onPress={() => { toggleAddSubgroup(); resetAddSubgroupForm(); }}>
+                  <Image source={require('../assets/cancel.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+
+                {/* Submit Subgroup Button */}
+                <TouchableOpacity onPress={handleAddSubgroup}>
+                  <Image source={require('../assets/pencil.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+
+            {/* Floating Action Button to Add Subgroup */}
+            <TouchableOpacity style={styles.floatingButton} onPress={toggleAddSubgroup}>
+              <Image source={require('../assets/pencil.png')} style={styles.floatingButtonImage} />
+            </TouchableOpacity>
     </SafeAreaView>
     </ImageBackground>
   );
@@ -231,7 +288,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
-    backgroundColor: '#000033',
+
   },
   buttonText: {
     fontSize: height * 0.025, // Dynamic font size
@@ -279,7 +336,6 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02, // Dynamic margin
     borderRadius: 4,
     color: '#fff',
-    backgroundColor: '#666',
   },
   recruiterHighlight: {
     fontWeight: 'bold',
@@ -292,7 +348,65 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
-  }
+  },
+  newSubgroupContainer: {
+      position: 'absolute',
+      left: '10%',
+      right: '10%',
+      top: '30%', // Adjust this value for vertical positioning
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: 20,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      },
+  iconButton: {
+    width: 24,
+    height: 24,
+    marginHorizontal: 8,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'right',
+    marginTop: 8,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 16,
+    backgroundColor: '#841584',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+  },
+  floatingButtonImage: {
+    width: 30,
+    height: 30,
+  },
+  roommateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#841584',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  roommateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',  // Text color
+    flex: 1,  // Take up space to push the image to the right
+  },
+  roommateImage: {
+    width: 55,  // Image width
+    height: 55,  // Image height
+  },
 });
 
 export default ForumSelect;

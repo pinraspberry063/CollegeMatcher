@@ -16,9 +16,9 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Dimensions,
-  Dimensions
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import themeContext from '../theme/themeContext';
 import {db} from '../config/firebaseConfig';
 import {
   collection,
@@ -51,6 +51,7 @@ const ColForum = ({route, navigation}) => {
     const [newThreadTitle, setNewThreadTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState({});
     const {user} = useContext(UserContext);
+    const theme = useContext(themeContext);
     const [username, setUsername] = useState('');
     const [isRecruiter, setIsRecruiter] = useState(false);
     const [isModerator, setIsModerator] = useState(false);

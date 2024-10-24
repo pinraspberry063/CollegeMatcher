@@ -1,7 +1,7 @@
 // Display the different colleges for selection.
 
 import React, { useState, useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, Button, Alert, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Button, Alert, ImageBackground, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -58,26 +58,33 @@ const ColForumSelector = ({ navigation }) => {
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <ScrollView>
+         <View style={styles.followedForumsContainer}>
+           <Text style={styles.followedForumsText}>View Your Followed Forums </Text>
+           <TouchableOpacity onPress={handleFollowedForumsNavigation}>
+             <Image source={require('../assets/faves.png')} style={styles.followedForumsImage} />
+           </TouchableOpacity>
+         </View>
+
         {colleges.length > 0 ? (
           colleges.map((college) => (
             <View key={college} style={styles.buttonContainer}>
               <Button
                 title={college}
                 onPress={() => handleNavigation(college)}
-                color="#841584"
+                color="#4d5457"
               />
             </View>
           ))
         ) : (
           <Text style={styles.noCollegesText}>No committed colleges found.</Text>
         )}
-        <View style={styles.followedForumsButtonContainer}>
+        {/*<View style={styles.followedForumsButtonContainer}>
           <Button
             title="View Followed Forums"
             onPress={handleFollowedForumsNavigation}
             color="#841584"
           />
-        </View>
+        </View>*/}
       </ScrollView>
     </SafeAreaView>
     </ImageBackground>
@@ -109,6 +116,28 @@ const styles = StyleSheet.create({
       flex: 1,
       resizeMode: 'cover'
     },
+followedForumsContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#841584',
+  padding: 15,
+  borderRadius: 8,
+  marginBottom: 20,
+  borderWidth: 1,
+  borderColor: 'black',
+},
+followedForumsText: {
+  fontSize: 16,
+  fontWeight: 'bold',
+  color: '#fff',  // Text color
+  flex: 1,  // Take up space to push the image to the right
+},
+followedForumsImage: {
+  width: 55,  // Image width
+  height: 55,  // Image height
+},
+
 });
 
 export default ColForumSelector;
