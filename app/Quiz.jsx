@@ -11,6 +11,8 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   TouchableOpacity,
+  LogBox,
+  Alert,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
@@ -26,7 +28,6 @@ import stateData from '../assets/state_data';
 import { handleReport } from '../src/utils/reportUtils';
 import Slider from '@react-native-community/slider';
 import { CollegesContext } from '../components/CollegeContext';
-import { LogBox } from 'react-native';
 
 LogBox.ignoreLogs(['VirtualizedLists should never be nested inside plain ScrollViews']);
 
@@ -506,12 +507,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actScore}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActScore(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScore(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actScore, 10);
+                        if (value > 36) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScore('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -521,12 +531,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actMath}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActMath(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActMath(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actMath, 10);
+                        if (value > 36) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActMath('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -536,12 +555,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actEnglish} 
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActEnglish(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActEnglish(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actEnglish, 10);
+                        if (value > 36) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActEnglish('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -551,12 +579,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actReading}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActReading(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActReading(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actReading, 10);
+                        if (value > 36) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActReading('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -566,12 +603,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actScience}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActScience(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScience(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actScience, 10);
+                        if (value > 36) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScience('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -581,12 +627,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actWriting}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 0 && value <= 36)) {
-                          setActWriting(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActWriting(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actWriting, 10);
+                        if (value > 36) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActWriting('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
@@ -616,12 +671,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput ]}
                   value={satScore}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 400 && value <= 1600)) {
-                          setSatScore(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatScore(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satScore, 10);
+                        if (value > 1600) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (value < 400) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (isNaN(value)) {
+                            setSatScore('N/A');
+                        }
+                    }}
                   placeholder="Ex: 1200..."
                   keyboardType="numeric"
                 />
@@ -630,12 +694,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={satMath}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 200 && value <= 800)) {
-                          setSatMath(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatMath(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satMath, 10);
+                        if (value > 800) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatMath('N/A');
+                        }
+                    }}
                   placeholder="Ex: 600..."
                   keyboardType="numeric"
                 />
@@ -644,12 +717,21 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={satCriticalReading}
                   onChangeText={(text) => {
-                      const formatted = text.replace(/[^0-9]/g, '');
-                      const value = parseInt(formatted, 10);
-                      if (formatted === '' || (value >= 200 && value <= 800)) {
-                          setSatCriticalReading(formatted);
-                      }
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatCriticalReading(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satCriticalReading, 10);
+                        if (value > 800) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatCriticalReading('N/A');
+                        }
+                    }}
                   placeholder="Ex: 600..."
                   keyboardType="numeric"
                 />
