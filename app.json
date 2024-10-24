@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "CM_App",
+    "slug": "cm-app",
     "scheme": "mycollegematcher",
     "entryPoint": "./App.jsx",
     "displayName": "CM_App",

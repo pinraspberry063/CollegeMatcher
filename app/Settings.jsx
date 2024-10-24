@@ -6,11 +6,10 @@ import {
   TouchableOpacity,
   View,
   Alert,
-  Switch,
 } from 'react-native';
 import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
-import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const Settings = ({ navigation }) => {
@@ -20,70 +19,23 @@ const Settings = ({ navigation }) => {
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Fetch MFA status when the component mounts
   useEffect(() => {
-    const fetchMfaStatus = async () => {
-      try {
-        const uid = auth().currentUser.uid;
+    const checkModeratorStatus = async () => {
+      const currentUser = auth().currentUser;
+      if (currentUser) {
         const firestore = getFirestore(db);
-        const userDocRef = doc(firestore, 'Users', uid);
-        const userDoc = await getDoc(userDocRef);
+        const userDoc = await getDoc(doc(firestore, 'Users', currentUser.uid));
         if (userDoc.exists()) {
-          const data = userDoc.data();
-          setIsMfaEnabled(data.mfaEnabled || false);
+          setIsModerator(userDoc.data().IsModerator || false);
         }
-      } catch (error) {
-        console.error('Error fetching MFA status:', error);
       }
     };
-    fetchMfaStatus();
+    checkModeratorStatus();
   }, []);
-
-  // Handle MFA toggle
-  const handleToggleMfa = (value) => {
-    setIsMfaEnabled(value);
-    if (value) {
-      // Enabling MFA, navigate to MFAScreen for setup
-      navigation.navigate('MFAScreen');
-    } else {
-      // Disabling MFA
-      Alert.alert(
-        'Disable MFA',
-        'Are you sure you want to disable Multi-Factor Authentication?',
-        [
-          { text: 'Cancel', onPress: () => setIsMfaEnabled(true) },
-          {
-            text: 'Yes',
-            onPress: async () => {
-              try {
-                setLoading(true);
-                const uid = auth().currentUser.uid;
-                const firestore = getFirestore(db);
-                await updateDoc(doc(firestore, 'Users', uid), {
-                  mfaEnabled: false,
-                  phoneNumber: '',
-                });
-                Alert.alert('MFA Disabled', 'Multi-Factor Authentication has been disabled.');
-              } catch (error) {
-                console.error('Error disabling MFA:', error);
-                Alert.alert('Error', 'Failed to disable MFA.');
-                setIsMfaEnabled(true); // Revert the toggle switch
-              } finally {
-                setLoading(false);
-              }
-            },
-          },
-        ]
-      );
-    }
-  };
 
   const handleLogout = async () => {
     try {
-      const currentUser = auth().currentUser;
-      if (currentUser) {
-        await auth().signOut();
-      }
+      await auth().signOut();
       navigation.reset({
         index: 0,
         routes: [{ name: 'Launch' }],
@@ -135,6 +87,11 @@ const Settings = ({ navigation }) => {
           <Text style={[styles.item, { color: 'black'}]}>Compare Colleges</Text>
         </TouchableOpacity>
 
+        {isModerator && (
+          <TouchableOpacity onPress={() => navigation.navigate('ModeratorScreen')}>
+            <Text style={[styles.item, { color: theme.color }]}>Moderation Panel</Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity onPress={handleLogout}>
           <Text style={[styles.item, { color: 'red' }]}>Logout</Text>
@@ -150,14 +107,9 @@ const styles = StyleSheet.create({
   },
   item: {
     fontSize: 18,
-    paddingVertical: 12,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
 });
 

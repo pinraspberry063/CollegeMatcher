@@ -49,16 +49,23 @@ const UsernamePrompt = ({ navigation, route }) => {
       // Create a new batch to set user data and update username with actual UID
       const userBatch = writeBatch(firestore);
       userBatch.set(userDocRef, {
+        User_UID: user.uid,
         Username: trimmedUsername,
-        // Add other necessary fields or merge with existing data
+        Email: user.email || '',
+        IsRecruiter: false,
+        SuperRecruiter: false,
+        RecruiterInstitution: 'NA',
+        mfaEnabled: false,
+        phoneNumber: user.phoneNumber || '',
+        IsModerator: false,
       }, { merge: true });
       userBatch.update(usernameRef, { uid: user.uid });
 
       // Commit the user batch
       await userBatch.commit();
 
-      // Send email verification if not already sent
-      if (!user.emailVerified) {
+      // Optionally, send email verification if applicable
+      if (user.email && !user.emailVerified) {
         await user.sendEmailVerification();
         Alert.alert('Verification Required', 'Please verify your email before proceeding.');
         navigation.navigate('EmailVerificationPrompt');
@@ -77,8 +84,6 @@ const UsernamePrompt = ({ navigation, route }) => {
         console.error('Username Submission Error:', error);
         Alert.alert('Error', 'Failed to set username. Please try again.');
       }
-      // Optional: Delete the Auth account if Firestore operations fail post-authentication
-      // await auth().currentUser?.delete();
     } finally {
       setLoading(false);
     }
