@@ -11,7 +11,7 @@ const doCirclesOverlap = (circle1, circle2) => {
     const Xmin = 145;
     const Xmax = 350;
     const Ymin = 20;
-    const Ymax = 155;
+    const Ymax = stof*10;
     const radius = 15; // Radius of the circles
     const gridCellSize = (radius * 2) + 6; // Slightly larger than diameter to handle overlaps
   

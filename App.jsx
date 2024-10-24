@@ -96,7 +96,7 @@ const screenOptions = {
     elevation: 0,
     height: 60,
     background: "#fff",
-
+    
   }
 };
 
@@ -114,6 +114,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
     <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
+    <HomeStack.Screen name="AI" component={AIStackScreen} />
   </HomeStack.Navigator>
 );
 
@@ -253,6 +254,8 @@ const Tab = createBottomTabNavigator();
 const TabScreen = () => {
   const [topColleges, setTopColleges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldHideTabBar, setShouldHideTabBar] = useState(true);
+  const [first, setFirst] = useState(true);
   // const user = auth().currentUser.uid;
 
   useEffect(() => {
@@ -283,18 +286,19 @@ const TabScreen = () => {
   }, [topColleges, isLoading]);
 
   // Function to determine tab bar visibility
-const getTabBarVisibility = (route) => {
-  const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
-
-  if (
-    routeName === 'Index' ||
-    routeName === 'Picker'
-  ) {
-    return { display: 'none' }; // Hide tab bar for specific routes
-  }
-  
-  return { display: 'flex' }; // Show tab bar for other routes
-};
+  const handleTabVisibility = (route) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
+    console.log(routeName)
+    if (routeName === 'Index' || routeName === 'Picker' || routeName === 'Home') {
+      setShouldHideTabBar(true);  // Hide tab bar on 'Index' and 'Picker'
+    } else {
+      setShouldHideTabBar(false); // Show tab bar on other screens
+    }
+    if(first){
+      setShouldHideTabBar(true);
+      setFirst(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -305,11 +309,18 @@ const getTabBarVisibility = (route) => {
   }
   return(
   <Tab.Navigator
-    screenOptions={({ route }) => {
-        
-      return {
-        ...screenOptions,
-        tabBarStyle: getTabBarVisibility(route),
+  screenOptions={({ route }) => {
+    
+    // Handle visibility when route changes
+    useEffect(() => {
+      handleTabVisibility(route);
+    }, [route]);
+
+    return {
+      ...screenOptions,
+      tabBarStyle: {
+        display: shouldHideTabBar ? 'none' : 'flex', // Control tab bar visibility
+      },
         tabBarIcon: () => {
           return (
             <MaterialCommunityIcons

@@ -60,7 +60,7 @@ const Demographics = ({navigation, collegeID}) => {
 const college = collegeID;
 const [sToF, setSToF] = useState(collegeID.student_to_Faculty_Ratio);
 const [userPref, setUserPref] = useState([]);
-const [circleData, setCircleData] = useState(generateCircleData(sToF));
+const [circleData, setCircleData] = useState(generateCircleData(collegeID.student_to_Faculty_Ratio));
 const user = auth().currentUser.uid;
 const [majors, setMajors] = useState(unique_Majors({collegeID: collegeID}));
 
@@ -151,7 +151,7 @@ return (
     <Svg height="250" width="100%">
         <Circle cx="50" cy="100" r="50" fill="blue" />
 
-        {/* {circleData.map((circle, index) => (
+        {circleData && circleData.map((circle, index) => (
         <Circle
             key={index}
             cx={circle.cx}
@@ -159,7 +159,7 @@ return (
             r={circle.r}
             fill="pink"
         />
-        ))} */}
+        ))}
     </Svg>
     <View style={{paddingVertical: 20}}>
         <Text style={styles.subTitle}>Major Break Down</Text>
