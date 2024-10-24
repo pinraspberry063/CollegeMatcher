@@ -91,14 +91,17 @@ const RoomateResults = ({ route, navigation }) => {
         [db, user, navigation] // Dependencies for useCallback
       );
     const renderItem = ({ item }) => (
+
         <View style={styles.card}>
             <Text style={styles.username}>{item.name}</Text>
             <Text style={styles.roomateScore}>Match Accuracy: {item.score}%</Text>
+            {/*
             <Button
                 style={styles.button}
                 onPress={() => handleRoomateViewQuiz(item.roomate_uid)}
                 title="View Roommate Quiz"
             />
+            */}
             <Button
                 style={styles.button}
                 onPress={() => handleMessageNavigation(user.uid,item.roomate_uid)}
