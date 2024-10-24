@@ -26,9 +26,9 @@ import { getVertexAI, getGenerativeModel } from "firebase/vertexai-preview";
 // Initialize the Vertex AI service
 const vertexAI = getVertexAI(db);
 
-// Initializes the generative model
+// Initialize the generative model with a model that supports your use case
+// Gemini 1.5 models are versatile and can be used with all API capabilities
 
-// system instructions text
 const si = {
     role: "system",
     parts: [
@@ -42,8 +42,7 @@ When presented with inquiries seeking information, provide answers that reflect 
 For any non-english queries, respond in the same language as the prompt unless otherwise specified by the user.
 For prompts involving reasoning, provide a clear explanation of each step in the reasoning process before presenting the final answer.
 Ground your responses about university facts and figures using data from the internet.
-Provide users links to university websites when appropriate.
-Limit your responses to an amount appropriate for a mobile app screen.`,
+Provide users links to university websites when appropriate.`,
         }
     ]
 }
@@ -58,7 +57,7 @@ const MakkAI = () => {
   useEffect(() => {
     const initializeChatSession = () => {
       try {
-        const chat =  model.startChat({ generationConfig: {maxOutputTokens: 500 } });
+        const chat =  model.startChat({ generationConfig: {maxOutputTokens: 200 } });
         console.log("model started chat: ", chat);
         setchatSession(chat);
       } catch (error) {
@@ -90,7 +89,7 @@ const MakkAI = () => {
     }
 
     try {
-      // streaming response type chat (didn't work, come back and fix later)
+      // stream type chat (didn't work, come back and fix later)
 
       // const { stream, response } = chatSession.sendMessageStream(userText);
       // if (!stream.text()) {
@@ -137,7 +136,7 @@ const MakkAI = () => {
             style={{flex: 1}}
             behavior={Platform.OS === "ios" ? "padding" : null}>
 
-
+          
             <FlatList
                 data={messages}
                 renderItem={({ item }) => (
@@ -152,7 +151,7 @@ const MakkAI = () => {
                   style={[styles.input]}
                   value={input}
                   onChangeText={setInput}
-                  placeholder="Chat with an AI assistant about your college questions!"
+                  placeholder="Type your message"
                   placeholderTextColor='white'
                   color='white'
               />
@@ -164,7 +163,7 @@ const MakkAI = () => {
               {/* <Button title="Send" onPress={sendMessage} /> */}
               {/*<Button title="Send" onPress={run} />*/}
             </View>
-
+          
         </KeyboardAvoidingView>
       </ImageBackground>
   );
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
-
+    
   },
   input: {
     flex: 1,
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginRight: 10,
-    borderColor: 'white',
+    borderColor: 'white', 
     color: 'white'
   },
 });

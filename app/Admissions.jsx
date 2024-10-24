@@ -17,7 +17,6 @@ query,
 where,
 } from 'firebase/firestore';
 import { CollegesContext } from '../components/CollegeContext';
-import FastImage from 'react-native-fast-image';
 
 
 const firestore = getFirestore(db);
@@ -26,13 +25,13 @@ const collegesRef = collection(firestore, 'CompleteColleges');
 
 const Admissions = ({navigation, collegeID}) => {
 
-const college = collegeID;
+const college = JSON.parse(collegeID);
 
-const [admUrl, setAdmUrl] = useState(collegeID.admission_website);
-const [finAidUrl, setFinAidUrl] = useState(collegeID.fincAid_website);
-const [priceCalcUrl, setPriceCalcUrl] = useState(collegeID.priceCalculator_website);
+const [admUrl, setAdmUrl] = useState('');
+const [finAidUrl, setFinAidUrl] = useState('');
+const [priceCalcUrl, setPriceCalcUrl] = useState('');
 const [showWebView, setShowWebView] = useState(null);
-
+const {colleges, loading} = useContext(CollegesContext);
 const [viewWeb, setViewWeb] = useState(false);
 
 // useEffect(() => {
@@ -86,7 +85,7 @@ const Link = ({uri}) => {
 
 const AdmOverView = () => {
     return (
-    <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>
     <View style={styles.contentContainer}>
         <TouchableOpacity
         style={styles.button}
@@ -106,7 +105,7 @@ const AdmOverView = () => {
         </TouchableOpacity>
         )}
     </View>
-    </ FastImage>
+    </ ImageBackground>
     );
 };
 

@@ -9,9 +9,6 @@ import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
 import { CollegesContext } from '../components/CollegeContext';
-import {useQuery} from '@tanstack/react-query';
-import FastImage from 'react-native-fast-image';
-
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -46,8 +43,6 @@ const favoriteCollege = async ({ID}) => {
   }
 };
 
-
-
 const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
   // const user = auth().currentUser.uid;
@@ -55,20 +50,13 @@ const Results = ({route, navigation}) => {
   const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
-  const [collegeList, setCollegeList] = useState([]);
+  const [colllegeList, setCollegeList] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
   const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
-  const {colleges, isLoading,error} = useContext(CollegesContext);
-  // const [isLoading, setIsLoading] = useState(false);
-
-  // Use the useQuery hook outside of useEffect
-  // const { data: collegesData, isLoading: queryLoading, error } = useQuery({
-  //   queryKey: ['colleges'], // Now an array inside an object
-  //   queryFn: fetchAllColleges, // Query function passed as part of the object
-  // });
-  
+  const {colleges, loading} = useContext(CollegesContext);
+  const [isLoading, setisLoading] = useState(false);
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
   const [privateSchool, setPrivate] = useState (false);
@@ -104,11 +92,6 @@ const Results = ({route, navigation}) => {
       setLoadCount(newLoadCount);
     }
   };
-
-  
- 
-    
-
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -173,12 +156,10 @@ const Results = ({route, navigation}) => {
     }
 };
 
-  useEffect(()=>{
-    const loadMoreColleges = () => {
-
-
-    }
-  });
+  function FindCollege(ID){
+    const college = colleges.find(college => college.school_id === parseInt(ID))
+    return college;
+  }
 
   const renderItem = ({item}) => {
     const isCommitted = committedColleges.includes(item.name);
@@ -201,16 +182,15 @@ const Results = ({route, navigation}) => {
       <TouchableOpacity
         onPress={() => handleCommit(item.name)}
       >
-        {isCommitted ? <FastImage source={require('../assets/rocket.png')} style={[styles.commitButton]}/> : <FastImage source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/>}
+        {isCommitted ? <Image source={require('../assets/rocket.png')} style={[styles.commitButton]}/> : <Image source={require('../assets/rocket_sat.png')} style={[styles.commitButton]}/>}
 
       </TouchableOpacity>
                     
       
       <TouchableOpacity
         onPress={() => {
-          const college = colleges.filter(college => college.school_id === parseInt(item.id))
-          console.log(college[0].school_id)
-          navigation.push('Details', {obj: college[0]})
+          const college = JSON.stringify(FindCollege(item.id))
+          navigation.push('Details', {college: item.name, id: item.id, obj: college})
         }
           
           
@@ -222,6 +202,22 @@ const Results = ({route, navigation}) => {
     </View>
   )};
 
+// const handleQuerySearch = async () => {
+
+//     const wm = womenOnly? 1 : 0;
+//     const prv = privateSchool? 'Private': 'Public'; 
+//     const mp = mealPlan? 'Yes': 'No';
+//     const queriedColleges = query(collegesRef, 
+//       where('women_only', '==', wm),
+//       // where('state', 'in', stateChoice),
+//       where('school_classification', '>=', prv),
+//       where('mealplan', '==', mp)
+//     );
+
+
+//     const colleges = await getDocs(queriedColleges);
+//       setCollegeList(colleges.map(doc => ({name: doc.shool_name, id: doc.school_id})))
+// }
   const handleFilterSearch = () => {
     setShowFilter(false);
     const filtered = colleges.filter(college=> 
@@ -314,12 +310,6 @@ const Results = ({route, navigation}) => {
 
   }
 
-
-  // Handle any errors
-  if (error) {
-    return <Text>Error fetching data: {error.message}</Text>;
-  }
-
   if(isLoading){
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -336,7 +326,7 @@ const Results = ({route, navigation}) => {
 
   
     return (
-      <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
+      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
         <View style={styles.searchView}>
           <TextInput style={styles.searchText} placeholder='Search...' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
@@ -534,7 +524,7 @@ const Results = ({route, navigation}) => {
         
         <Text style={styles.title}>Top College Matches</Text>
         <FlatList
-          data={collegeList}
+          data={colllegeList}
           renderItem={renderItem}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.list}
@@ -543,7 +533,7 @@ const Results = ({route, navigation}) => {
           ListFooterComponent={hasMore ? <ActivityIndicator size="small" color="#0000ff" /> : null} // Show loading indicator
         />
       </View>
-      </FastImage>
+      </ImageBackground>
     );
 
   }

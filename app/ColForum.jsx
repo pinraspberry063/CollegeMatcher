@@ -220,7 +220,6 @@ const ColForum = ({route, navigation}) => {
       setThreads(threadsList);
     } catch (error) {
       console.error('Error fetching threads and posts:', error);
-      Alert.alert('Error', 'Failed to load threads and posts. Please try again.');
     }
   };
   const handleAddThread = async () => {
@@ -244,7 +243,6 @@ const ColForum = ({route, navigation}) => {
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new thread
       } catch (error) {
         console.error('Error adding new thread:', error);
-        Alert.alert('Error', 'Failed to add new thread. Please try again.');
       }
     }
   };
@@ -323,7 +321,6 @@ const ColForum = ({route, navigation}) => {
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new post
       } catch (error) {
         console.error('Error adding new post:', error);
-        Alert.alert('Error', 'Failed to add new post. Please try again.');
       }
     }
   };

@@ -136,7 +136,7 @@ const RecConvs = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={[styles.title, { color: 'black' }]}>
+      <Text style={[styles.title, { color: theme.color }]}>
         {isRecruiter ? 'Conversations with Users' : 'Available Recruiters'}
       </Text>
       <ScrollView style={styles.conversationsContainer}>

@@ -2,22 +2,46 @@ import {Text,View, StyleSheet, ImageBackground} from 'react-native';
 import React, { useContext, useEffect, useState} from 'react';
 import Constants from 'expo-constants';
 import { CollegesContext } from '../components/CollegeContext';
-import FastImage from 'react-native-fast-image';
 
 
 const OverView = ({collegeID}) => {
     // const college = route.params.collegeID;
-    
-    const [urbanLevel, setUrbanLevel] = useState(collegeID.ubanization_level.split(':'));
+    const college = JSON.parse(JSON.parse(collegeID));
+    const [address, setAddress] = useState([]);
+    const [urbanLevel, setUrbanLevel] = useState([]);
+    const [admRate, setAdmRate] = useState(collegeID.adm_rate);
     // const {colleges, loading} = useContext(collegeID);
   
+    useEffect(() => {
+      const func = async () => {
+
+        try {
+          
+          console.log(college);
+          const addy = college.address;
+          const urban = college.ubanization_level || '';
+          const getCity = college.city;
+          const getState = college.state;
+
+          const getAddy = [addy, getCity, getState];
+
+          setAddress(getAddy);
+          setUrbanLevel(urban.split(':'));
+       
+        
+        } catch (error) {
+          console.error('Error retrieving document:', error);
+        }
+      };
+      func();
+    }, []);
   
     return (
-      <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
+      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>
       <View style={styles.contentContainer}>
         <Text style={styles.subTitle}>Address: </Text>
         <Text style= {{color: 'white'}}>
-          {collegeID.address}, {collegeID.city}, {collegeID.state}
+          {address[0]}, {address[1]}, {address[2]}
         </Text>
   
         <Text style={styles.subTitle}>Urbanization Level: </Text>
@@ -26,9 +50,9 @@ const OverView = ({collegeID}) => {
         </Text>
   
         <Text style={styles.subTitle}>Admissions Rate: </Text>
-        <Text style= {{color: 'white'}}>{collegeID.adm_rate} %</Text>
+        <Text style= {{color: 'white'}}>{admRate} %</Text>
       </View>
-      </FastImage>
+      </ImageBackground>
     );
   };
 

@@ -11,6 +11,7 @@ const firestore = getFirestore(db);
 const ColForumSelector = ({ navigation }) => {
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [colleges, setColleges] = useState([]);
+  const theme = useContext(themeContext);
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -60,7 +61,7 @@ const ColForumSelector = ({ navigation }) => {
               <Button
                 title={college}
                 onPress={() => handleNavigation(college)}
-                color='black'
+                color={theme.buttonColor}
               />
             </View>
           ))
@@ -71,7 +72,7 @@ const ColForumSelector = ({ navigation }) => {
           <Button
             title="View Followed Forums"
             onPress={handleFollowedForumsNavigation}
-            color='black'
+            color={theme.buttonColor}
           />
         </View>
       </ScrollView>

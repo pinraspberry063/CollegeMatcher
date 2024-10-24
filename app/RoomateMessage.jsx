@@ -1,55 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
-import { Ionicons } from '@expo/vector-icons';
-
-
-const ReportModal = ({ isVisible, onClose, onSubmit }) => {
-  const [selectedReason, setSelectedReason] = useState('');
-  const reasons = [
-    'Inappropriate content',
-    'Spam',
-    'Harassment',
-    'False information',
-    'Other'
-  ];
-
-  return (
-    <Modal visible={isVisible} transparent animationType="slide">
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Select a reason for reporting:</Text>
-          {reasons.map((reason) => (
-            <TouchableOpacity
-              key={reason}
-              style={[
-                styles.reasonButton,
-                selectedReason === reason && styles.selectedReasonButton
-              ]}
-              onPress={() => setSelectedReason(reason)}
-            >
-              <Text style={selectedReason === reason ? styles.selectedReasonText : styles.reasonText}>{reason}</Text>
-            </TouchableOpacity>
-          ))}
-          <View style={styles.modalButtons}>
-            <Button title="Cancel" onPress={onClose} color="#841584" />
-            <Button
-              title="Submit"
-              onPress={() => onSubmit(selectedReason)}
-              disabled={!selectedReason}
-              color="#841584"
-            />
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
 
 const Message = ({ route, navigation }) => {
   const theme = useContext(themeContext);
@@ -60,8 +16,6 @@ const Message = ({ route, navigation }) => {
   const [documentID, setDocumentID] = useState(null);
   //const [isRecruiter, setIsRecruiter] = useState(false);
   const [usernames, setUsernames] = useState({});
-  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
-  const [currentReportData, setCurrentReportData] = useState(null);
 
   const conversationId = route.params?.conversationId; // Safely get conversationId from route params
 
@@ -162,9 +116,19 @@ const Message = ({ route, navigation }) => {
     }
   };
 
-  const handleReportMessage = (messageId, reportedUsername) => {
-    setCurrentReportData({ messageId, reportedUsername });
-    setIsReportModalVisible(true);
+  const handleReportMessage = async (messageId, reportedUser) => {
+    const reportData = {
+      messageId,
+      reportedUser,
+      source: 'message'
+    };
+
+    const success = await handleReport(reportData);
+    if (success) {
+      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+    } else {
+      Alert.alert('Error', 'Failed to submit report. Please try again.');
+    }
   };
 
   if (!conversationId && !documentID) {
@@ -188,19 +152,9 @@ const Message = ({ route, navigation }) => {
                 : styles.roomateMessage
             ]}
           >
-            <View style={styles.messageHeader}>
-              <Text style={styles.messageSender}>
-                {usernames[message.sender_UID] || 'Unknown'}
-              </Text>
-              {message.sender_UID !== user.uid && (
-                <TouchableOpacity
-                  style={styles.reportButton}
-                  onPress={() => handleReportMessage(message.id, usernames[message.sender_UID])}
-                >
-                  <Ionicons name="flag-outline" size={16} color="#999" />
-                </TouchableOpacity>
-              )}
-            </View>
+            <Text style={styles.messageSender}>
+              {usernames[message.sender_UID] || 'Unknown'}
+            </Text>
             <Text style={styles.messageContent}>{message.content}</Text>
           </View>
         ))}
@@ -216,29 +170,6 @@ const Message = ({ route, navigation }) => {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
-      <ReportModal
-        isVisible={isReportModalVisible}
-        onClose={() => setIsReportModalVisible(false)}
-        onSubmit={async (reason) => {
-          setIsReportModalVisible(false);
-          if (currentReportData) {
-            const { messageId, reportedUsername } = currentReportData;
-            const reportData = {
-              messageId,
-              reportedUser: reportedUsername,
-              source: 'message',
-              reason: reason
-            };
-
-            const success = await handleReport(reportData);
-            if (success) {
-              Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-            } else {
-              Alert.alert('Error', 'Failed to submit report. Please try again.');
-            }
-          }
-        }}
-      />
     </View>
   );
 };
@@ -305,55 +236,6 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  reportButton: {
-    padding: 5,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#000',
-  },
-  reasonButton: {
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginBottom: 5,
-  },
-  selectedReasonButton: {
-    backgroundColor: '#e0e0e0',
-  },
-  reasonText: {
-    color: '#000',
-  },
-  selectedReasonText: {
-    color: '#841584',
-    fontWeight: 'bold',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
   },
 });
 

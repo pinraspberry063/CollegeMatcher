@@ -9,7 +9,10 @@ import {
   Keyboard,
   ImageBackground,
   KeyboardAvoidingView,
-  ScrollView
+  ScrollView,
+  TouchableOpacity,
+  LogBox,
+  Alert,
 } from 'react-native';
 import React, {useState, useContext, useEffect} from 'react';
 import DropdownComponent from '../components/DropdownComp';
@@ -25,6 +28,8 @@ import stateData from '../assets/state_data';
 import { handleReport } from '../src/utils/reportUtils';
 import Slider from '@react-native-community/slider';
 import { CollegesContext } from '../components/CollegeContext';
+
+LogBox.ignoreLogs(['VirtualizedLists should never be nested inside plain ScrollViews']);
 
 const firestore = getFirestore(db);
 
@@ -131,7 +136,6 @@ const Quiz = ({navigation}) => {
     const [actScore, setActScore] = useState('');
     const [satMath, setSatMath] = useState('');
     const [satCriticalReading, setSatCriticalReading] = useState('');
-    const [satWriting, setSatWriting] = useState('');
     const [actMath, setActMath] = useState('');
     const [actScience, setActScience] = useState('');
     const [actReading, setActReading] = useState('');
@@ -190,16 +194,15 @@ const Quiz = ({navigation}) => {
         const answers = {
             address,
             gpa,
-            sat: satScore || 'N/A',
-            act: actScore || 'N/A',
-            sat_critical_reading: satCriticalReading || 'N/A',
-            sat_writing: satWriting || 'N/A',
-            act: actScore || 'N/A',
-            act_math: actMath || 'N/A',
-            act_science: actScience || 'N/A',
-            act_reading: actReading || 'N/A',
-            act_english: actEnglish || 'N/A',
-            act_writing: actWriting || 'N/A',
+            sat: satScore || 'N/A'|| 'NA',
+            act: actScore || 'N/A' || 'NA',
+            sat_critical_reading: satCriticalReading || 'N/A' || 'NA',
+            act: actScore || 'N/A' || 'NA',
+            act_math: actMath || 'N/A' || 'NA',
+            act_science: actScience || 'N/A' || 'NA',
+            act_reading: actReading || 'N/A' || 'NA',
+            act_english: actEnglish || 'N/A' || 'NA',
+            act_writing: actWriting || 'N/A' || 'NA',
             distance_from_college: distanceFromCollege,
             distance_importance: distanceImportance,
             major,
@@ -262,6 +265,7 @@ const Quiz = ({navigation}) => {
             value={major}
             onChange={setMajor}
             multiSelect={true}
+            maxSelect={3}
           />
           <Slider
             value={majorImportance || 0.5}
@@ -279,7 +283,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Are you looking to attend college in a specific state?</Text>
-          <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} />
+          <DropdownComponent data={stateData} value={stateChoice} onChange={setState} multiSelect={true} maxSelect={3} />
           <Slider
             value={stateChoiceImportance || 0.5}
             onValueChange={setStateChoiceImportance}
@@ -296,7 +300,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>How far from home do you want your college to be?</Text>
-          <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} />
+          <DropdownComponent data={distanceData} value={distanceFromCollege} onChange={setDistance} multiSelect={true} maxSelect={3} />
           <Slider
             value={distanceImportance || 0.5}
             onValueChange={setDistanceImportance}
@@ -313,7 +317,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>How much are you willing to pay for tuition?</Text>
-          <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} />
+          <DropdownComponent data={tuitionData} value={tuitionCost} onChange={setTuition} multiSelect={true} maxSelect={3} />
           <Slider
             value={tuitionImportance || 0.5}
             onValueChange={setTuitionImportance}
@@ -341,6 +345,8 @@ const Quiz = ({navigation}) => {
           ]}
           value={schoolClassification}
           onChange={setType}
+          multiSelect={true}
+          maxSelect={2}
           />
           <Slider
             value={classificationImportance || 0.5}
@@ -366,6 +372,8 @@ const Quiz = ({navigation}) => {
              ]}
              value={collegeDiversity}
              onChange={setDiverse}
+             multiSelect={true}
+             maxSelect={3}
           />
           <Slider
             value={diversityImportance || 0.5}
@@ -383,7 +391,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Do you wish to attend a college with a specific religious affiliation?</Text>
-          <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} />
+          <DropdownComponent data={religiousAffiliationData} value={religiousAffiliation} onChange={setReligiousAffil} multiSelect={true} maxSelect={3} />
           <Slider
             value={religiousAffilImportance || 0.5}
             onValueChange={setReligiousAffilImportance}
@@ -404,7 +412,7 @@ const Quiz = ({navigation}) => {
       const renderPageThree = () => (
         <View>
             <Text style={[styles.text]}>What size college are you looking for?</Text>
-            <DropdownComponent data={sizeData} value={size} onChange={setSize} />
+            <DropdownComponent data={sizeData} value={size} onChange={setSize} multiSelect={true} maxSelect={3} />
             <Slider
                value={sizeImportance || 0.5}
                onValueChange={setSizeImportance}
@@ -420,7 +428,7 @@ const Quiz = ({navigation}) => {
               <Text>Very Important</Text>
           </View>
           <Text style={[styles.text]}>Are you looking for a school with sporting events?</Text>
-          <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} />
+          <DropdownComponent data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]} value={sportCollege} onChange={setSportEvents} multiSelect={true} maxSelect={2} />
           <Slider
             value={sportEventsImportance || 0.5}
             onValueChange={setSportEventsImportance}
@@ -437,7 +445,7 @@ const Quiz = ({navigation}) => {
           </View>
     
           <Text style={[styles.text]}>Are you looking for a college in a specific type of area?</Text>
-          <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} />
+          <DropdownComponent data={typeOfAreaData} value={urbanizationLevel} onChange={setTypeOfArea} multiSelect={true} maxSelect={3} />
           <Slider
             value={urbanizationImportance || 0.5}
             onValueChange={setUrbanizationImportance}
@@ -457,8 +465,16 @@ const Quiz = ({navigation}) => {
           <TextInput
               style={[styles.textInput]}
               value={gpa}
-              onChangeText={setGpa}
+              onChangeText={(text) => {
+                  const formatted = text.replace(/[^0-9.]/g, '');
+                  if (formatted.match(/^\d*\.?\d{0,2}$/)) {
+                      if (formatted === '' || (parseFloat(formatted) >= 0 && parseFloat(formatted) <= 4.00)) {
+                          setGpa(formatted);
+                      }
+                  }
+              }}
               placeholder="Ex: 3.6..."
+              keyboardType="numeric"
           />
         </View>
       );
@@ -490,48 +506,144 @@ const Quiz = ({navigation}) => {
                 <TextInput
                   style={[styles.textInput]}
                   value={actScore}
-                  onChangeText={setActScore}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScore(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actScore, 10);
+                        if (value > 36) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScore('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Math score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actMath}
-                  onChangeText={setActMath}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActMath(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actMath, 10);
+                        if (value > 36) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActMath('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT English score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actEnglish} 
-                  onChangeText={setActEnglish}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActEnglish(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actEnglish, 10);
+                        if (value > 36) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActEnglish('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Reading score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actReading}
-                  onChangeText={setActReading}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActReading(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actReading, 10);
+                        if (value > 36) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActReading('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Science score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actScience}
-                  onChangeText={setActScience}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScience(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actScience, 10);
+                        if (value > 36) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScience('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
     
                 <Text style={[styles.text]}>ACT Writing score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={actWriting}
-                  onChangeText={setActWriting}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActWriting(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actWriting, 10);
+                        if (value > 36) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActWriting('N/A');
+                        }
+                    }}
                   placeholder="Ex: 25..."
+                  keyboardType="numeric"
                 />
               </>
             )}
@@ -547,7 +659,7 @@ const Quiz = ({navigation}) => {
               onChange={(value) => {
                 setTookSAT(value);
                 if (value.includes('No')) {
-                  setSatScore(''); setSatMath(''); setSatCriticalReading(''); setSatWriting('');
+                  setSatScore(''); setSatMath(''); setSatCriticalReading('');
                 }
               }}
             />
@@ -558,29 +670,70 @@ const Quiz = ({navigation}) => {
                 <TextInput
                   style={[styles.textInput ]}
                   value={satScore}
-                  onChangeText={setSatScore}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatScore(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satScore, 10);
+                        if (value > 1600) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (value < 400) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (isNaN(value)) {
+                            setSatScore('N/A');
+                        }
+                    }}
                   placeholder="Ex: 1200..."
+                  keyboardType="numeric"
                 />
                 <Text style={[styles.text,]}>SAT Math score?</Text>
                 <TextInput
                   style={[styles.textInput]}
                   value={satMath}
-                  onChangeText={setSatMath}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatMath(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satMath, 10);
+                        if (value > 800) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatMath('N/A');
+                        }
+                    }}
                   placeholder="Ex: 600..."
+                  keyboardType="numeric"
                 />
-                <Text style={[styles.text, ]}>SAT Critical Reading score?</Text>
+                <Text style={[styles.text, ]}>SAT Evidence Based Reading and Writing score?</Text>
                 <TextInput
-                  style={[styles.textInput, ]}
+                  style={[styles.textInput]}
                   value={satCriticalReading}
-                  onChangeText={setSatCriticalReading}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatCriticalReading(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(satCriticalReading, 10);
+                        if (value > 800) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatCriticalReading('N/A');
+                        }
+                    }}
                   placeholder="Ex: 600..."
-                />
-                <Text style={[styles.text, ]}>SAT Writing score?</Text>
-                <TextInput
-                  style={[styles.textInput, ]}
-                  value={satWriting}
-                  onChangeText={setSatWriting}
-                  placeholder="Ex: 600..."
+                  keyboardType="numeric"
                 />
               </>
             )}
@@ -645,9 +798,9 @@ const Quiz = ({navigation}) => {
       );
 };
   
-  export default Quiz
-  
-  const styles = StyleSheet.create({
+export default Quiz
+
+const styles = StyleSheet.create({
     container: {
       flex: 1,
       paddingTop: 20,
@@ -678,10 +831,27 @@ const Quiz = ({navigation}) => {
       borderRadius: 5,
     },
     sliderLabels: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingHorizontal: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 10,
     },
-  });
-  
-  
+    choiceBoxContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginTop: 10,
+    },
+    choiceBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        marginRight: 5,
+        marginBottom: 5,
+    },
+    choiceBoxText: {
+        marginRight: 5,
+    },
+});
+

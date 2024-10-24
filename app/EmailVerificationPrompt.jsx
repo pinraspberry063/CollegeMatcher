@@ -1,49 +1,29 @@
-import React, { useEffect } from 'react';
-import { View, Text, Button, StyleSheet, Alert, BackHandler } from 'react-native';
+import React from 'react';
+import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { useFocusEffect } from '@react-navigation/native';
 
 const EmailVerificationPrompt = ({ navigation, route }) => {
-  const { isMfaEnabled, isRecruiter, nextScreen } = route.params || {};
-
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        // Prevent going back only while on this screen
-        return true;
-      };
-      // Listen for Android hardware back press
-      BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-      return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [])
-  );
+  const { isMfaEnabled, isRecruiter } = route.params || {};
 
   const checkEmailVerified = async () => {
-    try {
-      await auth().currentUser.reload();
-      const user = auth().currentUser;
-      if (user.emailVerified) {
-        // Proceed based on user preferences
-        proceedAfterVerification();
-      } else {
-        Alert.alert('Email Not Verified', 'Please verify your email before proceeding.');
-      }
-    } catch (error) {
-      console.error('Error checking email verification status:', error);
-      Alert.alert('Error', 'Failed to verify email status. Please try again.');
+    await auth().currentUser.reload();
+    const user = auth().currentUser;
+    if (user.emailVerified) {
+      // Proceed based on user preferences
+      proceedAfterVerification();
+    } else {
+      Alert.alert('Email Not Verified', 'Please verify your email before proceeding.');
     }
   };
 
   const proceedAfterVerification = () => {
-    if (nextScreen === 'MFAScreen') {
+    if (route.params.nextScreen === 'MFAScreen') {
       navigation.navigate('MFAScreen', {
         nextScreen: isRecruiter ? 'RecruiterVerification' : 'Main',
-        isMfaEnabled,
-        isRecruiter,
+        ...route.params
       });
     } else {
-      navigation.navigate(nextScreen);
+      navigation.navigate(route.params.nextScreen);
     }
   };
 
@@ -52,16 +32,7 @@ const EmailVerificationPrompt = ({ navigation, route }) => {
       await auth().currentUser.sendEmailVerification();
       Alert.alert('Verification Email Sent', 'Please check your email.');
     } catch (error) {
-      console.error('Error sending verification email:', error);
-      if (error.code === 'auth/too-many-requests') {
-        Alert.alert('Too Many Requests', 'You have requested verification emails too frequently. Please try again later.');
-      } else if (error.code === 'auth/invalid-email') {
-        Alert.alert('Invalid Email', 'The email address is invalid. Please check and try again.');
-      } else if (error.code === 'auth/user-not-found') {
-        Alert.alert('User Not Found', 'No user found with this email.');
-      } else {
-        Alert.alert('Error', 'Failed to send verification email. Please try again.');
-      }
+      Alert.alert('Error', error.message);
     }
   };
 
@@ -97,3 +68,5 @@ const styles = StyleSheet.create({
 });
 
 export default EmailVerificationPrompt;
+
+

@@ -1,6 +1,5 @@
 <resources>
-<!--    change android app name here-->
-    <string name="app_name">Universe</string>
+    <string name="app_name">CM_App</string>
     <string name="facebook_app_id">450940747808667</string>
     <string name="facebook_client_token">6110c31e37932eb5a9a031cd193bd485</string>
 </resources>
