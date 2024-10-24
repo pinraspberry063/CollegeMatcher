@@ -63,7 +63,6 @@ import MFAScreen from './app/MFAScreen';
 import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
-import ProfilePage from './app/ProfilePage';
 
 const firestore = getFirestore(db);
 
@@ -96,7 +95,6 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
-    <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
   </HomeStack.Navigator>
 );
 
