@@ -41,20 +41,32 @@ const ViewMessage = ( { navigation } ) => {
           const data = userDoc.data();
 
           const activeUserNames = data.activeMessages || [];
+          console.log("Below is activeUserNames");
+          console.log(activeUserNames);
           setActiveMessages(data.activeMessages || []);
+          console.log('Below is active messages');
+          console.log(activeMessages);
           setUserNames(activeUserNames.map(async(activeUser) => {
               const userNamesQuery = query(collection(firestore, 'Users'),
                           where('User_UID', '==', activeUser));
               const querySnapshot = await getDocs(userNamesQuery);
 
                       if (!querySnapshot.empty) {
-                        const userDoc = querySnapshot.docs[0];  // Get the first matching document
-                        const data = userDoc.data();
-                        //console.log(data.Username);
+                        const userNameDoc = querySnapshot.docs[0];  // Get the first matching document
+                        const data = userNameDoc.data();
+                        console.log("BELOW IS THE DATA.USERNAME VALUE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                       console.log(data.Username);
+                       console.log("ABOOOOOOOVE ISAS THE DATA!!!!!!!!!!!!!!!!!!!!!!!!!!")
                         }
-                        return data
+                    console.log("Below should be other peoples usersnames");
+                    console.log(data.Username);
+                        return data.Username
+                    console.log(userNames[0]);
 
               }))
+                console.log("testing");
+                console.log(userNames[0]);
+
 
           // Set the colleges from the user's Committed_Colleges field
 
