@@ -157,21 +157,23 @@ const ViewMessage = ( { navigation } ) => {
     navigation.navigate('FollowedForums');
     console.log("LOOP AT END");
   };
-
+fetchUsername
 
   //console.log(getDocs(query(collection(firestore,'Users'),where('Users_UID', '==',item)))).docs[0].data().Username);
-      const renderItem = ({ item }) => (
-          <View style={styles.card}>
-              <Text style={styles.username}>{
-              item}</Text>
-              <Button
-                  style={styles.button}
-                  onPress={() => handleMessageNavigation(user.uid,item)}
-                  title="Message"
-              />
-          </View>
-      );
+  const renderItem = ({ item }) => {
+      console.log("asdfasdf");
+      return(
+      <View style={styles.card}>
+          <Text style={styles.username}>{
+          item}</Text>
+          <Button
+              style={styles.button}
+              onPress={() => handleMessageNavigation(user.uid,item)}
+              title="Message"
+          />
+      </View>
 
+  )};
 
     return (
         <SafeAreaView style={styles.container}>
