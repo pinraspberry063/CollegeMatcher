@@ -1,11 +1,11 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
-import React, { useEffect , useState, useContext} from 'react'
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
 import { Button } from 'react-native-elements';
-//import ProfileImagePicker from '../components/ProfileImageComp';
 import auth from '@react-native-firebase/auth';
-import {getStorage, ref, getDownloadURL} from '@react-native-firebase/storage';
-import themeContext from '../theme/themeContext'
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
+import themeContext from '../theme/themeContext';
 
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const Account = ({route, navigation}) => {
         const theme = useContext(themeContext);
@@ -52,19 +52,24 @@ const Account = ({route, navigation}) => {
 
 export default Account
 
+
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignContent: 'center',
-        marginTop: 10,
-        backgroundColor:'#fff'
-        
-    },
-    profile: {
-        width: 200, height: 200, resizeMode: "cover", alignSelf: 'center'
-    },
-    button: {
-        width: '50%',
-        alignSelf: 'center'
-    }
-})
+  container: {
+    flex: 1,
+    alignContent: 'center',
+    marginTop: height * 0.02, // Dynamic margin top
+    backgroundColor: '#fff',
+  },
+  profile: {
+    width: width * 0.5, // Dynamic width based on screen width
+    height: width * 0.5, // Dynamic height to maintain aspect ratio
+    resizeMode: 'cover',
+    alignSelf: 'center',
+    borderRadius: width * 0.25, // Ensures a circular image
+  },
+  button: {
+    width: width * 0.6, // Dynamic width for button
+    alignSelf: 'center',
+    marginTop: height * 0.03, // Dynamic margin top for spacing
+  },
+});

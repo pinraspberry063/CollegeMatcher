@@ -1,8 +1,7 @@
-import {StyleSheet, Text, View, Button, ImageBackground, Animated} from 'react-native';
+import {StyleSheet, Text, View, Button, ImageBackground, Animated, Dimensions} from 'react-native';
 import React, {useRef, useEffect} from 'react';
 
-//test background
-//const backgroundImage = { uri: 'file:./assets/universe.jpeg' };
+const {width, height} = Dimensions.get('window'); // Get the dimensions of the device
 
 const Launch = ({navigation}) => {
     // animation value for opacity
@@ -41,25 +40,26 @@ const Launch = ({navigation}) => {
   );
 };
 
-
 export default Launch;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        },
+    },
     background: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        },
-  buttonContainer2: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  button2: {
-    marginVertical: 10,
-    width: 200,
+        width: '100%', // Scale to the full width of the device
+        height: '100%', // Scale to the full height of the device
     },
-})
+    buttonContainer2: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    button2: {
+        marginVertical: height * 0.02, // Dynamic vertical margin based on screen height
+        width: width * 0.5, // Button width is 50% of the device width
+    },
+});

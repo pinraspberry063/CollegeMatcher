@@ -1,7 +1,7 @@
 // College selected. Display the different subgroups within the college's forum.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -9,6 +9,7 @@ import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, q
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const ForumSelect = ({ route, navigation }) => {
   const { collegeName } = route.params;
@@ -197,7 +198,7 @@ const ForumSelect = ({ route, navigation }) => {
         </View>
                 <View style={styles.followedForumsButtonContainer}>
                     <Button
-                      title="Find a Roomate"
+                      title="Find a Roommate"
                        onPress={handleRoomateMatcherNavigation}
                        color={theme.buttonColor}
                     />
@@ -210,24 +211,27 @@ const ForumSelect = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
+    backgroundColor: '#000',
   },
   buttonContainer: {
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: height * 0.02, // Dynamic margin bottom
+    padding: height * 0.02, // Dynamic padding inside button container
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    backgroundColor: '#444',
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: height * 0.025, // Dynamic font size
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#000000',
+    marginBottom: height * 0.01, // Dynamic margin bottom
+    color: '#fff',
   },
   buttonSubText: {
-    fontSize: 14,
-    marginBottom: 8,
+    fontSize: height * 0.02, // Dynamic font size
+    marginBottom: height * 0.01, // Dynamic margin bottom
+    color: '#fff',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -236,35 +240,38 @@ const styles = StyleSheet.create({
   viewButton: {
     flex: 3,
     backgroundColor: '#4CAF50',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: width * 0.02, // Dynamic margin
   },
   followButton: {
     flex: 1,
     backgroundColor: '#FF9800',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
   },
   newSubgroupContainer: {
-    marginTop: 20,
-    padding: 16,
+    marginTop: height * 0.02, // Dynamic margin top
+    padding: height * 0.02, // Dynamic padding
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#888',
     borderRadius: 8,
+    backgroundColor: '#444',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 8,
+    borderColor: '#888',
+    padding: height * 0.015, // Dynamic padding
+    marginBottom: height * 0.02, // Dynamic margin
     borderRadius: 4,
+    color: '#fff',
+    backgroundColor: '#666',
   },
   recruiterHighlight: {
-    color: '#ff9900', // Highlight color for recruiters
     fontWeight: 'bold',
+    color: '#ff9900', // Highlight color for recruiters
   },
 });
 
