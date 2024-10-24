@@ -36,6 +36,7 @@ import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleReport } from '../src/utils/reportUtils';
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
 
 const firestore = getFirestore(db);
 
@@ -112,9 +113,28 @@ const resetAddPostForm = () => {
 
       for (const postDoc of postsSnapshot.docs) {
         const postData = postDoc.data();
+
+        // Get the user's profile picture from Firebase Storage
+        const storage = getStorage();
+        const profilePicRef = ref(storage, `images/${postData.createdBy}/profile`);
+
+        let profilePicUrl = null;
+
+        // Try to fetch the custom profile image
+        await getDownloadURL(profilePicRef)
+          .then((url) => {
+              profilePicUrl = url;
+            })
+          .catch(async (error) => {
+              // Fallback to the default profile picture if custom one is not found
+              const defaultProfileRef = ref(storage, 'profile.jpg');
+              profilePicUrl = await getDownloadURL(defaultProfileRef);
+          });
+
         postsList.push({
           id: postDoc.id,
           ...postData,
+          profilePicUrl: profilePicUrl,
         });
       }
 

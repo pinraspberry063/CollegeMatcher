@@ -1,7 +1,7 @@
 // After a college is selected, this screen allows the user to follow subgroups of their interest so they are easy to navigate to.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -115,14 +115,20 @@ const FollowedForums = ({ navigation }) => {
               >
                 <Text style={styles.buttonText}>View</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+             {/* <TouchableOpacity
                 style={styles.followButton}
                 onPress={() => toggleFollowSubgroup(collegeName, forumId)}
               >
-                <Text style={styles.buttonText}>
-                  {followedSubgroups.includes(`${collegeName}:${forumId}`) ? 'Unfollow' : 'Follow'}
-                </Text>
-              </TouchableOpacity>
+              <Image
+                  source={
+                      followedSubgroups.includes('${collegeName}:${forumId}')
+                      ? require('../assets/FilledBookmark.png')  // Show filled bookmark when unfollowing
+                      : require('../assets/Bookmark.png')
+                      }
+                      style={styles.icon}
+                  />
+
+              </TouchableOpacity>*/}
             </View>
           </View>
         ))}
@@ -142,21 +148,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    backgroundColor: '#000033',
   },
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
-    color: '#000000',
+    color: 'white',
   },
   collegeLabel: {
     fontSize: 14,
     color: '#555',
     marginBottom: 8,
+    color: 'white',
   },
   buttonRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    color: '#841584',
   },
   viewButton: {
     flex: 3,
