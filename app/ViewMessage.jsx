@@ -65,7 +65,7 @@ const ViewMessage = ( { navigation } ) => {
 
               }))
                 console.log("testing");
-                console.log(userNames[0]);
+                console.log(activeUserNames);
 
 
           // Set the colleges from the user's Committed_Colleges field
