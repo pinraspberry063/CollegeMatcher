@@ -1,13 +1,38 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert, Image } from 'react-native';
 
 const UserActivityScreen = ({ route }) => {
   const { userActivity, reportedUser } = route.params;
 
+  if (!userActivity || !reportedUser) {
+    Alert.alert('Error', 'Invalid user activity data.');
+    navigation.goBack();
+    return null;
+  }
+
   const renderItem = ({ item, type }) => (
     <View style={styles.item}>
-      <Text style={styles.itemTitle}>{type === 'thread' ? item.title : item.content}</Text>
-      <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
+      {type === 'thread' && (
+        <>
+          <Text style={styles.itemTitle}>{item.title}</Text>
+          {item.imageUrls && item.imageUrls.map((imageUrl, index) => (
+            <Image key={index} source={{ uri: imageUrl }} style={styles.image} />
+          ))}
+        </>
+      )}
+      {type === 'post' && (
+        <>
+          <Text>{item.content}</Text>
+          {item.images && item.images.map((imageUrl, index) => (
+            <Image key={index} source={{ uri: imageUrl }} style={styles.image} />
+          ))}
+        </>
+      )}
+      {type === 'message' && (
+        <Text>{item.content}</Text>
+      )}
+      <Text>Created At: {item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString() : 'Unknown'}</Text>
+      <Text>Created By: {item.createdBy || 'Unknown'}</Text>
     </View>
   );
 
@@ -24,6 +49,12 @@ const UserActivityScreen = ({ route }) => {
       <FlatList
         data={userActivity.posts}
         renderItem={({ item }) => renderItem({ item, type: 'post' })}
+        keyExtractor={item => item.id}
+      />
+      <Text style={styles.sectionTitle}>Messages:</Text>
+      <FlatList
+        data={userActivity.messages}
+        renderItem={({ item }) => renderItem({ item, type: 'message' })}
         keyExtractor={item => item.id}
       />
     </View>
@@ -55,6 +86,12 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: 'cover',
+    marginVertical: 10,
   },
 });
 
