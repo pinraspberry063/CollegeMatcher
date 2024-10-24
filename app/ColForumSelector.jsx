@@ -62,7 +62,7 @@ const ColForumSelector = ({ navigation }) => {
               <Button
                 title={college}
                 onPress={() => handleNavigation(college)}
-                color={theme.buttonColor}
+                color="#841584"
               />
             </View>
           ))
@@ -73,7 +73,7 @@ const ColForumSelector = ({ navigation }) => {
           <Button
             title="View Followed Forums"
             onPress={handleFollowedForumsNavigation}
-            color={theme.buttonColor}
+            color="#841584"
           />
         </View>
       </ScrollView>
@@ -89,6 +89,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     marginBottom: 16,
+    borderRadius: 10,
   },
   noCollegesText: {
     fontSize: 16,

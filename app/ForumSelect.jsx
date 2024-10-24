@@ -1,7 +1,7 @@
 // College selected. Display the different subgroups within the college's forum.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -177,12 +177,17 @@ const ForumSelect = ({ route, navigation }) => {
                 <Text style={styles.buttonText}>View</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.followButton}
-                onPress={() => toggleFollowSubgroup(collegeName, subgroup.id)} // Pass the college name and subgroup ID
+                style={[styles.followButton, { backgroundColor: '#841584' }]}  // Set background color to #841584
+                onPress={() => toggleFollowSubgroup(collegeName, subgroup.id)}  // Pass the college name and subgroup ID
               >
-                <Text style={styles.buttonText}>
-                  {followedSubgroups.includes(`${collegeName}:${subgroup.id}`) ? 'Unfollow' : 'Follow'}
-                </Text>
+                <Image
+                  source={
+                    followedSubgroups.includes(`${collegeName}:${subgroup.id}`)
+                      ? require('../assets/FilledBookmark.png')  // Show filled bookmark when unfollowing
+                      : require('../assets/Bookmark.png')        // Show normal bookmark when following
+                  }
+                  style={styles.icon}  // Style the icon
+                />
               </TouchableOpacity>
             </View>
           </View>
@@ -194,13 +199,13 @@ const ForumSelect = ({ route, navigation }) => {
             value={newSubgroupName}
             onChangeText={setNewSubgroupName}
           />
-          <Button title="Add Subgroup" onPress={handleAddSubgroup} color={theme.buttonColor} />
+          <Button title="Add Subgroup" onPress={handleAddSubgroup} style={styles.button} color="#841584" />
         </View>
                 <View style={styles.followedForumsButtonContainer}>
                     <Button
                       title="Find a Roomate"
                        onPress={handleRoomateMatcherNavigation}
-                       color={theme.buttonColor}
+                       color="#841584"
                     />
                 </View>
       </ScrollView>
@@ -214,18 +219,23 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  button: {
+      borderRadius: 10,
+      color: '#841584',
+      },
   buttonContainer: {
     marginBottom: 16,
     padding: 16,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    backgroundColor: '#000033',
   },
   buttonText: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 4,
-    color: '#000000',
+    color: 'white',
   },
   buttonSubText: {
     fontSize: 14,
@@ -245,10 +255,10 @@ const styles = StyleSheet.create({
   },
   followButton: {
     flex: 1,
-    backgroundColor: '#FF9800',
     padding: 10,
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   newSubgroupContainer: {
     marginTop: 20,
@@ -269,9 +279,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   background: {
-      flex: 1,
-      resizeMode: 'cover'
-    },
+    flex: 1,
+    resizeMode: 'cover'
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  }
 });
 
 export default ForumSelect;

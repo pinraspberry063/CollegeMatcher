@@ -64,6 +64,7 @@ import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
 import ProfilePage from './app/ProfilePage';
+import CommentPage from './app/CommentPage';
 
 const firestore = getFirestore(db);
 
@@ -142,6 +143,7 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="ForumSelect" component={ForumSelect} />
     <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
+    <ForumStack.Screen name="CommentPage" component={CommentPage}/>
     <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
     <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
     <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>

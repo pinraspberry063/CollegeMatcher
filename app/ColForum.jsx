@@ -1,5 +1,4 @@
 // Displays the threads and posts of the selected subgroup.
-
 import React, {useState, useEffect, useContext, useRef } from 'react';
 import {
   StyleSheet,
@@ -14,6 +13,9 @@ import {
   Image,
   ImageBackground,
   Modal,
+  FlatList,
+  KeyboardAvoidingView,
+  Dimensions,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
@@ -38,6 +40,7 @@ import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firestore = getFirestore(db);
 
@@ -56,40 +59,141 @@ const ColForum = ({route, navigation}) => {
     const [transferred, setTransferred] = useState(0);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
     const [currentReportData, setCurrentReportData] = useState(null);
-
-    // add floating button & animation
-    const [showAddThread, setShowAddThread] = useState(false);
+    const [showAddThread, setShowAddThread] = useState(false);     // add floating button & animation
     const animationValue = useRef(new Animated.Value(0)).current;
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [selectedThreadIndex, setSelectedThreadIndex] = useState(0);
+    const [selectedThreadId, setSelectedThreadId] = useState(0);
+    const [isAddPostModalVisible, setIsAddPostModalVisible] = useState(false);
+    const [galleryPermission, setGalleryPermission] = useState(null);
+    const flatListRef = useRef(null);
 
     //hide add thread from top
     const toggleAddThread = () => {
-        setShowAddThread(!showAddThread);
         Animated.spring(animationValue, {
           toValue: showAddThread ? 0 : 1, // Toggle between 0 and 1
           friction: 5,
-          useNativeDriver: false, // set false for layout animations
+          useNativeDriver: true, // set false for layout animations
         }).start();
         setShowAddThread(!showAddThread);
       };
 
+    // Function to reset Add Thread form
+    const resetAddThreadForm = () => {
+        setNewThreadTitle('');
+        setImages([]);
+        };
+
+    // permissions to access gallery
+    useEffect(() => { checkSavedPermissions();}, []);
+
+    const checkSavedPermissions = async () => {
+        const savedPermission = await AsyncStorage.getItem('galleryPermission');
+        if (savedPermission === 'granted') {
+            setGalleryPermission('granted');
+            }
+        };
+
     // Function to handle image selection
     const selectImage = async () => {
-        const options = {
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: false,
-        allowsMultipleSelection: true,
-        quality: 1,
+        if (galleryPermission === 'granted') { openGallery(); return; }
+
+        Alert.alert(
+            "Permission Required",
+            "We need access to your gallery to upload photos. Would you like to allow access?",
+            [
+               {text: "No", onPress: () => console.log("Permission denied"), style: "cancel",},
+               {text: "Only This Time",
+               onPress: async () => {
+                   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                   if (status === 'granted') {
+                       openGallery();
+                       }
+                   },
+                   },
+               {text: "Always",
+               onPress: async () => {
+                   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                   if (status === 'granted'); {
+                       await AsyncStorage.setItem('galleryPermission', 'granted');
+                       setGalleryPermission('granted');
+                       openGallery();
+                       }
+                   },
+               },
+                ]
+            );
+        };
+
+    const openGallery = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            allowsMultipleSelection: true,
+            quality: 1,
+            });
+
+        if (!result.canceled) {
+            const selectedImages = result.assets.map(asset => asset.uri);
+            setImages(selectedImages.slice(0, 4));
+            }
+        };
+
+    /*const selectImage = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: true,
+        });
+
+        if (!result.canceled) {
+          const selectedImages = result.assets.map((asset) => asset.uri);
+          setImages(selectedImages.slice(0, 4)); // Limit to 4 images
+        }
+      };*/
+
+   // scroll through images
+   const openImageModal = (imageIndex, threadIndex) => {
+     setSelectedImageIndex(imageIndex);
+     setSelectedThreadIndex(threadIndex);
+     setIsModalVisible(true);
+   };
+
+   //Render image display based on count
+   const renderImages = (imageUrls, threadIndex) => {
+          if (imageUrls.length === 1) {
+              return (
+                  <View style={styles.singleImageContainer}>
+                      <TouchableOpacity onPress={() => openImageModal(0, threadIndex)}>
+                          <Image source={{ uri: imageUrls[0] }} style={styles.singleImage} />
+                      </TouchableOpacity>
+                  </View>
+              );
+          } else if (imageUrls.length === 2) {
+              return (
+                  <View style={styles.twoImagesContainer}>
+                      {imageUrls.map((uri, index) => (
+                          <TouchableOpacity key={index} onPress={() => openImageModal(index, threadIndex)}>
+                              <Image source={{ uri: uri }} style={styles.twoImageBox} />
+                          </TouchableOpacity>
+                      ))}
+                  </View>
+              );
+          } else if (imageUrls.length > 2) {
+              return (
+                  <View style={styles.gridImageContainer}>
+                      {imageUrls.slice(0, 4).map((uri, index) => (
+                          <TouchableOpacity key={index} onPress={() => openImageModal(index, threadIndex)}>
+                              <Image source={{ uri: uri }} style={styles.gridImageBox} />
+                          </TouchableOpacity>
+                      ))}
+                  </View>
+              );
+          }
       };
 
-      let result = await ImagePicker.launchImageLibraryAsync(options);
 
-      console.log(result);
 
-      if (!result.canceled) {
-          const images = result.assets.map(asset => asset.uri );
-          setImages(images);
-          }
-    };
 
     // Upload image to Firebase
     const uploadImage = async () => {
@@ -179,13 +283,15 @@ const ColForum = ({route, navigation}) => {
           threadsList.push({
             id: threadId,
             ...threadData,
-            posts: []
+            posts: [],
+            profilePicUrl: '',
           });
         } else {
           const userDoc = userQuerySnapshot.docs[0];
           const userData = userDoc.data();
           console.log('Thread creator data:', userData);
           const isThreadCreatorBanned = userData.IsBanned || false;
+          const profilePicUrl = userData.profilePicUrl || '';
           console.log(`Thread ${threadId} creator (${threadData.createdBy}) banned:`, isThreadCreatorBanned);
 
           if (!isThreadCreatorBanned || isModerator) {
@@ -225,7 +331,8 @@ const ColForum = ({route, navigation}) => {
             threadsList.push({
               id: threadId,
               ...threadData,
-              posts: postsList
+              posts: postsList,
+              profilePicUrl,
             });
           } else {
             console.log(`Excluding thread ${threadId} due to banned creator`);
@@ -258,6 +365,8 @@ const ColForum = ({route, navigation}) => {
         setNewThreadTitle('');
         setImages([]);
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new thread
+        resetAddThreadForm();   // clear add thread form after adding
+        toggleAddThread();      // hide pop up after thread is added
       } catch (error) {
         console.error('Error adding new thread:', error);
       }
@@ -316,7 +425,7 @@ const ColForum = ({route, navigation}) => {
     };
 
 
-  const handleAddPost = async threadId => {
+  const handleAddPost = async (threadId) => {
     if (newPostContent[threadId]?.trim() && username) {
       let postImageUrls = []
       if (postImages[threadId]?.length > 0) {
@@ -334,12 +443,18 @@ const ColForum = ({route, navigation}) => {
         };
         await addDoc(postsRef, newPost);
         setNewPostContent(prev => ({...prev, [threadId]: ''}));
+        setIsAddPostModalVisible(false);
         setPostImages(prev => ({...prev, [threadId]: []})); //clear selected images
         fetchThreadsAndPosts(); // Refresh threads and posts after adding a new post
       } catch (error) {
         console.error('Error adding new post:', error);
       }
     }
+  };
+
+  const openAddPost = (threadId) => {
+    setSelectedThreadId(threadId); // Keep track of which thread we're adding a post to
+    setIsAddPostModalVisible(true); // Show the add post modal
   };
 
  const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername) => {
@@ -375,7 +490,7 @@ const ColForum = ({route, navigation}) => {
              </TouchableOpacity>
            ))}
            <View style={styles.modalButtons}>
-             <Button title="Cancel" onPress={onClose} />
+             <Button title="Cancel" onPress={onClose} color="red" />
              <Button
                title="Submit"
                onPress={() => onSubmit(selectedReason)}
@@ -392,31 +507,95 @@ const ColForum = ({route, navigation}) => {
         <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
         <SafeAreaView style={styles.container}>
           <ScrollView>
+            <KeyboardAvoidingView style={styles.keyboardAvoidingView}>
             {/* Render all threads */}
-            {threads.map((thread) => (
+            {threads.map((thread, threadIndex) => (
               <View key={thread.id} style={styles.threadItem}>
-                <View style={styles.threadHeader}>
+                  <View style={styles.threadHeader}>
+                    <View style={styles.profileContainer}>
+                      {/* Display Profile Picture */}
+                      {thread.profilePicUrl ? (
+                        <Image source={{ uri: thread.profilePicUrl }} style={styles.profilePic} />
+                      ) : (
+                        <Image source={require('../assets/profile.png')} style={styles.profilePic} />  // Default pic
+                      )}
+
+                      {/* Created by section next to profile pic */}
+                      <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>
+                         {thread.createdBy}
+                      </Text>
+                    </View>
+                  </View>
                   <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
 
-                  {/* Render thread images */}
-                  {thread.imageUrls && thread.imageUrls.length > 0 && (
-                    <View style={styles.imageContainer}>
-                      {thread.imageUrls.map((url, index) => (
-                        <Image key={index} source={{ uri: url }} style={styles.imageBox} />
-                      ))}
-                    </View>
-                  )}
+                  {/* Render images based on count */}
+                  {thread.imageUrls && thread.imageUrls.length > 0 && renderImages(thread.imageUrls, threadIndex)}
+
+
+                <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
+                  {thread.createdAt.toDate().toLocaleString()}
+                </Text>
+
+                <View style={styles.buttonContainer}>
+
+                {/* Report Button */}
+                <TouchableOpacity onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}>
+                    <Image source={require('../assets/flag.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+
+                {/* Add Post Button */}
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('CommentPage', { threadId: thread.id, threadTitle: thread.title })}
+                >
+                  <Image source={require('../assets/Chat.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+
                 </View>
 
-                <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>
-                  Created by: {thread.createdBy}
-                </Text>
-                <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
-                  Created at: {thread.createdAt.toDate().toLocaleString()}
-                </Text>
               </View>
             ))}
+           </KeyboardAvoidingView>
           </ScrollView>
+
+          {/*Modal to make images clickable */}
+          <Modal
+              visible={isModalVisible}
+              transparent={true}
+              animationType="fade"
+              onRequestClose={() => setIsModalVisible(false)}
+            >
+              <View style={styles.modalBackground}>
+                <FlatList
+                  ref={flatListRef}
+                  data={threads[selectedThreadIndex]?.imageUrls || []}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  renderItem={({ item }) => (
+                          <View style={styles.fullscreenImageContainer}>
+                              <Image source={{ uri: item }} style={{ width: 300, height: 300 }} resizeMode='contain' />
+                          </View>
+                  )}
+                  keyExtractor={(item, index) => index.toString()}
+                  initialScrollIndex={selectedImageIndex}  // Start with the selected image
+
+                  getItemLayout={(data, index) => (
+                      { length: Dimensions.get('window').width, offset: Dimensions.get('window').width * index, index }
+                  )}
+
+                  onScrollToIndexFailed={(info) => {
+                      console.log("Scroll to index failed:", info);
+                      setTimeout(() => {
+                          flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                          }, 500);
+                      }}
+                />
+                <TouchableOpacity onPress={() => setIsModalVisible(false)}>
+                    <Image source={require('../assets/cancel.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+              </View>
+            </Modal>
+
           <ReportModal
         isVisible={isReportModalVisible}
         onClose={() => setIsReportModalVisible(false)}
@@ -442,46 +621,71 @@ const ColForum = ({route, navigation}) => {
           }
         }}
       />
-          {/* Animated Add Thread Section */}
-                    <Animated.View
-                      style={[
-                        styles.newThreadContainer,
-                        {
-                          transform: [
-                            {
-                              translateY: animationValue.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [300, 0], // Slide up the add thread section
-                              }),
-                            },
-                          ],
-                        },
-                      ]}
-                    >
-                      <TextInput
-                        style={styles.input}
-                        placeholder="Thread Title"
-                        value={newThreadTitle}
-                        onChangeText={setNewThreadTitle}
-                      />
-                      <Button title="Add Thread" onPress={handleAddThread} />
 
-                      {/* Button to select images */}
-                      <Button title="Select Images" onPress={selectImage} />
+        <Modal
+          visible={isAddPostModalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setIsAddPostModalVisible(false)}
+        >
+          <View style={styles.modalBackground}>
+            <TextInput
+              style={styles.input}
+              placeholder="Write your post..."
+              value={newPostContent[selectedThreadId] || ''}
+              onChangeText={(text) => setNewPostContent(prev => ({ ...prev, [selectedThreadId]: text }))}
+            />
+            <Button title="Submit Post" onPress={() => handleAddPost(selectedThreadId)} />
+            <Button title="Cancel" onPress={() => setIsAddPostModalVisible(false)} color="red" />
+          </View>
+        </Modal>
 
-                      {/* Display selected images */}
-                      {images.length > 0 && (
-                        <View>
-                          {images.map((imageUri, index) => (
-                            <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
-                          ))}
-                          {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
-                        </View>
-                      )}
 
-                      {/* Cancel Buttonon */}
-                      <Button title="Cancel" onPress={toggleAddThread} color="red" />
-                    </Animated.View>
+        {/* Animated Add Thread Section */}
+        <Animated.View
+          style={[ styles.newThreadContainer,
+            { transform: [{
+                  translateY: animationValue.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [600, 0], // Slide up the add thread section
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <TextInput
+            style={styles.input}
+            placeholder="What would you like to say?"
+            value={newThreadTitle}
+            onChangeText={setNewThreadTitle}
+            multiline={true}
+          />
+          <View style={styles.buttonContainer}>
+              <TouchableOpacity  onPress={() => { toggleAddThread(); resetAddThreadForm(); }}>
+                  <Image source={require('../assets/cancel.png')} style={styles.iconButton} />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={selectImage}>
+                  <Image source={require('../assets/addphoto.png')} style={styles.iconButton} />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleAddThread}>
+                  <Image source={require('../assets/pencil.png')} style={styles.iconButton} />
+              </TouchableOpacity>
+
+          </View>
+
+          {/* Display selected images */}
+          {images.length > 0 && (
+            <View style={styles.gridImageContainer}>
+              {images.map((imageUri, index) => (
+                <Image key={index} source={{ uri: imageUri }} style={styles.imageBox} />
+              ))}
+              {uploading ? <Progress.Bar progress={transferred} width={300} /> : null}
+            </View>
+          )}
+        </Animated.View>
 
           {/* Floating button at bottom-right corner */}
           <TouchableOpacity style={styles.floatingButton} onPress={toggleAddThread}>
@@ -508,11 +712,7 @@ const ColForum = ({route, navigation}) => {
       borderRadius: 10,
       borderWidth: 1,
       borderColor: '#ddd',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.8,
-      shadowRadius: 3,
-      elevation: 5,  // Shadow for Android
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Dimmed background
     },
     threadHeader: {
         flexDirection: 'column',
@@ -529,10 +729,11 @@ const ColForum = ({route, navigation}) => {
         fontWeight: 'bold',
         flex: 1,
         marginRight: 8,
+        textColor: 'black',
       },
-      reportButton: {
+      /*reportButton: {
         marginTop: 4,
-      },
+      },*/
     newPostContainer: {
       marginTop: 12,
       padding: 12,
@@ -543,31 +744,34 @@ const ColForum = ({route, navigation}) => {
     input: {
       borderWidth: 1,
       borderColor: '#ccc',
-      padding: 8,
-      marginBottom: 8,
-      borderRadius: 4,
+      padding: 15,
+      height: 150,
+      fontSize: 18,
+      marginBottom: 10,
+      borderRadius: 8,
+      textAlignVertical: 'top',
     },
     threadItem: {
       marginBottom: 16,
       padding: 16,
       borderWidth: 1,
-      backgroundColor: '#000080',
+      backgroundColor: '#000033',
       borderRadius: 8,
     },
     threadTitle: {
-      fontSize: 18,
+      fontSize: 25,
       fontWeight: 'bold',
-      color: '#fff',
+      color: 'white',
     },
     threadCreatedBy: {
       fontSize: 14,
       marginTop: 4,
-      color: '#fff',
+      color: 'white',
     },
     threadCreatedAt: {
       fontSize: 14,
       marginTop: 4,
-      color: '#fff',
+      color: 'white',
     },
     postItem: {
       marginTop: 12,
@@ -593,15 +797,56 @@ const ColForum = ({route, navigation}) => {
       color: '#ff9900', // Highlight color for recruiters
     },
     imageBox: {
-        width: 200,
-        height: 200,
+        width: '48%',
+        height: 100,
+        borderWidth: 1,
+        borderColor: 'black',
+        resizeMode: 'cover',
+        borderColor: 'black',
+        borderRadius: 10,
+        },
+    singleImageContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
         marginVertical: 10,
         },
-    imageContainer: {
+    singleImage: {
+        width: 200,
+        height: 200,
+        resizeMode: 'cover',
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 10,
+      },
+    twoImagesContainer: {
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        marginBottom: 10,
-        },
+        alignItems: 'center',
+        marginVertical: 10,
+      },
+    twoImageBox: {
+        width: 150,
+        height: 150,
+        resizeMode: 'cover',
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 10,
+      },
+    gridImageContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginVertical: 10,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    gridImageBox: {
+      width: 100,
+      height: 100,
+      resizeMode: 'cover',
+      borderWidth: 1,
+      borderColor: 'black',
+      borderRadius: 10,
+    },
     background: {
         flex: 1,
         resizeMode: 'cover'
@@ -610,7 +855,7 @@ const ColForum = ({route, navigation}) => {
       position: 'absolute',
       bottom: 30,
       right: 16,
-      backgroundColor: '#ff9900',
+      backgroundColor: '#841584',
       width: 60,
       height: 60,
       borderRadius: 30,
@@ -619,8 +864,8 @@ const ColForum = ({route, navigation}) => {
       elevation: 8,
     },
     floatingButtonImage: {
-      width: 24,
-      height: 24,
+      width: 30,
+      height: 30,
     },
   imageContainer: {
       flexDirection: 'row',
@@ -631,10 +876,10 @@ const ColForum = ({route, navigation}) => {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: 'black',
     padding: 20,
     borderRadius: 10,
     width: '80%',
@@ -659,6 +904,48 @@ const ColForum = ({route, navigation}) => {
     justifyContent: 'space-between',
     marginTop: 20,
   },
+  buttonContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'right',
+      marginTop: 8,
+    },
+    iconButton: {
+      width: 24,
+      height: 24,
+      marginHorizontal: 8, // Adjust space between icons
+    },
+    profileContainer: {
+      flexDirection: 'row',  // Align profile picture and text horizontally
+      alignItems: 'center',  // Vertically center the items
+      marginBottom: 8,
+    },
+    profilePic: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,  // Make the image circular
+      marginRight: 10,   // Add some space between image and text
+    },
+  keyboardAvoidingView: {
+    flex: 1,
+    },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  fullscreenImageContainer: {
+      width: Dimensions.get('window').width,
+      height: Dimensions.get('window').height,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Dimmed background
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-  export default ColForum;
+export default ColForum;
