@@ -545,7 +545,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <Image source={require('./assets/Community.png')}
+                image: <Image source={require('./assets/onb_community.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Forums',
