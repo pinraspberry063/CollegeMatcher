@@ -53,15 +53,16 @@ const Results = ({route, navigation}) => {
   // const user = auth().currentUser.uid;
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [committedColleges, setCommittedColleges] = useState([]);
+  const {colleges} = useContext(CollegesContext);
 
   const [search, setSearch] = useState('');
   const [data, setData] = useState(top100);
-  const [collegeList, setCollegeList] = useState(top100.slice(0,20));
+  const [collegeList, setCollegeList] = useState(top100? top100.slice(0,20): colleges.slice(0,20));
   const [showFilter, setShowFilter] = useState(false);
   const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
   const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
-  const {colleges} = useContext(CollegesContext);
+
   // const [isLoading, setIsLoading] = useState(false);
 
   // Use the useQuery hook outside of useEffect
@@ -94,11 +95,16 @@ const Results = ({route, navigation}) => {
   const [collegeImages, setCollegeImages] = useState({});
 
   useEffect(() => {
-    setCollegeList(data.slice(0, loadCount)); // Load initial colleges
+    if(top100){
+      setCollegeList(data.slice(0, loadCount));
+    }else{
+      setCollegeList(colleges.slice(0, loadCount));
+    }
+     // Load initial colleges
   }, [ loadCount]);
 
   const loadMoreColleges = () => {
-    if (hasMore) {
+    if (hasMore && data) {
       const newLoadCount = loadCount + 20; // Increase load count by 20
       if (newLoadCount >= data.length) {
         setHasMore(false); // No more colleges to load
@@ -236,7 +242,7 @@ const renderItem = ({ item }) => {
         >
           <Text style={styles.collegeName}>{item.name}</Text>
           <Text style={styles.collegeScore}>
-            {(item.score != null) ? `Match Percent: ${item.score}%` : "No Previous Matches"}
+            {(item.score != null) ? `Match Percent: ${item.score}%` : "Match Not Calculated"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -300,10 +306,12 @@ const renderItem = ({ item }) => {
         college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-      setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
-    } else {
+      setData(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    } else if(top100) {
       // If searchQuery is not valid, reset the college list to the original data
-      setCollegeList(top100.slice(0, 20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+      setData(top100.slice(0, 20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    }else{
+      setData(colleges.slice(0, 20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     }
 
     setShowFilter(false);
