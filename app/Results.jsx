@@ -55,7 +55,8 @@ const Results = ({route, navigation}) => {
   const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
-  const [collegeList, setCollegeList] = useState([]);
+  const [data, setData] = useState(top100);
+  const [collegeList, setCollegeList] = useState(top100.slice(0,20));
   const [showFilter, setShowFilter] = useState(false);
   const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
   const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
@@ -90,24 +91,35 @@ const Results = ({route, navigation}) => {
   const [satSci, setSATSci] = useState();
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
+  const [collegeImages, setCollegeImages] = useState({});
   
   useEffect(() => {
-    setCollegeList(top100.slice(0, loadCount)); // Load initial colleges
-  }, [top100, loadCount]);
+    setCollegeList(data.slice(0, loadCount)); // Load initial colleges
+  }, [ loadCount]);
 
   const loadMoreColleges = () => {
     if (hasMore) {
       const newLoadCount = loadCount + 20; // Increase load count by 20
-      if (newLoadCount >= top100.length) {
+      if (newLoadCount >= data.length) {
         setHasMore(false); // No more colleges to load
       }
       setLoadCount(newLoadCount);
     }
   };
-
+  // useEffect(() => {
+  //   console.log('useEffect triggered with colleges:', colleges); // Add this
+  //   colleges.forEach((college) => {
+  //     if (!collegeImages[college.name]) {
+  //       const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
+  //       console.log(`Setting random image for ${college.name}:`, randomImage); // Add this log
+  //       setCollegeImages((prevState) => ({
+  //         ...prevState,
+  //         [college.name]: randomImage,
+  //       }));
+  //     }
+  //   });
+  // }, [colleges]);
   
- 
-    const [collegeImages, setCollegeImages] = useState({});
 
   const collegeImagesArray = [
     require('../assets/red.png'),
@@ -183,19 +195,20 @@ const Results = ({route, navigation}) => {
     }
 };
   // Function to get or set a random image for a college, with a fallback image to prevent null source
-  const getRandomImage = (collegeName) => {
-    if (!collegeImages[collegeName]) {
-      const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
-      setCollegeImages(prevState => ({ ...prevState, [collegeName]: randomImage }));
-    }
-    return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
-  };
+  // const getRandomImage = (collegeName) => {
+  //   return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
+  // };
+  
+  // Set random images outside the render cycle
+  function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 
-
+  }
 
 const renderItem = ({ item }) => {
-  const isCommitted = committedColleges.includes(item.name);
-  const collegeImage = getRandomImage(item.name); // Always get a valid image
+// Always get a valid image
 
   return (
     <ScrollView style={styles.card}>
@@ -203,11 +216,11 @@ const renderItem = ({ item }) => {
         {/* Tapping on the planet will commit/decommit */}
         <TouchableOpacity onPress={() => handleCommit(item.name)}>
           <FastImage
-            source={collegeImage}
+            source={collegeImagesArray[getRandomInt(0,collegeImagesArray.length)]}
             style={styles.collegeImage}
             resizeMode="contain"
           >
-            {isCommitted && (
+            {committedColleges.includes(item.name) && (
               <FastImage source={require('../assets/flag.png')} style={styles.flagImage} />
             )}
           </FastImage>
@@ -275,14 +288,14 @@ const renderItem = ({ item }) => {
       
     );
 
-    setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
+    setData(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
   }
 
   const handleSearch = (searchQuery) => {
 
     setSearch(searchQuery);
 
-    if (searchQuery) {
+    if (searchQuery && searchQuery != '') {
       const filtered = colleges.filter(college =>
         college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -290,7 +303,7 @@ const renderItem = ({ item }) => {
       setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     } else {
       // If searchQuery is not valid, reset the college list to the original data
-      setCollegeList(top100.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+      setCollegeList(top100.slice(0, 20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     }
   
     setShowFilter(false);
