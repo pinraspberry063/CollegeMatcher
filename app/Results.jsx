@@ -49,7 +49,7 @@ const usersRef = collection(firestore, 'Users');
 
 
 const Results = ({route, navigation}) => {
-  const top100 = route.params.top100;
+  const top100 = route.params?.top100 || []; // Default to an empty array if top100 is undefined
   // const user = auth().currentUser.uid;
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [committedColleges, setCommittedColleges] = useState([]);
