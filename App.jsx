@@ -141,6 +141,8 @@ const HomeStackScreen = () => (
 const MessageStack = createNativeStackNavigator();
 const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
+    <MessageStack.Screen name="ViewMessage" component={ViewMessage} />
+    <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
     <MessageStack.Screen name="RecConvs" component={RecConvs} />
     <MessageStack.Screen name="Message" component={Message} />
   </MessageStack.Navigator>
@@ -182,7 +184,6 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
     <ForumStack.Screen name="CommentPage" component={CommentPage}/>
     <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
-    <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
     <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
   </ForumStack.Navigator>
 );

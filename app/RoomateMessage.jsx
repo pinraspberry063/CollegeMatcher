@@ -50,7 +50,7 @@ const ReportModal = ({ isVisible, onClose, onSubmit }) => {
   );
 };
 
-const Message = ({ route, navigation }) => {
+const RoomateMessage = ({ route, navigation }) => {
   const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -243,6 +243,8 @@ const Message = ({ route, navigation }) => {
   );
 };
 
+export default RoomateMessage
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -357,4 +359,3 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Message;
