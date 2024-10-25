@@ -466,8 +466,7 @@ const matchColleges = async (studentPreferences, colleges) => {
         docID,
         {
           userPreferences: studentPreferences,
-          top100Colleges: top100Colleges.slice(0, 50),
-          collegeScores: top100Colleges
+          top100Colleges: top100Colleges
         },
         {merge: true},
       );

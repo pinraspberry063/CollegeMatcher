@@ -68,7 +68,6 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 import CommentPage from './app/CommentPage';
 import Onboarding from 'react-native-onboarding-swiper';
-import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 
@@ -91,17 +90,6 @@ const fetchAllColleges = async () => {
 //   .catch((error) => {
 //     console.error('Error pre-fetching data:', error);
 //   });
-
-queryClient.prefetchQuery({
-      queryKey: ['colleges'], // Now an array inside an object
-      queryFn: fetchAllColleges, // Query function passed as part of the object
-    })
-    .then(() => {
-      console.log('Data has been pre-fetched');
-    })
-    .catch((error) => {
-      console.error('Error pre-fetching data:', error);
-    });
 
 
 const screenOptions = {
@@ -141,8 +129,6 @@ const HomeStackScreen = () => (
 const MessageStack = createNativeStackNavigator();
 const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
-    <MessageStack.Screen name="ViewMessage" component={ViewMessage} />
-    <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
     <MessageStack.Screen name="RecConvs" component={RecConvs} />
     <MessageStack.Screen name="Message" component={Message} />
   </MessageStack.Navigator>
@@ -184,6 +170,7 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
     <ForumStack.Screen name="CommentPage" component={CommentPage}/>
     <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
+    <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
     <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
   </ForumStack.Navigator>
 );
@@ -410,7 +397,7 @@ const checkUserStatus = async (userId) => {
 
 
 const App = () => {
-  
+  const queryClient = new QueryClient();
   // const [takenQuiz, setTakenQuiz] = useState(false);
   // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
@@ -424,12 +411,12 @@ const App = () => {
   // }, [queryClient]);
 
 
-  // useEffect(() => {
-  //    queryClient.prefetchQuery({
-  //         queryKey: ['colleges'], // Key for the cached query
-  //         queryFn: fetchAllColleges, // The function to fetch the data
-  //       });
-  // }, [queryClient]);
+
+     queryClient.prefetchQuery({
+          queryKey: ['colleges'], // Key for the cached query
+          queryFn: fetchAllColleges, // The function to fetch the data
+        });
+
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const {height: height, width: width} = useWindowDimensions();
@@ -541,7 +528,7 @@ const App = () => {
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <FastImage source={require('./assets/Launch.png')}
+                image: <Image source={require('./assets/Launch.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Welcome to Universe college matcher!',
@@ -550,7 +537,7 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 size: '',
-                image: <FastImage source={require('./assets/Form.png')}
+                image: <Image source={require('./assets/Form.png')}
                               style={ui_styles.image}
                 />,
                 title: 'College Matcher Quiz',
@@ -558,7 +545,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <FastImage source={require('./assets/Community.png')}
+                image: <Image source={require('./assets/Community.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Forums',
@@ -566,7 +553,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <FastImage source={require('./assets/Chatbot.png')}
+                image: <Image source={require('./assets/Chatbot.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Get Help',
@@ -574,7 +561,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <FastImage source={require('./assets/Secure-login.png')}
+                image: <Image source={require('./assets/Secure-login.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Login to get started!',
