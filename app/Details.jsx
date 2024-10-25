@@ -32,12 +32,14 @@ import {
   import {color} from 'react-native-elements/dist/helpers';
   import Svg, {Circle, text} from 'react-native-svg';
   import majorData from '../assets/major_data';
-
+  import Admissions from './Admissions'
+  import  Demographics from './Demographics'
+  import OverView from './Overview';
 
   // Lazy load the tabs
-const Admissions = React.lazy(() => import('./Admissions'));
-const Demographics = React.lazy(() => import('./Demographics'));
-const OverView = React.lazy(() => import('./Overview'));
+// const Admissions = import('./Admissions');
+// const Demographics =  import('./Demographics');
+// const OverView = import('./Overview');
   
   const firestore = getFirestore(db);
   const collegesRef = collection(firestore, 'CompleteColleges');
@@ -83,25 +85,24 @@ const OverView = React.lazy(() => import('./Overview'));
   
   
   const Details = ({route}) => {
-    const collegeID = route.params.id;
-    const collName = route.params.college;
+    const collegeobj = route.params.obj;
     // const Star = require('../assets/pinkstar.png');
-  
+    
+    
     const data = [
       {
         tabLabel: 'Overview',
-        component: () => <OverView collegeID={collegeID} />,
-        props: {collegeID: collegeID},
+        component: () => <OverView collegeID={collegeobj}/>,
+      
       },
       {
         tabLabel: 'Demographics',
-        component: () => <Demographics collegeID={collegeID} />,
-        props: {collegeID: collegeID},
+        component: () => <Demographics collegeID={collegeobj}/>,
+  
       },
       {
         tabLabel: 'Admissions',
-        component: () => <Admissions collegeID={collegeID} />,
-        props: {collegeID: collegeID},
+        component: () => <Admissions collegeID={collegeobj} />,
       },
     ];
   
@@ -110,7 +111,7 @@ const OverView = React.lazy(() => import('./Overview'));
         <View style={{height: 200, backgroundColor: '#a49af4'}}>
           <TouchableOpacity
             onPress={() => {
-              favoriteCollege({ID: collegeID});
+              favoriteCollege({ID: collegeobj.school_id});
             }}>
             {/* <Image
               style={styles.star}
@@ -126,12 +127,12 @@ const OverView = React.lazy(() => import('./Overview'));
               fontWeight: 'bold',
               paddingTop: Constants.statusBarHeight
             }}>
-            {collName}
+            {collegeobj.shool_name}
           </Text>
         </View>
   
         <View style={styles.swipView}>
-          <Suspense fallback={<Text> loading </Text>}>
+          {/* <Suspense fallback={<Text> loading </Text>}> */}
             <Swiper
               data={data}
               isStaticPills={true}
@@ -140,7 +141,7 @@ const OverView = React.lazy(() => import('./Overview'));
               stickyHeaderIndex={1}
               style={swipeStyles}
             />
-          </Suspense>
+          {/* </Suspense> */}
         </View>
       </ScrollView>
     );

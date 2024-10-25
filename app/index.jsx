@@ -1,16 +1,17 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {SafeAreaView, StyleSheet, Text, View, Button, Dimensions, ImageBackground, Alert} from 'react-native';
-import themeContext from '../theme/themeContext';
+
 import { UserContext } from '../components/UserContext';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import PlanetSwiper from '../components/PlanetSlider.jsx';
+import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const Index = ({ navigation }) => {
-  const theme = useContext(themeContext);
+ 
   const { user } = useContext(UserContext);  // Get the current logged-in user
   const [isSuperRec, setIsSuperRec] = useState(false);  // State to track if the user is SuperRec
   const [collegeDocId, setCollegeDocId] = useState(null);  // Track the document ID for the college
@@ -63,16 +64,19 @@ const Index = ({ navigation }) => {
   }, [user]);
 
   return (
-    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+    <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
-        <SafeAreaView style={styles.titleContainer}>
-          <Text style={[styles.title, {color: 'purple'}]}>
-            College Matcher
-          </Text>
-          <Text style={[styles.subtitle, {color: 'white'}]}>
-            Let colleges find you today!
-          </Text>
-        </SafeAreaView>
+      
+
+      <SafeAreaView style={styles.titleContainer}>
+        <Text style={[styles.title, {color: 'purple'}]}>
+          College Matcher
+        </Text>
+        <Text style={[styles.subtitle, {color: 'white'}]}>
+          Let colleges find you today!
+        </Text>
+      </SafeAreaView>
+    
 
         {/* Place the sun image as a background */}
         <View style={styles.sunContainer}>
@@ -90,20 +94,20 @@ const Index = ({ navigation }) => {
 
         {/* Buttons placed below the planets and sun */}
         <View style={styles.buttonContainer}>
-          <Button
-            style={[styles.button, { textShadowColor: theme.color }]}
+          {/* <Button
+            style={[styles.button, { textShadowColor: 'purple' }]}
             onPress={() => {
               navigation.push('QuizButton');
             }}
             title="Take the Quiz"
             color="#841584"
             accessibilityLabel="Take the quiz to be matched with colleges automatically"
-          />
+          /> */}
 
           {isSuperRec && (
             <>
               <Button
-                style={[styles.button, { textShadowColor: theme.color }]}
+                style={[styles.button, { textShadowColor: 'purple' }]}
                 onPress={() => {
                   navigation.push('AddRecs');
                 }}
@@ -113,7 +117,7 @@ const Index = ({ navigation }) => {
               />
 
               <Button
-                style={[styles.button, { textShadowColor: theme.color }]}
+                style={[styles.button, { textShadowColor: 'purple' }]}
                 onPress={() => {
                   navigation.push('EditCollege', { collegeDocId });
                 }}
@@ -125,7 +129,7 @@ const Index = ({ navigation }) => {
           )}
         </View>
       </View>
-    </ImageBackground>
+    </FastImage>
   );
 };
 
@@ -152,21 +156,21 @@ const styles = StyleSheet.create({
   },
   sunContainer: {
     position: 'absolute',
-    top: height * 0.35,
-    left: width * 0.1,
+    top: height * 0.40,
+    left: width * 0.05,
     width: width * 0.8,
     height: width * 0.8,
     justifyContent: 'center',
     alignItems: 'center',
   },
   sunImage: {
-    width: '100%',
-    height: '100%',
+    width: '112%',
+    height: '112%',
     borderRadius: (width * 0.8) / 2,
   },
   planetContainer: {
     position: 'absolute',
-    top: height * 0.3,
+    top: height * 0.42,
     left: 0,
     right: 0,
     zIndex: 1,

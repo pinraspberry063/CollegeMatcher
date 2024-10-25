@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground, Image, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, query, where, getFirestore, Timestamp } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
@@ -16,7 +15,6 @@ const ForumSelect = ({ route, navigation }) => {
   const [subgroups, setSubgroups] = useState([]);
   const [newSubgroupName, setNewSubgroupName] = useState('');
   const { user } = useContext(UserContext);
-  const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
@@ -237,7 +235,7 @@ const ForumSelect = ({ route, navigation }) => {
                     {
                       translateY: animationValue.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [600, 0], // Slide up the Add Subgroup form
+                        outputRange: [height+200, 0], // Slide up the Add Subgroup form
                       }),
                     },
                   ],

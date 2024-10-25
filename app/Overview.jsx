@@ -1,65 +1,23 @@
 import {Text,View, StyleSheet, ImageBackground} from 'react-native';
-import React, { useEffect, useState} from 'react';
-import {db} from '../config/firebaseConfig';
-import auth from '@react-native-firebase/auth';
-import {
-collection,
-getDocs,
-getFirestore,
-query,
-where,
-} from 'firebase/firestore';
+import React, { useContext, useEffect, useState} from 'react';
 import Constants from 'expo-constants';
+import { CollegesContext } from '../components/CollegeContext';
+import FastImage from 'react-native-fast-image';
 
-
-const firestore = getFirestore(db);
-const collegesRef = collection(firestore, 'CompleteColleges');
 
 const OverView = ({collegeID}) => {
-    const [address, setAddress] = useState([]);
-    const [urbanLevel, setUrbanLevel] = useState([]);
-    const [admRate, setAdmRate] = useState(0.0);
+    // const college = route.params.collegeID;
+    
+    const [urbanLevel, setUrbanLevel] = useState(collegeID.ubanization_level.split(':'));
+    // const {colleges, loading} = useContext(collegeID);
   
-    useEffect(() => {
-      const func = async () => {
-        const collegeQuery = query(
-          collegesRef,
-          where('school_id', '==', parseInt(collegeID)),
-        );
-        try {
-          const querySnapshot = await getDocs(collegeQuery);
-  
-          if (!querySnapshot.empty) {
-            const firstDoc = querySnapshot.docs[0];
-            const collegeData = firstDoc.data();
-            const admissionRate = parseFloat(collegeData.adm_rate);
-            const addy = collegeData.address;
-            const urban = collegeData.ubanization_level;
-            const getCity = collegeData.city;
-            const getState = collegeData.state;
-  
-            const getAddy = [addy, getCity, getState];
-  
-            setAddress(getAddy);
-            setUrbanLevel(urban.split(':'));
-            setAdmRate(admissionRate);
-          } else {
-            console.log('No matching document found.');
-          }
-        } catch (error) {
-          console.error('Error retrieving document:', error);
-        }
-      };
-      func();
-      // console.log(admUrl)
-    }, [address, urbanLevel, admRate]);
   
     return (
-      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}>
+      <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
       <View style={styles.contentContainer}>
         <Text style={styles.subTitle}>Address: </Text>
         <Text style= {{color: 'white'}}>
-          {address[0]}, {address[1]}, {address[2]}
+          {collegeID.address}, {collegeID.city}, {collegeID.state}
         </Text>
   
         <Text style={styles.subTitle}>Urbanization Level: </Text>
@@ -68,9 +26,9 @@ const OverView = ({collegeID}) => {
         </Text>
   
         <Text style={styles.subTitle}>Admissions Rate: </Text>
-        <Text style= {{color: 'white'}}>{admRate} %</Text>
+        <Text style= {{color: 'white'}}>{collegeID.adm_rate} %</Text>
       </View>
-      </ImageBackground>
+      </FastImage>
     );
   };
 
@@ -98,8 +56,6 @@ const OverView = ({collegeID}) => {
       paddingLeft: 20,
       width: '100%',
       height: 1500,
-      // justifyContent: 'center',
-      // alignContent: 'center',
     },
     webView: {
       flex: 1,

@@ -18,7 +18,7 @@ import {
   Dimensions,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
+
 import {db} from '../config/firebaseConfig';
 import {
   collection,
@@ -52,7 +52,7 @@ const ColForum = ({route, navigation}) => {
     const [newThreadTitle, setNewThreadTitle] = useState('');
     const [newPostContent, setNewPostContent] = useState({});
     const {user} = useContext(UserContext);
-    const theme = useContext(themeContext);
+
     const [username, setUsername] = useState('');
     const [isRecruiter, setIsRecruiter] = useState(false);
     const [isModerator, setIsModerator] = useState(false);
@@ -508,7 +508,6 @@ const ColForum = ({route, navigation}) => {
 
  const ReportModal = ({ isVisible, onClose, onSubmit, isModerator, onBanUser, onViewActivity }) => {
    const [selectedReason, setSelectedReason] = useState('');
-   const theme = useContext(themeContext);
    const reasons = [
      'Inappropriate content',
      'Spam',
@@ -595,19 +594,19 @@ const ColForum = ({route, navigation}) => {
                       )}
 
                       {/* Created by section next to profile pic */}
-                      <Text style={[styles.threadCreatedBy, { color: theme.textColor }]}>
+                      <Text style={styles.threadCreatedBy}>
                          {thread.createdBy}
                       </Text>
                     </View>
                   </View>
-                  <Text style={[styles.threadTitle, { color: theme.textColor }]}>{thread.title}</Text>
+                  <Text style={styles.threadTitle}>{thread.title}</Text>
 
                   {/* Render images based on count */}
                   {thread.imageUrls && thread.imageUrls.length > 0 && renderImages(thread.imageUrls, threadIndex)}
 
 
                 <View style={styles.threadInfoRow}>
-                  <Text style={[styles.threadCreatedAt, { color: theme.textColor }]}>
+                  <Text style={styles.threadCreatedAt}>
                     Created at: {thread.createdAt.toDate().toLocaleString()}
                   </Text>
                   {thread.createdBy !== username && (  // Only show report button if not the creator
@@ -623,7 +622,12 @@ const ColForum = ({route, navigation}) => {
                 <View style={styles.buttonContainer}>
                 {/* Add Post Button */}
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('CommentPage', { threadId: thread.id, threadTitle: thread.title })}
+                  onPress={() => navigation.navigate('CommentPage', {
+                      threadId: thread.id,
+                      threadTitle: thread.title,
+                      collegeName: collegeName,
+                      forumName: forumName
+                      })}
                 >
                   <Image source={require('../assets/Chat.png')} style={styles.iconButton} />
                 </TouchableOpacity>
@@ -728,7 +732,7 @@ const ColForum = ({route, navigation}) => {
             { transform: [{
                   translateY: animationValue.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [600, 0], // Slide up the add thread section
+                    outputRange: [height+200, 0], // Slide up the add thread section
                   }),
                 },
               ],

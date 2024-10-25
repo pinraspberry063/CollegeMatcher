@@ -14,155 +14,144 @@ getFirestore,
 query,
 where,
 } from 'firebase/firestore';
-import majorData from '../assets/major_data';
+import majorData , {unique_Majors} from '../assets/major_data';
 import Constants from 'expo-constants';
 import { CollegesContext } from '../components/CollegeContext';
-import PieChart from 'react-native-pie-chart';
 import * as Progress from 'react-native-progress';
+import {Circle, Svg} from 'react-native-svg'
+import FastImage from 'react-native-fast-image';
+import {generateCircleData} from '../components/createCircleGraphic'
 
 const firestore = getFirestore(db);
-const collegesRef = collection(firestore, 'CompleteColleges');
 const usersRef = collection(firestore, 'Users');
-
-
-
-const Demographics = ({navigation, collegeID}) => {
-// const collegeID = route.params.collegeID;
-const [sToF, setSToF] = useState(0);
-const [userPref, setUserPref] = useState([]);
-const [circleData, setCircleData] = useState([]);
-const user = auth().currentUser.uid;
-const [majors, setMajors] = useState([]);
-const {colleges, loading} = useContext(CollegesContext);
-
-useEffect(() => {
-    const func =  () => {
-    // const collegeQuery = query(
-    //     collegesRef,
-    //     where('school_id', '==', parseInt(collegeID)),
-    // );
-    try {
-        // const querySnapshot = await getDocs(collegeQuery);
-
-        // if (!querySnapshot.empty) {
-        // const firstDoc = querySnapshot.docs[0];
-        // const collegeData = firstDoc.data();
-        const college = colleges.find(college => college.school_id == parseInt(collegeID));
-        if(college != null)
-        {
-            const sToF = college.student_to_Faculty_Ratio;
-        
-        
-
-        const uniqueMajors = [];
-        const majorSet = new Set();
-
-        majorData.forEach(major => {
-            const majorCategory = major.categories || [' '];
-            const field = 'percent_' + major.categories;
-            const percent = college[field];
-
-            if (!majorSet.has(majorCategory) && percent) {
-            majorSet.add(majorCategory);
-            uniqueMajors.push([majorCategory, percent]);
-            }
-        });
-        uniqueMajors.reduce((acc, curr) => {
-            const majorCategory = curr.categories;
-
-            if (!acc.some(major => major.categories === majorCategory)) {
-            acc.push(curr);
-            }
-
-            return acc;
-        }, []);
-
-        setMajors(uniqueMajors);
-
-        setSToF(sToF);
-        
-        } else {
-        console.log('No matching document found.');
-        }
-    } catch (error) {
-        console.error('Error retrieving document:', error);
-    }
-    };
-    func();
-    // console.log(sToF)
-}, []);
-
-useEffect(() => {
-    const func = async () => {
-    const userQuery = query(usersRef, where('User_UID', '==', user));
-    try {
-        const querySnapshot = await getDocs(userQuery);
-
-        if (!querySnapshot.empty) {
-        const firstDoc = querySnapshot.docs[0];
-        const userData = firstDoc.data();
-        const userPreferences = userData.userPreferences;
-
-        setUserPref(userPreferences);
-        } else {
-        console.log('No matching document found.');
-        }
-    } catch (error) {
-        console.error('Error retrieving document:', error);
-    }
-    };
-    func();
-    // console.log(userPref)
-}, []);
-
-// useEffect(() => {
-//   const generateCircleData = () => {
-//     const data = [];
-//     const Xmin = 145;
-//     const Xmax = 350;
-//     const Ymin = 20;
-//     const Ymax = 155;
-//     const radius = 15; // Radius of the circles
-
-//     while (data.length < sToF) {
-//       const newCircle = {
-//         cx: Math.random() * (Xmax - Xmin) + Xmin,
-//         cy: Math.random() * (Ymax - Ymin) + Ymin,
-//         r: radius,
-//       };
-
-//       // Check if the new circle overlaps with any existing circles
-//       let overlap = false;
-//       for (let i = 0; i < data.length; i++) {
-//         if (doCirclesOverlap(newCircle, data[i])) {
-//           overlap = true;
-//           break;
-//         }
+  
+//   const favoriteCollege = async ({ID}) => {
+//     const collegeID = parseInt(ID);
+  
+//     const userQuery = query(usersRef, where('User_UID', '==', user));
+  
+//     try {
+//       const querySnapshot = await getDocs(userQuery);
+  
+//       if (!querySnapshot.empty) {
+//         const firstDoc = querySnapshot.docs[0];
+//         const userData = firstDoc.data();
+//         const currentFavorited = userData.favorited_colleges;
+//         currentFavorited.push(collegeID);
+  
+//         await setDoc(
+//           firstDoc.ref,
+//           {
+//             favorited_colleges: currentFavorited,
+//           },
+//           {merge: true},
+//         );
+  
+//         alert('College added to Favorites!');
 //       }
-
-//       // Add the circle if no overlap was detected
-//       if (!overlap) {
-//         data.push(newCircle);
-//       }
+//     } catch (error) {
+//       console.error('Error adding college to favorites: ', error);
 //     }
-//     setCircleData(data);
 //   };
 
-//   if (sToF > 0) {
-//     generateCircleData();
-//   }
-// }, [sToF]);
+const Demographics = ({navigation, collegeID}) => {
+
+    // const college = route.params.collegeID;
+const college = collegeID;
+const [sToF, setSToF] = useState(collegeID.student_to_Faculty_Ratio);
+const [userPref, setUserPref] = useState([]);
+const [circleData, setCircleData] = useState(generateCircleData(collegeID.student_to_Faculty_Ratio));
+const user = auth().currentUser.uid;
+const [majors, setMajors] = useState(unique_Majors({collegeID: collegeID}));
+
+// useEffect(()=> {
+//     const func = () => {
+//         setMajors(unique_Majors(collegeID))
+//     }
+//     const makeCircles = () => {
+//         if (sToF > 0) {
+            
+//             setCircleData(generateCircleData(sToF))
+//           }
+//     }
+//     makeCircles()
+//     func()
+// },[])
+
+// useEffect(() => {
+//     const func =  () => {
+
+//     try {    
+ 
+
+//         const uniqueMajors = [];
+//         const majorSet = new Set();
+
+//         majorData.forEach(major => {
+//             const majorCategory = major.categories || [' '];
+//             const field = 'percent_' + major.categories;
+//             const percent = collegeID[field];
+
+//             if (!majorSet.has(majorCategory) && percent) {
+//             majorSet.add(majorCategory);
+//             uniqueMajors.push([majorCategory, percent]);
+//             }
+//         });
+//         uniqueMajors.reduce((acc, curr) => {
+//             const majorCategory = curr.categories;
+
+//             if (!acc.some(major => major.categories === majorCategory)) {
+//             acc.push(curr);
+//             }
+
+//             return acc;
+//         }, []);
+
+//         setMajors(uniqueMajors);
+    
+//     } catch (error) {
+//         console.error('Error retrieving document:', error);
+//     }
+//     };
+//     func();
+
+// }, []);
+
+// useEffect(() => {
+//     const func = async () => {
+//     const userQuery = query(usersRef, where('User_UID', '==', user));
+//     try {
+//         const querySnapshot = await getDocs(userQuery);
+
+//         if (!querySnapshot.empty) {
+//         const firstDoc = querySnapshot.docs[0];
+//         const userData = firstDoc.data();
+//         const userPreferences = userData.userPreferences;
+
+//         setUserPref(userPreferences);
+//         } else {
+//         console.log('No matching document found.');
+//         }
+//     } catch (error) {
+//         console.error('Error retrieving document:', error);
+//     }
+//     };
+//     func();
+
+// }, []);
+
+
 
 return (
-    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.container}> 
+    <FastImage source={require('../assets/galaxy.webp')} style={styles.container}> 
     <View style={styles.contentContainer}>
     <View>
         <Text style={styles.subTitle}>Student to Faculty Ratio: {sToF} </Text>
     </View>
-    {/* <Svg height="250" width="100%">
+    <Svg height="250" width="100%">
         <Circle cx="50" cy="100" r="50" fill="blue" />
 
-        {circleData.map((circle, index) => (
+        {circleData && circleData.map((circle, index) => (
         <Circle
             key={index}
             cx={circle.cx}
@@ -171,13 +160,13 @@ return (
             fill="pink"
         />
         ))}
-    </Svg> */}
+    </Svg>
     <View style={{paddingVertical: 20}}>
         <Text style={styles.subTitle}>Major Break Down</Text>
         {majors.map((major, index) => (
             <View style={{marginVertical: 10}} key={index}>
             <Text style={{color: '#eae8e5', marginBottom: 5 }}> {major[0]} :</Text>
-            <Progress.Bar progress={parseInt(major[1])/100} width={100}/>
+            <Progress.Bar progress={parseInt(major[1])/100} width={200}/>
             </View>
         ))}
 
@@ -188,7 +177,7 @@ return (
     <Text style={{color: '#eae8e5'}}> To Be Calculated </Text>
     <Text></Text>
     </View>
-    </ImageBackground>
+    </FastImage>
 );
 };
 

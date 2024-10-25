@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
+
 import { db } from '../config/firebaseConfig';
 import { collection, getDocs, doc, query, where, getFirestore, getDoc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
@@ -15,7 +15,6 @@ const FollowedForums = ({ navigation }) => {
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
   const [subgroupDetails, setSubgroupDetails] = useState([]);
   const { user } = useContext(UserContext);
-  const theme = useContext(themeContext);
 
   useEffect(() => {
     if (user) {

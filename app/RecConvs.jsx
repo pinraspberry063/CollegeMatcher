@@ -2,14 +2,13 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, Button, ScrollView, Alert, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, query, updateDoc, doc, arrayUnion, arrayRemove, getDocs, where, addDoc } from 'firebase/firestore';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
+import FastImage from 'react-native-fast-image';
 
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RecConvs = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const { user } = useContext(UserContext);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [recruiters, setRecruiters] = useState([]);
@@ -166,6 +165,7 @@ const RecConvs = ({ navigation }) => {
   );
 
  return (
+  <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <Text style={[styles.title, { color: '#fff' }]}>
         {isRecruiter ? 'Conversations with Users' : 'Available Recruiters'}
@@ -200,10 +200,17 @@ const RecConvs = ({ navigation }) => {
         )}
       </ScrollView>
     </SafeAreaView>
+    </FastImage>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     paddingHorizontal: width * 0.05, // Scaled horizontal padding

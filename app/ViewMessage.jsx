@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect,useCallback } from 'react';
 import { StyleSheet, Text, FlatList, View, ScrollView, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import auth from '@react-native-firebase/auth';
@@ -19,7 +18,6 @@ const ViewMessage = ( { navigation } ) => {
   const [activeMessages, setActiveMessages] = useState([]);
   const [userNames, setUserNames] = useState([]);
   const [isRecruiter, setIsRecruiter] = useState(false);
-  const theme = useContext(themeContext);
 
          //console.log("LOOP");
 
@@ -209,20 +207,28 @@ const ViewMessage = ( { navigation } ) => {
 
 
     return (
+      <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
-                data={userNames,activeMessages}
+                data={userNames}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
+      </FastImage>
     );
 };
 
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     padding: 16,

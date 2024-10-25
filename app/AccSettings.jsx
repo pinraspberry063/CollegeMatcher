@@ -3,12 +3,12 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Button } from 'react-native-elements';
 import auth from '@react-native-firebase/auth';
 import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
-import themeContext from '../theme/themeContext';
+
 
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const Account = ({route, navigation}) => {
-        const theme = useContext(themeContext);
+        
         const [url, seturl] = useState();
         const user = auth().currentUser;
 
@@ -29,7 +29,7 @@ const Account = ({route, navigation}) => {
         }, []);
         return (
             
-            <View style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+            <View style={styles.container}>
         
                 <Image
                 style={styles.profile}

@@ -73,29 +73,53 @@ const majorData = [
     { label: 'Visual Arts', value: 'Visual Arts' , categories:'Visual_and_PerformingArtsDegrees'},
 ];
 
-const unique_Majors = async() => {
+const uniqueMajors =  [
+  "EngineeringDegrees", 
+  "Business_Management_Marketing_and_RelatedDegrees",
+   "agriculturalDegrees", 
+   "ArchitectureDegrees", 
+   "Biological_and_BiomedicalSciencesDegrees", 
+   "PhysicalSciencesDegrees", 
+   "CommunicationTechnologiesDegrees", 
+   "Computer_and_ComputerInfoScienciesDegrees", 
+   "ConstructionTradesDegrees", 
+   "LegalStudiesDegrees", 
+   "CulinaryDegrees", 
+   "EducationsDegrees", 
+   "EnglishDegrees", 
+   "naturalResourceAndConservationDegrees", 
+   "Ethinc_Cultural_GenderStudiesDegrees", 
+   "Visual_and_PerformingArtsDegrees", 
+   "Parks_Recreation_Leisure_and_FitnessStudiesDegrees", 
+   "ForeignLanguagesDegrees", 
+   "LiberalArts_and_GeneralStudiesDegrees", 
+   "HistoryDegrees", 
+   "HumanSciencesDegrees", 
+   "Multi_InterdisciplinaryStudiesDegrees", 
+   "Communication_and_JournalismDegrees", 
+   "Math_and_StatsDegrees", 
+   "Mechanic_and_RepairTechnologiesDegrees", 
+   "Philosophy_and_ReligiousStudiesDegrees", 
+   "PsychologyDegrees", 
+   "SocialSciencesDegrees", 
+   "PrecisionProductionDegrees", 
+   "HomelandSecurity_LawEnforcement_Firefighting_and_RelatedProtectiveServicesDegrees", 
+   "PublicAdmin_and_SocialServiceDegrees",
+  "Theology_and_ReligiousVocationsDegrees"];
 
-    const uniqueMajors = [];
-    const majorSet = new Set();
-    majorData.forEach(major => {
-        const majorCategory = major.categories || [' '];
+export const unique_Majors = ({collegeID}) => {
 
-        if (!majorSet.has(majorCategory)) {
-          majorSet.add(majorCategory);
-          uniqueMajors.push(majorCategory);
-        }
-      });
-      uniqueMajors.reduce((acc, curr) => {
-        const majorCategory = curr.categories;
-
-        if (!acc.some(major => major.categories === majorCategory)) {
-          acc.push(curr);
-        }
-
-        return acc;
-      }, []);
-    
-    return uniqueMajors;
+          const uniqueMajorPercents = [];
+  
+          uniqueMajors.forEach(major => {
+              const field = 'percent_' + major;
+              const percent = collegeID[field];
+              uniqueMajorPercents.push([major, percent]);
+              
+          });
+  
+          return uniqueMajorPercents;
 }
 
 export default  majorData;
+

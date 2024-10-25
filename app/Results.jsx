@@ -9,39 +9,44 @@ import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
 import { CollegesContext } from '../components/CollegeContext';
+import {useQuery} from '@tanstack/react-query';
+import FastImage from 'react-native-fast-image';
+
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const collegeRef = collection(firestore, 'CompleteColleges'); // Initialize Firestore
 
-const favoriteCollege = async ({ID}) => {
-  const collegeID = parseInt(ID);
 
-  const userQuery = query(usersRef, where('User_UID', '==', user));
+// const favoriteCollege = async ({ID}) => {
+//   const collegeID = parseInt(ID);
 
-  try {
-    const querySnapshot = await getDocs(userQuery);
+//   const userQuery = query(usersRef, where('User_UID', '==', user));
 
-    if (!querySnapshot.empty) {
-      const firstDoc = querySnapshot.docs[0];
-      const userData = firstDoc.data();
-      const currentFavorited = userData.favorited_colleges;
-      currentFavorited.push(collegeID);
+//   try {
+//     const querySnapshot = await getDocs(userQuery);
 
-      await setDoc(
-        firstDoc.ref,
-        {
-          favorited_colleges: currentFavorited,
-        },
-        {merge: true},
-      );
+//     if (!querySnapshot.empty) {
+//       const firstDoc = querySnapshot.docs[0];
+//       const userData = firstDoc.data();
+//       const currentFavorited = userData.favorited_colleges;
+//       currentFavorited.push(collegeID);
 
-      Alert.alert('College added to Favorites!');
-    }
-  } catch (error) {
-    console.error('Error adding college to favorites: ', error);
-  }
-};
+//       await setDoc(
+//         firstDoc.ref,
+//         {
+//           favorited_colleges: currentFavorited,
+//         },
+//         {merge: true},
+//       );
+
+//       Alert.alert('College added to Favorites!');
+//     }
+//   } catch (error) {
+//     console.error('Error adding college to favorites: ', error);
+//   }
+// };
+
+
 
 const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
@@ -50,11 +55,21 @@ const Results = ({route, navigation}) => {
   const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
-  const [colllegeList, setCollegeList] = useState(top100);
+  const [data, setData] = useState(top100);
+  const [collegeList, setCollegeList] = useState(top100.slice(0,20));
   const [showFilter, setShowFilter] = useState(false);
+  const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
+  const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
-  const {colleges, loading} = useContext(CollegesContext);
-  const [isLoading, setisLoading] = useState(false);
+  const {colleges} = useContext(CollegesContext);
+  // const [isLoading, setIsLoading] = useState(false);
+
+  // Use the useQuery hook outside of useEffect
+  // const { data: collegesData, isLoading: queryLoading, error } = useQuery({
+  //   queryKey: ['colleges'], // Now an array inside an object
+  //   queryFn: fetchAllColleges, // Query function passed as part of the object
+  // });
+  
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
   const [privateSchool, setPrivate] = useState (false);
@@ -77,6 +92,34 @@ const Results = ({route, navigation}) => {
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
   const [collegeImages, setCollegeImages] = useState({});
+  
+  useEffect(() => {
+    setCollegeList(data.slice(0, loadCount)); // Load initial colleges
+  }, [ loadCount]);
+
+  const loadMoreColleges = () => {
+    if (hasMore) {
+      const newLoadCount = loadCount + 20; // Increase load count by 20
+      if (newLoadCount >= data.length) {
+        setHasMore(false); // No more colleges to load
+      }
+      setLoadCount(newLoadCount);
+    }
+  };
+  // useEffect(() => {
+  //   console.log('useEffect triggered with colleges:', colleges); // Add this
+  //   colleges.forEach((college) => {
+  //     if (!collegeImages[college.name]) {
+  //       const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
+  //       console.log(`Setting random image for ${college.name}:`, randomImage); // Add this log
+  //       setCollegeImages((prevState) => ({
+  //         ...prevState,
+  //         [college.name]: randomImage,
+  //       }));
+  //     }
+  //   });
+  // }, [colleges]);
+  
 
   const collegeImagesArray = [
     require('../assets/red.png'),
@@ -87,7 +130,7 @@ const Results = ({route, navigation}) => {
     require('../assets/pnk.png'),
     require('../assets/blu.png')
   ];
-  
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -108,31 +151,6 @@ const Results = ({route, navigation}) => {
 
     fetchCommittedColleges();
 }, [user]);
-
-  // useEffect(() => {
-    
-  //   const loadData = async() => {
-
-  //     try{
-  //     await college_data()
-  //     .then((data)=>{
-  //       const collegeData = (data.docs.map(doc=> doc.data()));
-  //       setColleges(collegeData);
-  //       setisLoading(false);
-
-  //     })
-
-  //     }catch(error) {
-  //       Alert.alert("Error Message: " + error);
-  //     }
-      
-  //   }
-  //   setisLoading(true);
-  //   loadData();
-    
-  
-    
-  // }, [])
 
   const handleCommit = async (collegeName) => {
     try {
@@ -176,42 +194,45 @@ const Results = ({route, navigation}) => {
         Alert.alert('Error', 'Something went wrong while committing to the college.');
     }
 };
-
   // Function to get or set a random image for a college, with a fallback image to prevent null source
-  const getRandomImage = (collegeName) => {
-    if (!collegeImages[collegeName]) {
-      const randomImage = collegeImagesArray[Math.floor(Math.random() * collegeImagesArray.length)];
-      setCollegeImages(prevState => ({ ...prevState, [collegeName]: randomImage }));
-    }
-    return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
-  };
+  // const getRandomImage = (collegeName) => {
+  //   return collegeImages[collegeName] || require('../assets/gre.png'); // Fallback to default image
+  // };
+  
+  // Set random images outside the render cycle
+  function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 
-
+  }
 
 const renderItem = ({ item }) => {
-  const isCommitted = committedColleges.includes(item.name);
-  const collegeImage = getRandomImage(item.name); // Always get a valid image
+// Always get a valid image
 
   return (
     <ScrollView style={styles.card}>
       <View style={styles.collegeRow}>
         {/* Tapping on the planet will commit/decommit */}
         <TouchableOpacity onPress={() => handleCommit(item.name)}>
-          <ImageBackground
-            source={collegeImage}
+          <FastImage
+            source={collegeImagesArray[getRandomInt(0,collegeImagesArray.length)]}
             style={styles.collegeImage}
             resizeMode="contain"
           >
-            {isCommitted && (
-              <Image source={require('../assets/flag.png')} style={styles.flagImage} />
+            {committedColleges.includes(item.name) && (
+              <FastImage source={require('../assets/flag.png')} style={styles.flagImage} />
             )}
-          </ImageBackground>
+          </FastImage>
         </TouchableOpacity>
 
         {/* Tapping on the text will navigate to the college details */}
         <TouchableOpacity
           style={styles.collegeTextContainer}
-          onPress={() => navigation.push('Details', { college: item.name, id: item.id })}
+          onPress={() => {
+            const college = colleges.filter(college => college.school_id === parseInt(item.id))
+            console.log(college[0].school_id)
+            navigation.push('Details', {obj: college[0]})}}
         >
           <Text style={styles.collegeName}>{item.name}</Text>
           <Text style={styles.collegeScore}>
@@ -267,14 +288,14 @@ const renderItem = ({ item }) => {
       
     );
 
-    setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
+    setData(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
   }
 
   const handleSearch = (searchQuery) => {
 
     setSearch(searchQuery);
 
-    if (searchQuery) {
+    if (searchQuery && searchQuery != '') {
       const filtered = colleges.filter(college =>
         college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -282,7 +303,7 @@ const renderItem = ({ item }) => {
       setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     } else {
       // If searchQuery is not valid, reset the college list to the original data
-      setCollegeList(top100.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+      setCollegeList(top100.slice(0, 20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     }
   
     setShowFilter(false);
@@ -317,17 +338,13 @@ const renderItem = ({ item }) => {
 
   }
 
-  if(isLoading || loading){
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size={100}/>
-      </View>
 
-    );
-  }
+  
+
+  
 
     return (
-      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+      <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
         <View style={styles.searchView}>
           <TextInput style={styles.searchText} placeholder='Search...' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
@@ -525,13 +542,16 @@ const renderItem = ({ item }) => {
         
         <Text style={styles.title}>Top College Matches</Text>
         <FlatList
-          data={colllegeList}
+          data={collegeList}
           renderItem={renderItem}
-          // keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.list}
+          onEndReached={loadMoreColleges} // Call function to load more colleges
+          onEndReachedThreshold={0.5} // Threshold for when to call loadMoreColleges
+          ListFooterComponent={hasMore ? <ActivityIndicator size="small" color="#0000ff" /> : null} // Show loading indicator
         />
       </View>
-      </ImageBackground>
+      </FastImage>
     );
 
   }

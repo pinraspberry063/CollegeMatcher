@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import { collection, getDocs, query, where, getFirestore } from 'firebase/firestore';
@@ -15,7 +14,6 @@ const { width, height } = Dimensions.get('window');
 const ProfilePage = ({ navigation }) => {
 
     const { user } = useContext(UserContext);
-    const theme = useContext(themeContext);
     const [userName, setUsername] = useState('');
     const [Email, setUserEmail] = useState('');
     const userNames = collection(firestore,'Users');

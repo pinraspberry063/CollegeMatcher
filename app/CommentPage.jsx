@@ -17,7 +17,6 @@ import {
   ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import {
   collection,
@@ -40,13 +39,13 @@ import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage'
 import { handleBanUser, handleUnbanUser, fetchUserActivity } from './ModeratorScreen';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const CommentPage = ({ route, navigation }) => {
-  const { threadId, threadTitle } = route.params;
+  const { threadId, threadTitle, collegeName, forumName } = route.params;
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
   const { user } = useContext(UserContext);
-  const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
@@ -107,7 +106,7 @@ const resetAddPostForm = () => {
   // Fetch all posts under the specific thread
   const fetchPosts = async () => {
     try {
-      const postsRef = collection(firestore, 'Forums', threadId, 'posts');
+      const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
       const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
       const postsSnapshot = await getDocs(postsQuery);
       const postsList = [];
@@ -212,7 +211,7 @@ const resetAddPostForm = () => {
       }
 
       try {
-        const postsRef = collection(firestore, 'Forums', threadId, 'posts');
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
         const newPost = {
           content: newPostContent.trim(),
           createdBy: username,
@@ -279,7 +278,6 @@ const resetAddPostForm = () => {
 
  const ReportModal = ({ isVisible, onClose, onSubmit, isModerator, onBanUser, onViewActivity }) => {
    const [selectedReason, setSelectedReason] = useState('');
-   const theme = useContext(themeContext);
    const reasons = [
      'Inappropriate content',
      'Spam',
@@ -389,7 +387,7 @@ const resetAddPostForm = () => {
         <ScrollView>
           <KeyboardAvoidingView style={styles.keyboardAvoidingView}>
             {/* Display thread title */}
-            <Text style={[styles.threadTitle, { color: theme.textColor }]}>{threadTitle}</Text>
+            <Text style={styles.threadTitle}>{threadTitle}</Text>
 
             {/* Render all posts */}
             {posts.map((post, postIndex) => (
@@ -409,16 +407,16 @@ const resetAddPostForm = () => {
                               </View>
                             </View>
 
-                <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
+                <Text style={styles.postContent}>{post.content}</Text>
 
                 {/* Render images in posts */}
                 {post.imageUrls && post.imageUrls.length > 0 && renderImages(post.imageUrls, postIndex)}
 
                 <View style={styles.postInfoRow}>
-                  <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>
+                <Text style={styles.postCreatedAt}>
                     {post.createdAt.toDate().toLocaleString()}
                   </Text>
-                  {post.createdBy !== username && (  // Add this condition
+                  {post.createdBy !== username && (
                     <TouchableOpacity
                       style={styles.reportButton}
                       onPress={() => handleReportSubmission('post', threadId, post.id, post.createdBy, post.content)}
@@ -501,7 +499,7 @@ const resetAddPostForm = () => {
            { transform: [{
                  translateY: animationValue.interpolate({
                    inputRange: [0, 1],
-                   outputRange: [600, 0], // Slide up the add thread section
+                   outputRange: [height+200, 0], // Slide up the add thread section
                  }),
                },
              ],
@@ -561,7 +559,8 @@ const styles = StyleSheet.create({
   threadTitle: {
       fontSize: 25,
       fontWeight: 'bold',
-      marginBottom: 10
+      marginBottom: 10,
+      color: '#fff'
       },
   newThreadContainer: {
         position: 'absolute',
