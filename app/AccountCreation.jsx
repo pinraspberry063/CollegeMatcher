@@ -17,6 +17,7 @@ const AccountCreation = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
+  const [activeMessages, setActiveMessages] = useState([]);
 
   const handleSignUp = async () => {
     if (!email || !password || !username || !confirmPassword) {
@@ -71,6 +72,7 @@ const AccountCreation = ({ navigation }) => {
         Email: email,
         mfaEnabled: isMfaEnabled,
         phoneNumber: '',
+        activeMessages: [],
         IsModerator: false,
       });
 

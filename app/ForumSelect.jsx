@@ -1,7 +1,7 @@
 // College selected. Display the different subgroups within the college's forum.
 
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { StyleSheet, Text, View, ScrollView, TextInput, Button, TouchableOpacity, ImageBackground, Image, Dimensions, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
@@ -9,6 +9,7 @@ import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, q
 import { UserContext } from '../components/UserContext';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const ForumSelect = ({ route, navigation }) => {
   const { collegeName } = route.params;
@@ -19,6 +20,24 @@ const ForumSelect = ({ route, navigation }) => {
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [followedSubgroups, setFollowedSubgroups] = useState([]);
+  const [subgroupName, setSubgroupName] = useState('');
+  const animationValue = useRef(new Animated.Value(0)).current; // Animation control
+  const [showAddSubgroup, setShowAddSubgroup] = useState(false);
+
+  // Function to toggle Add Subgroup form
+    const toggleAddSubgroup = () => {
+      Animated.spring(animationValue, {
+        toValue: showAddSubgroup ? 0 : 1, // Toggle between 0 (hidden) and 1 (visible)
+        friction: 5,
+        useNativeDriver: true, // set to true for animations
+      }).start();
+      setShowAddSubgroup(!showAddSubgroup);
+    };
+
+    // Function to reset Add Subgroup form
+    const resetAddSubgroupForm = () => {
+      setNewSubgroupName(''); // Clear the subgroup input field
+    };
 
   useEffect(() => {
     if (user) {
@@ -129,6 +148,8 @@ const ForumSelect = ({ route, navigation }) => {
           const docRef = await addDoc(subgroupsRef, newSubgroup);
           setSubgroups([...subgroups, { id: docRef.id, ...newSubgroup }]);
           setNewSubgroupName('');
+          resetAddSubgroupForm();
+          toggleAddSubgroup();
         } catch (error) {
           console.error('Error adding new subgroup:', error);
         }
@@ -157,8 +178,17 @@ const ForumSelect = ({ route, navigation }) => {
     };
 
   return (
+    <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <ScrollView>
+          <View style={styles.roommateContainer}>
+            <Text style={styles.roommateText}>Click the alien to find a roommate using our Roommate Quiz!</Text>
+            <TouchableOpacity onPress={handleRoomateMatcherNavigation}>
+              <Image source={require('../assets/alien.png')} style={styles.roommateImage} />
+            </TouchableOpacity>
+          </View>
+
+
         {subgroups.map(subgroup => (
           <View key={subgroup.id} style={styles.buttonContainer}>
             <Text style={styles.buttonText}>{subgroup.forumName}</Text>
@@ -176,58 +206,100 @@ const ForumSelect = ({ route, navigation }) => {
                 <Text style={styles.buttonText}>View</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.followButton}
-                onPress={() => toggleFollowSubgroup(collegeName, subgroup.id)} // Pass the college name and subgroup ID
+                style={[styles.followButton, { backgroundColor: '#841584' }]}  // Set background color to #841584
+                onPress={() => toggleFollowSubgroup(collegeName, subgroup.id)}  // Pass the college name and subgroup ID
               >
-                <Text style={styles.buttonText}>
-                  {followedSubgroups.includes(`${collegeName}:${subgroup.id}`) ? 'Unfollow' : 'Follow'}
-                </Text>
+                <Image
+                  source={
+                    followedSubgroups.includes(`${collegeName}:${subgroup.id}`)
+                      ? require('../assets/FilledBookmark.png')  // Show filled bookmark when unfollowing
+                      : require('../assets/Bookmark.png')        // Show normal bookmark when following
+                  }
+                  style={styles.icon}  // Style the icon
+                />
               </TouchableOpacity>
             </View>
           </View>
         ))}
-        <View style={styles.newSubgroupContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="New Subgroup Name"
-            value={newSubgroupName}
-            onChangeText={setNewSubgroupName}
-          />
-          <Button title="Add Subgroup" onPress={handleAddSubgroup} color={theme.buttonColor} />
-        </View>
-                <View style={styles.followedForumsButtonContainer}>
+                {/*<View style={styles.followedForumsButtonContainer}>
                     <Button
-                      title="Find a Roomate"
+                      title="Find a Roommate"
                        onPress={handleRoomateMatcherNavigation}
-                       color={theme.buttonColor}
+                       color="#841584"
                     />
-                </View>
+                </View>*/}
       </ScrollView>
+      <Animated.View
+              style={[
+                styles.newSubgroupContainer,
+                {
+                  transform: [
+                    {
+                      translateY: animationValue.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [600, 0], // Slide up the Add Subgroup form
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <TextInput
+                style={styles.input}
+                placeholder="Enter Subgroup Name"
+                value={newSubgroupName}
+                onChangeText={setNewSubgroupName}
+              />
+              <View style={styles.iconContainer}>
+                {/* Cancel Button */}
+                <TouchableOpacity onPress={() => { toggleAddSubgroup(); resetAddSubgroupForm(); }}>
+                  <Image source={require('../assets/cancel.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+
+                {/* Submit Subgroup Button */}
+                <TouchableOpacity onPress={handleAddSubgroup}>
+                  <Image source={require('../assets/pencil.png')} style={styles.iconButton} />
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+
+            {/* Floating Action Button to Add Subgroup */}
+            <TouchableOpacity style={styles.floatingButton} onPress={toggleAddSubgroup}>
+              <Image source={require('../assets/pencil.png')} style={styles.floatingButtonImage} />
+            </TouchableOpacity>
     </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
+    backgroundColor: '#000',
   },
+  button: {
+      borderRadius: 10,
+      color: '#841584',
+      },
   buttonContainer: {
-    marginBottom: 16,
-    padding: 16,
+    marginBottom: height * 0.02, // Dynamic margin bottom
+    padding: height * 0.02, // Dynamic padding inside button container
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: height * 0.025, // Dynamic font size
     fontWeight: 'bold',
-    marginBottom: 4,
-    color: '#000000',
+    marginBottom: height * 0.01, // Dynamic margin bottom
+    color: '#fff',
   },
   buttonSubText: {
-    fontSize: 14,
-    marginBottom: 8,
+    fontSize: height * 0.02, // Dynamic font size
+    marginBottom: height * 0.01, // Dynamic margin bottom
+    color: '#fff',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -236,35 +308,104 @@ const styles = StyleSheet.create({
   viewButton: {
     flex: 3,
     backgroundColor: '#4CAF50',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: width * 0.02, // Dynamic margin
   },
   followButton: {
     flex: 1,
     backgroundColor: '#FF9800',
-    padding: 10,
+    padding: height * 0.015, // Dynamic padding
     borderRadius: 8,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   newSubgroupContainer: {
-    marginTop: 20,
-    padding: 16,
+    marginTop: height * 0.02, // Dynamic margin top
+    padding: height * 0.02, // Dynamic padding
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#888',
     borderRadius: 8,
+    backgroundColor: '#444',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginBottom: 8,
+    borderColor: '#888',
+    padding: height * 0.015, // Dynamic padding
+    marginBottom: height * 0.02, // Dynamic margin
     borderRadius: 4,
+    color: '#fff',
   },
   recruiterHighlight: {
-    color: '#ff9900', // Highlight color for recruiters
     fontWeight: 'bold',
+    color: '#ff9900', // Highlight color for recruiters
+  },
+  background: {
+    flex: 1,
+    resizeMode: 'cover'
+  },
+  icon: {
+    width: 24,
+    height: 24,
+  },
+  newSubgroupContainer: {
+      position: 'absolute',
+      left: '10%',
+      right: '10%',
+      top: '30%', // Adjust this value for vertical positioning
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: 20,
+      borderRadius: 10,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      },
+  iconButton: {
+    width: 24,
+    height: 24,
+    marginHorizontal: 8,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'right',
+    marginTop: 8,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    right: 16,
+    backgroundColor: '#841584',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+  },
+  floatingButtonImage: {
+    width: 30,
+    height: 30,
+  },
+  roommateContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#841584',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+  },
+  roommateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',  // Text color
+    flex: 1,  // Take up space to push the image to the right
+  },
+  roommateImage: {
+    width: 55,  // Image width
+    height: 55,  // Image height
   },
 });
 

@@ -25,7 +25,9 @@ import RoomateMatcher from './app/RoomateMatcher';
 // noinspection SpellCheckingInspection
 import RoomateResults from './app/RoomateResults';
 import Message from './app/Message';
+import ViewMessage from './app/ViewMessage'
 import RoomateMessage from './app/RoomateMessage';
+import RoomateViewQuiz from './app/RoomateViewQuiz';
 import RecConvs from './app/RecConvs';
 import MakkAI from './app/MakkAI';
 import Login from './app/Login';
@@ -64,6 +66,7 @@ import ProfilePage from './app/ProfilePage';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 
+import CommentPage from './app/CommentPage';
 import Onboarding from 'react-native-onboarding-swiper';
 
 const firestore = getFirestore(db);
@@ -165,8 +168,10 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="ForumSelect" component={ForumSelect} />
     <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
+    <ForumStack.Screen name="CommentPage" component={CommentPage}/>
     <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
     <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
+    <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
   </ForumStack.Navigator>
 );
 
