@@ -41,6 +41,7 @@ import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { handleBanUser, handleUnbanUser, fetchUserActivity } from './ModeratorScreen';
 
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
@@ -295,7 +296,7 @@ const ColForum = ({route, navigation}) => {
           const profilePicUrl = userData.profilePicUrl || '';
           console.log(`Thread ${threadId} creator (${threadData.createdBy}) banned:`, isThreadCreatorBanned);
 
-          if (!isThreadCreatorBanned || isModerator) {
+          if (!isThreadCreatorBanned) {
             console.log(`Including thread ${threadId}`);
             const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
             const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
@@ -312,7 +313,7 @@ const ColForum = ({route, navigation}) => {
                 const postCreatorData = postCreatorSnapshot.docs[0].data();
                 const isPostCreatorBanned = postCreatorData.IsBanned || false;
 
-                if (!isPostCreatorBanned || isModerator) {
+                if (!isPostCreatorBanned) {
                   postsList.push({
                     id: postDoc.id,
                     ...postData
@@ -461,12 +462,51 @@ const ColForum = ({route, navigation}) => {
     setIsAddPostModalVisible(true); // Show the add post modal
   };
 
- const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername) => {
-   setCurrentReportData({ reportType, threadId, postId, reportedUsername });
+ const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername, content) => {
+   if (reportedUsername === username) {
+     Alert.alert('Error', 'You cannot report your own content.');
+     return;
+   }
+   setCurrentReportData({ reportType, threadId, postId, reportedUsername, content });
    setIsReportModalVisible(true);
  };
 
- const ReportModal = ({ isVisible, onClose, onSubmit }) => {
+ const handleBanUserAction = async () => {
+   if (currentReportData) {
+     try {
+       await handleBanUser(
+         currentReportData.threadId,
+         currentReportData.reportedUsername,
+         currentReportData.reason,
+         currentReportData.content
+       );
+       Alert.alert('User Banned', 'The user has been banned successfully.');
+       fetchThreadsAndPosts(); // Refresh the threads list after banning
+     } catch (error) {
+       Alert.alert('Error', 'Failed to ban user. Please try again.');
+     }
+   }
+   setIsReportModalVisible(false);
+ };
+
+ const handleViewUserActivityAction = async () => {
+   if (currentReportData) {
+     try {
+       const userActivity = await fetchUserActivity(currentReportData.reportedUsername);
+       if (userActivity) {
+         navigation.navigate('UserActivityScreen', {
+           userActivity,
+           reportedUser: currentReportData.reportedUsername
+         });
+       }
+     } catch (error) {
+       Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
+     }
+   }
+   setIsReportModalVisible(false);
+ };
+
+ const ReportModal = ({ isVisible, onClose, onSubmit, isModerator, onBanUser, onViewActivity }) => {
    const [selectedReason, setSelectedReason] = useState('');
    const reasons = [
      'Inappropriate content',
@@ -477,10 +517,17 @@ const ColForum = ({route, navigation}) => {
    ];
 
    return (
-     <Modal visible={isVisible} transparent animationType="slide">
-       <View style={styles.modalContainer}>
-         <View style={styles.modalContent}>
-           <Text style={styles.modalTitle}>Select a reason for reporting:</Text>
+     <Modal
+       visible={isVisible}
+       transparent={true}
+       animationType="slide"
+       onRequestClose={onClose}
+     >
+       <View style={styles.modalBackground}>
+         <View style={[styles.modalContent, { backgroundColor: '#fff' }]}>
+           <Text style={styles.modalTitle}>
+             Select a reason for reporting:
+           </Text>
            {reasons.map((reason) => (
              <TouchableOpacity
                key={reason}
@@ -490,17 +537,39 @@ const ColForum = ({route, navigation}) => {
                ]}
                onPress={() => setSelectedReason(reason)}
              >
-               <Text>{reason}</Text>
+               <Text style={[
+                 styles.reasonText,
+                 selectedReason === reason && styles.selectedReasonText
+               ]}>
+                 {reason}
+               </Text>
              </TouchableOpacity>
            ))}
            <View style={styles.modalButtons}>
-             <Button title="Cancel" onPress={onClose} color="red" />
-             <Button
-               title="Submit"
+             <TouchableOpacity
+               onPress={onClose}
+               style={styles.cancelButton}
+             >
+               <Text style={styles.cancelButtonText}>Cancel</Text>
+             </TouchableOpacity>
+             <TouchableOpacity
                onPress={() => onSubmit(selectedReason)}
                disabled={!selectedReason}
-             />
+               style={[styles.submitButton, !selectedReason && styles.buttonDisabled]}
+             >
+               <Text style={styles.submitButtonText}>Submit</Text>
+             </TouchableOpacity>
            </View>
+           {isModerator && (
+             <View style={styles.moderatorButtons}>
+               <TouchableOpacity onPress={onBanUser} style={styles.banButton}>
+                 <Text style={styles.banButtonText}>Ban User</Text>
+               </TouchableOpacity>
+               <TouchableOpacity onPress={onViewActivity} style={styles.viewActivityButton}>
+                 <Text style={styles.viewActivityButtonText}>View Activity</Text>
+               </TouchableOpacity>
+             </View>
+           )}
          </View>
        </View>
      </Modal>
@@ -536,20 +605,29 @@ const ColForum = ({route, navigation}) => {
                   {thread.imageUrls && thread.imageUrls.length > 0 && renderImages(thread.imageUrls, threadIndex)}
 
 
-                <Text style={styles.threadCreatedAt}>
-                  {thread.createdAt.toDate().toLocaleString()}
-                </Text>
+                <View style={styles.threadInfoRow}>
+                  <Text style={styles.threadCreatedAt}>
+                    Created at: {thread.createdAt.toDate().toLocaleString()}
+                  </Text>
+                  {thread.createdBy !== username && (  // Only show report button if not the creator
+                    <TouchableOpacity
+                      style={styles.reportButton}
+                      onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy, thread.title)}
+                    >
+                      <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
+                    </TouchableOpacity>
+                  )}
+                </View>
 
                 <View style={styles.buttonContainer}>
-
-                {/* Report Button */}
-                <TouchableOpacity onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy)}>
-                    <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
-                </TouchableOpacity>
-
                 {/* Add Post Button */}
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('CommentPage', { threadId: thread.id, threadTitle: thread.title })}
+                  onPress={() => navigation.navigate('CommentPage', {
+                      threadId: thread.id,
+                      threadTitle: thread.title,
+                      collegeName: collegeName,
+                      forumName: forumName
+                      })}
                 >
                   <Image source={require('../assets/Chat.png')} style={styles.iconButton} />
                 </TouchableOpacity>
@@ -606,16 +684,16 @@ const ColForum = ({route, navigation}) => {
         onSubmit={async (reason) => {
           setIsReportModalVisible(false);
           if (currentReportData) {
-            const { reportType, threadId, postId, reportedUsername } = currentReportData;
+            const { reportType, threadId, postId, reportedUsername, content } = currentReportData;
             const reportData = {
               threadId,
               postId,
               reportedUser: reportedUsername,
+              content: content,
               source: 'forum',
               type: reportType,
               reason: reason
             };
-
             const success = await handleReport(reportData);
             if (success) {
               Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
@@ -624,6 +702,9 @@ const ColForum = ({route, navigation}) => {
             }
           }
         }}
+        isModerator={isModerator}
+        onBanUser={handleBanUserAction}
+        onViewActivity={handleViewUserActivityAction}
       />
 
         <Modal
@@ -651,7 +732,7 @@ const ColForum = ({route, navigation}) => {
             { transform: [{
                   translateY: animationValue.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [600, 0], // Slide up the add thread section
+                    outputRange: [height+200, 0], // Slide up the add thread section
                   }),
                 },
               ],
@@ -892,6 +973,7 @@ const ColForum = ({route, navigation}) => {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: '#fff',
   },
   reasonButton: {
     padding: 10,
@@ -901,12 +983,20 @@ const ColForum = ({route, navigation}) => {
     marginBottom: 5,
   },
   selectedReasonButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#e0e0e0',
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+  },
+  moderatorButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  reportButton: {
+    padding: 5,
   },
   buttonContainer: {
       flexDirection: 'row',
@@ -946,9 +1036,114 @@ const ColForum = ({route, navigation}) => {
     },
   modalBackground: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',  // Dimmed background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#000',
+  },
+  reasonButton: {
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  selectedReasonButton: {
+    backgroundColor: '#e3f2fd',
+    borderColor: '#2196f3',
+  },
+  reasonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  selectedReasonText: {
+    color: '#2196f3',
+    fontWeight: 'bold',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  cancelButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  submitButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#2196f3',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#bdbdbd',
+  },
+  cancelButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  moderatorButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#dee2e6',
+  },
+  banButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#ff1744',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  viewActivityButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#4caf50',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  banButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  viewActivityButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

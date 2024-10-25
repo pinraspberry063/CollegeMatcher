@@ -1,12 +1,55 @@
 // This is where the actual messaging takes place.
 
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
+import { Ionicons } from '@expo/vector-icons';
+
+const ReportModal = ({ isVisible, onClose, onSubmit }) => {
+  const [selectedReason, setSelectedReason] = useState('');
+  const reasons = [
+    'Inappropriate content',
+    'Spam',
+    'Harassment',
+    'False information',
+    'Other'
+  ];
+
+  return (
+    <Modal visible={isVisible} transparent animationType="slide">
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Select a reason for reporting:</Text>
+          {reasons.map((reason) => (
+            <TouchableOpacity
+              key={reason}
+              style={[
+                styles.reasonButton,
+                selectedReason === reason && styles.selectedReasonButton
+              ]}
+              onPress={() => setSelectedReason(reason)}
+            >
+              <Text style={selectedReason === reason ? styles.selectedReasonText : styles.reasonText}>{reason}</Text>
+            </TouchableOpacity>
+          ))}
+          <View style={styles.modalButtons}>
+            <Button title="Cancel" onPress={onClose} color="#841584" />
+            <Button
+              title="Submit"
+              onPress={() => onSubmit(selectedReason)}
+              disabled={!selectedReason}
+              color="#841584"
+            />
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 const Message = ({ route, navigation }) => {
   const { user } = useContext(UserContext);
@@ -16,6 +59,8 @@ const Message = ({ route, navigation }) => {
   const [documentID, setDocumentID] = useState(null);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [usernames, setUsernames] = useState({});
+  const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+  const [currentReportData, setCurrentReportData] = useState(null);
 
   const conversationId = route.params?.conversationId; // Safely get conversationId from route params
 
@@ -122,19 +167,9 @@ const Message = ({ route, navigation }) => {
     }
   };
 
-  const handleReportMessage = async (messageId, reportedUser) => {
-    const reportData = {
-      messageId,
-      reportedUser,
-      source: 'message'
-    };
-
-    const success = await handleReport(reportData);
-    if (success) {
-      Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
-    } else {
-      Alert.alert('Error', 'Failed to submit report. Please try again.');
-    }
+  const handleReportMessage = (messageId, reportedUsername, messageContent) => {
+    setCurrentReportData({ messageId, reportedUsername, messageContent });
+    setIsReportModalVisible(true);
   };
 
   if (!conversationId && !documentID) {
@@ -146,25 +181,65 @@ const Message = ({ route, navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView style={styles.messagesContainer}>
         {messages.map((message) => (
           <View
             key={message.id}
             style={[
               styles.message,
-              (message.sender_UID === user.uid && !isRecruiter) || (message.sender_UID === recruiterUID && isRecruiter)
-                ? styles.userMessage
-                : styles.recruiterMessage
+              message.sender_UID === user.uid ? styles.userMessage : styles.recruiterMessage
             ]}
           >
-            <Text style={styles.messageSender}>
-              {usernames[message.sender_UID] || 'Unknown'}
-            </Text>
+            <View style={styles.messageHeader}>
+              <Text style={styles.messageSender}>
+                {message.sender_UID === user.uid ? 'You' : usernames[message.sender_UID] || 'Recruiter'}
+              </Text>
+              {message.sender_UID !== user.uid && (
+                <TouchableOpacity
+                  style={styles.reportButton}
+                  onPress={() => handleReportMessage(
+                    message.id,
+                    usernames[message.sender_UID],
+                    message.content
+                  )}
+                >
+                  <Ionicons name="flag-outline" size={16} color="#999" />
+                </TouchableOpacity>
+              )}
+            </View>
             <Text style={styles.messageContent}>{message.content}</Text>
           </View>
         ))}
       </ScrollView>
+
+      {/* Add ReportModal component */}
+      <ReportModal
+        isVisible={isReportModalVisible}
+        onClose={() => setIsReportModalVisible(false)}
+        onSubmit={async (reason) => {
+          setIsReportModalVisible(false);
+          if (currentReportData) {
+            const { messageId, reportedUsername, messageContent } = currentReportData;
+            const reportData = {
+              messageId,
+              reportedUser: reportedUsername,
+              content: messageContent,
+              source: 'message',
+              type: 'recruiter_message',
+              reason: reason
+            };
+
+            const success = await handleReport(reportData);
+            if (success) {
+              Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
+            } else {
+              Alert.alert('Error', 'Failed to submit report. Please try again.');
+            }
+          }
+        }}
+      />
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -176,7 +251,7 @@ const Message = ({ route, navigation }) => {
           <Text style={styles.sendButtonText}>Send</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -242,6 +317,52 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  reportButton: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    padding: 5,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000',
+  },
+  reasonButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 5,
+  },
+  selectedReasonButton: {
+    backgroundColor: '#e0e0e0',
+  },
+  reasonText: {
+    color: '#000',
+  },
+  selectedReasonText: {
+    color: '#841584',
+    fontWeight: 'bold',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
   },
 });
 

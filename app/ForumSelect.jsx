@@ -235,7 +235,7 @@ const ForumSelect = ({ route, navigation }) => {
                     {
                       translateY: animationValue.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [600, 0], // Slide up the Add Subgroup form
+                        outputRange: [height+200, 0], // Slide up the Add Subgroup form
                       }),
                     },
                   ],

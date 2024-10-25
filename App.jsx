@@ -68,6 +68,7 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
 
 import CommentPage from './app/CommentPage';
 import Onboarding from 'react-native-onboarding-swiper';
+import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 
@@ -90,6 +91,17 @@ const fetchAllColleges = async () => {
 //   .catch((error) => {
 //     console.error('Error pre-fetching data:', error);
 //   });
+
+queryClient.prefetchQuery({
+      queryKey: ['colleges'], // Now an array inside an object
+      queryFn: fetchAllColleges, // Query function passed as part of the object
+    })
+    .then(() => {
+      console.log('Data has been pre-fetched');
+    })
+    .catch((error) => {
+      console.error('Error pre-fetching data:', error);
+    });
 
 
 const screenOptions = {
@@ -398,7 +410,7 @@ const checkUserStatus = async (userId) => {
 
 
 const App = () => {
-  const queryClient = new QueryClient();
+  
   // const [takenQuiz, setTakenQuiz] = useState(false);
   // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
@@ -529,7 +541,7 @@ const App = () => {
             pages={[
               {
                 backgroundColor: '#fff',
-                image: <Image source={require('./assets/Launch.png')}
+                image: <FastImage source={require('./assets/Launch.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Welcome to Universe college matcher!',
@@ -538,7 +550,7 @@ const App = () => {
               {
                 backgroundColor: '#fff',
                 size: '',
-                image: <Image source={require('./assets/Form.png')}
+                image: <FastImage source={require('./assets/Form.png')}
                               style={ui_styles.image}
                 />,
                 title: 'College Matcher Quiz',
@@ -546,7 +558,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <Image source={require('./assets/Community.png')}
+                image: <FastImage source={require('./assets/Community.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Forums',
@@ -554,7 +566,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <Image source={require('./assets/Chatbot.png')}
+                image: <FastImage source={require('./assets/Chatbot.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Get Help',
@@ -562,7 +574,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <Image source={require('./assets/Secure-login.png')}
+                image: <FastImage source={require('./assets/Secure-login.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Login to get started!',
