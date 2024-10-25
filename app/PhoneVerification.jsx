@@ -5,12 +5,10 @@ import { UserContext } from '../components/UserContext';
 import { doc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import themeContext from '../theme/themeContext';
 
 const firestore = getFirestore(db);
 
 const PhoneVerification = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const { setUser } = useContext(UserContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -48,8 +46,17 @@ const PhoneVerification = ({ navigation }) => {
       const user = userCredential.user;
       setUser(user); // Set the logged-in user in context
 
-      // Navigate to Username Prompt
-      navigation.navigate('UsernamePrompt', { user });
+      // Check if user document exists
+      const userDocRef = doc(firestore, 'Users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        // Navigate to UsernamePrompt to set up the user document
+        navigation.navigate('UsernamePrompt', { user });
+      } else {
+        // User document exists, navigate to main app
+        navigation.navigate('Main');
+      }
     } catch (error) {
       console.error('Code Confirmation Error:', error);
       Alert.alert('Error', 'Invalid verification code.');
@@ -62,11 +69,11 @@ const PhoneVerification = ({ navigation }) => {
     <View style={styles.container}>
       {!confirm ? (
         <>
-          <Text style={[styles.title, { color: theme.color }]}>Phone Verification</Text>
+          <Text style={styles.title}>Phone Verification</Text>
           <TextInput
-            style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            style={styles.input}
             placeholder="Phone Number"
-            placeholderTextColor={theme.color}
+            placeholderTextColor={'grey'}
             keyboardType="phone-pad"
             value={phoneNumber}
             onChangeText={setPhoneNumber}
@@ -79,11 +86,11 @@ const PhoneVerification = ({ navigation }) => {
         </>
       ) : (
         <>
-          <Text style={[styles.title, { color: theme.color }]}>Enter Verification Code</Text>
+          <Text style={styles.title}>Enter Verification Code</Text>
           <TextInput
-            style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+            style={styles.input}
             placeholder="Verification Code"
-            placeholderTextColor={theme.color}
+            placeholderTextColor={'grey'}
             keyboardType="number-pad"
             value={verificationCode}
             onChangeText={setVerificationCode}

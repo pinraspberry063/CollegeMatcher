@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
-import themeContext from '../theme/themeContext';
+import { getFirestore, collection, updateDoc, query, getDocs, doc, where, addDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
 
@@ -11,31 +10,16 @@ const RoomateResults = ({ route, navigation }) => {
     const { user } = useContext(UserContext);
     const [conversations, setConversations] = useState([]);
     const [usernames, setUsernames] = useState({});
-    //const [roomate_uid, setRoomateUid] = useState('');
-    //const [conversationId, setConversationId] = useState('');
     const handleRoomateViewQuiz =  async (roomate_uid) => {
-        /*
-        const roomateUIDPass = roomate_uid;
-
-            const firestore = getFirestore(db);
-            const roomateDataRef = collection(firestore, 'RoomateMatcher');
-            const currRoomateQuery = query(
-                        roomateDataRef,
-                         where('userId', '==', roomate_uid)
-                    );
-            const currRoomateSnapshot = await getDocs(currRoomateQuery);
-            console.log("START.......................");
-            console.log(currRoomateSnapshot);
-            console.log('PASSING..................');
-            */
             console.log("handleRoomateViewQuiz");
             console.log(roomate_uid);
             navigation.navigate('RoomateViewQuiz', { roomate_UID: roomate_uid});
     };
     const handleMessageNavigation = useCallback(
         async (userUID,roomateUID) => {
+
+          //navigate to the roomate's messaging page
           const firestore = getFirestore(db);
-          // Check if a conversation already exists between the user and the recruiter
           const messagingRef = collection(firestore, 'Messaging');
           const existingConvoInQuery = query(
             messagingRef,
@@ -53,6 +37,7 @@ const RoomateResults = ({ route, navigation }) => {
             // Conversation already exists, navigate to the existing conversation
             if(!existingConvoInSnapshot.empty){
                 const conversationId = existingConvoInSnapshot.docs[0].id;
+
                 navigation.navigate('RoomateMessage', { conversationId });
                 }
             else if(!existingConvoOutSnapshot.empty){
@@ -60,7 +45,36 @@ const RoomateResults = ({ route, navigation }) => {
                 navigation.navigate('RoomateMessage', { conversationId });
                 }
           } else {
+            //Populate roomate and user's activeMessages
+               try {
+                 const usersRef = collection(firestore, 'Users');
+                 const q = query(usersRef, where('User_UID', '==', userUID));
+                 const k = query(usersRef,where('User_UID', '==', roomateUID));
+                 const queryUserSnapshot = await getDocs(q);
+                 const queryRoomateSnapshot = await getDocs(k);
+                 if (!queryUserSnapshot.empty && !queryRoomateSnapshot.empty) {
+                   const userDoc = queryUserSnapshot.docs[0];
+                   const userDocRef = doc(firestore, 'Users', userDoc.id);
+                   const roomateDoc = queryRoomateSnapshot.docs[0];
+                   const roomateDocRef = doc(firestore, 'Users', roomateDoc.id);
+                   const userData = userDoc.data();
+                   const roomateData = roomateDoc.data();
+                   //populate the users active messages with the roomates uid
+                   await updateDoc(userDocRef, {
+                        activeMessages: arrayUnion(roomateUID),
+                    })
+                    //populate the roomates active messages with the users uid
+                   await updateDoc(roomateDocRef, {
+                        activeMessages: arrayUnion(userUID),
+                    })
+                 } else {
+                   console.error('(RoomateMatcher/username)No user found with the given UID.');
+                 }
+               } catch (error) {
+                 console.error('Error Fetching Username and CollegeName:', error);
+               }
             // No conversation exists, create a new one
+
             const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
               Roomate_UID: roomateUID,
               User_UID: userUID,
@@ -76,14 +90,17 @@ const RoomateResults = ({ route, navigation }) => {
         [db, user, navigation] // Dependencies for useCallback
       );
     const renderItem = ({ item }) => (
+
         <View style={styles.card}>
             <Text style={styles.username}>{item.name}</Text>
             <Text style={styles.roomateScore}>Match Accuracy: {item.score}%</Text>
+            {/*
             <Button
                 style={styles.button}
                 onPress={() => handleRoomateViewQuiz(item.roomate_uid)}
                 title="View Roommate Quiz"
             />
+            */}
             <Button
                 style={styles.button}
                 onPress={() => handleMessageNavigation(user.uid,item.roomate_uid)}

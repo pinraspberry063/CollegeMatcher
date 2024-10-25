@@ -1,16 +1,15 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Dimensions } from 'react-native';
 import { doc, setDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
-import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const UsernamePrompt = ({ navigation, route }) => {
-  const theme = useContext(themeContext);
   const { user } = route.params; // Authenticated user
   const { setUser } = useContext(UserContext);
   const [username, setUsername] = useState('');
@@ -49,16 +48,23 @@ const UsernamePrompt = ({ navigation, route }) => {
       // Create a new batch to set user data and update username with actual UID
       const userBatch = writeBatch(firestore);
       userBatch.set(userDocRef, {
+        User_UID: user.uid,
         Username: trimmedUsername,
-        // Add other necessary fields or merge with existing data
+        Email: user.email || '',
+        IsRecruiter: false,
+        SuperRecruiter: false,
+        RecruiterInstitution: 'NA',
+        mfaEnabled: false,
+        phoneNumber: user.phoneNumber || '',
+        IsModerator: false,
       }, { merge: true });
       userBatch.update(usernameRef, { uid: user.uid });
 
       // Commit the user batch
       await userBatch.commit();
 
-      // Send email verification if not already sent
-      if (!user.emailVerified) {
+      // Optionally, send email verification if applicable
+      if (user.email && !user.emailVerified) {
         await user.sendEmailVerification();
         Alert.alert('Verification Required', 'Please verify your email before proceeding.');
         navigation.navigate('EmailVerificationPrompt');
@@ -77,8 +83,6 @@ const UsernamePrompt = ({ navigation, route }) => {
         console.error('Username Submission Error:', error);
         Alert.alert('Error', 'Failed to set username. Please try again.');
       }
-      // Optional: Delete the Auth account if Firestore operations fail post-authentication
-      // await auth().currentUser?.delete();
     } finally {
       setLoading(false);
     }
@@ -86,11 +90,11 @@ const UsernamePrompt = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Choose a Username</Text>
+      <Text style={styles.title}>Choose a Username</Text>
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Username"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'grey'}
         value={username}
         onChangeText={setUsername}
       />
@@ -107,18 +111,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 16,
+    padding: width * 0.04, // Dynamic padding based on screen width
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
+    fontSize: height * 0.03, // Dynamic font size based on screen height
+    marginBottom: height * 0.02, // Dynamic margin
     textAlign: 'center',
   },
   input: {
-    height: 40,
+    height: height * 0.06, // Dynamic height
     borderWidth: 1,
-    marginBottom: 12,
-    padding: 10,
+    marginBottom: height * 0.02, // Dynamic margin
+    padding: width * 0.03, // Dynamic padding inside input
   },
 });
 

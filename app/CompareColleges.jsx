@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import CollegeSearch from '../app/SearchComp';
 
 const getGrade = (value, ranges) => {
@@ -131,89 +131,85 @@ const CompareColleges = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.title}>Compare Colleges</Text>
 
             <Text>Select the first college:</Text>
-            <CollegeSearch onCollegeSelect={setCollege1} />
+            <CollegeSearch onCollegeSelect={setCollege1} selectedValue={college1} />
 
             {college1 && (
                 <View style={styles.collegeCard}>
-                    <Text style={styles.collegeName}>{college1.shool_name}</Text>
                     <Text style={styles.uniVerseGrade}>UniVerse Grade: {calculateAverageGrade(getGradesForCollege(college1))}</Text>
                 </View>
             )}
 
             <Text>Select the second college:</Text>
-            <CollegeSearch onCollegeSelect={setCollege2} />
+            <CollegeSearch onCollegeSelect={setCollege2} selectedValue={college2} />
 
             {college2 && (
                 <View style={styles.collegeCard}>
-                    <Text style={styles.collegeName}>{college2.shool_name}</Text>
                     <Text style={styles.uniVerseGrade}>UniVerse Grade: {calculateAverageGrade(getGradesForCollege(college2))}</Text>
                 </View>
             )}
 
             {college1 && college2 && (
                 <View>
-                    <Text style={styles.title}>Comparison</Text>
 
-                    <View style={styles.comparisonRow}>
-                        <Text style={styles.collegeAttribute}></Text>
-                        <Text style={styles.collegeName}>First College</Text>
-                        <Text style={styles.collegeName}>Second College</Text>
+                    <View style={styles.schoolNamesContainer}>
+                        <Text style={styles.schoolNameColumnLeft}>{college1.shool_name}</Text>
+                        <Text style={styles.schoolNameColumn}>{college2.shool_name}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
-                        <Text style={styles.collegeAttribute}>SAT Total (Average):</Text>
-                        <Text>{college1.sat_Total} (Grade: {getGrade(college1.sat_Total, satRanges)})</Text>
-                        <Text>{college2.sat_Total} (Grade: {getGrade(college2.sat_Total, satRanges)})</Text>
+                        <Text style={styles.collegeAttribute}>SAT:</Text>
+                        <Text style={styles.collegeName}>{college1.sat_Total}</Text>
+                        <Text style={styles.collegeName}>{college2.sat_Total}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
-                        <Text style={styles.collegeAttribute}>ACT Composite (50th Percentile):</Text>
-                        <Text>{college1.act_Composite50} (Grade: {getGrade(college1.act_Composite50, actRanges)})</Text>
-                        <Text>{college2.act_Composite50} (Grade: {getGrade(college2.act_Composite50, actRanges)})</Text>
+                        <Text style={styles.collegeAttribute}>ACT Composite:</Text>
+                        <Text style={styles.collegeName}>{college1.act_Composite50}</Text>
+                        <Text style={styles.collegeName}>{college2.act_Composite50}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>Total Enrollment:</Text>
-                        <Text>{college1.total_enrollment23} (Grade: {getGrade(college1.total_enrollment23, enrollmentRanges)})</Text>
-                        <Text>{college2.total_enrollment23} (Grade: {getGrade(college2.total_enrollment23, enrollmentRanges)})</Text>
+                        <Text style={styles.collegeName}>{college1.total_enrollment23}</Text>
+                        <Text style={styles.collegeName}>{college2.total_enrollment23}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>Admission Rate:</Text>
-                        <Text>{college1.adm_rate}% (Grade: {getGrade(college1.adm_rate, admissionRateRanges)})</Text>
-                        <Text>{college2.adm_rate}% (Grade: {getGrade(college2.adm_rate, admissionRateRanges)})</Text>
+                        <Text style={styles.collegeName}>{college1.adm_rate}%</Text>
+                        <Text style={styles.collegeName}>{college2.adm_rate}%</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>In-State Tuition:</Text>
-                        <Text>${college1.inState_price23} (Grade: {getGrade(college1.inState_price23, tuitionRanges)})</Text>
-                        <Text>${college2.inState_price23} (Grade: {getGrade(college2.inState_price23, tuitionRanges)})</Text>
+                        <Text style={styles.collegeName}>${college1.inState_price23}</Text>
+                        <Text style={styles.collegeName}>${college2.inState_price23}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>Out-of-State Tuition:</Text>
-                        <Text>${college1.OutOfState_price23} (Grade: {getGrade(college1.OutOfState_price23, tuitionRanges)})</Text>
-                        <Text>${college2.OutOfState_price23} (Grade: {getGrade(college2.OutOfState_price23, tuitionRanges)})</Text>
+                        <Text style={styles.collegeName}>${college1.OutOfState_price23}</Text>
+                        <Text style={styles.collegeName}>${college2.OutOfState_price23}</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>Student-Faculty Ratio:</Text>
-                        <Text>{college1.student_to_Faculty_Ratio}:1 (Grade: {getGrade(college1.student_to_Faculty_Ratio, studentFacultyRatioRanges)})</Text>
-                        <Text>{college2.student_to_Faculty_Ratio}:1 (Grade: {getGrade(college2.student_to_Faculty_Ratio, studentFacultyRatioRanges)})</Text>
+                        <Text style={styles.collegeName}>{college1.student_to_Faculty_Ratio}:1</Text>
+                        <Text style={styles.collegeName}>{college2.student_to_Faculty_Ratio}:1</Text>
                     </View>
 
                     <View style={styles.comparisonRow}>
                         <Text style={styles.collegeAttribute}>On-Campus Housing:</Text>
-                        <Text>{college1.housing ? "Yes" : "No"}</Text>
-                        <Text>{college2.housing ? "Yes" : "No"}</Text>
+                        <Text style={styles.collegeName}>{college1.housing ? "Yes" : "No"}</Text>
+                        <Text style={styles.collegeName}>{college2.housing ? "Yes" : "No"}</Text>
                     </View>
                 </View>
             )}
-        </View>
+        </ScrollView>
     );
 };
 
@@ -221,38 +217,79 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        backgroundColor: '#f0f4f8',
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: 10,
         textAlign: 'center',
+        color: '#333',
     },
     collegeCard: {
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#fff',
         padding: 20,
-        borderRadius: 10,
-        marginBottom: 10,
+        borderRadius: 12,
+        marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        elevation: 2,
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     comparisonRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingVertical: 10,
+        paddingHorizontal: 10,
+        backgroundColor: '#fafafa',
+        borderRadius: 8,
+        marginBottom: 5,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
     },
     collegeAttribute: {
+        flex: 1,
         fontWeight: 'bold',
+        color: '#555',
+    },
+    collegeName: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#2c3e50',
+        textAlign: 'right',
     },
     uniVerseGrade: {
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 10,
         color: '#4CAF50',
-    }
+    },
+    schoolNamesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginBottom: 20,
+        paddingHorizontal: 5,
+    },
+    schoolNameColumn: {
+        flex: 1,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#000',
+        textAlign: 'center',
+        flexShrink: 1,
+        maxWidth: '30%',
+    },
+    schoolNameColumnLeft: {
+            flex: 1,
+            fontSize: 18,
+            fontWeight: 'bold',
+            color: '#000',
+            textAlign: 'center',
+            flexShrink: 1,
+            maxWidth: '30%',
+    },
 });
 
 export default CompareColleges;

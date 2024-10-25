@@ -22,6 +22,5 @@ Colin Bailey
 ## Dependencies
 * [React Native & Android Studio](https://reactnative.dev/docs/set-up-your-environment?platform=android)
 * [Node.js](https://nodejs.org/en/download/prebuilt-installer/current)
-* FireStore
-
-
+* [FireStore](https://firebase.google.com/docs/firestore)
+* [Google's Vertex AI](https://cloud.google.com/vertex-ai)

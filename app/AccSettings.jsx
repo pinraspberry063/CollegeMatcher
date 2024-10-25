@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
-import React, { useEffect , useState, useContext} from 'react'
+import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import React, { useEffect, useState, useContext } from 'react';
 import { Button } from 'react-native-elements';
 //import ProfileImagePicker from '../components/ProfileImageComp';
 import auth from '@react-native-firebase/auth';
@@ -8,11 +8,14 @@ import themeContext from '../theme/themeContext'
 import { db } from '../config/firebaseConfig';
 import { collection, getDocs, addDoc, updateDoc, arrayUnion, arrayRemove, doc, query, where, getFirestore, Timestamp } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
 
 const firestore = getFirestore(db);
 
+const { width, height } = Dimensions.get('window'); // Get device dimensions
+
 const Account = ({route, navigation}) => {
-        const theme = useContext(themeContext);
+
         const [url, seturl] = useState();
         const user = auth().currentUser;
         const [userName, setUsername] = useState('');
@@ -58,7 +61,7 @@ const Account = ({route, navigation}) => {
 
         return (
             
-            <View style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+            <View style={styles.container}>
         
                 <Image
                 style={styles.profile}
@@ -128,4 +131,23 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+});
+  container: {
+    flex: 1,
+    alignContent: 'center',
+    marginTop: height * 0.02, // Dynamic margin top
+    backgroundColor: '#fff',
+  },
+  profile: {
+    width: width * 0.5, // Dynamic width based on screen width
+    height: width * 0.5, // Dynamic height to maintain aspect ratio
+    resizeMode: 'cover',
+    alignSelf: 'center',
+    borderRadius: width * 0.25, // Ensures a circular image
+  },
+  button: {
+    width: width * 0.6, // Dynamic width for button
+    alignSelf: 'center',
+    marginTop: height * 0.03, // Dynamic margin top for spacing
+  },
 });

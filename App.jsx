@@ -1,14 +1,13 @@
 // noinspection JSUnusedLocalSymbols
 
-import React, { useState, useEffect } from 'react';
-import {StyleSheet, Text, View, Alert, Image} from 'react-native';
+import React, { useState, useEffect, useContext} from 'react';
+import ViewMessage from './app/ViewMessage'
+import {StyleSheet, Text, View, Alert, Image, ActivityIndicator, useWindowDimensions} from 'react-native';
 import { registerRootComponent } from 'expo';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import { UserProvider } from './components/UserContext';
-import themeContext from './theme/themeContext';
-import theme from './theme/theme';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +16,7 @@ import Settings from './app/Settings';
 import Home from './app/index';
 import Account from './app/AccSettings';
 import Picker from './app/ProfileImageComp';
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
@@ -63,10 +62,47 @@ import MFAScreen from './app/MFAScreen';
 import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
+import ProfilePage from './app/ProfilePage';
 
 const firestore = getFirestore(db);
 
+import CommentPage from './app/CommentPage';
 import Onboarding from 'react-native-onboarding-swiper';
+import FastImage from 'react-native-fast-image';
+
+const firestore = getFirestore(db);
+
+// Create a query client instance
+const queryClient = new QueryClient();
+
+const fetchAllColleges = async () => {
+  const snapshot = await getDocs(collection(firestore, 'CompleteColleges'))
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+};
+// // Pre-fetch the data before rendering the app
+// const colleges = queryClient.prefetchQuery({
+//     queryKey: ['colleges'], // Now an array inside an object
+//     queryFn: fetchAllColleges, // Query function passed as part of the object
+//   })
+//   .then(() => {
+//     console.log('Data has been pre-fetched');
+//   })
+//   .catch((error) => {
+//     console.error('Error pre-fetching data:', error);
+//   });
+
+queryClient.prefetchQuery({
+      queryKey: ['colleges'], // Now an array inside an object
+      queryFn: fetchAllColleges, // Query function passed as part of the object
+    })
+    .then(() => {
+      console.log('Data has been pre-fetched');
+    })
+    .catch((error) => {
+      console.error('Error pre-fetching data:', error);
+    });
+
 
 const screenOptions = {
   tabBarShowLabel: false,
@@ -78,7 +114,8 @@ const screenOptions = {
     left: 0,
     elevation: 0,
     height: 60,
-    background: "#fff"
+    background: "#fff",
+
   }
 };
 
@@ -88,13 +125,16 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Index" component={Home} />
     <HomeStack.Screen name="Settings" component={Settings} />
     <HomeStack.Screen name="Account" component={Account} />
-    <HomeStack.Screen name="Picker" component={Picker} />
+    <HomeStack.Screen name="Picker" component={Picker}  />
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
+    <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
+    <HomeStack.Screen name="AI" component={AIStackScreen} />
+    <HomeStack.Screen name="ModeratorScreen" component={ModeratorScreen} />
   </HomeStack.Navigator>
 );
 

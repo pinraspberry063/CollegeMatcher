@@ -1,5 +1,5 @@
-import React from "react";
-import { View, SafeAreaView, Text, Dimensions, TouchableOpacity } from "react-native";
+import React, {useRef, useEffect} from "react";
+import { View, SafeAreaView, Text, ImageBackground, Dimensions, TouchableOpacity , Image, StyleSheet} from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -7,91 +7,116 @@ import Animated, {
   interpolate,
   interpolateColor,
   Extrapolate,
-  
 } from "react-native-reanimated";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import FastImage from "react-native-fast-image";
 
 
+// Imported planet images
+const redImage = require('../assets/red.png');
+const purImage = require('../assets/pur.png');
+const pnkImage = require('../assets/pnk.png');
+const bluImage = require('../assets/blu.png');
+const brnImage = require('../assets/brn.png');
+const greImage = require('../assets/gre.png');
+const cynImage = require('../assets/cyn.png');
 
 const { width, height } = Dimensions.get("screen");
 
 const textColor = "white";
 const gray = "#A0A0A0";
-const planetWidth = (width/4) * 0.75;
-const planetHeight = (height/4) * 0.5;
+const planetWidth = (width / 4) * 1.3;
+const planetHeight = (height / 4) * 1.3;
 
 const slides = [
   {
-    // Take the Quiz
     icon: "lead-pencil",
-    page: 'QuizButton'
+    page: 'QuizButton',
+    image: redImage,
+    iconColor: "yellow",
+    label: 'Quiz', 
+    txtColor: textColor
   },
   {
-    // QuickSearch
     icon: "magnify",
-    page: 'QuizStack'
+    page: 'QuizStack',
+    image: purImage,
+    iconColor: "yellow",
+    label: 'Search',
+    txtColor: textColor
   },
   {
-    // Compare Colleges
-    icon: "compare-vertical",
-    page: 'CompareColleges'
-  },
-  {
-    // Direct Messages
-    icon: "message",
-    page: 'Messages'
-  },
-  {
-    // Forums
-    icon: "earth",
-    page: 'ColForumSelectorTab'
-  },
-  {
-    // AI
     icon: "head",
-    page: 'AI'
+    page: 'AI',
+    image: greImage,
+    iconColor: "orange",
+    label: 'MAKK AI',
+    txtColor: 'black'
   },
   {
-    // Settings
+    icon: "message",
+    page: 'Messages',
+    image: bluImage,
+    iconColor: "yellow",
+    label: 'Messages',
+    txtColor: textColor
+  },
+  {
+    icon: "earth",
+    page: 'ColForumSelectorTab',
+    image: brnImage,
+    iconColor: "yellow",
+    label: 'Forums',
+    txtColor: textColor
+  },
+  {
+    icon: "compare-vertical",
+    page: 'CompareColleges',
+    image: pnkImage,
+    iconColor: "yellow",
+    label: 'Compare',
+    txtColor: textColor
+  },
+  {
     icon: "star-settings-outline",
-    page: 'Settings'
+    page: 'Settings',
+    image: cynImage,
+    iconColor: "orange",
+    label: 'Settings',
+    txtColor: 'black'
   },
 ];
 
-const Slide = ({ slide, scrollOffset, index , navigation}) => {
+const Slide = ({ slide, scrollOffset, index, navigation }) => {
+
+  const txtCol = slide.txtColor;
   const animatedStyle = useAnimatedStyle(() => {
     const input = scrollOffset.value / planetWidth;
     const inputRange = [index - 1, index, index + 1];
-    const inputYRange = [index-3, index -2, index -1, index, index+1, index +2, index +3]
+    const inputYRange = [index - 2, index - 1, index, index + 1, index + 2];
+    
 
     return {
       transform: [
         {
-          scale: interpolate(
-            input,
-            inputRange,
-            [0.8, 0.8, 0.8],
-            Extrapolate.CLAMP
-          ),
+          // Adjust scale for zoom in and out effect
+          scale: interpolate(input, inputRange, [0.75, 0.95, 0.75], Extrapolate.CLAMP),
         },
         {
-            // TranslateY effect to move the focused slide lower
-            translateY: interpolate(input, inputYRange, [-70,20,45, 60,45, 20, -70], Extrapolate.CLAMP),
+          // Planets will move vertically to simulate "revolving" around the sun
+          translateY: interpolate(input, inputYRange, [-90, -25, 15, -25, -90], Extrapolate.CLAMP),
         },
         {
-            // TranslateY effect to move the most outer slides closer in for orbiting effect
-            translateX: interpolate(input, inputYRange, [-100 ,0 ,0 ,0 ,0, 0, 100], Extrapolate.CLAMP),
+          // Horizontal translation for orbit effect
+          translateX: interpolate(input, inputYRange, [-20, 0.05, 0, 0.05, -20], Extrapolate.CLAMP),
         },
       ],
-      // Change aopactiy of theslides as they dissappear behind the planet
-      opacity: interpolate(input, inputYRange, [0, 0.75, 1, 1, 1, 0.75, 0], Extrapolate.CLAMP),
-      
+      // Opacity to fade in and out as the planets "move"
+      opacity: interpolate(input, inputYRange, [0.5, 0.75, 1, 0.75, 0.5], Extrapolate.CLAMP),
     };
   });
 
   return (
-    
     <Animated.View
       key={index}
       style={[
@@ -104,70 +129,63 @@ const Slide = ({ slide, scrollOffset, index , navigation}) => {
         animatedStyle,
       ]}
     >
-      <TouchableOpacity style={{flex: 1}} onPress={()=>{navigation.navigate(slide.page)}}>
-      <View
-        style={{
-          padding: 5,
-          alignItems: "center",
-          backgroundColor: 'purple',
-          borderRadius: 100,
-          height: '80%',
-          justifyContent: "center",
-        }}
-      >
-        <MaterialCommunityIcons name={slide.icon} size={25} color={textColor} />
-    
-      </View>
+      <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate(slide.page)}>
+        <View
+          style={{
+            padding: 5,
+            alignItems: "center",
+            borderRadius: 100,
+            height: '80%',
+            justifyContent: "center",
+            position: 'relative',
+          }}
+        >
+          <FastImage
+            source={slide.image}
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 100,
+              overflow: 'hidden',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            resizeMode="contain"
+          >
+            <MaterialCommunityIcons name={slide.icon} size={50} color={slide.iconColor} />
+            <Text style={{color: txtCol, fontSize: 23, fontWeight: 'bold'}}>{slide.label}</Text>
+          </FastImage>
+          
+        </View>
       </TouchableOpacity>
     </Animated.View>
-
   );
 };
 
-const Indicator = ({ scrollOffset, index }) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const input = scrollOffset.value / planetWidth;
-    const inputRange = [index - 1, index, index + 1];
-    const animatedColor = interpolateColor(input, inputRange, [
-      gray,
-      textColor,
-      gray,
-    ]);
+const PlanetSwiper = ({ navigation }) => {
+  const scrollViewRef = useRef(null);
+  const { width } = Dimensions.get('window');
 
-    return {
-      width: interpolate(input, inputRange, [20, 40, 20], Extrapolate.CLAMP),
-      backgroundColor: animatedColor,
-    };
-  });
+  // Calculate the initial offset for the middle element
+  const initialOffset = (planetWidth);
 
-  return (
-    <Animated.View
-      style={[
-        {
-          marginHorizontal: 5,
-          height: 20,
-          borderRadius: 10,
-          backgroundColor: textColor,
-        },
-        animatedStyle,
-      ]}
-    />
-  );
-};
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: initialOffset, animated: false });
+    }
+  }, []);
 
-const PlanetSwiper = ({navigation}) => {
   const scrollOffset = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollOffset.value = event.contentOffset.x;
-
-      
     },
   });
 
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "space-around" }}>
       <Animated.ScrollView
+        ref={scrollViewRef}
         scrollEventThrottle={1}
         horizontal
         snapToInterval={planetWidth}
@@ -175,7 +193,7 @@ const PlanetSwiper = ({navigation}) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
           alignItems: "center",
-          paddingHorizontal: ((width - planetWidth) / 2),
+          paddingHorizontal: (width - planetWidth) / 2,
           justifyContent: "center",
         }}
         onScroll={scrollHandler}
@@ -192,15 +210,17 @@ const PlanetSwiper = ({navigation}) => {
           );
         })}
       </Animated.ScrollView>
-      {/* <View style={{ flex: 1, flexDirection: "row", justifyContent: "center" }}>
-        {slides.map((_, index) => {
-          return (
-            <Indicator key={index} index={index} scrollOffset={scrollOffset} />
-          );
-        })}
-      </View> */}
     </SafeAreaView>
   );
 };
 
+
+
+const styles = StyleSheet.create({
+  tabIcon:{
+    width:20, 
+    height: 20, 
+    borderRadius:10
+  }
+});
 export default PlanetSwiper;

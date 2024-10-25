@@ -11,8 +11,10 @@
     "test": "jest"
   },
   "dependencies": {
+    "@miblanchard/react-native-slider": "^2.6.0",
     "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/checkbox": "^0.5.17",
+    "@react-native-community/slider": "^4.5.4",
     "@react-native-firebase/app": "^20.1.0",
     "@react-native-firebase/auth": "^20.1.0",
     "@react-native-firebase/dynamic-links": "^20.1.0",
@@ -23,6 +25,7 @@
     "@react-navigation/elements": "^1.3.31",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.10.0",
+    "@tanstack/react-query": "^5.59.15",
     "axios": "^1.7.2",
     "expo": "^51.0.17",
     "expo-constants": "~16.0.2",
@@ -42,10 +45,13 @@
     "react-native": "0.74.3",
     "react-native-canvas": "^0.1.40",
     "react-native-chart-kit": "^6.12.0",
+    "react-native-checkbox": "^2.0.0",
     "react-native-checkbox-reanimated": "^0.1.1",
+    "react-native-dotenv": "^3.4.11",
     "react-native-element-dropdown": "^2.12.1",
     "react-native-elements": "^3.4.3",
     "react-native-event-listeners": "^1.0.7",
+    "react-native-fast-image": "^8.6.3",
     "react-native-fbsdk": "^3.0.0",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-google-places-autocomplete": "^2.5.6",
@@ -62,6 +68,7 @@
     "react-native-web": "~0.19.10",
     "react-native-webview": "^13.8.6",
     "react-navigation": "^5.0.0",
+    "react-query": "^3.39.3",
     "twilio": "^5.3.3"
   },
   "devDependencies": {

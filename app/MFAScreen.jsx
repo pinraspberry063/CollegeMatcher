@@ -11,10 +11,9 @@ import {
 import auth from '@react-native-firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import themeContext from '../theme/themeContext';
+
 
 const MFAScreen = ({ navigation, route }) => {
-  const theme = useContext(themeContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
@@ -38,7 +37,13 @@ const MFAScreen = ({ navigation, route }) => {
       Alert.alert('Verification Code Sent', 'Please enter the code sent to your phone.');
     } catch (error) {
       console.error('Error sending verification code:', error);
-      Alert.alert('Error', 'Failed to send verification code. Please try again.');
+      if (error.code === 'auth/invalid-phone-number') {
+        Alert.alert('Invalid Phone Number', 'The phone number entered is invalid. Please check and try again.');
+      } else if (error.code === 'auth/quota-exceeded') {
+        Alert.alert('Quota Exceeded', 'You have exceeded the number of verification attempts. Please try again later.');
+      } else {
+        Alert.alert('Error', 'Failed to send verification code. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -80,15 +85,21 @@ const MFAScreen = ({ navigation, route }) => {
       navigation.navigate(nextScreen);
     } catch (error) {
       console.error('Verification Error:', error);
-      Alert.alert('Verification Failed', 'Invalid verification code.');
+      if (error.code === 'auth/invalid-verification-code') {
+        Alert.alert('Invalid Code', 'The verification code entered is incorrect.');
+      } else if (error.code === 'auth/code-expired') {
+        Alert.alert('Code Expired', 'The verification code has expired. Please request a new one.');
+      } else {
+        Alert.alert('Verification Failed', 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.color }]}>
+    <View style={styles.container}>
+      <Text style={styles.title}>
         Set Up Multi-Factor Authentication
       </Text>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}

@@ -1,16 +1,14 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Switch } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
-import { doc, setDoc, writeBatch, getDoc } from 'firebase/firestore';
+import { doc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const firestore = getFirestore(db);
 
 const AccountCreation = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const { setUser } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,6 +17,7 @@ const AccountCreation = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
+  const [activeMessages, setActiveMessages] = useState([]);
 
   const handleSignUp = async () => {
     if (!email || !password || !username || !confirmPassword) {
@@ -73,6 +72,7 @@ const AccountCreation = ({ navigation }) => {
         Email: email,
         mfaEnabled: isMfaEnabled,
         phoneNumber: '',
+        activeMessages: [],
         IsModerator: false,
       });
 
@@ -82,16 +82,22 @@ const AccountCreation = ({ navigation }) => {
       // Commit the user batch
       await userBatch.commit();
 
-      // Send email verification
+      // Commenting out email verification for testing purposes
       await user.sendEmailVerification();
       Alert.alert('Account Created', 'Please verify your email before proceeding.');
 
-      // Navigate to Email Verification Prompt
       navigation.navigate('EmailVerificationPrompt', {
         isMfaEnabled,
         isRecruiter,
-        nextScreen: isMfaEnabled ? 'MFAScreen' : determineNextScreen(),
+        nextScreen: determineNextScreen(),
       });
+
+//       const nextScreen = determineNextScreen();
+//       navigation.navigate(nextScreen, {
+//         isMfaEnabled,
+//         isRecruiter,
+//       });
+
     } catch (error) {
       console.error('Account Creation Error:', error);
 
@@ -104,7 +110,7 @@ const AccountCreation = ({ navigation }) => {
         Alert.alert('Account Creation Failed', error.message);
       }
 
-      // Optional Cleanup: Delete the Auth account if Firestore operations fail after authentication
+      // Cleanup: Delete the Auth account if Firestore operations fail after authentication
       if (error.code !== 'permission-denied' && auth().currentUser) {
         await auth().currentUser.delete();
       }
@@ -113,9 +119,11 @@ const AccountCreation = ({ navigation }) => {
     }
   };
 
+ 
+
   const determineNextScreen = () => {
     if (isMfaEnabled) {
-      return isRecruiter ? 'RecruiterVerification' : 'Main';
+      return 'MFAScreen';
     } else if (isRecruiter) {
       return 'RecruiterVerification';
     } else {
@@ -125,57 +133,57 @@ const AccountCreation = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Create Account</Text>
+      <Text style={styles.title}>Create Account</Text>
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Email"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'black'}
         keyboardType="email-address"
         value={email}
         onChangeText={setEmail}
       />
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Password"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'black'}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Confirm Password"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'black'}
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Username"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'black'}
         value={username}
         onChangeText={setUsername}
       />
       <View style={styles.switchContainer}>
-        <Text style={[styles.label, { color: theme.color }]}>
+        <Text style={styles.label}>
           Enable Multi-Factor Authentication (MFA)
         </Text>
         <Switch
           value={isMfaEnabled}
           onValueChange={setIsMfaEnabled}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isMfaEnabled ? theme.buttonColor : '#f4f3f4'}
+          trackColor={'#767577'}
+          thumbColor={'#f4f3f4'}
         />
       </View>
 
       <View style={styles.switchContainer}>
-        <Text style={[styles.label, { color: theme.color }]}>I am a recruiter</Text>
+        <Text style={styles.label}>I am a recruiter</Text>
         <Switch
           value={isRecruiter}
           onValueChange={setIsRecruiter}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isRecruiter ? theme.buttonColor : '#f4f3f4'}
+          trackColor={'#767577'}
+          thumbColor={'#f4f3f4'}
         />
       </View>
 
