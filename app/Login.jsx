@@ -311,194 +311,194 @@ const Login = ({ navigation }) => {
     }
   };
 
-  const handleEmailLinkLogin = async (emailToUse) => {
-    try {
-        const link = await dynamicLinks().buildLink({
-            link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${emailToUse}`,
-            domainUriPrefix: 'https://collegematcher46019.page.link',
-            android: {
-                packageName: 'com.cm_app',
-            },
-        });
-
-        console.log('Generated dynamic link:', link);
-
-        const actionCodeSettings = {
-            url: link,
-            handleCodeInApp: true,
-            android: {
-                packageName: 'com.cm_app',
-                installApp: false,
-                minimumVersion: '12',
-            },
-            dynamicLinkDomain: 'collegematcher46019.page.link',
-        };
-
-        console.log('Action code settings:', actionCodeSettings);
-
-        await auth().sendSignInLinkToEmail(emailToUse, actionCodeSettings);
-        await AsyncStorage.setItem('emailForSignIn', emailToUse);
-
-        Alert.alert(
-            'Email Sent',
-            'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
-        );
-    } catch (error) {
-        console.error('Email Link Sign-In Error:', error);
-        Alert.alert('Email Link Login Failed', error.message);
-    }
-};
-
- // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
- useEffect(() => {
-   const handleDynamicLink = async (link) => {
-     if (auth().isSignInWithEmailLink(link.url)) {
-       let email = await AsyncStorage.getItem('emailForSignIn');
-       if (!email) {
-         // Prompt the user to enter their email
-         Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
-           email = userEmail;
-         });
-       }
-
-       try {
-         // Complete the sign-in process
-         const userCredential = await auth().signInWithEmailLink(email, link.url);
-         const user = userCredential.user;
-
-         // Reference to Firestore
-         const firestore = getFirestore(db);
-
-         // Check if user document exists in Firestore
-         const userDocRef = doc(firestore, 'Users', user.uid);
-         const userDoc = await getDoc(userDocRef);
-
-         if (!userDoc.exists()) {
-           // User document doesn't exist; navigate to UsernamePrompt
-           navigation.navigate('UsernamePrompt', {
-             user,
-             isRecruiter: false,
-             nextScreen: determineNextScreen(),
-           });
-         } else {
-           // User document exists; proceed with MFA check
-
-           const userData = userDoc.data();
-
-           if (userData.mfaEnabled) {
-             // If MFA is enabled, navigate to MFAScreen
-             navigation.navigate('MFAScreen', {
-               nextScreen: determineNextScreen(),
-               phoneNumber: userData.phoneNumber,
-             });
-           } else {
-             // If MFA is not enabled, proceed to main application
-             setUser(user); // Ensure setUser is defined in your context
-             navigation.navigate('Main');
-           }
-         }
-
-         // Remove the email from storage
-         await AsyncStorage.removeItem('emailForSignIn');
-       } catch (error) {
-         console.error('Error completing email link sign-in:', error);
-         Alert.alert('Sign-In Failed', error.message);
-       }
-     }
-   };
-
-   // Subscribe to dynamic links
-   const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
-
-   // Check if the app was opened with a link
-   dynamicLinks()
-     .getInitialLink()
-     .then((link) => {
-       if (link) {
-         handleDynamicLink(link);
-       }
-     });
-
-   return () => {
-     unsubscribe();
-   };
- }, []);
+//   const handleEmailLinkLogin = async (emailToUse) => {
+//     try {
+//         const link = await dynamicLinks().buildLink({
+//             link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${emailToUse}`,
+//             domainUriPrefix: 'https://collegematcher46019.page.link',
+//             android: {
+//                 packageName: 'com.cm_app',
+//             },
+//         });
+//
+//         console.log('Generated dynamic link:', link);
+//
+//         const actionCodeSettings = {
+//             url: link,
+//             handleCodeInApp: true,
+//             android: {
+//                 packageName: 'com.cm_app',
+//                 installApp: false,
+//                 minimumVersion: '12',
+//             },
+//             dynamicLinkDomain: 'collegematcher46019.page.link',
+//         };
+//
+//         console.log('Action code settings:', actionCodeSettings);
+//
+//         await auth().sendSignInLinkToEmail(emailToUse, actionCodeSettings);
+//         await AsyncStorage.setItem('emailForSignIn', emailToUse);
+//
+//         Alert.alert(
+//             'Email Sent',
+//             'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
+//         );
+//     } catch (error) {
+//         console.error('Email Link Sign-In Error:', error);
+//         Alert.alert('Email Link Login Failed', error.message);
+//     }
+// };
+//
+//  // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
+//  useEffect(() => {
+//    const handleDynamicLink = async (link) => {
+//      if (auth().isSignInWithEmailLink(link.url)) {
+//        let email = await AsyncStorage.getItem('emailForSignIn');
+//        if (!email) {
+//          // Prompt the user to enter their email
+//          Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
+//            email = userEmail;
+//          });
+//        }
+//
+//        try {
+//          // Complete the sign-in process
+//          const userCredential = await auth().signInWithEmailLink(email, link.url);
+//          const user = userCredential.user;
+//
+//          // Reference to Firestore
+//          const firestore = getFirestore(db);
+//
+//          // Check if user document exists in Firestore
+//          const userDocRef = doc(firestore, 'Users', user.uid);
+//          const userDoc = await getDoc(userDocRef);
+//
+//          if (!userDoc.exists()) {
+//            // User document doesn't exist; navigate to UsernamePrompt
+//            navigation.navigate('UsernamePrompt', {
+//              user,
+//              isRecruiter: false,
+//              nextScreen: determineNextScreen(),
+//            });
+//          } else {
+//            // User document exists; proceed with MFA check
+//
+//            const userData = userDoc.data();
+//
+//            if (userData.mfaEnabled) {
+//              // If MFA is enabled, navigate to MFAScreen
+//              navigation.navigate('MFAScreen', {
+//                nextScreen: determineNextScreen(),
+//                phoneNumber: userData.phoneNumber,
+//              });
+//            } else {
+//              // If MFA is not enabled, proceed to main application
+//              setUser(user); // Ensure setUser is defined in your context
+//              navigation.navigate('Main');
+//            }
+//          }
+//
+//          // Remove the email from storage
+//          await AsyncStorage.removeItem('emailForSignIn');
+//        } catch (error) {
+//          console.error('Error completing email link sign-in:', error);
+//          Alert.alert('Sign-In Failed', error.message);
+//        }
+//      }
+//    };
+//
+//    // Subscribe to dynamic links
+//    const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+//
+//    // Check if the app was opened with a link
+//    dynamicLinks()
+//      .getInitialLink()
+//      .then((link) => {
+//        if (link) {
+//          handleDynamicLink(link);
+//        }
+//      });
+//
+//    return () => {
+//      unsubscribe();
+//    };
+//  }, []);
 
 // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
-useEffect(() => {
-  const handleDynamicLink = async (link) => {
-    if (auth().isSignInWithEmailLink(link.url)) {
-      let email = await AsyncStorage.getItem('emailForSignIn');
-      if (!email) {
-        // Prompt the user to enter their email
-        Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
-          email = userEmail;
-        });
-      }
-
-      try {
-        // Complete the sign-in process
-        const userCredential = await auth().signInWithEmailLink(email, link.url);
-        const user = userCredential.user;
-
-        // Reference to Firestore
-        const firestore = getFirestore(db);
-
-        // Check if user document exists in Firestore
-        const userDocRef = doc(firestore, 'Users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (!userDoc.exists()) {
-          // User document doesn't exist; navigate to UsernamePrompt
-          navigation.navigate('UsernamePrompt', {
-            user,
-            isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
-            isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
-            nextScreen: determineNextScreen(), // Ensure this function exists and returns the appropriate screen
-          });
-        } else {
-          // User document exists; proceed with MFA check
-
-          const userData = userDoc.data();
-
-          if (userData.mfaEnabled) {
-            // If MFA is enabled, navigate to MFAScreen
-            navigation.navigate('MFAScreen', {
-              nextScreen: determineNextScreen(),
-              phoneNumber: userData.phoneNumber,
-            });
-          } else {
-            // If MFA is not enabled, proceed to main application
-            setUser(user); // Ensure setUser is defined in your context
-            navigation.navigate('Main');
-          }
-        }
-
-        // Remove the email from storage
-        await AsyncStorage.removeItem('emailForSignIn');
-      } catch (error) {
-        console.error('Error completing email link sign-in:', error);
-        Alert.alert('Sign-In Failed', error.message);
-      }
-    }
-  };
-
-  // Subscribe to dynamic links
-  const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
-
-  // Check if the app was opened with a link
-  dynamicLinks()
-    .getInitialLink()
-    .then((link) => {
-      if (link) {
-        handleDynamicLink(link);
-      }
-    });
-
-  return () => {
-    unsubscribe();
-  };
-}, []);
+// useEffect(() => {
+//   const handleDynamicLink = async (link) => {
+//     if (auth().isSignInWithEmailLink(link.url)) {
+//       let email = await AsyncStorage.getItem('emailForSignIn');
+//       if (!email) {
+//         // Prompt the user to enter their email
+//         Alert.prompt('Email Required', 'Please enter your email to complete sign-in.', async (userEmail) => {
+//           email = userEmail;
+//         });
+//       }
+//
+//       try {
+//         // Complete the sign-in process
+//         const userCredential = await auth().signInWithEmailLink(email, link.url);
+//         const user = userCredential.user;
+//
+//         // Reference to Firestore
+//         const firestore = getFirestore(db);
+//
+//         // Check if user document exists in Firestore
+//         const userDocRef = doc(firestore, 'Users', user.uid);
+//         const userDoc = await getDoc(userDocRef);
+//
+//         if (!userDoc.exists()) {
+//           // User document doesn't exist; navigate to UsernamePrompt
+//           navigation.navigate('UsernamePrompt', {
+//             user,
+//             isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
+//             isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
+//             nextScreen: determineNextScreen(), // Ensure this function exists and returns the appropriate screen
+//           });
+//         } else {
+//           // User document exists; proceed with MFA check
+//
+//           const userData = userDoc.data();
+//
+//           if (userData.mfaEnabled) {
+//             // If MFA is enabled, navigate to MFAScreen
+//             navigation.navigate('MFAScreen', {
+//               nextScreen: determineNextScreen(),
+//               phoneNumber: userData.phoneNumber,
+//             });
+//           } else {
+//             // If MFA is not enabled, proceed to main application
+//             setUser(user); // Ensure setUser is defined in your context
+//             navigation.navigate('Main');
+//           }
+//         }
+//
+//         // Remove the email from storage
+//         await AsyncStorage.removeItem('emailForSignIn');
+//       } catch (error) {
+//         console.error('Error completing email link sign-in:', error);
+//         Alert.alert('Sign-In Failed', error.message);
+//       }
+//     }
+//   };
+//
+//   // Subscribe to dynamic links
+//   const unsubscribe = dynamicLinks().onLink(handleDynamicLink);
+//
+//   // Check if the app was opened with a link
+//   dynamicLinks()
+//     .getInitialLink()
+//     .then((link) => {
+//       if (link) {
+//         handleDynamicLink(link);
+//       }
+//     });
+//
+//   return () => {
+//     unsubscribe();
+//   };
+// }, []);
 
 const checkIsRecruiter = async (uid) => {
   try {
@@ -620,13 +620,13 @@ const determineNextScreen = () => {
               <Text style={styles.socialButtonText}>Continue with Facebook</Text>
             </TouchableOpacity>
 
-            {/* === Email Link Login === */}
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#34A853' }]}
-              onPress={() => setIsEmailModalVisible(true)}
-            >
-              <Text style={styles.socialButtonText}>Continue with Email Link</Text>
-            </TouchableOpacity>
+{/*              */}{/* === Email Link Login === */}
+{/*             <TouchableOpacity */}
+{/*               style={[styles.socialButton, { backgroundColor: '#34A853' }]} */}
+{/*               onPress={() => setIsEmailModalVisible(true)} */}
+{/*             > */}
+{/*               <Text style={styles.socialButtonText}>Continue with Email Link</Text> */}
+{/*             </TouchableOpacity> */}
           </>
 
           {/* === Account Creation Button === */}
