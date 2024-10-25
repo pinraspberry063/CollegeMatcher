@@ -38,9 +38,10 @@ import { handleReport } from '../src/utils/reportUtils';
 import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
 
 const firestore = getFirestore(db);
+const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const CommentPage = ({ route, navigation }) => {
-  const { threadId, threadTitle } = route.params;
+  const { threadId, threadTitle, collegeName, forumName } = route.params;
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
   const { user } = useContext(UserContext);
@@ -104,7 +105,7 @@ const resetAddPostForm = () => {
   // Fetch all posts under the specific thread
   const fetchPosts = async () => {
     try {
-      const postsRef = collection(firestore, 'Forums', threadId, 'posts');
+      const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
       const postsQuery = query(postsRef, orderBy('createdAt', 'desc'));
       const postsSnapshot = await getDocs(postsQuery);
       const postsList = [];
@@ -198,7 +199,7 @@ const resetAddPostForm = () => {
       }
 
       try {
-        const postsRef = collection(firestore, 'Forums', threadId, 'posts');
+        const postsRef = collection(firestore, 'Forums', collegeName, 'subgroups', forumName, 'threads', threadId, 'posts');
         const newPost = {
           content: newPostContent.trim(),
           createdBy: username,
@@ -416,7 +417,7 @@ const resetAddPostForm = () => {
            { transform: [{
                  translateY: animationValue.interpolate({
                    inputRange: [0, 1],
-                   outputRange: [600, 0], // Slide up the add thread section
+                   outputRange: [height+200, 0], // Slide up the add thread section
                  }),
                },
              ],
@@ -476,7 +477,8 @@ const styles = StyleSheet.create({
   threadTitle: {
       fontSize: 25,
       fontWeight: 'bold',
-      marginBottom: 10
+      marginBottom: 10,
+      color: '#fff'
       },
   newThreadContainer: {
         position: 'absolute',

@@ -549,7 +549,12 @@ const ColForum = ({route, navigation}) => {
 
                 {/* Add Post Button */}
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('CommentPage', { threadId: thread.id, threadTitle: thread.title })}
+                  onPress={() => navigation.navigate('CommentPage', {
+                      threadId: thread.id,
+                      threadTitle: thread.title,
+                      collegeName: collegeName,
+                      forumName: forumName
+                      })}
                 >
                   <Image source={require('../assets/Chat.png')} style={styles.iconButton} />
                 </TouchableOpacity>
@@ -651,7 +656,7 @@ const ColForum = ({route, navigation}) => {
             { transform: [{
                   translateY: animationValue.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [600, 0], // Slide up the add thread section
+                    outputRange: [height+200, 0], // Slide up the add thread section
                   }),
                 },
               ],
