@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { UserContext } from '../components/UserContext';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginManager, AccessToken } from 'react-native-fbsdk';
@@ -27,7 +27,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 
 const Login = ({ navigation }) => {
-
   const { setUser } = useContext(UserContext);
 
   // === Unified Input Fields State ===
@@ -115,11 +114,6 @@ const Login = ({ navigation }) => {
     if (!identifier) {
       Alert.alert('Input Error', 'Please enter your login details');
       return;
-    }
-
-    if (!password) {
-        Alert.alert('Input Error', 'Please enter your password.');
-        return;
     }
 
     try {
@@ -245,29 +239,29 @@ const Login = ({ navigation }) => {
       const userDoc = await getDoc(userDocRef);
 
       if (!userDoc.exists()) {
-        // User document doesn't exist; navigate to UsernamePrompt
+        // User document doesn't exist; create initial document
+        await setDoc(userDocRef, {
+          User_UID: user.uid,
+          Email: user.email,
+          IsRecruiter: false,
+          SuperRecruiter: false,
+          RecruiterInstitution: 'NA',
+          phoneNumber: '',
+          activeMessages: [],
+          IsModerator: false,
+          IsBanned: false
+        });
+
+        // Navigate to UsernamePrompt for new users
         navigation.navigate('UsernamePrompt', {
           user,
-          isMfaEnabled: false,
           isRecruiter: false,
-          nextScreen: determineNextScreen(),
+          nextScreen: 'Main',
         });
       } else {
-        // User document exists; proceed with MFA check
-
-        const userData = userDoc.data();
-
-        if (userData.mfaEnabled) {
-          // If MFA is enabled, navigate to MFAScreen
-          navigation.navigate('MFAScreen', {
-            nextScreen: determineNextScreen(),
-            phoneNumber: userData.phoneNumber,
-          });
-        } else {
-          // If MFA is not enabled, proceed to main application
-          setUser(user); // Ensure setUser is defined in your context
-          navigation.navigate('Main');
-        }
+        // Existing user, go directly to main
+        setUser(user);
+        navigation.navigate('Main');
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
@@ -297,10 +291,6 @@ const Login = ({ navigation }) => {
       const userCredential = await auth().signInWithCredential(facebookCredential);
       const user = userCredential.user;
 
-      // Reference to Firestore
-      const firestore = getFirestore(db);
-
-      // Check if user document exists in Firestore
       const userDocRef = doc(firestore, 'Users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
@@ -308,26 +298,12 @@ const Login = ({ navigation }) => {
         // User document doesn't exist; navigate to UsernamePrompt
         navigation.navigate('UsernamePrompt', {
           user,
-          isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
-          isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
-          nextScreen: determineNextScreen(), // Ensure this function exists and returns the appropriate screen
+          isRecruiter: false,
+          nextScreen: 'Main'
         });
       } else {
-        // User document exists; proceed with MFA check
-
-        const userData = userDoc.data();
-
-        if (userData.mfaEnabled) {
-          // If MFA is enabled, navigate to MFAScreen
-          navigation.navigate('MFAScreen', {
-            nextScreen: determineNextScreen(),
-            phoneNumber: userData.phoneNumber,
-          });
-        } else {
-          // If MFA is not enabled, proceed to main application
-          setUser(user); // Ensure setUser is defined in your context
-          navigation.navigate('Main');
-        }
+        // Existing user, check if banned and proceed
+        await checkIsRecruiter(user.uid);
       }
     } catch (error) {
       console.error('Facebook Sign-In Error:', error);
@@ -401,8 +377,7 @@ const Login = ({ navigation }) => {
            // User document doesn't exist; navigate to UsernamePrompt
            navigation.navigate('UsernamePrompt', {
              user,
-             isMfaEnabled: false, // Adjust based on your logic or retrieve dynamically
-             isRecruiter: false,  // Adjust based on your logic or retrieve dynamically
+             isRecruiter: false,
              nextScreen: determineNextScreen(),
            });
          } else {
@@ -596,7 +571,7 @@ const determineNextScreen = () => {
           {/* === Password Input with Toggle === */}
           <View style={styles.passwordContainer}>
             <TextInput
-              style={[styles.input]}
+              style={[styles.input, styles.passwordInput, { borderColor: 'black', color: 'black' }]}
               placeholder="Password"
               placeholderTextColor='black'
               secureTextEntry={!showPassword}
@@ -608,7 +583,7 @@ const determineNextScreen = () => {
               onPress={() => setShowPassword(!showPassword)}
               style={styles.toggleButton}
             >
-              <Text >{showPassword ? 'Hide' : 'Show'}</Text>
+              <Text style={{ color: '#1E90FF' }}>{showPassword ? 'Hide' : 'Show'}</Text>
             </TouchableOpacity>
           </View>
 
@@ -664,7 +639,7 @@ const determineNextScreen = () => {
             <View style={styles.mfaContainer}>
               <Text style={styles.mfaTitle}>Enter MFA Verification Code</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input]}
                 placeholder="Verification Code"
                 value={mfaVerificationCode}
                 onChangeText={setMfaVerificationCode}
@@ -753,6 +728,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    color: 'black'
   },
   toggleButton: {
     padding: 10,
@@ -845,3 +824,4 @@ const styles = StyleSheet.create({
 
 
 export default Login;
+
