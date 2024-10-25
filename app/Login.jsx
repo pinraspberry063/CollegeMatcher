@@ -544,11 +544,11 @@ const determineNextScreen = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
-    >
+    // <KeyboardAvoidingView
+    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    //   style={{ flex: 1 }}
+    //   keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
+    // >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -696,7 +696,7 @@ const determineNextScreen = () => {
           </Modal>
         </Animated.View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    // </KeyboardAvoidingView>
   );
 };
 
