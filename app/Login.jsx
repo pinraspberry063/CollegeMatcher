@@ -17,7 +17,6 @@ import {
   Platform,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext';
 import { UserContext } from '../components/UserContext';
 import { getFirestore, collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
