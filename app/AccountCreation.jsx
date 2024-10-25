@@ -80,15 +80,21 @@ const AccountCreation = ({ navigation }) => {
       // Commit the user batch
       await userBatch.commit();
 
-      // Send email verification
-      await user.sendEmailVerification();
-      Alert.alert('Account Created', 'Please verify your email before proceeding.');
+      // Commenting out email verification for testing purposes
+      // await user.sendEmailVerification();
+      // Alert.alert('Account Created', 'Please verify your email before proceeding.');
 
-      // Navigate to Email Verification Prompt
-      navigation.navigate('EmailVerificationPrompt', {
+//       navigation.navigate('EmailVerificationPrompt', {
+//         isMfaEnabled,
+//         isRecruiter,
+//         nextScreen: determineNextScreen(),
+//       });
+
+
+      const nextScreen = determineNextScreen();
+      navigation.navigate(nextScreen, {
         isMfaEnabled,
         isRecruiter,
-        nextScreen: isMfaEnabled ? 'MFAScreen' : determineNextScreen,
       });
     } catch (error) {
       console.error('Account Creation Error:', error);
@@ -102,7 +108,7 @@ const AccountCreation = ({ navigation }) => {
         Alert.alert('Account Creation Failed', error.message);
       }
 
-      // Optional Cleanup: Delete the Auth account if Firestore operations fail after authentication
+      // Cleanup: Delete the Auth account if Firestore operations fail after authentication
       if (error.code !== 'permission-denied' && auth().currentUser) {
         await auth().currentUser.delete();
       }
@@ -115,7 +121,7 @@ const AccountCreation = ({ navigation }) => {
 
   const determineNextScreen = () => {
     if (isMfaEnabled) {
-      return isRecruiter ? 'RecruiterVerification' : 'Main';
+      return 'MFAScreen';
     } else if (isRecruiter) {
       return 'RecruiterVerification';
     } else {
