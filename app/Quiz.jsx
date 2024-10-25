@@ -29,7 +29,10 @@ import { handleReport } from '../src/utils/reportUtils';
 import Slider from '@react-native-community/slider';
 import { CollegesContext } from '../components/CollegeContext';
 
-LogBox.ignoreLogs(['VirtualizedLists should never be nested inside plain ScrollViews']);
+LogBox.ignoreLogs([
+  'VirtualizedLists should never be nested',
+  'Function setDoc() called with invalid data. Unsupported field value: undefined'
+]);
 
 const firestore = getFirestore(db);
 
