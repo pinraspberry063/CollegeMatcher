@@ -132,7 +132,7 @@ const MakkAI = () => {
 
   // noinspection JSValidateTypes
   return (
-    <ImageBackground source={require('../assets/galaxy.jpg')} style={styles.container}>
+    <ImageBackground source={require('../assets/galaxy_msg.jpg')} style={styles.container}> 
         <KeyboardAvoidingView
             style={{flex: 1}}
             behavior={Platform.OS === "ios" ? "padding" : null}>

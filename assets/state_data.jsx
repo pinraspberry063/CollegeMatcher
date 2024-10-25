@@ -1,4 +1,5 @@
 const stateData = [
+    { label: 'N/A', value: 'N/A' },
     {label: 'Alabama', value: 'Alabama'},
     {label: 'Alaska', value: 'Alaska'},
     {label: 'Arizona', value: 'Arizona'},

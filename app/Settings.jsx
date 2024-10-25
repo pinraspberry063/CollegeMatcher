@@ -46,36 +46,36 @@ const Settings = ({ navigation }) => {
     <View style={styles.container}>
       <ScrollView>
         <TouchableOpacity onPress={() => navigation.navigate('Account')}>
-          <Text style={[styles.item, { color: theme.color }]}>Account</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Account</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('Preferences')}>
-          <Text style={[styles.item, { color: theme.color }]}>Preferences</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Preferences</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('FavColleges')}>
-          <Text style={[styles.item, { color: theme.color }]}>Committed Colleges</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Committed Colleges</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('ProfilePage')}>
-          <Text style={[styles.item, { color: theme.color }]}>Profile Page</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Profile Page</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Saved MAKK Chats')}>
-          <Text style={[styles.item, { color: theme.color }]}>Saved MAKK Chats</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Saved MAKK Chats</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => console.log('Privacy')}>
-          <Text style={[styles.item, { color: theme.color }]}>Privacy</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Privacy</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate('CompareColleges')}>
-          <Text style={[styles.item, { color: theme.color }]}>Compare Colleges</Text>
+          <Text style={[styles.item, { color: 'black' }]}>Compare Colleges</Text>
         </TouchableOpacity>
 
         {isModerator && (
           <TouchableOpacity onPress={() => navigation.navigate('ModeratorScreen')}>
-            <Text style={[styles.item, { color: theme.color }]}>Moderation Panel</Text>
+            <Text style={[styles.item, { color: 'black' }]}>Moderation Panel</Text>
           </TouchableOpacity>
         )}
 

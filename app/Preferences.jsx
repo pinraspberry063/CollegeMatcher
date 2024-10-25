@@ -72,26 +72,18 @@ const Preferences = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <View style={styles.preferenceItem}>
-        <Text style={[styles.preferenceText, { color: theme.color }]}>Dark Mode</Text>
+    <View styles={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+      {/* <TouchableOpacity styles={[styles.container, {backgroundColor: theme.background}]}>
+        <Text style={[styles.item, {color: theme.color}]}>Dark Mode</Text>
         <Switch
           value={darkMode}
-          onValueChange={handleToggleDarkMode}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={darkMode ? theme.buttonColor : '#f4f3f4'}
+          onValueChange={(value) => {
+            setDarkMode(value);
+            EventRegister.emit('Change Theme', value)
+
+          }}
         />
-      </View>
-      <View style={styles.preferenceItem}>
-        <Text style={[styles.preferenceText, { color: theme.color }]}>Enable MFA</Text>
-        <Switch
-          value={isMfaEnabled}
-          onValueChange={handleToggleMfa}
-          trackColor={{ false: '#767577', true: theme.buttonColor }}
-          thumbColor={isMfaEnabled ? theme.buttonColor : '#f4f3f4'}
-          disabled={loading}
-        />
-      </View>
+        </TouchableOpacity> */}
     </View>
   );
 };

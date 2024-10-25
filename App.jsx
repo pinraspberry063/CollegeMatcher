@@ -7,8 +7,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { EventRegister } from 'react-native-event-listeners';
 import { UserProvider } from './components/UserContext';
-import themeContext from './theme/themeContext';
-import theme from './theme/theme';
 import dynamicLinks from '@react-native-firebase/dynamic-links';
 import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -17,7 +15,7 @@ import Settings from './app/Settings';
 import Home from './app/index';
 import Account from './app/AccSettings';
 import Picker from './app/ProfileImageComp';
-import { DarkTheme, DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Launch from './app/Launch';
 import Preferences from './app/Preferences';
@@ -65,10 +63,33 @@ import CompareColleges from './app/CompareColleges';
 import UsernamePrompt from './app/UsernamePrompt';
 import { CollegesProvider } from './components/CollegeContext';
 import ProfilePage from './app/ProfilePage';
+import {QueryClient, QueryClientProvider} from '@tanstack/react-query'
+
+
 import CommentPage from './app/CommentPage';
 import Onboarding from 'react-native-onboarding-swiper';
 
 const firestore = getFirestore(db);
+
+// Create a query client instance
+const queryClient = new QueryClient();
+
+const fetchAllColleges = async () => {
+  const snapshot = await getDocs(collection(firestore, 'CompleteColleges'))
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+};
+// // Pre-fetch the data before rendering the app
+// const colleges = queryClient.prefetchQuery({
+//     queryKey: ['colleges'], // Now an array inside an object
+//     queryFn: fetchAllColleges, // Query function passed as part of the object
+//   })
+//   .then(() => {
+//     console.log('Data has been pre-fetched');
+//   })
+//   .catch((error) => {
+//     console.error('Error pre-fetching data:', error);
+//   });
 
 
 const screenOptions = {
@@ -81,7 +102,8 @@ const screenOptions = {
     left: 0,
     elevation: 0,
     height: 60,
-    background: "#fff"
+    background: "#fff",
+    
   }
 };
 
@@ -91,7 +113,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Index" component={Home} />
     <HomeStack.Screen name="Settings" component={Settings} />
     <HomeStack.Screen name="Account" component={Account} />
-    <HomeStack.Screen name="Picker" component={Picker} />
+    <HomeStack.Screen name="Picker" component={Picker}  />
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
@@ -99,6 +121,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
     <HomeStack.Screen name="CompareColleges" component={CompareColleges} />
     <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
+    <HomeStack.Screen name="AI" component={AIStackScreen} />
     <HomeStack.Screen name="ModeratorScreen" component={ModeratorScreen} />
   </HomeStack.Navigator>
 );
@@ -124,7 +147,7 @@ const QuizStackScreen = () => (
 const ResultStack = createNativeStackNavigator();
 const ResultStackScreen = ({route}) => {
   const Top100 = route.params.Top100;
-  console.log('Top100' + Top100);
+  // console.log('Top100' + Top100);
   return (
     <ResultStack.Navigator screenOptions={screenOptions}>
       <ResultStack.Screen
@@ -170,9 +193,78 @@ const icons = {
 };
 
 const Tab = createBottomTabNavigator();
+// const MainNav = () => {
+//   const [topColleges, setTopColleges] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   // const user = auth().currentUser.uid;
+
+//   useEffect(() => {
+//     const checkQuiz = async () => {
+//       const usersRef = collection(firestore, 'Users');
+//       const userQuery = query(
+//         usersRef,
+//         where('User_UID', '==', auth().currentUser.uid),
+//       );
+//       try {
+//         const querySnapshot = await getDocs(userQuery);
+
+//         if (!querySnapshot.empty) {
+//           const firstDoc = querySnapshot.docs[0];
+//           const collegeData = firstDoc.data();
+//           const top100 = collegeData.top100Colleges;
+
+//           setTopColleges(top100);
+//         } else {
+//           console.log('No matching document found.');
+//         }
+//         setIsLoading(false);
+//       } catch (error) {
+//         console.error('Error retrieving document:', error);
+//       }
+//     };
+//     checkQuiz();
+//   }, [topColleges, isLoading]);
+
+//   if (isLoading) {
+//     return (
+//       <View>
+//         <Text>Loading</Text>
+//       </View>
+//     );
+//   }
+//   return(
+//   <TabStack.Navigator
+//     screenOptions={screenOptions}
+//   >
+//     <TabStack.Screen name="Home" component={HomeStackScreen} />
+//     <TabStack.Screen
+//         name="QuizStack"
+//         initialParams={{Top100: topColleges}}
+//         component={ResultStackScreen}
+//       />
+//     <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+//     <TabStack.Screen name="Messages" component={MessageStackScreen} />
+//     <TabStack.Screen name="AI" component={AIStackScreen} />
+// {/*     {checkUserStatus === 'moderator' && ( */}
+//               <TabStack.Screen name="Moderation" component={ModeratorScreen} />
+// {/*             )} */}
+//         <TabStack.Screen
+//               name="UserActivityScreen"
+//               component={UserActivityScreen}
+//               options={{ tabBarButton: () => null }}
+//             />
+//             <TabStack.Screen
+//               name="Planets"
+//               component={TabScreen}
+//               options={{ tabBarButton: () => null }}
+//             />
+//   </TabStack.Navigator>
+// )};
 const TabScreen = () => {
   const [topColleges, setTopColleges] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [shouldHideTabBar, setShouldHideTabBar] = useState(true);
+  const [first, setFirst] = useState(true);
   // const user = auth().currentUser.uid;
 
   useEffect(() => {
@@ -202,6 +294,21 @@ const TabScreen = () => {
     checkQuiz();
   }, [topColleges, isLoading]);
 
+  // Function to determine tab bar visibility
+  const handleTabVisibility = (route) => {
+    const routeName = getFocusedRouteNameFromRoute(route) ?? route.name;
+    console.log(routeName)
+    if (routeName === 'Index' || routeName === 'Picker' || routeName === 'Home') {
+      setShouldHideTabBar(true);  // Hide tab bar on 'Index' and 'Picker'
+    } else {
+      setShouldHideTabBar(false); // Show tab bar on other screens
+    }
+    if(first){
+      setShouldHideTabBar(true);
+      setFirst(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <View>
@@ -210,27 +317,41 @@ const TabScreen = () => {
     );
   }
   return(
-  <TabStack.Navigator
-    screenOptions={screenOptions}
+  <Tab.Navigator
+  screenOptions={({ route }) => {
+    
+    // Handle visibility when route changes
+    useEffect(() => {
+      handleTabVisibility(route);
+    }, [route]);
+
+    return {
+      ...screenOptions,
+      tabBarStyle: {
+        display: shouldHideTabBar ? 'none' : 'flex', // Control tab bar visibility
+      },
+        tabBarIcon: () => {
+          return (
+            <MaterialCommunityIcons
+              name={icons[route.name]}
+              size={20}
+            />
+          );
+        },
+  
+      };
+      
+    }}
   >
-    <TabStack.Screen name="Home" component={HomeStackScreen} />
-    <TabStack.Screen
+    <Tab.Screen name="Home" component={HomeStackScreen}/>
+    <Tab.Screen
         name="QuizStack"
         initialParams={{Top100: topColleges}}
         component={ResultStackScreen}
       />
-    <TabStack.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
-    <TabStack.Screen name="Messages" component={MessageStackScreen} />
-    <TabStack.Screen name="AI" component={AIStackScreen} />
-{/*     {checkUserStatus === 'moderator' && ( */}
-              <Tab.Screen name="Moderation" component={ModeratorScreen} />
-{/*             )} */}
-        <TabStack.Screen
-              name="UserActivityScreen"
-              component={UserActivityScreen}
-              options={{ tabBarButton: () => null }}
-            />
-  </TabStack.Navigator>
+    <Tab.Screen name="ColForumSelectorTab" component={ForumStackScreen} />
+    <Tab.Screen name="Messages" component={MessageStackScreen} />
+  </Tab.Navigator>
 )};
 
 const RootStack = createNativeStackNavigator();
@@ -274,12 +395,40 @@ const checkUserStatus = async (userId) => {
   return 'regular';
 };
 
+
 const App = () => {
-  const [darkMode, setDarkMode] = useState(true);
-  const [takenQuiz, setTakenQuiz] = useState(false);
-  const [topColleges, setTopColleges] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
+  const queryClient = new QueryClient();
+  // const [takenQuiz, setTakenQuiz] = useState(false);
+  // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
+  const [colleges, setColleges] = useState([]);
+
+  // useEffect(() => {
+  //   queryClient.prefetchQuery({
+  //     queryKey: ['colleges'], // Key for the cached query
+  //     queryFn: fetchAllColleges, // The function to fetch the data
+  //   });
+  // }, [queryClient]);
+
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const fetchedColleges = await queryClient.prefetchQuery({
+          queryKey: ['colleges'], // Key for the cached query
+          queryFn: fetchAllColleges, // The function to fetch the data
+        });
+        setColleges(fetchedColleges); // Store colleges in state
+      } catch (error) {
+        console.error('Error fetching colleges:', error);
+      }
+    };
+
+    fetchColleges();
+  }, [queryClient]);
+
   const [showOnboarding, setShowOnboarding] = useState(false);
   const {height: height, width: width} = useWindowDimensions();
 
@@ -381,7 +530,7 @@ const App = () => {
         })
         .catch(error => console.error('Error checking initial link:', error));
 
-      return () => unsubscribe();
+      return unsubscribe;
     }, []);
 
   if (initializing) return null;
@@ -446,10 +595,12 @@ const App = () => {
   }
 
     return (
-      <CollegesProvider>
+
         <UserProvider>
-          <themeContext.Provider value={darkMode === true ? theme.dark : theme.light}>
-            <NavigationContainer theme={darkMode === true ? DarkTheme : DefaultTheme}>
+        <QueryClientProvider client={queryClient}>
+          <CollegesProvider colleges={colleges}>
+        
+            <NavigationContainer>
               <RootStack.Navigator screenOptions={screenOptions}>
   {/*                */}{/* {user ? ( */}
   {/*                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} /> */}
@@ -460,9 +611,11 @@ const App = () => {
                 <RootStack.Screen name="Main" component={TabScreen} options={{ headerShown: false }} />
               </RootStack.Navigator>
             </NavigationContainer>
-          </themeContext.Provider>
+            
+            </CollegesProvider>
+          </QueryClientProvider>
         </UserProvider>
-      </CollegesProvider>
+      
     )
   }
 

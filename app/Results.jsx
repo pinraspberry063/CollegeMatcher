@@ -9,10 +9,13 @@ import college_data from '../assets/college_data';
 import stateData from '../assets/state_data'
 import majorData from '../assets/major_data';
 import { CollegesContext } from '../components/CollegeContext';
+import {useQuery} from '@tanstack/react-query';
+import FastImage from 'react-native-fast-image';
+
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const collegeRef = collection(firestore, 'CompleteColleges'); // Initialize Firestore
+const collegesRef = collection(firestore, 'CompleteColleges');
 
 const favoriteCollege = async ({ID}) => {
   const collegeID = parseInt(ID);
@@ -43,6 +46,8 @@ const favoriteCollege = async ({ID}) => {
   }
 };
 
+
+
 const Results = ({route, navigation}) => {
   const top100 = route.params.top100;
   // const user = auth().currentUser.uid;
@@ -50,11 +55,20 @@ const Results = ({route, navigation}) => {
   const [committedColleges, setCommittedColleges] = useState([]);
 
   const [search, setSearch] = useState('');
-  const [colllegeList, setCollegeList] = useState(top100);
+  const [collegeList, setCollegeList] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
+  const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
-  const {colleges, loading} = useContext(CollegesContext);
-  const [isLoading, setisLoading] = useState(false);
+  const {colleges, isLoading,error} = useContext(CollegesContext);
+  // const [isLoading, setIsLoading] = useState(false);
+
+  // Use the useQuery hook outside of useEffect
+  // const { data: collegesData, isLoading: queryLoading, error } = useQuery({
+  //   queryKey: ['colleges'], // Now an array inside an object
+  //   queryFn: fetchAllColleges, // Query function passed as part of the object
+  // });
+  
   const [housing , setHousing] = useState(false);
   const [mealPlan, setMealplan] = useState(false);
   const [privateSchool, setPrivate] = useState (false);
@@ -76,7 +90,24 @@ const Results = ({route, navigation}) => {
   const [satSci, setSATSci] = useState();
   const [major, setMajor] = useState(false);
   const [selMajors, setSelMajors] = useState([]);
-  const [collegeImages, setCollegeImages] = useState({});
+  
+  useEffect(() => {
+    setCollegeList(top100.slice(0, loadCount)); // Load initial colleges
+  }, [top100, loadCount]);
+
+  const loadMoreColleges = () => {
+    if (hasMore) {
+      const newLoadCount = loadCount + 20; // Increase load count by 20
+      if (newLoadCount >= top100.length) {
+        setHasMore(false); // No more colleges to load
+      }
+      setLoadCount(newLoadCount);
+    }
+  };
+
+  
+ 
+    const [collegeImages, setCollegeImages] = useState({});
 
   const collegeImagesArray = [
     require('../assets/red.png'),
@@ -87,7 +118,7 @@ const Results = ({route, navigation}) => {
     require('../assets/pnk.png'),
     require('../assets/blu.png')
   ];
-  
+
 
   useEffect(() => {
     const fetchCommittedColleges = async () => {
@@ -108,31 +139,6 @@ const Results = ({route, navigation}) => {
 
     fetchCommittedColleges();
 }, [user]);
-
-  // useEffect(() => {
-    
-  //   const loadData = async() => {
-
-  //     try{
-  //     await college_data()
-  //     .then((data)=>{
-  //       const collegeData = (data.docs.map(doc=> doc.data()));
-  //       setColleges(collegeData);
-  //       setisLoading(false);
-
-  //     })
-
-  //     }catch(error) {
-  //       Alert.alert("Error Message: " + error);
-  //     }
-      
-  //   }
-  //   setisLoading(true);
-  //   loadData();
-    
-  
-    
-  // }, [])
 
   const handleCommit = async (collegeName) => {
     try {
@@ -176,6 +182,13 @@ const Results = ({route, navigation}) => {
         Alert.alert('Error', 'Something went wrong while committing to the college.');
     }
 };
+
+  useEffect(()=>{
+    const loadMoreColleges = () => {
+
+
+    }
+  });
 
   // Function to get or set a random image for a college, with a fallback image to prevent null source
   const getRandomImage = (collegeName) => {
@@ -317,7 +330,13 @@ const renderItem = ({ item }) => {
 
   }
 
-  if(isLoading || loading){
+
+  // Handle any errors
+  if (error) {
+    return <Text>Error fetching data: {error.message}</Text>;
+  }
+
+  if(isLoading){
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size={100}/>
@@ -327,7 +346,7 @@ const renderItem = ({ item }) => {
   }
 
     return (
-      <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
+      <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
       <View style={styles.container}>
         <View style={styles.searchView}>
           <TextInput style={styles.searchText} placeholder='Search...' clearButtonMode='always' value={search} onChangeText={handleSearch}/>
@@ -525,13 +544,16 @@ const renderItem = ({ item }) => {
         
         <Text style={styles.title}>Top College Matches</Text>
         <FlatList
-          data={colllegeList}
+          data={collegeList}
           renderItem={renderItem}
-          // keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.list}
+          onEndReached={loadMoreColleges} // Call function to load more colleges
+          onEndReachedThreshold={0.5} // Threshold for when to call loadMoreColleges
+          ListFooterComponent={hasMore ? <ActivityIndicator size="small" color="#0000ff" /> : null} // Show loading indicator
         />
       </View>
-      </ImageBackground>
+      </FastImage>
     );
 
   }
