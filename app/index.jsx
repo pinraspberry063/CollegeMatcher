@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     height: height * 0.5,
+    zIndex: 1,
   },
   buttonContainer: {
     position: 'absolute',
@@ -183,6 +184,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
   },
   button: {
     width: width * 0.5,

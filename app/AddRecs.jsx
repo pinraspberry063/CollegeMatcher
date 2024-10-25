@@ -212,6 +212,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.04, // Dynamic padding
+    backgroundColor: '#000'
   },
   listItem: {
     padding: height * 0.02, // Dynamic padding
@@ -234,11 +235,11 @@ const styles = StyleSheet.create({
   },
   input: {
     height: height * 0.06, // Dynamic height
-    borderColor: '#888',
+    borderColor: '#fff',
     borderWidth: 1,
     marginBottom: height * 0.02, // Dynamic margin
     paddingHorizontal: width * 0.02, // Dynamic padding
-    backgroundColor: '#444',
+    backgroundColor: '#ccc',
     color: '#fff',
   },
 });

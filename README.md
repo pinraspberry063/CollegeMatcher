@@ -2,7 +2,7 @@
 Senior Capstone Project 
 
 ## Project Description
-A web/mobile app that helps with the college search process by matching people to colleges based on their interests and stats. 
+An android mobile app that helps with the college search process by matching people to colleges based on their interests and stats. 
 
 ## Team Members
 * Keith Mueller
