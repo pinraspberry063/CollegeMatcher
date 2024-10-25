@@ -85,21 +85,21 @@ const AccountCreation = ({ navigation }) => {
       await userBatch.commit();
 
       // Commenting out email verification for testing purposes
-      // await user.sendEmailVerification();
-      // Alert.alert('Account Created', 'Please verify your email before proceeding.');
+      await user.sendEmailVerification();
+      Alert.alert('Account Created', 'Please verify your email before proceeding.');
 
-//       navigation.navigate('EmailVerificationPrompt', {
-//         isMfaEnabled,
-//         isRecruiter,
-//         nextScreen: determineNextScreen(),
-//       });
-
-
-      const nextScreen = determineNextScreen();
-      navigation.navigate(nextScreen, {
+      navigation.navigate('EmailVerificationPrompt', {
         isMfaEnabled,
         isRecruiter,
+        nextScreen: determineNextScreen(),
       });
+
+//       const nextScreen = determineNextScreen();
+//       navigation.navigate(nextScreen, {
+//         isMfaEnabled,
+//         isRecruiter,
+//       });
+
     } catch (error) {
       console.error('Account Creation Error:', error);
 

@@ -15,6 +15,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import themeContext from '../theme/themeContext';
@@ -34,6 +35,8 @@ const Login = ({ navigation }) => {
   const [identifier, setIdentifier] = useState(''); // Username, Email, or Phone Number
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isEmailModalVisible, setIsEmailModalVisible] = useState(false);
+  const [tempEmail, setTempEmail] = useState('');
 
   // MFA states
   const [showMfaPrompt, setShowMfaPrompt] = useState(false);
@@ -154,7 +157,6 @@ const Login = ({ navigation }) => {
       } else {
         Alert.alert('Login Error', 'Failed to retrieve user information.');
       }
-      Alert.alert('Login Successful');
       //navigation.navigate('Main');
     } catch (error) {
       console.error('Login Error:', error);
@@ -329,50 +331,43 @@ const Login = ({ navigation }) => {
     }
   };
 
- const handleEmailLinkLogin = async () => {
-   if (!email) {
-     Alert.alert('Input Error', 'Please enter your email address.');
-     return;
-   }
+  const handleEmailLinkLogin = async (emailToUse) => {
+    try {
+        const link = await dynamicLinks().buildLink({
+            link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${emailToUse}`,
+            domainUriPrefix: 'https://collegematcher46019.page.link',
+            android: {
+                packageName: 'com.cm_app',
+            },
+        });
 
-   try {
-     // Build the dynamic link for email sign-in
-     const link = await dynamicLinks().buildLink({
-       link: `https://collegematcher-46019.firebaseapp.com/__/auth/action?email=${email}`,
-       domainUriPrefix: 'https://collegematcher46019.page.link',
-       android: {
-         packageName: 'com.cm_app',
-       },
-     });
+        console.log('Generated dynamic link:', link);
 
-     console.log('Generated dynamic link:', link);
+        const actionCodeSettings = {
+            url: link,
+            handleCodeInApp: true,
+            android: {
+                packageName: 'com.cm_app',
+                installApp: false,
+                minimumVersion: '12',
+            },
+            dynamicLinkDomain: 'collegematcher46019.page.link',
+        };
 
-     const actionCodeSettings = {
-       url: link,
-       handleCodeInApp: true,
-       android: {
-         packageName: 'com.cm_app',
-         installApp: false,
-         minimumVersion: '12',
-       },
-       dynamicLinkDomain: 'collegematcher46019.page.link',
-     };
+        console.log('Action code settings:', actionCodeSettings);
 
-     console.log('Action code settings:', actionCodeSettings);
+        await auth().sendSignInLinkToEmail(emailToUse, actionCodeSettings);
+        await AsyncStorage.setItem('emailForSignIn', emailToUse);
 
-     // Send the sign-in email link
-     await auth().sendSignInLinkToEmail(email, actionCodeSettings);
-     await AsyncStorage.setItem('emailForSignIn', email);
-
-     Alert.alert(
-       'Email Sent',
-       'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
-     );
-   } catch (error) {
-     console.error('Email Link Sign-In Error:', error);
-     Alert.alert('Email Link Login Failed', error.message);
-   }
- };
+        Alert.alert(
+            'Email Sent',
+            'A sign-in link has been sent to your email address. Please check your email and click the link to sign in.'
+        );
+    } catch (error) {
+        console.error('Email Link Sign-In Error:', error);
+        Alert.alert('Email Link Login Failed', error.message);
+    }
+};
 
  // Handling the incoming email link (This should be placed in useEffect or appropriate lifecycle method)
  useEffect(() => {
@@ -649,7 +644,7 @@ const determineNextScreen = () => {
             {/* === Email Link Login === */}
             <TouchableOpacity
               style={[styles.socialButton, { backgroundColor: '#34A853' }]}
-              onPress={handleEmailLinkLogin}
+              onPress={() => setIsEmailModalVisible(true)}
             >
               <Text style={styles.socialButtonText}>Continue with Email Link</Text>
             </TouchableOpacity>
@@ -674,6 +669,52 @@ const determineNextScreen = () => {
               <Button title="Verify Code" onPress={handleMfaVerification} />
             </View>
           )}
+              <Modal
+              visible={isEmailModalVisible}
+              transparent={true}
+              animationType="slide"
+              onRequestClose={() => setIsEmailModalVisible(false)}
+          >
+              <View style={styles.emailModalContainer}>
+                  <View style={styles.emailModalContent}>
+                      <Text style={styles.emailModalTitle}>Enter Email Address</Text>
+                      <TextInput
+                          style={[styles.input, { borderColor: 'black', color: 'black', marginBottom: 20 }]}
+                          placeholder="Email Address"
+                          placeholderTextColor="gray"
+                          value={tempEmail}
+                          onChangeText={setTempEmail}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                      />
+                      <View style={styles.emailModalButtons}>
+                          <TouchableOpacity
+                              style={[styles.emailModalButton, { backgroundColor: '#841584' }]}
+                              onPress={() => {
+                                  setIsEmailModalVisible(false);
+                                  setTempEmail('');
+                              }}
+                          >
+                              <Text style={styles.emailModalButtonText}>Cancel</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                              style={[styles.emailModalButton, { backgroundColor: '#34A853' }]}
+                              onPress={() => {
+                                  if (!tempEmail || !isValidEmail(tempEmail)) {
+                                      Alert.alert('Error', 'Please enter a valid email address');
+                                      return;
+                                  }
+                                  handleEmailLinkLogin(tempEmail);
+                                  setIsEmailModalVisible(false);
+                                  setTempEmail('');
+                              }}
+                          >
+                              <Text style={styles.emailModalButtonText}>Send Link</Text>
+                          </TouchableOpacity>
+                      </View>
+                  </View>
+              </View>
+          </Modal>
         </Animated.View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -766,6 +807,41 @@ const styles = StyleSheet.create({
       bottom: 50,
       left: '45%',
       },
+      emailModalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    emailModalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+        alignItems: 'center',
+    },
+    emailModalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        color: 'black',
+    },
+    emailModalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    emailModalButton: {
+        padding: 10,
+        borderRadius: 5,
+        width: '40%',
+    },
+    emailModalButtonText: {
+        color: 'white',
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
 });
+
 
 export default Login;

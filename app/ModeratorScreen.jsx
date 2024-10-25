@@ -6,6 +6,244 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const firestore = getFirestore(db);
 
+export const handleBanUser = async (reportId, reportedUser, reason, content) => {
+  try {
+    console.log(`Attempting to ban user: ${reportedUser}`);
+    console.log(`Reason: ${reason}`);
+    console.log(`Reported content: ${content}`);
+
+    // First, find the user document using the Username
+    const usersRef = collection(firestore, 'Users');
+    let q = query(usersRef, where('Username', '==', reportedUser));
+    let querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      // If not found by Username, try with User_UID
+      q = query(usersRef, where('User_UID', '==', reportedUser));
+      querySnapshot = await getDocs(q);
+    }
+
+    if (querySnapshot.empty) {
+      console.log(`User not found: ${reportedUser}`);
+      throw new Error('User not found');
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    console.log(`User document found for: ${reportedUser}`);
+
+    // Update user's IsBanned field in Firestore
+    await updateDoc(userDoc.ref, {
+      IsBanned: true,
+    });
+    console.log(`User banned: ${reportedUser}`);
+
+    // Update report status
+    if (reportId) {
+      const reportRef = doc(firestore, 'Reports', reportId);
+      await updateDoc(reportRef, {
+        status: 'resolved',
+        resolution: 'banned',
+        resolvedAt: Timestamp.now()
+      });
+      console.log(`Report ${reportId} status updated to resolved`);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error banning user: ', error);
+    throw error;
+  }
+};
+
+export const handleUnbanUser = async (reportId, reportedUser) => {
+  try {
+    console.log(`Attempting to unban user: ${reportedUser}`);
+    const usersRef = collection(firestore, 'Users');
+    let q = query(usersRef, where('Username', '==', reportedUser));
+    let querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      // If not found by Username, try with User_UID
+      q = query(usersRef, where('User_UID', '==', reportedUser));
+      querySnapshot = await getDocs(q);
+    }
+
+    if (querySnapshot.empty) {
+      console.log(`User not found: ${reportedUser}`);
+      throw new Error('User not found');
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    console.log(`User document found for: ${reportedUser}`);
+
+    // Update user's IsBanned field in Firestore
+    await updateDoc(userDoc.ref, { IsBanned: false });
+    console.log(`User unbanned: ${reportedUser}`);
+
+    // Update report status
+    const reportRef = doc(firestore, 'Reports', reportId);
+    await updateDoc(reportRef, { status: 'resolved' });
+    console.log(`Report ${reportId} status updated to resolved`);
+
+    // Refresh reports list
+    fetchReports();
+
+    Alert.alert('User Unbanned', 'The user has been unbanned successfully.');
+  } catch (error) {
+    console.error('Error unbanning user: ', error);
+    if (error.code === 'permission-denied') {
+      Alert.alert('Permission Denied', 'You do not have the necessary permissions to unban users.');
+    } else if (error.code === 'network-request-failed') {
+      Alert.alert('Network Error', 'Please check your internet connection and try again.');
+    } else {
+      Alert.alert('Error', `Failed to unban user: ${error.message}`);
+    }
+  }
+};
+
+export const fetchUserActivity = async (reportedUser) => {
+  try {
+    // Find the user document to get the username
+    const usersRef = collection(firestore, 'Users');
+    let userQuery = query(usersRef, where('User_UID', '==', reportedUser));
+    let querySnapshot = await getDocs(userQuery);
+
+    if (querySnapshot.empty) {
+      userQuery = query(usersRef, where('Username', '==', reportedUser));
+      querySnapshot = await getDocs(userQuery);
+    }
+
+    if (querySnapshot.empty) {
+      console.log('User not found with given identifier:', reportedUser);
+      throw new Error('User not found');
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    const username = userDoc.data().Username;
+    const userUID = userDoc.data().User_UID;
+    console.log('Found user:', username, 'UID:', userUID);
+
+    const userActivity = { threads: [], posts: [], messages: [] };
+
+    // Fetch all threads created by the user using Collection Group Query
+    const threadsQuery = query(
+      collectionGroup(firestore, 'threads'),
+      where('createdBy', '==', username)
+    );
+    const threadsSnapshot = await getDocs(threadsQuery);
+
+    console.log(`Total user threads found: ${threadsSnapshot.size}`);
+
+    threadsSnapshot.forEach((threadDoc) => {
+      const threadData = threadDoc.data();
+      const threadPath = threadDoc.ref.path;
+      const pathSegments = threadPath.split('/');
+
+      if (pathSegments.length >= 6) {
+        const collegeName = pathSegments[1];
+        const subgroupName = pathSegments[3];
+
+        userActivity.threads.push({
+          id: threadDoc.id,
+          collegeName,
+          subgroupName,
+          title: threadData.title,
+          createdAt: threadData.createdAt,
+          imageUrls: threadData.imageUrls || [], // Include imageUrls
+          ...threadData
+        });
+      } else {
+        console.warn(`Unexpected thread path structure: ${threadPath}`);
+      }
+    });
+
+    // Fetch all posts created by the user using Collection Group Query
+    const postsQuery = query(
+      collectionGroup(firestore, 'posts'),
+      where('createdBy', '==', username)
+    );
+    const postsSnapshot = await getDocs(postsQuery);
+
+    console.log(`Total user posts found: ${postsSnapshot.size}`);
+
+    postsSnapshot.forEach((postDoc) => {
+      const postPath = postDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1/posts/Post 1
+      const pathSegments = postPath.split('/');
+
+      if (pathSegments.length >= 8) {
+        const collegeName = pathSegments[1];
+        const subgroupName = pathSegments[3];
+        const threadId = pathSegments[5];
+
+        userActivity.posts.push({
+          id: postDoc.id,
+          threadId,
+          collegeName,
+          subgroupName,
+          ...postDoc.data(),
+        });
+      } else {
+        console.warn(`Unexpected post path structure: ${postPath}`);
+      }
+    });
+
+    // Fetch messages from Messaging collection
+    const messagingRef = collection(firestore, 'Messaging');
+    const userMessagesQuery = query(
+      messagingRef,
+      where('User_UID', '==', userUID)
+    );
+    const roomateMessagesQuery = query(
+      messagingRef,
+      where('Roomate_UID', '==', userUID)
+    );
+    const recruiterMessagesQuery = query(
+      messagingRef,
+      where('Recruiter_UID', '==', userUID)
+    );
+
+    const [userMessagesSnapshot, roomateMessagesSnapshot, recruiterMessagesSnapshot] = await Promise.all([
+      getDocs(userMessagesQuery),
+      getDocs(roomateMessagesQuery),
+      getDocs(recruiterMessagesQuery)
+    ]);
+
+    const fetchMessagesFromConversation = async (conversationDoc) => {
+      const messagesRef = collection(conversationDoc.ref, 'conv');
+      const messagesSnapshot = await getDocs(messagesRef);
+      return messagesSnapshot.docs.map(messageDoc => {
+        const data = messageDoc.data();
+        return {
+          id: messageDoc.id,
+          conversationId: conversationDoc.id,
+          ...data,
+          createdAt: data.createdAt || Timestamp.now() // Provide a default value if createdAt is missing
+        };
+      });
+    };
+
+    const userMessages = await Promise.all(userMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+    const roomateMessages = await Promise.all(roomateMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+    const recruiterMessages = await Promise.all(recruiterMessagesSnapshot.docs.map(fetchMessagesFromConversation));
+
+    userActivity.messages = [...userMessages.flat(), ...roomateMessages.flat(), ...recruiterMessages.flat()];
+
+    // Filter out any undefined or null messages
+    userActivity.messages = userActivity.messages.filter(message => message && message.content);
+
+    console.log('User Activity:', JSON.stringify(userActivity, null, 2));
+    return userActivity;
+  } catch (error) {
+    console.error('Error fetching user activity:', error);
+    if (error.code === 'network-request-failed') {
+      Alert.alert('Network Error', 'Please check your internet connection and try again.');
+    } else {
+      Alert.alert('Error', `Failed to fetch user activity: ${error.message}`);
+    }
+    return null;
+  }
+};
+
 const ModeratorScreen = ({ navigation }) => {
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,240 +338,6 @@ const ModeratorScreen = ({ navigation }) => {
     }
   };
 
-  const handleBanUser = async (reportId, reportedUser) => {
-    try {
-      console.log(`Attempting to ban user: ${reportedUser}`);
-      // First, find the user document using the Username
-      const usersRef = collection(firestore, 'Users');
-      let q = query(usersRef, where('Username', '==', reportedUser));
-      let querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        // If not found by Username, try with User_UID
-        q = query(usersRef, where('User_UID', '==', reportedUser));
-        querySnapshot = await getDocs(q);
-      }
-
-      if (querySnapshot.empty) {
-        console.log(`User not found: ${reportedUser}`);
-        throw new Error('User not found');
-      }
-
-      const userDoc = querySnapshot.docs[0];
-      console.log(`User document found for: ${reportedUser}`);
-
-      // Update user's IsBanned field in Firestore
-      await updateDoc(userDoc.ref, { IsBanned: true });
-      console.log(`User banned: ${reportedUser}`);
-
-      // Update report status
-      const reportRef = doc(firestore, 'Reports', reportId);
-      await updateDoc(reportRef, { status: 'resolved' });
-      console.log(`Report ${reportId} status updated to resolved`);
-
-      // Refresh reports list
-      fetchReports();
-
-      Alert.alert('User Banned', 'The user has been banned successfully.');
-    } catch (error) {
-      console.error('Error banning user: ', error);
-      if (error.code === 'permission-denied') {
-        Alert.alert('Permission Denied', 'You do not have the necessary permissions to ban users.');
-      } else {
-        Alert.alert('Error', `Failed to ban user: ${error.message}`);
-      }
-    }
-  };
-
-  const handleUnbanUser = async (reportId, reportedUser) => {
-    try {
-      console.log(`Attempting to unban user: ${reportedUser}`);
-      const usersRef = collection(firestore, 'Users');
-      let q = query(usersRef, where('Username', '==', reportedUser));
-      let querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        // If not found by Username, try with User_UID
-        q = query(usersRef, where('User_UID', '==', reportedUser));
-        querySnapshot = await getDocs(q);
-      }
-
-      if (querySnapshot.empty) {
-        console.log(`User not found: ${reportedUser}`);
-        throw new Error('User not found');
-      }
-
-      const userDoc = querySnapshot.docs[0];
-      console.log(`User document found for: ${reportedUser}`);
-
-      // Update user's IsBanned field in Firestore
-      await updateDoc(userDoc.ref, { IsBanned: false });
-      console.log(`User unbanned: ${reportedUser}`);
-
-      // Update report status
-      const reportRef = doc(firestore, 'Reports', reportId);
-      await updateDoc(reportRef, { status: 'resolved' });
-      console.log(`Report ${reportId} status updated to resolved`);
-
-      // Refresh reports list
-      fetchReports();
-
-      Alert.alert('User Unbanned', 'The user has been unbanned successfully.');
-    } catch (error) {
-      console.error('Error unbanning user: ', error);
-      if (error.code === 'permission-denied') {
-        Alert.alert('Permission Denied', 'You do not have the necessary permissions to unban users.');
-      } else if (error.code === 'network-request-failed') {
-        Alert.alert('Network Error', 'Please check your internet connection and try again.');
-      } else {
-        Alert.alert('Error', `Failed to unban user: ${error.message}`);
-      }
-    }
-  };
-
-  const fetchUserActivity = async (reportedUser) => {
-    try {
-      // Find the user document to get the username
-      const usersRef = collection(firestore, 'Users');
-      let userQuery = query(usersRef, where('User_UID', '==', reportedUser));
-      let querySnapshot = await getDocs(userQuery);
-
-      if (querySnapshot.empty) {
-        userQuery = query(usersRef, where('Username', '==', reportedUser));
-        querySnapshot = await getDocs(userQuery);
-      }
-
-      if (querySnapshot.empty) {
-        console.log('User not found with given identifier:', reportedUser);
-        throw new Error('User not found');
-      }
-
-      const userDoc = querySnapshot.docs[0];
-      const username = userDoc.data().Username;
-      const userUID = userDoc.data().User_UID;
-      console.log('Found user:', username, 'UID:', userUID);
-
-      const userActivity = { threads: [], posts: [], messages: [] };
-
-      // Fetch all threads created by the user using Collection Group Query
-      const threadsQuery = query(
-        collectionGroup(firestore, 'threads'),
-        where('createdBy', '==', username)
-      );
-      const threadsSnapshot = await getDocs(threadsQuery);
-
-      console.log(`Total user threads found: ${threadsSnapshot.size}`);
-
-      threadsSnapshot.forEach((threadDoc) => {
-        const threadData = threadDoc.data();
-        const threadPath = threadDoc.ref.path;
-        const pathSegments = threadPath.split('/');
-
-        if (pathSegments.length >= 6) {
-          const collegeName = pathSegments[1];
-          const subgroupName = pathSegments[3];
-
-          userActivity.threads.push({
-            id: threadDoc.id,
-            collegeName,
-            subgroupName,
-            title: threadData.title,
-            createdAt: threadData.createdAt,
-            imageUrls: threadData.imageUrls || [], // Include imageUrls
-            ...threadData
-          });
-        } else {
-          console.warn(`Unexpected thread path structure: ${threadPath}`);
-        }
-      });
-
-      // Fetch all posts created by the user using Collection Group Query
-      const postsQuery = query(
-        collectionGroup(firestore, 'posts'),
-        where('createdBy', '==', username)
-      );
-      const postsSnapshot = await getDocs(postsQuery);
-
-      console.log(`Total user posts found: ${postsSnapshot.size}`);
-
-      postsSnapshot.forEach((postDoc) => {
-        const postPath = postDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1/posts/Post 1
-        const pathSegments = postPath.split('/');
-
-        if (pathSegments.length >= 8) {
-          const collegeName = pathSegments[1];
-          const subgroupName = pathSegments[3];
-          const threadId = pathSegments[5];
-
-          userActivity.posts.push({
-            id: postDoc.id,
-            threadId,
-            collegeName,
-            subgroupName,
-            ...postDoc.data(),
-          });
-        } else {
-          console.warn(`Unexpected post path structure: ${postPath}`);
-        }
-      });
-
-      // Fetch messages from Messaging collection
-      const messagingRef = collection(firestore, 'Messaging');
-      const userMessagesQuery = query(
-        messagingRef,
-        where('User_UID', '==', userUID)
-      );
-      const roomateMessagesQuery = query(
-        messagingRef,
-        where('Roomate_UID', '==', userUID)
-      );
-      const recruiterMessagesQuery = query(
-        messagingRef,
-        where('Recruiter_UID', '==', userUID)
-      );
-
-      const [userMessagesSnapshot, roomateMessagesSnapshot, recruiterMessagesSnapshot] = await Promise.all([
-        getDocs(userMessagesQuery),
-        getDocs(roomateMessagesQuery),
-        getDocs(recruiterMessagesQuery)
-      ]);
-
-      const fetchMessagesFromConversation = async (conversationDoc) => {
-        const messagesRef = collection(conversationDoc.ref, 'conv');
-        const messagesSnapshot = await getDocs(messagesRef);
-        return messagesSnapshot.docs.map(messageDoc => {
-          const data = messageDoc.data();
-          return {
-            id: messageDoc.id,
-            conversationId: conversationDoc.id,
-            ...data,
-            createdAt: data.createdAt || Timestamp.now() // Provide a default value if createdAt is missing
-          };
-        });
-      };
-
-      const userMessages = await Promise.all(userMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-      const roomateMessages = await Promise.all(roomateMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-      const recruiterMessages = await Promise.all(recruiterMessagesSnapshot.docs.map(fetchMessagesFromConversation));
-
-      userActivity.messages = [...userMessages.flat(), ...roomateMessages.flat(), ...recruiterMessages.flat()];
-
-      // Filter out any undefined or null messages
-      userActivity.messages = userActivity.messages.filter(message => message && message.content);
-
-      console.log('User Activity:', JSON.stringify(userActivity, null, 2));
-      return userActivity;
-    } catch (error) {
-      console.error('Error fetching user activity:', error);
-      if (error.code === 'network-request-failed') {
-        Alert.alert('Network Error', 'Please check your internet connection and try again.');
-      } else {
-        Alert.alert('Error', `Failed to fetch user activity: ${error.message}`);
-      }
-      return null;
-    }
-  };
-
   const handleViewUserActivity = async (reportedUser) => {
     setIsLoading(true);
     try {
@@ -353,25 +357,23 @@ const ModeratorScreen = ({ navigation }) => {
 
   const renderReportItem = ({ item }) => (
     <View style={styles.reportItem}>
-      <Text style={styles.reportHeader}>Reported User: {item.reportedUser}</Text>
-      <Text style={styles.reportHeader}>Reported By: {item.reportedBy}</Text>
-      <Text style={styles.reportHeader}>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
-      <Text style={styles.reportReason}>Reason: {item.reason}</Text>
-      <View style={styles.contentContainer}>
-        <Text style={styles.contentLabel}>Reported Content:</Text>
-        <Text style={styles.reportedContent}>{item.content}</Text>
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          title={item.isBanned ? "Unban User" : "Ban User"}
-          onPress={() => item.isBanned ? handleUnbanUser(item.id, item.reportedUser) : handleBanUser(item.id, item.reportedUser)}
-        />
-        <Button
-          title="View User Activity"
-          onPress={() => handleViewUserActivity(item.reportedUser)}
-          disabled={isLoading}
-        />
-      </View>
+      <Text>Reported User: {item.reportedUser}</Text>
+      <Text>Reported By: {item.reportedBy}</Text>
+      <Text>Created At: {item.createdAt.toDate().toLocaleString()}</Text>
+      <Text>Reason: {item.reason || 'Not specified'}</Text>
+      <Text>Reported Content: {item.content || 'Not specified'}</Text>
+      <Button
+        title={item.isBanned ? "Unban User" : "Ban User"}
+        onPress={() => item.isBanned
+          ? handleUnbanUser(item.id, item.reportedUser)
+          : handleBanUser(item.id, item.reportedUser, item.reason, item.content)
+        }
+      />
+      <Button
+        title="View User Activity"
+        onPress={() => handleViewUserActivity(item.reportedUser)}
+        disabled={isLoading}
+      />
     </View>
   );
 
@@ -427,36 +429,6 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#f0f0f0',
     borderRadius: 5,
-  },
-  reportHeader: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  reportReason: {
-    fontSize: 16,
-    marginVertical: 10,
-    fontWeight: '500',
-    color: '#666',
-  },
-  contentContainer: {
-    backgroundColor: '#f5f5f5',
-    padding: 10,
-    borderRadius: 5,
-    marginVertical: 10,
-  },
-  contentLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 5,
-  },
-  reportedContent: {
-    fontSize: 15,
-    color: '#333',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
   },
 });
 

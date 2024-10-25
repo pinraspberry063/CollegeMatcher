@@ -37,6 +37,7 @@ import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { handleReport } from '../src/utils/reportUtils';
 import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
+import { handleBanUser, handleUnbanUser, fetchUserActivity } from './ModeratorScreen';
 
 const firestore = getFirestore(db);
 
@@ -114,6 +115,17 @@ const resetAddPostForm = () => {
       for (const postDoc of postsSnapshot.docs) {
         const postData = postDoc.data();
 
+        // Check if the post creator is banned
+        const usersRef = collection(firestore, 'Users');
+        const userQuery = query(usersRef, where('Username', '==', postData.createdBy));
+        const userSnapshot = await getDocs(userQuery);
+        const isUserBanned = !userSnapshot.empty && userSnapshot.docs[0].data().IsBanned;
+
+        // Skip this post if user is banned
+        if (isUserBanned) {
+          continue;
+        }
+
         // Get the user's profile picture from Firebase Storage
         const storage = getStorage();
         const profilePicRef = ref(storage, `images/${postData.createdBy}/profile`);
@@ -123,12 +135,12 @@ const resetAddPostForm = () => {
         // Try to fetch the custom profile image
         await getDownloadURL(profilePicRef)
           .then((url) => {
-              profilePicUrl = url;
-            })
+            profilePicUrl = url;
+          })
           .catch(async (error) => {
-              // Fallback to the default profile picture if custom one is not found
-              const defaultProfileRef = ref(storage, 'profile.jpg');
-              profilePicUrl = await getDownloadURL(defaultProfileRef);
+            // Fallback to the default profile picture if custom one is not found
+            const defaultProfileRef = ref(storage, 'profile.jpg');
+            profilePicUrl = await getDownloadURL(defaultProfileRef);
           });
 
         postsList.push({
@@ -265,8 +277,9 @@ const resetAddPostForm = () => {
     setIsReportModalVisible(true);
   };
 
- const ReportModal = ({ isVisible, onClose, onSubmit }) => {
+ const ReportModal = ({ isVisible, onClose, onSubmit, isModerator, onBanUser, onViewActivity }) => {
    const [selectedReason, setSelectedReason] = useState('');
+   const theme = useContext(themeContext);
    const reasons = [
      'Inappropriate content',
      'Spam',
@@ -276,10 +289,17 @@ const resetAddPostForm = () => {
    ];
 
    return (
-     <Modal visible={isVisible} transparent animationType="slide">
-       <View style={styles.modalContainer}>
-         <View style={styles.modalContent}>
-           <Text style={styles.modalTitle}>Select a reason for reporting:</Text>
+     <Modal
+       visible={isVisible}
+       transparent={true}
+       animationType="slide"
+       onRequestClose={onClose}
+     >
+       <View style={styles.modalBackground}>
+         <View style={[styles.modalContent, { backgroundColor: '#fff' }]}>
+           <Text style={styles.modalTitle}>
+             Select a reason for reporting:
+           </Text>
            {reasons.map((reason) => (
              <TouchableOpacity
                key={reason}
@@ -289,23 +309,79 @@ const resetAddPostForm = () => {
                ]}
                onPress={() => setSelectedReason(reason)}
              >
-               <Text>{reason}</Text>
+               <Text style={[
+                 styles.reasonText,
+                 selectedReason === reason && styles.selectedReasonText
+               ]}>
+                 {reason}
+               </Text>
              </TouchableOpacity>
            ))}
            <View style={styles.modalButtons}>
-             <Button title="Cancel" onPress={onClose} color="red" />
-             <Button
-               title="Submit"
+             <TouchableOpacity
+               onPress={onClose}
+               style={styles.cancelButton}
+             >
+               <Text style={styles.cancelButtonText}>Cancel</Text>
+             </TouchableOpacity>
+             <TouchableOpacity
                onPress={() => onSubmit(selectedReason)}
                disabled={!selectedReason}
-               color="#841584"
-             />
+               style={[styles.submitButton, !selectedReason && styles.buttonDisabled]}
+             >
+               <Text style={styles.submitButtonText}>Submit</Text>
+             </TouchableOpacity>
            </View>
+           {isModerator && (
+             <View style={styles.moderatorButtons}>
+               <TouchableOpacity onPress={onBanUser} style={styles.banButton}>
+                 <Text style={styles.banButtonText}>Ban User</Text>
+               </TouchableOpacity>
+               <TouchableOpacity onPress={onViewActivity} style={styles.viewActivityButton}>
+                 <Text style={styles.viewActivityButtonText}>View Activity</Text>
+               </TouchableOpacity>
+             </View>
+           )}
          </View>
        </View>
      </Modal>
    );
  };
+
+  const handleBanUserAction = async () => {
+    if (currentReportData) {
+      try {
+        await handleBanUser(
+          currentReportData.postId,
+          currentReportData.reportedUsername,
+          currentReportData.reason,
+          currentReportData.content
+        );
+        Alert.alert('User Banned', 'The user has been banned successfully.');
+        fetchPosts(); // Refresh the posts list after banning
+      } catch (error) {
+        Alert.alert('Error', 'Failed to ban user. Please try again.');
+      }
+    }
+    setIsReportModalVisible(false);
+  };
+
+  const handleViewUserActivityAction = async () => {
+    if (currentReportData) {
+      try {
+        const userActivity = await fetchUserActivity(currentReportData.reportedUsername);
+        if (userActivity) {
+          navigation.navigate('UserActivityScreen', {
+            userActivity,
+            reportedUser: currentReportData.reportedUsername
+          });
+        }
+      } catch (error) {
+        Alert.alert('Error', 'Failed to fetch user activity. Please try again.');
+      }
+    }
+    setIsReportModalVisible(false);
+  };
 
   return (
     <ImageBackground source={require('../assets/galaxy.webp')} style={styles.background}>
@@ -338,15 +414,18 @@ const resetAddPostForm = () => {
                 {/* Render images in posts */}
                 {post.imageUrls && post.imageUrls.length > 0 && renderImages(post.imageUrls, postIndex)}
 
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>
-                  {post.createdAt.toDate().toLocaleString()}
-                </Text>
-
-                <View style={styles.buttonContainer}>
-                  {/* Report Button */}
-                  <TouchableOpacity onPress={() => handleReportSubmission('post', post.id, post.createdBy)}>
-                    <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
-                  </TouchableOpacity>
+                <View style={styles.postInfoRow}>
+                  <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>
+                    {post.createdAt.toDate().toLocaleString()}
+                  </Text>
+                  {post.createdBy !== username && (  // Add this condition
+                    <TouchableOpacity
+                      style={styles.reportButton}
+                      onPress={() => handleReportSubmission('post', threadId, post.id, post.createdBy, post.content)}
+                    >
+                      <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))}
@@ -391,7 +470,6 @@ const resetAddPostForm = () => {
           isVisible={isReportModalVisible}
           onClose={() => setIsReportModalVisible(false)}
           onSubmit={async (reason) => {
-            setIsReportModalVisible(false);
             if (currentReportData) {
               const { reportType, postId, reportedUsername } = currentReportData;
               const reportData = {
@@ -400,8 +478,9 @@ const resetAddPostForm = () => {
                 source: 'forum',
                 type: reportType,
                 reason: reason,
+                content: currentReportData.content // Add this
               };
-
+              setCurrentReportData({ ...currentReportData, reason }); // Add this
               const success = await handleReport(reportData);
               if (success) {
                 Alert.alert('Report Submitted', 'Thank you for your report. Our moderators will review it shortly.');
@@ -409,7 +488,11 @@ const resetAddPostForm = () => {
                 Alert.alert('Error', 'Failed to submit report. Please try again.');
               }
             }
+            setIsReportModalVisible(false);
           }}
+          isModerator={isModerator}
+          onBanUser={handleBanUserAction}
+          onViewActivity={handleViewUserActivityAction}
         />
 
         {/* Add post section */}
@@ -721,6 +804,126 @@ const styles = StyleSheet.create({
           justifyContent: 'center',
           alignItems: 'center',
         },
+  postInfoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+      },
+  reportButton: {
+        marginLeft: 10,
+      },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#000',
+  },
+  reasonButton: {
+    padding: 15,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#dee2e6',
+  },
+  selectedReasonButton: {
+    backgroundColor: '#e3f2fd',
+    borderColor: '#2196f3',
+  },
+  reasonText: {
+    fontSize: 16,
+    color: '#000',
+  },
+  selectedReasonText: {
+    color: '#2196f3',
+    fontWeight: 'bold',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  cancelButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  submitButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#2196f3',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    backgroundColor: '#bdbdbd',
+  },
+  cancelButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  moderatorButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#dee2e6',
+  },
+  banButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#ff1744',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  viewActivityButton: {
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#4caf50',
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  banButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  viewActivityButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
 });
 
 export default CommentPage;
