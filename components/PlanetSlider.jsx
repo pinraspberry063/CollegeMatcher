@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useRef, useEffect} from "react";
 import { View, SafeAreaView, Text, ImageBackground, Dimensions, TouchableOpacity , Image, StyleSheet} from "react-native";
 import Animated, {
   useSharedValue,
@@ -33,68 +33,85 @@ const slides = [
     page: 'QuizButton',
     image: redImage,
     iconColor: "yellow",
+    label: 'Quiz', 
+    txtColor: textColor
   },
   {
     icon: "magnify",
     page: 'QuizStack',
     image: purImage,
     iconColor: "yellow",
-  },
-  {
-    icon: "compare-vertical",
-    page: 'CompareColleges',
-    image: pnkImage,
-    iconColor: "yellow",
-  },
-  {
-    icon: "message",
-    page: 'Messages',
-    image: bluImage,
-    iconColor: "yellow",
-  },
-  {
-    icon: "earth",
-    page: 'ColForumSelectorTab',
-    image: brnImage,
-    iconColor: "yellow",
+    label: 'Search',
+    txtColor: textColor
   },
   {
     icon: "head",
     page: 'AI',
     image: greImage,
     iconColor: "orange",
+    label: 'MAKK AI',
+    txtColor: 'black'
+  },
+  {
+    icon: "message",
+    page: 'Messages',
+    image: bluImage,
+    iconColor: "yellow",
+    label: 'Messages',
+    txtColor: textColor
+  },
+  {
+    icon: "earth",
+    page: 'ColForumSelectorTab',
+    image: brnImage,
+    iconColor: "yellow",
+    label: 'Forums',
+    txtColor: textColor
+  },
+  {
+    icon: "compare-vertical",
+    page: 'CompareColleges',
+    image: pnkImage,
+    iconColor: "yellow",
+    label: 'Compare',
+    txtColor: textColor
   },
   {
     icon: "star-settings-outline",
     page: 'Settings',
     image: cynImage,
     iconColor: "orange",
+    label: 'Settings',
+    txtColor: 'black'
   },
 ];
 
 const Slide = ({ slide, scrollOffset, index, navigation }) => {
+
+  const txtCol = slide.txtColor;
   const animatedStyle = useAnimatedStyle(() => {
     const input = scrollOffset.value / planetWidth;
     const inputRange = [index - 1, index, index + 1];
     const inputYRange = [index - 2, index - 1, index, index + 1, index + 2];
+    
 
     return {
       transform: [
         {
           // Adjust scale for zoom in and out effect
-          scale: interpolate(input, inputRange, [0.75, 1, 0.75], Extrapolate.CLAMP),
+          scale: interpolate(input, inputRange, [0.75, 0.95, 0.75], Extrapolate.CLAMP),
         },
         {
           // Planets will move vertically to simulate "revolving" around the sun
-          translateY: interpolate(input, inputYRange, [-45, -45, 50, -45, -45], Extrapolate.CLAMP),
+          translateY: interpolate(input, inputYRange, [-90, -25, 15, -25, -90], Extrapolate.CLAMP),
         },
         {
           // Horizontal translation for orbit effect
-          translateX: interpolate(input, inputYRange, [30, 30, 0, -30, -30], Extrapolate.CLAMP),
+          translateX: interpolate(input, inputYRange, [-20, 0.05, 0, 0.05, -20], Extrapolate.CLAMP),
         },
       ],
       // Opacity to fade in and out as the planets "move"
-      opacity: interpolate(input, inputYRange, [0.25, 0.5, 1, 0.5, 0.25], Extrapolate.CLAMP),
+      opacity: interpolate(input, inputYRange, [0.5, 0.75, 1, 0.75, 0.5], Extrapolate.CLAMP),
     };
   });
 
@@ -135,7 +152,9 @@ const Slide = ({ slide, scrollOffset, index, navigation }) => {
             resizeMode="contain"
           >
             <MaterialCommunityIcons name={slide.icon} size={50} color={slide.iconColor} />
+            <Text style={{color: txtCol, fontSize: 23, fontWeight: 'bold'}}>{slide.label}</Text>
           </ImageBackground>
+          
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -143,6 +162,18 @@ const Slide = ({ slide, scrollOffset, index, navigation }) => {
 };
 
 const PlanetSwiper = ({ navigation }) => {
+  const scrollViewRef = useRef(null);
+  const { width } = Dimensions.get('window');
+
+  // Calculate the initial offset for the middle element
+  const initialOffset = (planetWidth);
+
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({ x: initialOffset, animated: false });
+    }
+  }, []);
+
   const scrollOffset = useSharedValue(0);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -153,6 +184,7 @@ const PlanetSwiper = ({ navigation }) => {
   return (
     <SafeAreaView style={{ flex: 1, justifyContent: "space-around" }}>
       <Animated.ScrollView
+        ref={scrollViewRef}
         scrollEventThrottle={1}
         horizontal
         snapToInterval={planetWidth}

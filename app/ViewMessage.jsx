@@ -209,20 +209,28 @@ const ViewMessage = ( { navigation } ) => {
 
 
     return (
+      <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
-                data={userNames,activeMessages}
+                data={userNames}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
+      </FastImage>
     );
 };
 
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     padding: 16,
