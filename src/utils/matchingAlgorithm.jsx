@@ -54,7 +54,7 @@ const matchColleges = async (studentPreferences, colleges) => {
     // const querySnapshot = await getDocs(collegeDataRef);
     // const colleges = querySnapshot.docs.map(doc => doc.data());
 
-    const maxScore = 170;
+    const maxScore = 165;
   
     const userCoords = await geoCodeAddress(studentPreferences.address);
   
@@ -157,49 +157,26 @@ const matchColleges = async (studentPreferences, colleges) => {
       // Major Offered Matching
       if (studentPreferences.major.length > 0) {
           const userSelectedMajors = studentPreferences.major;
-          let strongMatchCount = 0
-          let weakMatchCount = 0
-
+          let majorMatch = false;
+  
           userSelectedMajors.forEach((major) => {
-              const majorInfo = majorData.find((m) => m.value === major)
-
+              const majorInfo = majorData.find((m) => m.value === major);
+  
               if (majorInfo && majorInfo.categories && college[majorInfo.categories]) {
-                  const majorPercentage = parseFloat(college[majorInfo.categories])
-
-                  if (majorPercentage > 4) {
-                      strongMatchCount += 1
-                  } else if (majorPercentage >= 0.1 && majorPercentage <= 3.99) {
-                      weakMatchCount += 1
-                  }
+                const majorPercentage = parseFloat(college[majorInfo.categories]);
+  
+                if (majorPercentage > 4) {
+                  score += 25 * studentPreferences.major_importance;
+                  majorMatch = true;
+                }
+                else if (majorPercentage >= 0.1 && majorPercentage <= 3.99) {
+                  score += 10 * studentPreferences.major_importance;
+                  majorMatch = true;
+                }
               }
-          })
-
-          if (userSelectedMajors.length === 3) {
-              if (strongMatchCount >= 2) {
-                  score += 25 * studentPreferences.major_importance
-              } else if (weakMatchCount >= 2) {
-                  score += 20 * studentPreferences.major_importance
-              } else if (strongMatchCount === 1) {
-                  score += 15 * studentPreferences.major_importance
-              } else if (weakMatchCount === 1) {
-                  score += 10 * studentPreferences.major_importance
-              }
-          } else if (userSelectedMajors.length === 2) {
-              if (strongMatchCount === 2) {
-                  score += 25 * studentPreferences.major_importance
-              } else if (weakMatchCount === 2) {
-                  score += 20 * studentPreferences.major_importance
-              } else if (strongMatchCount === 1) {
-                  score += 15 * studentPreferences.major_importance
-              } else if (weakMatchCount === 1) {
-                  score += 10 * studentPreferences.major_importance
-              }
-          } else if (userSelectedMajors.length === 1) {
-              if (strongMatchCount === 1) {
-                  score += 25 * studentPreferences.major_importance
-              } else if (weakMatchCount === 1) {
-                  score += 10 * studentPreferences.major_importance
-              }
+          });
+          if (!majorMatch) {
+              score += 0 * studentPreferences.major_importance;
           }
       }
   
@@ -262,61 +239,31 @@ const matchColleges = async (studentPreferences, colleges) => {
   
       // Distance from Home Matching
       const distanceRanges = {
-          '0-50 miles': [0, 50 * 1.60934],
-          '50-200 miles': [50 * 1.60934, 200 * 1.60934],
-          '200-500 miles': [200 * 1.60934, 500 * 1.60934],
-          '500+ miles': [500 * 1.60934, Infinity],
+        '0-50 miles': [0, 50 * 1.60934],
+        '50-200 miles': [50 * 1.60934, 200 * 1.60934],
+        '200-500 miles': [200 * 1.60934, 500 * 1.60934],
+        '500+ miles': [500 * 1.60934, Infinity],
       };
-
+  
       const collegeCoords = {
           lat: parseFloat(college.latitude),
           lng: parseFloat(college.longitude),
       };
-
       const distance = findDist(userCoords, collegeCoords);
-      const userSelectedDistances = studentPreferences.distance_from_college;
-      const distanceImportance = importanceMultiplier(studentPreferences.distance_importance);
-
-      const sortedDistances = userSelectedDistances.sort((a, b) => distanceRanges[a][0] - distanceRanges[b][0]);
-
-      let totalDistanceScore = 0;
-      let combinedMin = null;
-      let combinedMax = null;
-
-      for (let i = 0; i < sortedDistances.length; i++) {
-          const [minDistance, maxDistance] = distanceRanges[sortedDistances[i]];
-
-          if (combinedMin === null && combinedMax === null) {
-              combinedMin = minDistance;
-              combinedMax = maxDistance;
-          } else {
-              if (combinedMax >= minDistance) {
-                  combinedMax = maxDistance;
-              } else {
-                  if (distance >= combinedMin && distance <= combinedMax) {
-                      totalDistanceScore += 25 * distanceImportance;
-                  }
-                  combinedMin = minDistance;
-                  combinedMax = maxDistance;
-              }
-          }
+      const [minDistance, maxDistance] = distanceRanges[studentPreferences.distance_from_college] || [0, Infinity];
+      const distanceImportance = importanceMultiplier(studentPreferences.distance_importance); // Apply importance multiplier
+      if (distance >= minDistance && distance <= maxDistance) {
+          score += 25 * distanceImportance;
       }
-      if (distance >= combinedMin && distance <= combinedMax) {
-          totalDistanceScore += 25 * distanceImportance;
-      }
-      if (totalDistanceScore === 0) {
-          totalDistanceScore = 10 * distanceImportance;
-      }
-      score += totalDistanceScore;
   
       // Diversity Matching (logic can be expanded later)
       score += 25;
   
       // Specific State Matching
-      const userSelectedStates = studentPreferences.state_choice;
+      const userSelectedStates = studentPreferences.state_choice; // This is an array if the user selected multiple states
   
       if (userSelectedStates.includes('N/A')) {
-          score += 20;
+          score += 10;
       } else if (userSelectedStates.length > 0 && userSelectedStates.includes(college.state)) {
           score += 25 * studentPreferences.state_choice_importance;
       }
@@ -347,99 +294,82 @@ const matchColleges = async (studentPreferences, colleges) => {
       const actComposite50 = parseFloat(college.act_Composite50);
       const actComposite75 = parseFloat(college.act_Composite75);
       let actScoreMatched = false;
-      if (isNaN(actScore) || studentPreferences.act === "N/A") {
-          if (!isNaN(actComposite50) && actComposite50 < 24) {
-              score += 20
-          } else {
-              score += 10
-          }
-      } else {
-          let actScoreMatched = false
-          if (!isNaN(actComposite75) && actScore === actComposite75) {
-              score += 25
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite50) &&
-              !isNaN(actComposite75) &&
-              actScore > actComposite50 &&
-              actScore < actComposite75
-          ) {
-              score += 15
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite25) &&
-              !isNaN(actComposite50) &&
-              actScore > actComposite25 &&
-              actScore < actComposite50
-          ) {
-              score += 15
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite25) &&
-              !isNaN(actComposite75) &&
-              isNaN(actComposite50) &&
-              actScore > actComposite25 &&
-              actScore < actComposite25 + 2
-          ) {
-              score += 25
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite50) &&
-              isNaN(actComposite75) &&
-              actScore > actComposite50 &&
-              actScore < actComposite50 + 2
-          ) {
-              score += 15
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite75) &&
-              isNaN(actComposite50) &&
-              actScore > actComposite75 - 2 &&
-              actScore < actComposite75
-          ) {
-              score += 15
-              actScoreMatched = true
-          } else if (
-              !isNaN(actComposite50) &&
-              isNaN(actComposite25) &&
-              actScore > actComposite50 - 2 &&
-              actScore < actComposite50
-          ) {
-              score += 15
-              actScoreMatched = true
-          }
-          if (!actScoreMatched) {
-              if (
-                  isNaN(actComposite25) &&
-                  isNaN(actComposite50) &&
-                  isNaN(actComposite75)
-              ) {
-                  score += 10
-              }
-          }
+      if (!isNaN(actComposite75) && actScore === actComposite75) {
+        score += 25;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite50) &&
+        !isNaN(actComposite75) &&
+        actScore > actComposite50 &&
+        actScore < actComposite75
+      ) {
+        score += 15;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite25) &&
+        !isNaN(actComposite50) &&
+        actScore > actComposite25 &&
+        actScore < actComposite50
+      ) {
+        score += 15;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite25) &&
+        !isNaN(actComposite75) &&
+        isNaN(actComposite50) &&
+        actScore > actComposite25 &&
+        actScore < actComposite25 + 2
+      ) {
+        score += 25;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite50) &&
+        isNaN(actComposite75) &&
+        actScore > actComposite50 &&
+        actScore < actComposite50 + 2
+      ) {
+        score += 15;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite75) &&
+        isNaN(actComposite50) &&
+        actScore > actComposite75 - 2 &&
+        actScore < actComposite75
+      ) {
+        score += 15;
+        actScoreMatched = true;
+      } else if (
+        !isNaN(actComposite50) &&
+        isNaN(actComposite25) &&
+        actScore > actComposite50 - 2 &&
+        actScore < actComposite50
+      ) {
+        score += 15;
+        actScoreMatched = true;
+      }
+      if (!actScoreMatched) {
+        if (
+          isNaN(actComposite25) &&
+          isNaN(actComposite50) &&
+          isNaN(actComposite75)
+        ) {
+          score += 10;
+        }
       }
   
       // SAT Score Matching
       const satScore = parseFloat(studentPreferences.sat);
       const satTotal = parseFloat(college.sat_Total);
-      if (isNaN(satScore) || studentPreferences.sat === "N/A") {
-          if (!isNaN(satTotal) && satTotal < 1150) {
-              score += 20
-          } else {
-              score += 10
-          }
+      if (isNaN(satTotal)) {
+        score += 5;
       } else {
-          if (isNaN(satTotal)) {
-              score += 5
-          } else {
-              for (const range in satScoreRanges) {
-                  const [min, max] = satScoreRanges[range]
-                  if (satScore >= min && satScore <= max) {
-                      score += 25
-                      break
-                  }
-              }
+        for (const range in satScoreRanges) {
+          const [min, max] = satScoreRanges[range];
+          if (satScore >= min && satScore <= max) {
+            score += 25;
+            break;
           }
+        }
       }
   
       const finalScore = Math.round((score / maxScore) * 100);

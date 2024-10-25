@@ -192,8 +192,8 @@ const Quiz = ({navigation}) => {
     
 
         const answers = {
-            address: address || 'N/A',
-            gpa: gpa || 'N/A',
+            address,
+            gpa,
             sat: satScore || 'N/A'|| 'NA',
             act: actScore || 'N/A' || 'NA',
             sat_critical_reading: satCriticalReading || 'N/A' || 'NA',
@@ -203,25 +203,25 @@ const Quiz = ({navigation}) => {
             act_reading: actReading || 'N/A' || 'NA',
             act_english: actEnglish || 'N/A' || 'NA',
             act_writing: actWriting || 'N/A' || 'NA',
-            distance_from_college: distanceFromCollege || 'N/A',
+            distance_from_college: distanceFromCollege,
             distance_importance: distanceImportance,
-            major: major || 'N/A',
+            major,
             major_importance: majorImportance,
-            tuition_cost: tuitionCost || 'N/A',
+            tuition_cost: tuitionCost,
             tuition_importance: tuitionImportance,
-            religious_affiliation: religiousAffiliation || 'N/A',
+            religious_affiliation: religiousAffiliation,
             religious_importance: religiousAffilImportance,
-            sport_college: sportCollege || 'N/A',
+            sport_college: sportCollege,
             sport_importance: sportEventsImportance,
-            state_choice: stateChoice || 'N/A',
+            state_choice: stateChoice,
             state_choice_importance: stateChoiceImportance,
-            college_diversity: collegeDiversity || 'N/A',
+            college_diversity: collegeDiversity,
             diversity_importance: diversityImportance,
-            size: size || 'N/A',
+            size,
             size_importance: sizeImportance,
-            school_classification: schoolClassification || 'N/A',
+            school_classification: schoolClassification,
             classification_importance: classificationImportance,
-            urbanization_level: urbanizationLevel || 'N/A',
+            urbanization_level: urbanizationLevel,
             urbanization_importance: urbanizationImportance,
             userId: auth().currentUser.uid,
             };
@@ -507,22 +507,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actScore}
                   onChangeText={(text) => {
-                        setActScore(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScore(formatted);
+                    }}
                   onBlur={() => {
-                      if (actScore.toUpperCase() === "N/A") {
-                          setActScore("N/A");
-                      } else {
-                          const value = parseInt(actScore, 10);
-                          if (!isNaN(value) && value >= 0 && value <= 36) {
-                              setActScore(value.toString());
-                          } else {
-                              setActScore("");
-                              Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                        const value = parseInt(actScore, 10);
+                        if (value > 36) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScore('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
     
@@ -531,22 +531,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actMath}
                   onChangeText={(text) => {
-                          setActMath(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActMath(formatted);
+                    }}
                   onBlur={() => {
-                    if (actMath.toUpperCase() === "N/A") {
-                        setActMath("N/A");
-                    } else {
                         const value = parseInt(actMath, 10);
-                        if (!isNaN(value) && value >= 0 && value <= 36) {
-                            setActMath(value.toString());
-                        } else {
-                            setActMath("");
-                            Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
+                        if (value > 36) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActMath('N/A');
                         }
-                    }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
     
@@ -555,22 +555,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actEnglish} 
                   onChangeText={(text) => {
-                      setActEnglish(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActEnglish(formatted);
+                    }}
                   onBlur={() => {
-                      if (actEnglish.toUpperCase() === "N/A") {
-                          setActEnglish("N/A");
-                      } else {
-                          const value = parseInt(actEnglish, 10);
-                          if (!isNaN(value) && value >= 0 && value <= 36) {
-                              setActEnglish(value.toString());
-                          } else {
-                              setActEnglish("");
-                              Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                        const value = parseInt(actEnglish, 10);
+                        if (value > 36) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActEnglish('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActEnglish('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
     
@@ -579,22 +579,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actReading}
                   onChangeText={(text) => {
-                      setActReading(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActReading(formatted);
+                    }}
                   onBlur={() => {
-                      if (actReading.toUpperCase() === "N/A") {
-                          setActReading("N/A");
-                      } else {
-                          const value = parseInt(actReading, 10);
-                          if (!isNaN(value) && value >= 0 && value <= 36) {
-                              setActReading(value.toString());
-                          } else {
-                              setActReading("");
-                              Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                        const value = parseInt(actReading, 10);
+                        if (value > 36) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActReading('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
     
@@ -603,22 +603,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actScience}
                   onChangeText={(text) => {
-                      setActScience(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScience(formatted);
+                    }}
                   onBlur={() => {
-                      if (actScience.toUpperCase() === "N/A") {
-                          setActScience("N/A");
-                      } else {
-                          const value = parseInt(actScience, 10);
-                          if (!isNaN(value) && value >= 0 && value <= 36) {
-                              setActScience(value.toString());
-                          } else {
-                              setActScience("");
-                              Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                        const value = parseInt(actScience, 10);
+                        if (value > 36) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScience('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScience('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
     
@@ -627,22 +627,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={actWriting}
                   onChangeText={(text) => {
-                      setActWriting(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActWriting(formatted);
+                    }}
                   onBlur={() => {
-                      if (actWriting.toUpperCase() === "N/A") {
-                          setActWriting("N/A");
-                      } else {
-                          const value = parseInt(actWriting, 10);
-                          if (!isNaN(value) && value >= 0 && value <= 36) {
-                              setActWriting(value.toString());
-                          } else {
-                              setActWriting("");
-                              Alert.alert("Invalid Input", "Please enter a number between 0-36 or 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 25 or N/A"
+                        const value = parseInt(actWriting, 10);
+                        if (value > 36) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActWriting('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActWriting('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
                   keyboardType="numeric"
                 />
               </>
@@ -671,22 +671,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput ]}
                   value={satScore}
                   onChangeText={(text) => {
-                      setSatScore(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatScore(formatted);
+                    }}
                   onBlur={() => {
-                      if (satScore.toUpperCase() === "N/A") {
-                          setSatScore("N/A");
-                      } else {
-                          const value = parseInt(satScore, 10);
-                          if (!isNaN(value) && value >= 400 && value <= 1600) {
-                              setSatScore(value.toString());
-                          } else {
-                              setSatScore("");
-                              Alert.alert("Invalid Input", "Please enter a number between 400-1600 or\n 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 1200 or N/A"
+                        const value = parseInt(satScore, 10);
+                        if (value > 1600) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (value < 400) {
+                            setSatScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 400-1600.');
+                        } else if (isNaN(value)) {
+                            setSatScore('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 1200..."
                   keyboardType="numeric"
                 />
                 <Text style={[styles.text,]}>SAT Math score?</Text>
@@ -694,22 +694,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={satMath}
                   onChangeText={(text) => {
-                      setSatMath(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatMath(formatted);
+                    }}
                   onBlur={() => {
-                    if (satMath.toUpperCase() === "N/A") {
-                        setSatMath("N/A");
-                    } else {
                         const value = parseInt(satMath, 10);
-                        if (!isNaN(value) && value >= 400 && value <= 1600) {
-                            setSatMath(value.toString());
-                        } else {
-                            setSatMath("");
-                            Alert.alert("Invalid Input", "Please enter a number between 400-1600 or\n 'N/A'.");
+                        if (value > 800) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatMath('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatMath('N/A');
                         }
-                    }
-                  }}
-                  placeholder="Ex: 600 or N/A"
+                    }}
+                  placeholder="Ex: 600..."
                   keyboardType="numeric"
                 />
                 <Text style={[styles.text, ]}>SAT Evidence Based Reading and Writing score?</Text>
@@ -717,22 +717,22 @@ const Quiz = ({navigation}) => {
                   style={[styles.textInput]}
                   value={satCriticalReading}
                   onChangeText={(text) => {
-                      setSatCriticalReading(text);
-                  }}
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setSatCriticalReading(formatted);
+                    }}
                   onBlur={() => {
-                      if (satCriticalReading.toUpperCase() === "N/A") {
-                          setSatCriticalReading("N/A");
-                      } else {
-                          const value = parseInt(satCriticalReading, 10);
-                          if (!isNaN(value) && value >= 400 && value <= 1600) {
-                              setSatCriticalReading(value.toString());
-                          } else {
-                              setSatCriticalReading("");
-                              Alert.alert("Invalid Input", "Please enter a number between 400-1600 or\n 'N/A'.");
-                          }
-                      }
-                  }}
-                  placeholder="Ex: 600 or N/A"
+                        const value = parseInt(satCriticalReading, 10);
+                        if (value > 800) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (value < 200) {
+                            setSatCriticalReading('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 200-800.');
+                        } else if (isNaN(value)) {
+                            setSatCriticalReading('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 600..."
                   keyboardType="numeric"
                 />
               </>
