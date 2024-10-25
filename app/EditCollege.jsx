@@ -134,9 +134,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.04, // Dynamic padding based on screen width
+    backgroundColor: '#000'
   },
   contentContainer: {
     paddingBottom: height * 0.1,  // Dynamic space at the bottom
+    backgroundColor: '#000'
   },
   field: {
     marginBottom: height * 0.02, // Dynamic margin between fields
@@ -148,10 +150,10 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#888',
+    borderColor: '#ccc',
     padding: height * 0.015,  // Dynamic padding inside text box
-    color: '#fff',
-    backgroundColor: '#666',
+    color: '#000',
+    backgroundColor: '#fff',
     borderRadius: 5,
   },
 });
