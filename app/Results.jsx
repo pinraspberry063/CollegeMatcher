@@ -92,11 +92,16 @@ const Results = ({route, navigation}) => {
   const [selMajors, setSelMajors] = useState([]);
   
   useEffect(() => {
-    setCollegeList(top100.slice(0, loadCount)); // Load initial colleges
+    if(top100){
+      setCollegeList(top100.slice(0, loadCount));
+    }else{
+      setCollegeList(colleges.slice(0, loadCount).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    }
+     // Load initial colleges
   }, [top100, loadCount]);
 
   const loadMoreColleges = () => {
-    if (hasMore) {
+    if (hasMore && top100) {
       const newLoadCount = loadCount + 20; // Increase load count by 20
       if (newLoadCount >= top100.length) {
         setHasMore(false); // No more colleges to load
@@ -282,17 +287,19 @@ const renderItem = ({ item }) => {
 
     setSearch(searchQuery);
 
-    if (searchQuery) {
+    if (searchQuery && searchQuery != '') {
       const filtered = colleges.filter(college =>
         college.shool_name && college.shool_name.toLowerCase().includes(searchQuery.toLowerCase())
       );
   
       setCollegeList(filtered.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
-    } else {
+    } else if(top100)
+    {
       // If searchQuery is not valid, reset the college list to the original data
-      setCollegeList(top100.map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+      setCollegeList(top100.slice(0,20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
+    }else{
+      setCollegeList(colleges.slice(0,20).map(doc => ({ name: doc.shool_name, id: doc.school_id })));
     }
-  
     setShowFilter(false);
 
   }

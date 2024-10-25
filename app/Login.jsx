@@ -564,11 +564,11 @@ const checkIsRecruiter = async (uid) => {
 };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
-    >
+    // <KeyboardAvoidingView
+    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    //   style={{ flex: 1 }}
+    //   keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20} // Adjust if necessary
+    // >
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardShouldPersistTaps="handled"
@@ -670,7 +670,7 @@ const checkIsRecruiter = async (uid) => {
           )}
         </Animated.View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    // </KeyboardAvoidingView>
   );
 };
 
