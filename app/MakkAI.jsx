@@ -16,7 +16,6 @@ import {
 // import { collection, addDoc, getFirestore } from 'firebase/firestore';
 // import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import themeContext from '../theme/themeContext';
 
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai-preview";
 // import { getVertexAI, getGenerativeModel, startChat, sendMessageStream } from "firebase/vertexai-preview";
@@ -50,7 +49,6 @@ Limit your responses to an amount appropriate for a mobile app screen.`,
 const model = getGenerativeModel(vertexAI, {model: "gemini-1.5-flash", systemInstruction: si});
 
 const MakkAI = () => {
-  const theme = useContext(themeContext);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [chatSession, setchatSession] = useState(null);

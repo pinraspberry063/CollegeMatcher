@@ -25,21 +25,21 @@ const fetchAllColleges = async () => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
 };
-export const CollegesProvider = ({ children, colleges }) => {
-  // const [colleges, setColleges] = useState([]);
-  // const [isLoading, setIsLoading] = useState(false);
-  // // Prefetch the colleges when the app starts
-  // useEffect(() => {
-  //   const fetchColleges = async () => {
-  //     const collegesData = await queryClient.fetchQuery({
-  //       queryKey: ['colleges'],
-  //       queryFn: fetchAllColleges, // Your function to fetch colleges
-  //     });
-  //     setColleges(collegesData); // Save the fetched data in state
-  //   };
+export const CollegesProvider = ({ children , queryClient}) => {
+  const [colleges, setColleges] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  // Prefetch the colleges when the app starts
+  useEffect(() => {
+    const fetchColleges = async () => {
+      const collegesData = await queryClient.fetchQuery({
+        queryKey: ['colleges'],
+        queryFn: fetchAllColleges, // Your function to fetch colleges
+      });
+      setColleges(collegesData); // Save the fetched data in state
+    };
     
-  //   fetchColleges();
-  // }, []);
+     fetchColleges();
+   }, []);
   // useEffect(()=>{
 
   //   if (collegesData) {

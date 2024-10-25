@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, updateDoc, query, getDocs, doc, where, addDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
 

@@ -17,7 +17,6 @@ import {
   ImageBackground,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import {
   collection,
@@ -45,7 +44,6 @@ const CommentPage = ({ route, navigation }) => {
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
   const { user } = useContext(UserContext);
-  const theme = useContext(themeContext);
   const [username, setUsername] = useState('');
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [isModerator, setIsModerator] = useState(false);
@@ -313,7 +311,7 @@ const resetAddPostForm = () => {
         <ScrollView>
           <KeyboardAvoidingView style={styles.keyboardAvoidingView}>
             {/* Display thread title */}
-            <Text style={[styles.threadTitle, { color: theme.textColor }]}>{threadTitle}</Text>
+            <Text style={styles.threadTitle}>{threadTitle}</Text>
 
             {/* Render all posts */}
             {posts.map((post, postIndex) => (
@@ -333,12 +331,12 @@ const resetAddPostForm = () => {
                               </View>
                             </View>
 
-                <Text style={[styles.postContent, { color: theme.textColor }]}>{post.content}</Text>
+                <Text style={styles.postContent}>{post.content}</Text>
 
                 {/* Render images in posts */}
                 {post.imageUrls && post.imageUrls.length > 0 && renderImages(post.imageUrls, postIndex)}
 
-                <Text style={[styles.postCreatedAt, { color: theme.textColor }]}>
+                <Text style={styles.postCreatedAt}>
                   {post.createdAt.toDate().toLocaleString()}
                 </Text>
 

@@ -397,13 +397,11 @@ const checkUserStatus = async (userId) => {
 
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false);
   const queryClient = new QueryClient();
   // const [takenQuiz, setTakenQuiz] = useState(false);
   // const [topColleges, setTopColleges] = useState([]);
   const [initializing, setInitializing] = useState(true); // indicates whether app is still checking for INITIAL auth state
   const [user, setUser] = useState(null);
-  const [colleges, setColleges] = useState([]);
 
   // useEffect(() => {
   //   queryClient.prefetchQuery({
@@ -414,19 +412,10 @@ const App = () => {
 
 
   useEffect(() => {
-    const fetchColleges = async () => {
-      try {
-        const fetchedColleges = await queryClient.prefetchQuery({
+     queryClient.prefetchQuery({
           queryKey: ['colleges'], // Key for the cached query
           queryFn: fetchAllColleges, // The function to fetch the data
         });
-        setColleges(fetchedColleges); // Store colleges in state
-      } catch (error) {
-        console.error('Error fetching colleges:', error);
-      }
-    };
-
-    fetchColleges();
   }, [queryClient]);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -461,15 +450,6 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    const listener = EventRegister.addEventListener('Change Theme', (data) => {
-      setDarkMode(data);
-    });
-    return () => {
-      // EventRegister.removeAllListeners(listener);
-      EventRegister.removeAllListeners();
-    };
-  }, [darkMode]);
 
   // onboarding checks
   useEffect(() => {
@@ -598,7 +578,7 @@ const App = () => {
 
         <UserProvider>
         <QueryClientProvider client={queryClient}>
-          <CollegesProvider colleges={colleges}>
+          <CollegesProvider queryClient={queryClient}>
         
             <NavigationContainer>
               <RootStack.Navigator screenOptions={screenOptions}>

@@ -2,12 +2,10 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, query, getDocs, where, addDoc } from 'firebase/firestore';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
 
 const RoomateViewQuiz = ( { route } ) => {
-     const theme = useContext(themeContext);
      console.log("RoomateViewQuiz");
      const roomateUID = route.params.roomate_UID;
      console.log(roomateUID);
@@ -291,50 +289,50 @@ const RoomateViewQuiz = ( { route } ) => {
     handleFindRoomateAns(roomateUID);
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={[styles.text, { color: theme.color }]}>Do you want your roommate to have a consistent bedtime?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {bedtime}</Text>
+            <Text style={styles.text}>Do you want your roommate to have a consistent bedtime?</Text>
+            <Text style={styles.text}>Response: {bedtime}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you want light-out at 10pm or a specific time?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {tenpmSleep}</Text>
+            <Text style={styles.text}>Do you want light-out at 10pm or a specific time?</Text>
+            <Text style={styles.text}>Response: {tenpmSleep}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {nightSilence}</Text>
+            <Text style={styles.text}>Do you require silence to sleep?</Text>
+            <Text style={styles.text}>Response: {nightSilence}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you prefer a quiet environment in general?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {noise}</Text>
+            <Text style={styles.text}>Do you prefer a quiet environment in general?</Text>
+            <Text style={styles.text}>Response: {noise}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with your roommate?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {friendsRoomate}</Text>
+            <Text style={styles.text}>Would you want to become friends with your roommate?</Text>
+            <Text style={styles.text}>Response: {friendsRoomate}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate smoking at the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {smoking}</Text>
+            <Text style={styles.text}>Are you against your roommate smoking at the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {smoking}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {drinking}</Text>
+            <Text style={styles.text}>Are you against your roommate drinking at the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {drinking}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Are you against company frequently being over at the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {companyOver}</Text>
+            <Text style={styles.text}>Are you against company frequently being over at the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {companyOver}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {informCompany}</Text>
+            <Text style={styles.text}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {informCompany}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {hmwrkSpot}</Text>
+            <Text style={styles.text}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {hmwrkSpot}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {silence}</Text>
+            <Text style={styles.text}>Do you require silence to be able to study/do homework?</Text>
+            <Text style={styles.text}>Response: {silence}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {sixamWake}</Text>
+            <Text style={styles.text}>Do you plan on waking up at 6am or earlier?</Text>
+            <Text style={styles.text}>Response: {sixamWake}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {clean}</Text>
+            <Text style={styles.text}>Do you require a clean environment?</Text>
+            <Text style={styles.text}>Response: {clean}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {boundaries}</Text>
+            <Text style={styles.text}>Do you require a strong respect of boundaries and personal space?</Text>
+            <Text style={styles.text}>Response: {boundaries}</Text>
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
-            <Text style={[styles.text, { color: theme.color }]}>Response: {shareDuties}</Text>
+            <Text style={styles.text}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
+            <Text style={styles.text}>Response: {shareDuties}</Text>
 
         </SafeAreaView>
     );

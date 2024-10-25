@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import CollegeSearch from '../app/SearchComp';
 
 const getGrade = (value, ranges) => {
@@ -131,7 +131,7 @@ const CompareColleges = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <Text style={styles.title}>Compare Colleges</Text>
 
             <Text>Select the first college:</Text>
@@ -209,7 +209,7 @@ const CompareColleges = () => {
                     </View>
                 </View>
             )}
-        </View>
+        </ScrollView>
     );
 };
 

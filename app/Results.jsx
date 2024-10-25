@@ -15,36 +15,36 @@ import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
-const collegesRef = collection(firestore, 'CompleteColleges');
 
-const favoriteCollege = async ({ID}) => {
-  const collegeID = parseInt(ID);
 
-  const userQuery = query(usersRef, where('User_UID', '==', user));
+// const favoriteCollege = async ({ID}) => {
+//   const collegeID = parseInt(ID);
 
-  try {
-    const querySnapshot = await getDocs(userQuery);
+//   const userQuery = query(usersRef, where('User_UID', '==', user));
 
-    if (!querySnapshot.empty) {
-      const firstDoc = querySnapshot.docs[0];
-      const userData = firstDoc.data();
-      const currentFavorited = userData.favorited_colleges;
-      currentFavorited.push(collegeID);
+//   try {
+//     const querySnapshot = await getDocs(userQuery);
 
-      await setDoc(
-        firstDoc.ref,
-        {
-          favorited_colleges: currentFavorited,
-        },
-        {merge: true},
-      );
+//     if (!querySnapshot.empty) {
+//       const firstDoc = querySnapshot.docs[0];
+//       const userData = firstDoc.data();
+//       const currentFavorited = userData.favorited_colleges;
+//       currentFavorited.push(collegeID);
 
-      Alert.alert('College added to Favorites!');
-    }
-  } catch (error) {
-    console.error('Error adding college to favorites: ', error);
-  }
-};
+//       await setDoc(
+//         firstDoc.ref,
+//         {
+//           favorited_colleges: currentFavorited,
+//         },
+//         {merge: true},
+//       );
+
+//       Alert.alert('College added to Favorites!');
+//     }
+//   } catch (error) {
+//     console.error('Error adding college to favorites: ', error);
+//   }
+// };
 
 
 
@@ -60,7 +60,7 @@ const Results = ({route, navigation}) => {
   const [loadCount, setLoadCount] = useState(20); // Number of colleges to load
   const [hasMore, setHasMore] = useState(true); // To check if more colleges are available
   // const [colleges, setColleges] = useState([]);
-  const {colleges, isLoading,error} = useContext(CollegesContext);
+  const {colleges} = useContext(CollegesContext);
   // const [isLoading, setIsLoading] = useState(false);
 
   // Use the useQuery hook outside of useEffect
@@ -182,14 +182,6 @@ const Results = ({route, navigation}) => {
         Alert.alert('Error', 'Something went wrong while committing to the college.');
     }
 };
-
-  useEffect(()=>{
-    const loadMoreColleges = () => {
-
-
-    }
-  });
-
   // Function to get or set a random image for a college, with a fallback image to prevent null source
   const getRandomImage = (collegeName) => {
     if (!collegeImages[collegeName]) {
@@ -210,21 +202,24 @@ const renderItem = ({ item }) => {
       <View style={styles.collegeRow}>
         {/* Tapping on the planet will commit/decommit */}
         <TouchableOpacity onPress={() => handleCommit(item.name)}>
-          <ImageBackground
+          <FastImage
             source={collegeImage}
             style={styles.collegeImage}
             resizeMode="contain"
           >
             {isCommitted && (
-              <Image source={require('../assets/flag.png')} style={styles.flagImage} />
+              <FastImage source={require('../assets/flag.png')} style={styles.flagImage} />
             )}
-          </ImageBackground>
+          </FastImage>
         </TouchableOpacity>
 
         {/* Tapping on the text will navigate to the college details */}
         <TouchableOpacity
           style={styles.collegeTextContainer}
-          onPress={() => navigation.push('Details', { college: item.name, id: item.id })}
+          onPress={() => {
+            const college = colleges.filter(college => college.school_id === parseInt(item.id))
+            console.log(college[0].school_id)
+            navigation.push('Details', {obj: college[0]})}}
         >
           <Text style={styles.collegeName}>{item.name}</Text>
           <Text style={styles.collegeScore}>
@@ -331,19 +326,9 @@ const renderItem = ({ item }) => {
   }
 
 
-  // Handle any errors
-  if (error) {
-    return <Text>Error fetching data: {error.message}</Text>;
-  }
+  
 
-  if(isLoading){
-    return (
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <ActivityIndicator size={100}/>
-      </View>
-
-    );
-  }
+  
 
     return (
       <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>

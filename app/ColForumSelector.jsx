@@ -3,7 +3,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, Button, Alert, ImageBackground, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';

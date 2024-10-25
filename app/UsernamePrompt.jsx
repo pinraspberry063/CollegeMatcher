@@ -4,14 +4,12 @@ import { doc, setDoc, writeBatch, getDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
-import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const UsernamePrompt = ({ navigation, route }) => {
-  const theme = useContext(themeContext);
   const { user } = route.params; // Authenticated user
   const { setUser } = useContext(UserContext);
   const [username, setUsername] = useState('');
@@ -92,11 +90,11 @@ const UsernamePrompt = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.title, { color: theme.color }]}>Choose a Username</Text>
+      <Text style={styles.title}>Choose a Username</Text>
       <TextInput
-        style={[styles.input, { borderColor: theme.color, color: theme.color }]}
+        style={styles.input}
         placeholder="Username"
-        placeholderTextColor={theme.color}
+        placeholderTextColor={'grey'}
         value={username}
         onChangeText={setUsername}
       />

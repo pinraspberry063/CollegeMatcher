@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { StyleSheet, Text, View, Button, ScrollView, Alert, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, query, updateDoc, doc, arrayUnion, arrayRemove, getDocs, where, addDoc } from 'firebase/firestore';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
 import FastImage from 'react-native-fast-image';
@@ -10,7 +9,6 @@ import FastImage from 'react-native-fast-image';
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RecConvs = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const { user } = useContext(UserContext);
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [recruiters, setRecruiters] = useState([]);
