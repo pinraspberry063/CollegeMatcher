@@ -9,6 +9,7 @@ import Animated, {
   Extrapolate,
 } from "react-native-reanimated";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import FastImage from "react-native-fast-image";
 
 
 // Imported planet images
@@ -139,7 +140,7 @@ const Slide = ({ slide, scrollOffset, index, navigation }) => {
             position: 'relative',
           }}
         >
-          <ImageBackground
+          <FastImage
             source={slide.image}
             style={{
               width: '100%',
@@ -153,7 +154,7 @@ const Slide = ({ slide, scrollOffset, index, navigation }) => {
           >
             <MaterialCommunityIcons name={slide.icon} size={50} color={slide.iconColor} />
             <Text style={{color: txtCol, fontSize: 23, fontWeight: 'bold'}}>{slide.label}</Text>
-          </ImageBackground>
+          </FastImage>
           
         </View>
       </TouchableOpacity>

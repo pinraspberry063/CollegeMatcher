@@ -7,13 +7,11 @@ import {
   View,
   Alert,
 } from 'react-native';
-import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const Settings = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const [isModerator, setIsModerator] = useState(false);
 
   useEffect(() => {

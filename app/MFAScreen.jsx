@@ -11,10 +11,9 @@ import {
 import auth from '@react-native-firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
-import themeContext from '../theme/themeContext';
+
 
 const MFAScreen = ({ navigation, route }) => {
-  const theme = useContext(themeContext);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
@@ -99,8 +98,8 @@ const MFAScreen = ({ navigation, route }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.color }]}>
+    <View style={styles.container}>
+      <Text style={styles.title}>
         Set Up Multi-Factor Authentication
       </Text>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}

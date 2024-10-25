@@ -1,13 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Switch, Alert } from 'react-native';
 import { EventRegister } from 'react-native-event-listeners';
-import themeContext from '../theme/themeContext';
 import auth from '@react-native-firebase/auth';
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 
 const Preferences = ({ navigation }) => {
-  const theme = useContext(themeContext);
   const [darkMode, setDarkMode] = useState(true);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,11 +27,6 @@ const Preferences = ({ navigation }) => {
     };
     fetchMfaStatus();
   }, []);
-
-  const handleToggleDarkMode = (value) => {
-    setDarkMode(value);
-    EventRegister.emit('Change Theme', value);
-  };
 
   const handleToggleMfa = (value) => {
     setIsMfaEnabled(value);
@@ -72,18 +65,17 @@ const Preferences = ({ navigation }) => {
   };
 
   return (
-    <View styles={[styles.container, {backgroundColor: theme.backgroundColor}]}>
-      {/* <TouchableOpacity styles={[styles.container, {backgroundColor: theme.background}]}>
-        <Text style={[styles.item, {color: theme.color}]}>Dark Mode</Text>
+    <View styles={styles.container}>
+      <TouchableOpacity styles={styles.container}>
+        <Text style={styles.item}>Multi Factor Authentication</Text>
         <Switch
-          value={darkMode}
-          onValueChange={(value) => {
-            setDarkMode(value);
-            EventRegister.emit('Change Theme', value)
-
-          }}
-        />
-        </TouchableOpacity> */}
+        value={isMfaEnabled}
+        onValueChange={setIsMfaEnabled}
+        trackColor={{ false: '#767577', true: 'black' }}
+        thumbColor={isMfaEnabled ? 'black' : '#f4f3f4'}
+          />
+    
+        </TouchableOpacity>
     </View>
   );
 };

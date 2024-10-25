@@ -5,10 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import storage from '@react-native-firebase/storage';
 import * as Progress from 'react-native-progress';
 import auth from '@react-native-firebase/auth';
-import themeContext from '../theme/themeContext'
 
 export default function Picker({navigation}) {
-  const theme = useContext(themeContext);
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [transferred, setTransferred] = useState(0);
@@ -70,13 +68,13 @@ export default function Picker({navigation}) {
    
   };
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: theme.backgroundColor}]}>
+    <SafeAreaView style={styles.container}>
       <Button style={styles.selectButton} 
       onPress={selectImage}
       title= "Select Image"/>
        
       
-      <View style={[styles.imageContainer, {backgroundColor: theme.background}]}>
+      <View style={styles.imageContainer}>
         {image !== null ? (
           <Image source={{ uri: image.uri }} style={styles.imageBox} />
         ) : null}

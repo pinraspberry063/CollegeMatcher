@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, TextInput, Button, FlatList, TouchableWithoutFe
 import React, { useState, useContext, useEffect } from 'react'
 import DropdownComponent from '../components/DropdownComp'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext'
 import {db} from '../config/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 import { collection, addDoc, doc, deleteDoc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs, count, data, get } from 'firebase/firestore';
@@ -15,7 +14,6 @@ const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const RoomateMatcher = ({ navigation }) => {
-    const theme = useContext(themeContext);
     const choice = [
          { label: 'Prefer Otherwise', value: 1 },
          { label: 'Do Not Care', value: 2 },
@@ -219,22 +217,22 @@ const RoomateMatcher = ({ navigation }) => {
          fetchUsername(auth().currentUser.uid);
     const renderPageOne = () => (
         <View>
-            <Text style={[styles.text, { color: theme.color }]}>Do you want your roommate to have a consistent bedtime?</Text>
+            <Text style={styles.text}>Do you want your roommate to have a consistent bedtime?</Text>
             <DropdownComponent data={choiceBed} value={bedtime} onChange={setBedtime} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you want light-out at 10pm or a specific time?</Text>
+            <Text style={styles.text}>Do you want light-out at 10pm or a specific time?</Text>
             <DropdownComponent data={choiceSleep} value={tenpmSleep} onChange={setTenpmSleep} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you require silence to sleep?</Text>
+            <Text style={styles.text}>Do you require silence to sleep?</Text>
             <DropdownComponent data={choiceNightSilence} value={nightSilence} onChange={setNightSilence} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Do you prefer a quiet environment in general?</Text>
+            <Text style={styles.text}>Do you prefer a quiet environment in general?</Text>
             <DropdownComponent data={choiceNoise} value={noise} onChange={setNoise} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Would you want to become friends with your roommate?</Text>
+            <Text style={styles.text}>Would you want to become friends with your roommate?</Text>
             <DropdownComponent data={choiceFriends} value={friendsRoommate} onChange={setFriendsRoommate} />
 
-            <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate smoking at the dorm/apartment?</Text>
+            <Text style={styles.text}>Are you against your roommate smoking at the dorm/apartment?</Text>
             <DropdownComponent data={choiceSmoking} value={smoking} onChange={setSmokingHabit} />
 
         </View>
@@ -242,22 +240,22 @@ const RoomateMatcher = ({ navigation }) => {
 
      const renderPageTwo = () => (
          <View>
-             <Text style={[styles.text, { color: theme.color }]}>Are you against your roommate drinking at the dorm/apartment?</Text>
+             <Text style={styles.text}>Are you against your roommate drinking at the dorm/apartment?</Text>
              <DropdownComponent data={choiceDrinking} value={drinking} onChange={setDrinkingHabit} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Are you against company frequently being over at the dorm/apartment?</Text>
+             <Text style={styles.text}>Are you against company frequently being over at the dorm/apartment?</Text>
              <DropdownComponent data={choiceConsCompany} value={companyOver} onChange={setCompanyOver} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
+             <Text style={styles.text}>Do you require a heads up/discussion before inviting company to the dorm/apartment?</Text>
              <DropdownComponent data={choiceInformCompany} value={informCompany} onChange={setInformCompany} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
+             <Text style={styles.text}>Do you need to be able to study and do homework at the dorm/apartment?</Text>
              <DropdownComponent data={choiceHmwrk} value={hmwrkSpot} onChange={setHmwrkSpot} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you require silence to be able to study/do homework?</Text>
+             <Text style={styles.text}>Do you require silence to be able to study/do homework?</Text>
              <DropdownComponent data={choiceSilence} value={silence} onChange={setSilence} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you plan on waking up at 6am or earlier?</Text>
+             <Text style={styles.text}>Do you plan on waking up at 6am or earlier?</Text>
              <DropdownComponent data={choiceSixam} value={sixamWake} onChange={setSixamWake} />
          </View>
     );
@@ -265,13 +263,13 @@ const RoomateMatcher = ({ navigation }) => {
 
      const renderPageThree = () => (
          <View>
-             <Text style={[styles.text, { color: theme.color }]}>Do you require a clean environment?</Text>
+             <Text style={styles.text}>Do you require a clean environment?</Text>
              <DropdownComponent data={choiceClean} value={clean} onChange={setClean} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you require a strong respect of boundaries and personal space?</Text>
+             <Text style={styles.text}>Do you require a strong respect of boundaries and personal space?</Text>
              <DropdownComponent data={choiceBoundaries} value={boundaries} onChange={setBoundaries} />
 
-             <Text style={[styles.text, { color: theme.color }]}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
+             <Text style={styles.text}>Do you want to share responsibilities in maintaining the dorm/apartment?</Text>
              <DropdownComponent data={choiceDuties} value={shareDuties} onChange={setShareDuties} />
 
 

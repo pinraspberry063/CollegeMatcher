@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import themeContext from '../theme/themeContext';
 import { db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
@@ -52,7 +51,6 @@ const ReportModal = ({ isVisible, onClose, onSubmit }) => {
 };
 
 const Message = ({ route, navigation }) => {
-  const theme = useContext(themeContext);
   const { user } = useContext(UserContext);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
