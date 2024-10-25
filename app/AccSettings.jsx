@@ -3,8 +3,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Button } from 'react-native-elements';
 import auth from '@react-native-firebase/auth';
 import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
-
-
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
 const Account = ({route, navigation}) => {
