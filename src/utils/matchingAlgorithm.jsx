@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useState, useContext } from 'react';
 import auth from '@react-native-firebase/auth';
 import majorData from '../../assets/major_data';
+import { CollegesContext } from '../../components/CollegeContext';
 
 
 
@@ -378,26 +379,25 @@ const matchColleges = async (studentPreferences, colleges) => {
   
     scores.sort((a, b) => b.score - a.score);
 
-    const top100Colleges = scores
+    const top100Colleges = scores.slice(0,100)
       .map(s => ({
         name: s.college.shool_name,
         score: s.score,
         id: s.college.school_id,
       }));
-    const resultsRef = collection(firestore, 'Users');
-    const resultDoc = query(
-      resultsRef,
-      where('User_UID', '==', auth().currentUser.uid),
-    );
-    const docID = (await getDocs(resultDoc)).docs[0].ref;
+    // const resultsRef = collection(firestore, 'Users');
+    // const resultDoc = query(
+    //   resultsRef,
+    //   where('User_UID', '==', auth().currentUser.uid),
+    // );
+    // const docID = (await getDocs(resultDoc)).docs[0].ref;
   
     try {
       await setDoc(
-        docID,
+        doc(collection(firestore, "Users"), auth().currentUser.uid),
         {
           userPreferences: studentPreferences,
-          top100Colleges: top100Colleges.slice(0, 50),
-          collegeScores: top100Colleges
+          top100Colleges: top100Colleges,
         },
         {merge: true},
       );

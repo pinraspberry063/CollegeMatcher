@@ -151,7 +151,7 @@ const Quiz = ({navigation}) => {
     const [sportCollege, setSportEvents] = useState('');
     const [collegeDiversity, setDiverse] = useState('');
     const [schoolClassification, setType] = useState('');
-    const {colleges, loading} = useContext(CollegesContext);
+    const {colleges } = useContext(CollegesContext);
 
     const [distanceImportance, setDistanceImportance] = useState(0.5);
     const [majorImportance, setMajorImportance] = useState(0.5);
@@ -247,16 +247,17 @@ const Quiz = ({navigation}) => {
     //    await deleteItem(auth().currentUser.uid);
 
         try {
-            await setDoc(doc(collection(firestore, "Users"), auth().currentUser.uid), answers);
+            await setDoc(doc(collection(firestore, "Users"), auth().currentUser.uid), {userPreferences: answers, User_UID: auth().currentUser.uid},
+            {merge: true});
             alert('Quiz submitted successfully!');
         } catch (error) {
             console.error('Error adding document: ', error);
         }
 
-        const result = (await matchColleges( answers,  colleges)).top100Colleges;
+        const result = (await matchColleges(answers, colleges)).top100;
         navigation.navigate('QuizStack', { top100: result });
     };
-
+    
     const renderPageOne = () => (
         <View>
           <Text style={[styles.text]}>What do you plan on studying?</Text>

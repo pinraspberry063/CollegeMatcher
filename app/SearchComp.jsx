@@ -6,7 +6,7 @@ const CollegeSearch = ({ onCollegeSelect }) => {
     const [searchText, setSearchText] = useState('');
     // const [colleges, setColleges] = useState([]);
     const [filteredColleges, setFilteredColleges] = useState([]);
-    const {colleges, loading} = useContext(CollegesContext);
+    const {colleges} = useContext(CollegesContext);
 
     // useEffect(() => {
     //     const getData = async () => {

@@ -91,7 +91,6 @@ const fetchAllColleges = async () => {
 //   .catch((error) => {
 //     console.error('Error pre-fetching data:', error);
 //   });
-
 queryClient.prefetchQuery({
       queryKey: ['colleges'], // Now an array inside an object
       queryFn: fetchAllColleges, // Query function passed as part of the object
@@ -527,7 +526,12 @@ const App = () => {
     }, []);
 
   if (initializing) return null;
-  if (showOnboarding) {
+  // else if(queryLoading){
+  //   return (
+  //     <ActivityIndicator size={50}/>
+  //   )
+  // }
+  else if (showOnboarding) {
     return (
         <Onboarding
             onDone={async () => {
@@ -558,7 +562,7 @@ const App = () => {
               },
               {
                 backgroundColor: '#fff',
-                image: <FastImage source={require('./assets/Community.png')}
+                image: <FastImage source={require('./assets/community.png')}
                               style={ui_styles.image}
                 />,
                 title: 'Forums',
@@ -586,6 +590,7 @@ const App = () => {
         />
     );
   }
+    
 
     return (
 
