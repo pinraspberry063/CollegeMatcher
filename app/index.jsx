@@ -69,10 +69,10 @@ const Index = ({ navigation }) => {
       
 
       <SafeAreaView style={styles.titleContainer}>
-        <Text style={[styles.title, {color: 'purple'}]}>
-          College Matcher
+        <Text style={[styles.title, {color: '#8b2dc2', paddingTop: 20}]}>
+          Uni-Verse
         </Text>
-        <Text style={[styles.subtitle, {color: 'white'}]}>
+        <Text style={[styles.subtitle, {color: 'white', paddingTop: 20}]}>
           Let colleges find you today!
         </Text>
       </SafeAreaView>
