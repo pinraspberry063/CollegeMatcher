@@ -8,6 +8,7 @@ import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFire
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
 import { Ionicons } from '@expo/vector-icons';
+import FastImage from 'react-native-fast-image';
 
 const ReportModal = ({ isVisible, onClose, onSubmit }) => {
   const [selectedReason, setSelectedReason] = useState('');
@@ -61,8 +62,27 @@ const Message = ({ route, navigation }) => {
   const [usernames, setUsernames] = useState({});
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [currentReportData, setCurrentReportData] = useState(null);
+  const [url, seturl] = useState();
 
   const conversationId = route.params?.conversationId; // Safely get conversationId from route params
+
+  
+
+  useEffect(() => {
+      const func = async () => {
+          const storage = getStorage();
+          const reference = ref(storage, "images/" + user.uid + "/profile");
+
+          await getDownloadURL(reference)
+              .then((x)=> {seturl(x);})
+              .catch((error)=> {
+
+                  getDownloadURL(ref(storage, "profile.jpg"))
+                  .then((x)=> {seturl(x);})
+              })
+      }
+      func();
+  }, []);
 
   useEffect(() => {
     const firestore = getFirestore(db);
@@ -182,6 +202,7 @@ const Message = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      
       <ScrollView style={styles.messagesContainer}>
         {messages.map((message) => (
           <View
@@ -191,6 +212,7 @@ const Message = ({ route, navigation }) => {
               message.sender_UID === user.uid ? styles.userMessage : styles.recruiterMessage
             ]}
           >
+            <FastImage source={{uri: url}}/>
             <View style={styles.messageHeader}>
               <Text style={styles.messageSender}>
                 {message.sender_UID === user.uid ? 'You' : usernames[message.sender_UID] || 'Recruiter'}

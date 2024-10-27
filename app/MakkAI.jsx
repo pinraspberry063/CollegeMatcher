@@ -18,6 +18,10 @@ import {
 import { db } from '../config/firebaseConfig';
 
 import { getVertexAI, getGenerativeModel } from "firebase/vertexai-preview";
+import FastImage from 'react-native-fast-image';
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
+import { UserContext } from '../components/UserContext';
+
 // import { getVertexAI, getGenerativeModel, startChat, sendMessageStream } from "firebase/vertexai-preview";
 
 // const firestore = getFirestore(db);
@@ -52,6 +56,26 @@ const MakkAI = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [chatSession, setchatSession] = useState(null);
+  const [url, seturl] = useState();
+  const {user} = useContext(UserContext);
+
+  
+
+  useEffect(() => {
+      const func = async () => {
+          const storage = getStorage();
+          const reference = ref(storage, "images/" + user.uid + "/profile");
+
+          await getDownloadURL(reference)
+              .then((x)=> {seturl(x);})
+              .catch((error)=> {
+
+                  getDownloadURL(ref(storage, "profile.jpg"))
+                  .then((x)=> {seturl(x);})
+              })
+      }
+      func();
+  }, []);
 
   useEffect(() => {
     const initializeChatSession = () => {
@@ -132,16 +156,21 @@ const MakkAI = () => {
   return (
     <ImageBackground source={require('../assets/galaxy_msg.jpg')} style={styles.container}> 
         <KeyboardAvoidingView
-            style={{flex: 1}}
+            style={{flex: 1, paddingTop: 40}}
             behavior={Platform.OS === "ios" ? "padding" : null}>
 
 
             <FlatList
                 data={messages}
                 renderItem={({ item }) => (
+                  <View> 
+                    {(item.sender != 'ai') && <FastImage source={{uri: url}} style={{width: 30, height:30, borderRadius: 20, alignSelf: 'flex-end'}}/>}
+                    
+
                     <Text style={[styles.message, item.sender === 'user' ? styles.user : styles.ai]}>
                       {item.text}
                     </Text>
+                    </View>
                 )}
                 keyExtractor={item => item.id}
             />

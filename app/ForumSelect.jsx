@@ -172,7 +172,7 @@ const ForumSelect = ({ route, navigation }) => {
   };
 
     const handleRoomateMatcherNavigation = () => {
-      navigation.navigate('RoomateMatcher');
+      navigation.navigate('RoomateMatcher', {collegeName});
     };
 
   return (

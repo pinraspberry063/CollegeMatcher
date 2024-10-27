@@ -226,11 +226,14 @@ const matchRoomates = async (roomatePreferences) => {
     //console.log(top5Roomates);
     const resultsRef = collection(firestore,'RoomateResults');
 
+
     try{
-        await addDoc(resultsRef,{
-            userPreferences: roomatePreferences,
-            top5Roomates,
-            });
+        await setDoc(
+            doc(collection(firestore, "Users"), auth().currentUser.uid),
+            {
+            roomatePreferences: roomatePreferences,
+            top5Roomates: top5Roomates ,
+            }, {merge:true});
         alert("Roomates succesfully judged!");
 
         } catch(error){

@@ -182,8 +182,9 @@ const ForumStackScreen = () => (
     <ForumStack.Screen name="FollowedForums" component={FollowedForums} />
     <ForumStack.Screen name="RoomateMatcher" component={RoomateMatcher} />
     <ForumStack.Screen name="CommentPage" component={CommentPage}/>
-    <QuizStack.Screen name="RoomateResults" component={RoomateResults} />
-    <QuizStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
+    <ForumStack.Screen name="RoomateResults" component={RoomateResults} />
+    <ForumStack.Screen name="RoomateMessage" component={RoomateMessage} />
+    <ForumStack.Screen name="RoomateViewQuiz" component={RoomateViewQuiz}/>
   </ForumStack.Navigator>
 );
 

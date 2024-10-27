@@ -1,11 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button , Image,FlatList} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig';
 import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
 import { Ionicons } from '@expo/vector-icons';
+import FastImage from 'react-native-fast-image';
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
+
+
+FastImage.clearMemoryCache();
+FastImage.clearDiskCache();
 
 
 const ReportModal = ({ isVisible, onClose, onSubmit }) => {
@@ -60,8 +66,27 @@ const RoomateMessage = ({ route, navigation }) => {
   const [usernames, setUsernames] = useState({});
   const [isReportModalVisible, setIsReportModalVisible] = useState(false);
   const [currentReportData, setCurrentReportData] = useState(null);
+  const [url, seturl] = useState();
 
   const conversationId = route.params?.conversationId; // Safely get conversationId from route params
+
+  
+
+  useEffect(() => {
+      const func = async () => {
+          const storage = getStorage();
+          const reference = ref(storage, "images/" + user.uid + "/profile");
+
+          await getDownloadURL(reference)
+              .then((x)=> {seturl(x);})
+              .catch((error)=> {
+
+                  getDownloadURL(ref(storage, "profile.jpg"))
+                  .then((x)=> {seturl(x);})
+              })
+      }
+      func();
+  }, []);
 
   useEffect(() => {
     const firestore = getFirestore(db);
@@ -165,6 +190,36 @@ const RoomateMessage = ({ route, navigation }) => {
     setIsReportModalVisible(true);
   };
 
+  const renderMessage = ({item}) => (
+    <View key={item.id}
+    style={[
+      styles.message,
+      item.sender_UID === user.uid ? styles.userMessage : styles.recruiterMessage
+    ]}>
+      <FastImage 
+          source={{uri: url }} 
+          style={{width: 40, heigth: 40, borderRadius: 20}}
+          onError={(error) => console.log('FastImage error:', error.nativeEvent)}
+          />
+            
+            <View style={styles.messageHeader}>
+              <Text style={styles.messageSender}>
+                {usernames[item.sender_UID] || 'Unknown'}
+              </Text>
+              {item.sender_UID !== user.uid && (
+                <TouchableOpacity
+                  style={styles.reportButton}
+                  onPress={() => handleReportMessage(item.id, usernames[item.sender_UID], item.content)}
+                >
+                  <Ionicons name="flag-outline" size={16} color="#999" />
+                </TouchableOpacity>
+              )}
+              
+            </View>
+            <Text style={styles.messageContent}>{item.content}</Text>
+
+    </View>
+  )
   if (!conversationId && !documentID) {
     return (
       <View style={styles.centeredContainer}>
@@ -174,46 +229,17 @@ const RoomateMessage = ({ route, navigation }) => {
   }
 
   return (
+    <FastImage source={require('../assets/galaxy_msg.jpg')} style={styles.container}> 
     <View style={styles.container}>
-      <ScrollView style={styles.messagesContainer}>
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.message,
-              (message.sender_UID === user.uid)
-                ? styles.userMessage
-                : styles.roomateMessage
-            ]}
-          >
-            <View style={styles.messageHeader}>
-              <Text style={styles.messageSender}>
-                {usernames[message.sender_UID] || 'Unknown'}
-              </Text>
-              {message.sender_UID !== user.uid && (
-                <TouchableOpacity
-                  style={styles.reportButton}
-                  onPress={() => handleReportMessage(message.id, usernames[message.sender_UID], message.content)}
-                >
-                  <Ionicons name="flag-outline" size={16} color="#999" />
-                </TouchableOpacity>
-              )}
-            </View>
-            <Text style={styles.messageContent}>{message.content}</Text>
-          </View>
-        ))}
-      </ScrollView>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={newMessage}
-          onChangeText={setNewMessage}
-          placeholder="Type your message..."
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
+      <FlatList
+        data={messages}
+
+        renderItem={renderMessage}
+        style={styles.messagesContainer}
+      />
+
+      
+      
       <ReportModal
         isVisible={isReportModalVisible}
         onClose={() => setIsReportModalVisible(false)}
@@ -239,7 +265,27 @@ const RoomateMessage = ({ route, navigation }) => {
           }
         }}
       />
+
+
+    <View style={styles.inputContainer}>
+        <TextInput
+            style={[styles.input]}
+            value={newMessage}
+            onChangeText={setNewMessage}
+            placeholder="Type your message..."
+            placeholderTextColor='white'
+            color='white'
+        />
+
+          <TouchableOpacity onPress={handleSend}>
+            <Image source={require('../assets/arrow.png')}  style={{height: 45, width: 45, marginLeft: 10}}/>
+
+          </TouchableOpacity>
+        {/* <Button title="Send" onPress={sendMessage} /> */}
+        {/*<Button title="Send" onPress={run} />*/}
+      </View>
     </View>
+    </FastImage>
   );
 };
 
@@ -287,7 +333,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
-    paddingVertical: 80,
+    paddingVertical: 20,
   },
   input: {
     flex: 1,
@@ -295,7 +341,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     padding: 10,
-    backgroundColor: '#fff',
+    // backgroundColor: '#fff',
   },
   sendButton: {
     marginLeft: 10,

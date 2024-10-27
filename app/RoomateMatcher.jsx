@@ -13,7 +13,8 @@ import { handleReport } from '../src/utils/reportUtils';
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
 
-const RoomateMatcher = ({ navigation }) => {
+const RoomateMatcher = ({ navigation, route }) => {
+    const {collegeName} = route.params;
     const choice = [
          { label: 'Prefer Otherwise', value: 1 },
          { label: 'Do Not Care', value: 2 },
@@ -142,7 +143,7 @@ const RoomateMatcher = ({ navigation }) => {
      const [clean, setClean] = useState('');
      const [boundaries, setBoundaries] = useState('');
      const [shareDuties, setShareDuties] = useState('');
-     const [collegeName, setCollegeName] = useState('');
+    //  const [CollegeName, setCollegeName] = useState(collegeName);
      const [userName, setUsername] = useState('');
 
 
@@ -170,29 +171,29 @@ const RoomateMatcher = ({ navigation }) => {
             userId: auth().currentUser.uid,
             username: userName
              };
-          const deleteItem = async(uid) => {
-              const quizesRef = collection(firestore, 'RoomateMatcher');
-              const q = query(quizesRef, where('userId', '==', uid));
-              const querySnapshot = await getDocs(q);
-              try{
-              if (!querySnapshot.empty) {
-                  const userDoc = querySnapshot.docs[0];
-                  const userData = userDoc.data();
-                  deleteDoc(userDoc.ref)
-                   } else {
-                       //console.error('(RoomateMatcher/delete)No user found with the given UID.');
-                   }
-               } catch (error) {
-                   console.error('Error deleting repeat quiz:', error);
-               }
-           };
-       await deleteItem(auth().currentUser.uid);
-        try {
-            await addDoc(collectionref, answers);
-            alert('Quiz submitted successfully!');
-        } catch (error) {
-            console.error('Error adding document: ', error);
-        }
+    //       const deleteItem = async(uid) => {
+    //           const quizesRef = collection(firestore, 'RoomateMatcher');
+    //           const q = query(quizesRef, where('userId', '==', uid));
+    //           const querySnapshot = await getDocs(q);
+    //           try{
+    //           if (!querySnapshot.empty) {
+    //               const userDoc = querySnapshot.docs[0];
+    //               const userData = userDoc.data();
+    //               deleteDoc(userDoc.ref)
+    //                } else {
+    //                    //console.error('(RoomateMatcher/delete)No user found with the given UID.');
+    //                }
+    //            } catch (error) {
+    //                console.error('Error deleting repeat quiz:', error);
+    //            }
+    //        };
+    //    await deleteItem(auth().currentUser.uid);
+    //     try {
+    //         await addDoc(collectionref, answers);
+    //         alert('Quiz submitted successfully!');
+    //     } catch (error) {
+    //         console.error('Error adding document: ', error);
+    //     }
 
         const result = (await matchRoomates(answers)).top5Roomates;
         navigation.navigate('RoomateResults', { top5: result });
@@ -206,7 +207,7 @@ const RoomateMatcher = ({ navigation }) => {
                    const userDoc = querySnapshot.docs[0];
                    const userData = userDoc.data();
                    setUsername(userData.Username);
-                   setCollegeName(userData.Committed_Colleges[0]);
+                //    setCollegeName(collegeName);
                  } else {
                    console.error('(RoomateMatcher/username)No user found with the given UID.');
                  }
