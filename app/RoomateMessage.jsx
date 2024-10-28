@@ -10,8 +10,6 @@ import FastImage from 'react-native-fast-image';
 import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
 
 
-FastImage.clearMemoryCache();
-FastImage.clearDiskCache();
 
 
 const ReportModal = ({ isVisible, onClose, onSubmit }) => {
@@ -68,14 +66,14 @@ const RoomateMessage = ({ route, navigation }) => {
   const [currentReportData, setCurrentReportData] = useState(null);
   const [url, seturl] = useState();
 
-  const conversationId = route.params?.conversationId; // Safely get conversationId from route params
+  const {conversationId , otherUID} = route.params; // Safely get conversationId from route params
 
   
 
   useEffect(() => {
       const func = async () => {
           const storage = getStorage();
-          const reference = ref(storage, "images/" + user.uid + "/profile");
+          const reference = ref(storage, "images/" + otherUID + "/profile");
 
           await getDownloadURL(reference)
               .then((x)=> {seturl(x);})
@@ -191,16 +189,22 @@ const RoomateMessage = ({ route, navigation }) => {
   };
 
   const renderMessage = ({item}) => (
+    <View style={{flex:1}}>
+      { item.sender_UID !== user.uid &&
+      <FastImage 
+      source={{uri: url }} 
+      style={{width: 40, height: 40, borderRadius: 20}}
+      onError={(error) => console.log('FastImage error:', error.nativeEvent)}
+      />
+      
+      }
+    
     <View key={item.id}
     style={[
       styles.message,
-      item.sender_UID === user.uid ? styles.userMessage : styles.recruiterMessage
+      item.sender_UID === user.uid ? styles.userMessage : styles.roomateMessage
     ]}>
-      <FastImage 
-          source={{uri: url }} 
-          style={{width: 40, heigth: 40, borderRadius: 20}}
-          onError={(error) => console.log('FastImage error:', error.nativeEvent)}
-          />
+      
             
             <View style={styles.messageHeader}>
               <Text style={styles.messageSender}>
@@ -218,6 +222,7 @@ const RoomateMessage = ({ route, navigation }) => {
             </View>
             <Text style={styles.messageContent}>{item.content}</Text>
 
+    </View>
     </View>
   )
   if (!conversationId && !documentID) {
@@ -318,10 +323,12 @@ const styles = StyleSheet.create({
   userMessage: {
     backgroundColor: '#d1e7dd',
     alignSelf: 'flex-end',
+    borderRadius: 10,
   },
   roomateMessage: {
     backgroundColor: '#f8d7da',
     alignSelf: 'flex-start',
+    borderRadius: 10,
   },
   messageSender: {
     fontWeight: 'bold',

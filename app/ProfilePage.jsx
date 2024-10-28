@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: width * 0.04, // Dynamic padding based on screen width
-    backgroundColor: '#000',
+    
   },
   buttonText: {
     fontSize: height * 0.04, // Dynamic font size for larger text

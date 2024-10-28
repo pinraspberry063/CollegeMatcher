@@ -78,11 +78,11 @@ const slides = [
     txtColor: textColor
   },
   {
-    icon: "star-settings-outline",
-    page: 'Settings',
+    icon: "account",
+    page: 'Account',
     image: cynImage,
     iconColor: "orange",
-    label: 'Settings',
+    label: 'Account',
     txtColor: 'black'
   },
 ];

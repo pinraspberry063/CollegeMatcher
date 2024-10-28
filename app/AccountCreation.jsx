@@ -18,6 +18,8 @@ const AccountCreation = ({ navigation }) => {
   const [isRecruiter, setIsRecruiter] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [activeMessages, setActiveMessages] = useState([]);
+  const [FName, setFName] = useState('');
+  const [LName, setLName] = useState('');
 
   const handleSignUp = async () => {
     if (!email || !password || !username || !confirmPassword) {
@@ -74,6 +76,8 @@ const AccountCreation = ({ navigation }) => {
         phoneNumber: '',
         activeMessages: [],
         IsModerator: false,
+        First: FName,
+        Last: LName
       });
 
       // Update the 'Usernames' document with the actual UID
@@ -134,6 +138,20 @@ const AccountCreation = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="First Name"
+        placeholderTextColor={'black'}
+        value={FName}
+        onChangeText={setFName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Last Name"
+        placeholderTextColor={'black'}
+        value={LName}
+        onChangeText={setLName}
+      />
       <TextInput
         style={styles.input}
         placeholder="Email"

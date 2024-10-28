@@ -100,7 +100,7 @@ const ViewMessage = ( { navigation } ) => {
                   if (!existingConvoSnapshot.empty) {
                     // Navigate to the existing conversation
                     const conversationId = existingConvoSnapshot.docs[0].id;
-                    navigation.navigate('Message', { conversationId });
+                    navigation.navigate('Message', { conversationId , otherUID});
                   } else {
                     // Handle creating a new conversation if needed
                     // Navigate to the new conversation page
