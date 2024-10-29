@@ -50,6 +50,12 @@ const Account = ({route, navigation}) => {
               if (!querySnapshot.empty) {
                 const userDoc = querySnapshot.docs[0];
                 const userData = userDoc.data();
+                if (!userData.First) {
+                    userData.First = '';
+                    }
+                if (!userData.Last) {
+                    userData.Last = '';
+                    }
                 setUserData(userData);
               } else {
                 console.error('No user found with the given UID.');
@@ -77,10 +83,10 @@ const Account = ({route, navigation}) => {
                 />
               </View>
               <View style={{backgroundColor: 'white', borderRadius: 10, marginTop: 20, height: 200, width: 365, marginLeft: 20}}>
-                 <Text style={styles.label}> UserName :     {UserData.Username? UserData.Username : 'No Username Provided'}</Text>
-                 <Text style={styles.label}> Name :      {UserData.First? UserData.First : 'No'} {UserData.last? UserData.Last : 'Name Provided'}</Text>
-                  <Text style={styles.label}> Email :     {UserData.Email? UserData.Email: 'No Email Provided'}</Text>
-                  <Text style={styles.label}> Address :     {UserData.userPreferences? UserData.userPreferences.address : 'No Address Provided'}</Text>
+                 <Text style={styles.label}> UserName :     {UserData.Username? UserData.Username : 'User'}</Text>
+                 <Text style={styles.label}> Name :      {UserData.First} {UserData.Last}</Text>
+                  <Text style={styles.label}> Email :     {UserData.Email? UserData.Email: 'Not Given'}</Text>
+                  <Text style={styles.label}> Address :     {UserData.userPreferences? UserData.userPreferences.address : 'Not Given'}</Text>
                   
                  
 
