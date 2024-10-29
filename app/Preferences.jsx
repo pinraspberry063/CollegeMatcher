@@ -67,7 +67,7 @@ const Preferences = ({ navigation }) => {
   return (
     <View styles={styles.container}>
       <TouchableOpacity styles={styles.container}>
-        <Text style={styles.item}>Multi Factor Authentication</Text>
+        <Text style={styles.preferenceText}>Multi Factor Authentication</Text>
         <Switch
         value={isMfaEnabled}
         onValueChange={setIsMfaEnabled}
@@ -92,7 +92,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   preferenceText: {
-    fontSize: 18,
+    fontSize: 25,
+    marginTop: 10,
   },
 });
 

@@ -603,10 +603,12 @@ const determineNextScreen = () => {
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
+              color='black'
             />
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={styles.toggleButton}
+              color='black'
             >
               <Text >{showPassword ? 'Hide' : 'Show'}</Text>
             </TouchableOpacity>
@@ -756,6 +758,7 @@ const styles = StyleSheet.create({
   },
   toggleButton: {
     padding: 10,
+    color: '#fff',
   },
   mfaContainer: {
     marginTop: 20,
