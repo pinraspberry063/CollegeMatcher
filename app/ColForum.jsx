@@ -475,7 +475,7 @@ const ColForum = ({route, navigation}) => {
    if (currentReportData) {
      try {
        await handleBanUser(
-         currentReportData.threadId,
+         null,
          currentReportData.reportedUsername,
          currentReportData.reason,
          currentReportData.content
@@ -948,10 +948,10 @@ const ColForum = ({route, navigation}) => {
       alignItems: 'center',
       elevation: 8,
     },
-    floatingButtonImage: {
-      width: 30,
-      height: 30,
-    },
+  floatingButtonImage: {
+    width: 30,
+    height: 30,
+  },
   imageContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1144,6 +1144,24 @@ const ColForum = ({route, navigation}) => {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  threadInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 10,
+  },
+  threadCreatedAt: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  reportButton: {
+    padding: 5,
+  },
+  iconButton: {
+    width: 24,
+    height: 24,
   },
 });
 

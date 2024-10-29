@@ -123,6 +123,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="ProfilePage" component={ProfilePage} />
     <HomeStack.Screen name="AI" component={AIStackScreen} />
     <HomeStack.Screen name="ModeratorScreen" component={ModeratorScreen} />
+    <HomeStack.Screen name="UserActivityScreen" component={UserActivityScreen} />
   </HomeStack.Navigator>
 );
 

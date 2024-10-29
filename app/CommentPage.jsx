@@ -271,8 +271,12 @@ const resetAddPostForm = () => {
   };
 
   // Report handling
-  const handleReportSubmission = (reportType, postId, reportedUsername) => {
-    setCurrentReportData({ reportType, postId, reportedUsername });
+  const handleReportSubmission = (reportType, threadId, postId = null, reportedUsername, content) => {
+    if (reportedUsername === username) {
+      Alert.alert('Error', 'You cannot report your own content.');
+      return;
+    }
+    setCurrentReportData({ reportType, threadId, postId, reportedUsername, content });
     setIsReportModalVisible(true);
   };
 
@@ -350,7 +354,7 @@ const resetAddPostForm = () => {
     if (currentReportData) {
       try {
         await handleBanUser(
-          currentReportData.postId,
+          null,
           currentReportData.reportedUsername,
           currentReportData.reason,
           currentReportData.content

@@ -167,20 +167,22 @@ export const fetchUserActivity = async (reportedUser) => {
     console.log(`Total user posts found: ${postsSnapshot.size}`);
 
     postsSnapshot.forEach((postDoc) => {
-      const postPath = postDoc.ref.path; // e.g., Forums/College A/subgroups/Subgroup 1/threads/Thread 1/posts/Post 1
+      const postPath = postDoc.ref.path;
       const pathSegments = postPath.split('/');
 
       if (pathSegments.length >= 8) {
         const collegeName = pathSegments[1];
         const subgroupName = pathSegments[3];
         const threadId = pathSegments[5];
+        const postData = postDoc.data();
 
         userActivity.posts.push({
           id: postDoc.id,
           threadId,
           collegeName,
           subgroupName,
-          ...postDoc.data(),
+          imageUrls: postData.imageUrls || [], // Explicitly include imageUrls
+          ...postData,
         });
       } else {
         console.warn(`Unexpected post path structure: ${postPath}`);

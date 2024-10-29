@@ -116,6 +116,7 @@ const Login = ({ navigation }) => {
       return;
     }
 
+
     try {
       let userCredential;
       if (isValidEmail(identifier)) {

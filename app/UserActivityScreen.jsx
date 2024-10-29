@@ -15,21 +15,34 @@ const UserActivityScreen = ({ route }) => {
       {type === 'thread' && (
         <>
           <Text style={styles.itemTitle}>{item.title}</Text>
-          {item.imageUrls && item.imageUrls.map((imageUrl, index) => (
-            <Image key={index} source={{ uri: imageUrl }} style={styles.image} />
-          ))}
+          {item.imageUrls && item.imageUrls.length > 0 ? (
+            item.imageUrls.map((imageUrl, index) => (
+              <View key={index} style={styles.imageContainer}>
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={styles.image}
+                  onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
+                />
+              </View>
+            ))
+          ) : null}
         </>
       )}
       {type === 'post' && (
         <>
           <Text>{item.content}</Text>
-          {item.images && item.images.map((imageUrl, index) => (
-            <Image key={index} source={{ uri: imageUrl }} style={styles.image} />
-          ))}
+          {item.imageUrls && item.imageUrls.length > 0 ? (
+            item.imageUrls.map((imageUrl, index) => (
+              <View key={index} style={styles.imageContainer}>
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={styles.image}
+                  onError={(e) => console.log('Image loading error:', e.nativeEvent.error)}
+                />
+              </View>
+            ))
+          ) : null}
         </>
-      )}
-      {type === 'message' && (
-        <Text>{item.content}</Text>
       )}
       <Text>Created At: {item.createdAt && item.createdAt.toDate ? item.createdAt.toDate().toLocaleString() : 'Unknown'}</Text>
       <Text>Created By: {item.createdBy || 'Unknown'}</Text>
@@ -49,12 +62,6 @@ const UserActivityScreen = ({ route }) => {
       <FlatList
         data={userActivity.posts}
         renderItem={({ item }) => renderItem({ item, type: 'post' })}
-        keyExtractor={item => item.id}
-      />
-      <Text style={styles.sectionTitle}>Messages:</Text>
-      <FlatList
-        data={userActivity.messages}
-        renderItem={({ item }) => renderItem({ item, type: 'message' })}
         keyExtractor={item => item.id}
       />
     </View>
@@ -87,11 +94,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  imageContainer: {
+    marginVertical: 8,
+    alignItems: 'center',
+  },
   image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'cover',
-    marginVertical: 10,
+    width: 300,
+    height: 300,
+    resizeMode: 'contain',
+    borderRadius: 8,
   },
 });
 
