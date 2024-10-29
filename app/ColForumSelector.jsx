@@ -41,7 +41,7 @@ const ColForumSelector = ({ navigation }) => {
     };
 
     fetchCommittedColleges();
-  }, [user]);
+  }, [colleges]);
 
   const handleNavigation = async (collegeName) => {
     // Navigate to the ForumSelect screen for the selected college
