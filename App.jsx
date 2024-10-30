@@ -126,7 +126,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Account" component={Account} />
     <HomeStack.Screen name="Picker" component={Picker}  />
     <HomeStack.Screen name="Preferences" component={Preferences} />
-    <HomeStack.Screen name="QuizButton" component={QuizStackScreen} />
+    <HomeStack.Screen name="QuizButton" component={Quiz} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
     <HomeStack.Screen name="EditCollege" component={EditCollege} />
@@ -148,13 +148,16 @@ const MessageStackScreen = () => (
 );
 
 const QuizStack = createNativeStackNavigator();
-const QuizStackScreen = () => (
-  <QuizStack.Navigator screenOptions={screenOptions}>
-    <QuizStack.Screen name="Quiz" component={Quiz} />
-    <QuizStack.Screen name="Results" component={Results} />
-    <QuizStack.Screen name="Details" component={Details} />
-  </QuizStack.Navigator>
-);
+const QuizStackScreen = () => {
+ 
+  (
+    <QuizStack.Navigator screenOptions={screenOptions}>
+      <QuizStack.Screen name="Quiz" component={Quiz} />
+      <QuizStack.Screen name="Results" component={Quiz}/>
+      <QuizStack.Screen name="Details" component={Details} />
+    </QuizStack.Navigator>
+  );
+}
 
 
 const ResultStack = createNativeStackNavigator();
@@ -278,34 +281,37 @@ const TabScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [shouldHideTabBar, setShouldHideTabBar] = useState(true);
   const [first, setFirst] = useState(true);
-  // const user = auth().currentUser.uid;
+  const user = auth().currentUser.uid;
 
   useEffect(() => {
     const checkQuiz = async () => {
       const usersRef = collection(firestore, 'Users');
-      const userQuery = query(
-        usersRef,
-        where('User_UID', '==', auth().currentUser.uid),
-      );
+      // const userQuery = query(
+      //   usersRef,
+      //   where('User_UID', '==', auth().currentUser.uid),
+      // );
       try {
-        const querySnapshot = await getDocs(userQuery);
+        // const querySnapshot = await getDocs(userQuery);
 
-        if (!querySnapshot.empty) {
-          const firstDoc = querySnapshot.docs[0];
-          const collegeData = firstDoc.data();
-          const top100 = collegeData.top100Colleges;
+        // if (!querySnapshot.empty) {
+        //   const firstDoc = querySnapshot.docs[0];
+        //   const collegeData = firstDoc.data();
+        //   const top100 = collegeData.top100Colleges;
+          await getDoc(doc(collection(firestore, "Users"), auth().currentUser.uid))
+          .then( d => {
+            const userData = d.data();
+            const top100 = userData.top100Colleges;
+            setTopColleges(top100);
+          })
 
-          setTopColleges(top100);
-        } else {
-          console.log('No matching document found.');
-        }
+        
         setIsLoading(false);
       } catch (error) {
         console.error('Error retrieving document:', error);
       }
     };
     checkQuiz();
-  }, [topColleges, isLoading]);
+  }, [ topColleges,isLoading]);
 
   // Function to determine tab bar visibility
   const handleTabVisibility = (route) => {

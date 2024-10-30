@@ -21,6 +21,9 @@ import * as Progress from 'react-native-progress';
 import {Circle, Svg} from 'react-native-svg'
 import FastImage from 'react-native-fast-image';
 import {generateCircleData} from '../components/createCircleGraphic'
+import computeDiverse from '../assets/diversity_data';
+import Piechart from '../components/pieChart';
+import GenderChart from '../components/genderChart';
 
 const firestore = getFirestore(db);
 const usersRef = collection(firestore, 'Users');
@@ -60,9 +63,11 @@ const Demographics = ({navigation, collegeID}) => {
 const college = collegeID;
 const [sToF, setSToF] = useState(collegeID.student_to_Faculty_Ratio);
 const [userPref, setUserPref] = useState([]);
+const genPercentages = [collegeID.percent_male, collegeID.percent_women]
 const [circleData, setCircleData] = useState(generateCircleData(collegeID.student_to_Faculty_Ratio));
 const user = auth().currentUser.uid;
 const [majors, setMajors] = useState(unique_Majors({collegeID: collegeID}));
+const [percentages, setPercentages] = useState(computeDiverse({college: collegeID}));
 
 // useEffect(()=> {
 //     const func = () => {
@@ -174,8 +179,9 @@ return (
     
     
     <Text style={styles.subTitle}>Diversity: </Text>
-    <Text style={{color: '#eae8e5'}}> To Be Calculated </Text>
-    <Text></Text>
+        <Piechart percentages={percentages} />
+    <Text style={styles.subTitle}>Gender Breakdown: </Text>
+        <GenderChart percentages={genPercentages}/>
     </View>
     </FastImage>
 );
@@ -204,7 +210,7 @@ swipView: {
 contentContainer: {
     paddingLeft: 20,
     width: '100%',
-    height: 1500,
+    height: 3000,
     // justifyContent: 'center',
     // alignContent: 'center',
 },

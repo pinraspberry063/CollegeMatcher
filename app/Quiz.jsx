@@ -246,13 +246,13 @@ const Quiz = ({navigation}) => {
     //        };
     //    await deleteItem(auth().currentUser.uid);
 
-        try {
-            await setDoc(doc(collection(firestore, "Users"), auth().currentUser.uid), {userPreferences: answers, User_UID: auth().currentUser.uid},
-            {merge: true});
-            alert('Quiz submitted successfully!');
-        } catch (error) {
-            console.error('Error adding document: ', error);
-        }
+        // try {
+        //     await setDoc(doc(collection(firestore, "Users"), auth().currentUser.uid), {userPreferences: answers, User_UID: auth().currentUser.uid},
+        //     {merge: true});
+        //     alert('Quiz submitted successfully!');
+        // } catch (error) {
+        //     console.error('Error adding document: ', error);
+        // }
 
         const result = (await matchColleges(answers, colleges)).top100;
         navigation.navigate('QuizStack', { top100: result });

@@ -49,7 +49,7 @@ const usersRef = collection(firestore, 'Users');
 
 
 const Results = ({route, navigation}) => {
-  const top100 = route.params?.top100 || []; // Default to an empty array if top100 is undefined
+  const top100 = route.params.top100 // Default to an empty array if top100 is undefined
   // const user = auth().currentUser.uid;
   const { user } = useContext(UserContext);  // Get the current user from UserContext
   const [committedColleges, setCommittedColleges] = useState([]);
@@ -362,7 +362,7 @@ const renderItem = ({ item }) => {
         {showFilter &&
 
             <View style={styles.filterView}>
-              <ScrollView style={{width: '98%' }}>
+              <ScrollView >
                 <View style={styles.checkboxContainer} >
                   <CheckBox
                     value={housing}
@@ -423,7 +423,7 @@ const renderItem = ({ item }) => {
                             <TouchableOpacity onPress={() => {
                               setSelMajors(prevChoices => prevChoices.filter((_, i) => i !== index));
                             }}>
-                              <Text>X</Text>
+                              <Text style={styles.delete}>x</Text>
                             </TouchableOpacity>
                           </View>
                         ))}
@@ -436,9 +436,9 @@ const renderItem = ({ item }) => {
 
                   {major &&
 
-                    <View style={{flex:1,width:'95%'}}>
+                    <View style={styles.dropdown}>
                       <DropdownComponent
-                        style={{width: '75%', marginLeft: 15}}
+                       
                         data={majorData}
                         value={selMajors}
                         onChange={(val) => {
@@ -465,7 +465,7 @@ const renderItem = ({ item }) => {
                             <TouchableOpacity onPress={() => {
                               setStateChoice(prevChoices => prevChoices.filter((_, i) => i !== index));
                             }}>
-                              <Text>X</Text>
+                              <Text>x</Text>
                             </TouchableOpacity>
                           </View>
                         ))}
@@ -477,10 +477,10 @@ const renderItem = ({ item }) => {
                   </View>
 
                   {chooseState &&
-
-                    <View style={{flex:1, width:'95%'}}>
+                  
+                    <View style={styles.dropdown}>
                       <DropdownComponent
-                        style={{ marginLeft: 15}}
+                        
                         data={stateData}
                         value={stateChoice}
                         onChange={(val) => {
@@ -488,6 +488,7 @@ const renderItem = ({ item }) => {
                         }}
                       />
                     </View>
+               
                   }
                 <View style={styles.checkboxContainer} >
                   <CheckBox
@@ -627,7 +628,7 @@ const renderItem = ({ item }) => {
       color: '#dbdada',
     },
     dropdown: {
-      width: 100,
+      width: '50%',
     },
     button: {
       width: 20,
@@ -662,13 +663,14 @@ const renderItem = ({ item }) => {
       justifyContent: 'center'
     },
     filterView: {
-      width: '95%',
+      width: '98%',
+      borderRadius: 10,
       height: 600,
       borderBlockColor: 'green',
       backgroundColor: 'white',
       justifyContent: 'flex-start',
       alignItems: 'flex-start',
-      paddingTop: 15,
+      padding: 15,
       marginTop: 10
     },
      checkboxContainer:{
@@ -682,12 +684,19 @@ const renderItem = ({ item }) => {
     },
     label: {
       margin: 8,
-      color: 'black'
+      color: 'black',
+      borderRadius: 10
     },
     choices: {
       flexDirection: 'row',
 
       width: '90%'
+    },
+    delete:{
+      alignSelf: 'flex-end',
+      fontWeight: 'bold',
+      paddingLeft: 10
+      
     },
     choiceBox: {
       width: 125,
@@ -696,7 +705,11 @@ const renderItem = ({ item }) => {
       borderWidth: 1,
       margin: 8,
       alignSelf: 'center',
-      flexDirection: 'row'
+      flexDirection: 'row', 
+      borderRadius: 10, 
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding:5
     },
     input: {
       height: 30,

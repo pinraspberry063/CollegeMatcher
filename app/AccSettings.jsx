@@ -8,6 +8,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { UserContext } from '../components/UserContext';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { Ionicons } from '@expo/vector-icons';
 
 const firestore = getFirestore(db);
 
@@ -65,16 +66,31 @@ const Account = ({route, navigation}) => {
         return (
           <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
             <View style={{flex:1}}>
-              <View style={{backgroundColor: '#2a272e'}}>
-                <MaterialCommunityIcons name={'settings'} size={50} color={'white'} style={{alignSelf: 'flex-start'}} onPress={() => {navigation.navigate('Settings')}}/>
-                <MaterialCommunityIcons name={'pencil'} size={50} color={'white'} style={{alignSelf: 'flex-end'}} onPress={() => {setEdit(!edit)}}/>
+              <View style={{backgroundColor: '#2a272e', flexDirection: 'row', justifyContent: 'space-between', padding: 5
+              }}>
+                <Ionicons name={'settings-outline'} size={40} color={'white'} style={{alignSelf: 'flex-start'}} onPress={() => {navigation.navigate('Settings')}}/>
+                <MaterialCommunityIcons name={'pencil'} size={40} color={'white'} style={{alignSelf: 'flex-end'}} onPress={() => {setEdit(!edit)}}/>
               </View>
               <View style={{backgroundColor:'#8b2dc2', paddingBottom: 20, paddingTop: 20, borderBlockColor: '#2a272e', borderWidth: 1}}>
+                
                 <Image
                 style={styles.profile}
                 source={{uri: url}
                 }
                 />
+                {edit && (
+                    <MaterialCommunityIcons
+                        name={'camera'}
+                        color={'white'}
+                        size={40}
+                        style={{
+                            position: 'absolute',
+                            bottom: 20, // Adjust as needed
+                            right: 110,  // Adjust as needed
+                        }}
+                        onPress={() => navigation.navigate('Picker')}
+                    />
+                )}
               </View>
               <View style={{backgroundColor: 'white', borderRadius: 10, marginTop: 20, height: 200, width: 365, marginLeft: 20}}>
                  <Text style={styles.label}> UserName :     {UserData.Username? UserData.Username : 'No Username Provided'}</Text>
