@@ -6,7 +6,7 @@ const Piechart = ({percentages}) =>  {
   
     const widthAndHeight = 200
     const series = percentages
-    const sliceColor = [ '#8a05f7','#05aff7', '#ffb300', '#ff9100', '#ff00fb' , '#00ff77','#00ffdd', '#fbd203']
+    const sliceColor = [ '#8a05f7','#05aff7', '#f7e705', '#c72246', '#ff00fb' , '#00ff77','#00ffdd', '#f77e05']
 
     return (
       <ScrollView style={{ flex: 1 }}>
@@ -19,13 +19,9 @@ const Piechart = ({percentages}) =>  {
 }
 export default Piechart
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 40
-  },
-  title: {
-    fontSize: 24,
-    margin: 10,
-  },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        paddingTop: 0,
+      },
 })

@@ -1,6 +1,6 @@
 
 import React, {useContext, useEffect, useState} from 'react';
-const diverses = [
+export const diverses = [
     "AmericanIndian_or_AlaskaNative",
     'American_Nonresident',
     'NativeHawaiian_or_OtherPacificIslander',

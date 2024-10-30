@@ -3,6 +3,8 @@ import React, { useContext, useEffect, useState} from 'react';
 import Constants from 'expo-constants';
 import { CollegesContext } from '../components/CollegeContext';
 import FastImage from 'react-native-fast-image';
+import * as Progress from 'react-native-progress';
+
 
 
 const OverView = ({collegeID}) => {
@@ -15,18 +17,19 @@ const OverView = ({collegeID}) => {
     return (
       <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
       <View style={styles.contentContainer}>
-        <Text style={styles.subTitle}>Address: </Text>
-        <Text style= {{color: 'white'}}>
+        <Text style={styles.subTitle}>Address</Text>
+        <Text style= {{color: 'white', alignSelf: 'center', fontSize: 20}}>
           {collegeID.address}, {collegeID.city}, {collegeID.state}
         </Text>
   
-        <Text style={styles.subTitle}>Urbanization Level: </Text>
+        <Text style={styles.subTitle}>Urbanization Level</Text>
         <Text style= {{color: 'white'}}>
           {urbanLevel[1]} {urbanLevel[0]}
         </Text>
   
-        <Text style={styles.subTitle}>Admissions Rate: </Text>
-        <Text style= {{color: 'white'}}>{collegeID.adm_rate} %</Text>
+        <Text style={styles.subTitle}>Admissions Rate</Text>
+        <Text style= {{color: 'white', position: 'absolute', top: 300, right: 40, fontSize: 40}}>{collegeID.adm_rate} %</Text>
+        <Progress.Pie progress={(collegeID.adm_rate/100)} size={150} style={{marginLeft: 20, marginTop: 20}}/>
       </View>
       </FastImage>
     );
@@ -74,10 +77,12 @@ const OverView = ({collegeID}) => {
       fontSize: 16,
     },
     subTitle: {
-      fontSize: 25,
+      fontSize: 40,
       fontWeight: 'bold',
       fontStyle: 'italic',
       color: 'white',
-      marginTop: 10
+      marginVertical: 10,
+      alignSelf: 'center',
+  
     },
   });
