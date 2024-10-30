@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, Dimensions, TextInput, LogBox } from 'react-native';
 import React, { useEffect, useState, useContext } from 'react';
 import { Button } from 'react-native-elements';
 import auth from '@react-native-firebase/auth';
@@ -9,6 +9,8 @@ import { UserContext } from '../components/UserContext';
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
+
+LogBox.ignoreLogs([`ReactImageView: Image source "null" doesn't exist`]);
 
 const firestore = getFirestore(db);
 
@@ -84,6 +86,7 @@ const Account = ({route, navigation}) => {
                 source={{uri: url}
                 }
                 />
+                
                 {edit && (
                     <MaterialCommunityIcons
                         name={'camera'}
@@ -98,15 +101,68 @@ const Account = ({route, navigation}) => {
                     />
                 )}
               </View>
-              <View style={{backgroundColor: 'white', borderRadius: 10, marginTop: 20, height: 200, width: 365, marginLeft: 20}}>
-                 <Text style={styles.label}> UserName :     {UserData.Username? UserData.Username : 'User'}</Text>
-                 <Text style={styles.label}> Name :      {UserData.First} {UserData.Last}</Text>
-                  <Text style={styles.label}> Email :     {UserData.Email? UserData.Email: 'Not Given'}</Text>
-                  <Text style={styles.label}> Address :     {UserData.userPreferences? UserData.userPreferences.address : 'Not Given'}</Text>
-                  
-                 
+              
+              <View style={{backgroundColor: 'white', borderRadius: 10, marginTop: 20, height: 475, width: '90%', marginLeft: 20}}>
+                <View style={styles.property}>
+                    <Text style={[styles.label]}> UserName :</Text>
+                    <Text style={[styles.label, {alignSelf: 'flex-end', paddingRight: 10, marginBottom: 5}]}>{UserData.Username? UserData.Username : 'User'}</Text>
+                </View>
+                <View style={styles.property}>
+                    <Text style={[styles.label]}> Name :</Text>
+                    <Text style={[styles.label, {alignSelf: 'flex-end', paddingRight: 10, marginBottom: 5}]}>{(UserData.First == '' && UserData.Last == '' )? 'Not Given' : UserData.First + " " + UserData.Last}</Text>
+                </View>
+                <View style={styles.property}>
+                    <Text style={[styles.label]}> Email :</Text>
+                    <Text style={[styles.label, {alignSelf: 'flex-end',paddingRight: 10, marginBottom: 5}]}>{UserData.Email? UserData.Email: 'Not Given'}</Text>
+                </View>
+                <View style={styles.horixProperty}>
+                    <Text style={[styles.label]}> Address :</Text>
+                    {!edit &&
+                    <Text style={[styles.label, {height: 80}]}>{UserData.userPreferences? UserData.userPreferences.address : 'Not Given'}</Text>}
+                    
+                </View>
+                
 
               </View>
+              {
+              edit && 
+              <View style={[styles.editWindow]}>
+                <View style={styles.editProperty}>
+                    <Text style={[styles.editColor]}> UserName :</Text>
+                    <TextInput 
+                      style={[styles.editTextInput]} 
+                      placeholder={UserData.Username? UserData.Username : 'User'}
+                      placeholderTextColor={'#cacfce'}
+                    />
+                </View>
+                <View style={styles.editProperty}>
+                    <Text style={[styles.editColor]}> Name :</Text>
+                    <TextInput 
+                      style={[styles.editTextInput]} 
+                      placeholder={(UserData.First == '' && UserData.Last == '' )? 'Not Given' : UserData.First + " " + UserData.Last}
+                      placeholderTextColor={'#cacfce'}
+                    />
+                </View>
+                <View style={styles.editProperty}>
+                    <Text style={[styles.editColor]}> Email :</Text>
+                    <TextInput 
+                      style={[styles.editTextInput]} 
+                      placeholder={UserData.Email? UserData.Email: 'Not Given'}
+                      placeholderTextColor={'#cacfce'}
+                    />
+                </View>
+                <View style={[styles.horixProperty, {borderColor: 'white'}]}>
+                    <Text style={[styles.editColor]}> Address :</Text>
+                    <TextInput 
+                      style={[styles.edithorix, {height: 80}]} 
+                      placeholder={UserData.userPreferences? UserData.userPreferences.address : 'Not Given'}
+                      placeholderTextColor={'#cacfce'}
+                    />
+                </View>
+                
+
+              </View>
+              }
                 
                 
             </View>
@@ -139,15 +195,98 @@ const styles = StyleSheet.create({
   label:{
     color: 'black', 
     alignSelf: 'flex-start', 
-    marginTop: 20,
-    paddingLeft: 10
+    paddingLeft: 10,
+    fontSize: 20,
+    fontWeight: 20,
+    paddingTop: 8
 
   }, 
   field:{
     color: 'black', 
     alignSelf: 'flex-end', 
     paddingRight: 10
-  }
+  },
+  property:{
+    borderWidth: 1,
+    borderColor: 'black',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginLeft: 15,
+    marginTop: 10,
+    borderRadius: 10,
+    height: 40
+  },
+  horixProperty:{
+    borderWidth: 1,
+    borderColor: 'black',
+
+    width: '90%',
+    marginLeft: 15,
+    marginTop: 10,
+    borderRadius: 10,
+    height: 100
+
+  },
+  editWindow:{
+    width: '90%', 
+    alignSelf: 'center', 
+    borderRadius: 10, 
+    height: 475, 
+    backgroundColor: 'black', 
+    borderWidth: 1, 
+    borderColor: 'white',
+    position: 'absolute', 
+    top: 318, 
+    opacity: 10
+     
+  
+    
+
+  },
+  editColor: {
+    color: 'white', 
+    alignSelf: 'flex-start', 
+    paddingLeft: 10,
+    fontSize: 20,
+    fontWeight: 'bold',
+    paddingTop: 10, 
+    marginBottom: 2
+
+  },
+  editProperty:
+  {
+    borderWidth: 1,
+    borderColor: 'white',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
+    marginLeft: 15,
+    marginTop: 10,
+    borderRadius: 10,
+    height: 40
+
+  }, 
+  editTextInput:{
+    color: 'white', 
+    alignSelf: 'flex-end', 
+    fontSize: 20,
+    position: 'absolute', 
+    right: 6,
+    top: 0.05
+
+
+  },
+  edithorix:{
+    color: 'white', 
+    alignSelf: 'flex-end', 
+    fontSize: 20,
+    position: 'absolute', 
+    left: 5,
+    top: 15, 
+    width: '90%'
+
+  },
 
 
 });

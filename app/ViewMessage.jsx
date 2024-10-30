@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect,useCallback } from 'react';
 import { StyleSheet, Text, FlatList, View, ScrollView, Button, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig';
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, getDoc, doc } from 'firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import { UserContext } from '../components/UserContext';
 import FastImage from 'react-native-fast-image';
@@ -18,6 +18,7 @@ const ViewMessage = ( { navigation } ) => {
   const [otherName, setOtherName] = useState('');
   const [activeMessages, setActiveMessages] = useState([]);
   const [userNames, setUserNames] = useState([]);
+  const [newMessages, setNewMessages] = useState([]);
   const [isRecruiter, setIsRecruiter] = useState(false);
 
          //console.log("LOOP");
@@ -75,6 +76,40 @@ const ViewMessage = ( { navigation } ) => {
           fetchActiveMessages();
         }, []);
 
+        useEffect(() => {
+          const fetchOtherUsers = async () => {
+      
+            try {
+              await getDoc(doc(collection(firestore, 'Users'), user.uid))
+              .then(rm => {
+                const messages = [];
+                const data = rm.data()
+                const top5Room = data.top5Roomates;
+                top5Room.map(async(roomi)=> {
+                  const qry = query(collection(firestore, 'Users'), where('User_UID', '==',roomi.roomate_uid ))
+                  const matches = await getDocs(qry);
+
+                  if(!matches.empty){
+                    const suggested = matches.docs[0];
+                    const suggData = suggested.data();
+                    messages.push(suggData);
+                    console.log(messages.length)
+                  
+                  }
+                
+                })
+                setNewMessages(messages);
+              })
+             
+            } catch (error) {
+              console.error('Error fetching usernames:', error);
+              Alert.alert('Error', 'Something went wrong while fetching usernames.');
+            }
+          };
+      
+          fetchOtherUsers();
+        }, []);
+
         const handleMessageNavigation = useCallback(
           async (userUID, otherUID) => {
             const firestore = getFirestore(db);
@@ -104,7 +139,14 @@ const ViewMessage = ( { navigation } ) => {
                   } else {
                     // Handle creating a new conversation if needed
                     // Navigate to the new conversation page
-                    console.log("Creating new recruiter conversation...");
+                    
+                    const newConvoRef = await addDoc(collection(firestore, 'Messaging'), {
+                      Roomate_UID: roomateUID,
+                      User_UID: userUID,
+                    });
+
+                    // Create a sub-collection 'conv' within the new conversation document
+                    await addDoc(collection(newConvoRef, 'conv'), {});
                   }
                   return;
                 }
@@ -125,17 +167,13 @@ const ViewMessage = ( { navigation } ) => {
               const existingConvoInSnapshot = await getDocs(existingConvoInQuery);
               const existingConvoOutSnapshot = await getDocs(existingConvoOutQuery);
         
-              if (!existingConvoInSnapshot.empty || !existingConvoOutSnapshot.empty) {
                 // Navigate to the existing roommate conversation
                 const conversationId = !existingConvoInSnapshot.empty
                   ? existingConvoInSnapshot.docs[0].id
                   : existingConvoOutSnapshot.docs[0].id;
                   
                 navigation.navigate('RoomateMessage', { conversationId });
-              } else {
-                // Handle creating a new conversation if needed
-                console.log("Creating new roommate conversation...");
-              }
+              
             } catch (error) {
               console.error("Error navigating to conversation:", error);
             }
@@ -162,7 +200,7 @@ const ViewMessage = ( { navigation } ) => {
                         <Button
                             style={styles.button}
                             onPress={() => handleMessageNavigation(user.uid,item.User_UID)}
-                            title="Message"
+                            title="Send Message"
                         />
                     </View>
                 )
@@ -176,6 +214,13 @@ const ViewMessage = ( { navigation } ) => {
             <Text style={styles.title}>Currently Active Conversations</Text>
             <FlatList
                 data={userNames}
+                renderItem={renderItem}
+                //keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={styles.list}
+            />
+            <Text style={styles.title}>Suggested</Text>
+            <FlatList
+                data={newMessages}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}

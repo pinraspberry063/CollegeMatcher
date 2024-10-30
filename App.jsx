@@ -127,6 +127,7 @@ const HomeStackScreen = () => (
     <HomeStack.Screen name="Picker" component={Picker}  />
     <HomeStack.Screen name="Preferences" component={Preferences} />
     <HomeStack.Screen name="QuizButton" component={Quiz} />
+    <HomeStack.Screen name="QuizResults" component={ResultStackScreen} />
     <HomeStack.Screen name="AddRecs" component={AddRecs} />
     <HomeStack.Screen name="FavColleges" component={FavColleges} />
     <HomeStack.Screen name="EditCollege" component={EditCollege} />

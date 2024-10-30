@@ -255,7 +255,7 @@ const Quiz = ({navigation}) => {
         // }
 
         const result = (await matchColleges(answers, colleges)).top100;
-        navigation.navigate('QuizStack', { top100: result });
+        navigation.navigate('QuizResults', { Top100: result });
     };
     
     const renderPageOne = () => (

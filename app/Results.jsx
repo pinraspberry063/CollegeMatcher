@@ -356,7 +356,7 @@ const renderItem = ({ item }) => {
                 <Text style={[{color: 'white'}]}>Search</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={showFilters} style={{ borderBlockColor: 'white', borderWidth: 2, width: 175, marginLeft: 10, borderRadius: 10, marginTop: 10}}>
+        <TouchableOpacity onPress={showFilters} style={{ borderColor: 'white', borderWidth: 2, width: 175, marginLeft: 10, borderRadius: 10, marginTop: 10}}>
               <Text style={{color: 'white', fontSize: 20, marginLeft: 20, marginTop: 10}}> Filter Search</Text>
           </TouchableOpacity>
         {showFilter &&

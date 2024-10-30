@@ -114,7 +114,10 @@ export const unique_Majors = ({collegeID}) => {
           uniqueMajors.forEach(major => {
               const field = 'percent_' + major;
               const percent = collegeID[field];
-              uniqueMajorPercents.push([major, percent]);
+              if( percent != 0){
+                uniqueMajorPercents.push([major, percent]);
+              }
+              
               
           });
   

@@ -179,7 +179,7 @@ const MakkAI = () => {
                   style={[styles.input]}
                   value={input}
                   onChangeText={setInput}
-                  placeholder="Chat with an AI assistant about your college questions!"
+                  placeholder="Chat with MAKK AI..."
                   placeholderTextColor='white'
                   color='white'
               />

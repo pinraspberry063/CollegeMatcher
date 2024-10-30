@@ -172,7 +172,7 @@ return (
             ))}
         </Svg>
         <View style={{paddingVertical: 20}}>
-            <Text style={styles.subTitle}>Major Break Down</Text>
+           {majors.length != 0 &&  <Text style={styles.subTitle}>Major Break Down</Text>}
             {majors.map((major, index) => (
                  
                     <View style={[styles.legend, {flexDirection: 'column', paddingVertical: 5, paddingRight: 100}]}>
