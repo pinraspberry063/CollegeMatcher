@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, FlatList,Button, ScrollView, Alert, LogBox } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, updateDoc, query, getDocs, doc, where, addDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { UserContext } from '../components/UserContext';
+
+LogBox.ignoreLogs(['(RoomateMatcher/username)No user found with the given UID.']);
 
 const RoomateResults = ({ route, navigation }) => {
     const top5  = route.params.top5;
