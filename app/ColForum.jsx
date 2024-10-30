@@ -607,9 +607,14 @@ const ColForum = ({route, navigation}) => {
 
                 <View style={styles.threadInfoRow}>
                   <Text style={styles.threadCreatedAt}>
-                    Created at: {thread.createdAt.toDate().toLocaleString()}
+                    {thread.createdAt.toDate().toLocaleString()}
                   </Text>
-                  {thread.createdBy !== username && (  // Only show report button if not the creator
+
+                </View>
+
+                <View style={styles.buttonContainer}>
+                {/* Report Button */}
+                {thread.createdBy !== username && (  // Only show report button if not the creator
                     <TouchableOpacity
                       style={styles.reportButton}
                       onPress={() => handleReportSubmission('thread', thread.id, null, thread.createdBy, thread.title)}
@@ -617,10 +622,8 @@ const ColForum = ({route, navigation}) => {
                       <Image source={require('../assets/reportFlag.png')} style={styles.iconButton} />
                     </TouchableOpacity>
                   )}
-                </View>
 
-                <View style={styles.buttonContainer}>
-                {/* Add Post Button */}
+                {/* Add Post Button / Comments */}
                 <TouchableOpacity
                   onPress={() => navigation.navigate('CommentPage', {
                       threadId: thread.id,
@@ -719,6 +722,7 @@ const ColForum = ({route, navigation}) => {
               placeholder="Write your post..."
               value={newPostContent[selectedThreadId] || ''}
               onChangeText={(text) => setNewPostContent(prev => ({ ...prev, [selectedThreadId]: text }))}
+              color='white'
             />
             <Button title="Submit Post" onPress={() => handleAddPost(selectedThreadId)} />
             <Button title="Cancel" onPress={() => setIsAddPostModalVisible(false)} color="red" />
@@ -745,6 +749,7 @@ const ColForum = ({route, navigation}) => {
             value={newThreadTitle}
             onChangeText={setNewThreadTitle}
             multiline={true}
+            color='white'
           />
           <View style={styles.buttonContainer}>
               <TouchableOpacity  onPress={() => { toggleAddThread(); resetAddThreadForm(); }}>
