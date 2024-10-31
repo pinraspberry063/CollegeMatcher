@@ -42,7 +42,7 @@ const Account = ({route, navigation}) => {
 
             }
             func();
-        }, []);
+        }, [edit]);
 
         useEffect(()=>{
           const getUserInfo = async () => {

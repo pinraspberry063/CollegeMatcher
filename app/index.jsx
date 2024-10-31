@@ -104,12 +104,14 @@ const Index = ({ navigation }) => {
             accessibilityLabel="Take the quiz to be matched with colleges automatically"
           /> */}
 
-          {isSuperRec && (
-            <>
+          
+        </View>
+        {isSuperRec && (
+            <View style={{padding: 20, paddingVertical:10 }}>
               <Button
-                style={[styles.button, { textShadowColor: 'purple' }]}
+                style={[styles.button, { textShadowColor: 'purple'}]}
                 onPress={() => {
-                  navigation.push('AddRecs');
+                  navigation.navigate('AddRecs');
                 }}
                 title="Add Recruiters to Institution"
                 color="#841584"
@@ -119,15 +121,14 @@ const Index = ({ navigation }) => {
               <Button
                 style={[styles.button, { textShadowColor: 'purple' }]}
                 onPress={() => {
-                  navigation.push('EditCollege', { collegeDocId });
+                  navigation.navigate('EditCollege', { collegeDocId });
                 }}
                 title="Edit College"
                 color="#841584"
                 accessibilityLabel="Edit your college details"
               />
-            </>
+            </View>
           )}
-        </View>
       </View>
     </FastImage>
   );

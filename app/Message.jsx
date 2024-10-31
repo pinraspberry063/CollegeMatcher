@@ -4,12 +4,14 @@ import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Alert, Modal, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { db } from '../config/firebaseConfig';
-import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs, getStorage } from 'firebase/firestore';
+import { getStorage, ref, getDownloadURL } from '@react-native-firebase/storage';
+import { collection, addDoc, doc, Timestamp, onSnapshot, query, orderBy, getFirestore, getDoc, where, getDocs } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { handleReport } from '../src/utils/reportUtils';
 import { Ionicons } from '@expo/vector-icons';
 import FastImage from 'react-native-fast-image';
 
+const firestore = getFirestore(db);
 const ReportModal = ({ isVisible, onClose, onSubmit }) => {
   const [selectedReason, setSelectedReason] = useState('');
   const reasons = [
@@ -201,6 +203,7 @@ const Message = ({ route, navigation }) => {
   }
 
   return (
+    <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
     <SafeAreaView style={styles.container}>
       
       <ScrollView style={styles.messagesContainer}>
@@ -274,6 +277,7 @@ const Message = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    </FastImage>
   );
 };
 

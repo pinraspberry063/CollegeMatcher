@@ -3,6 +3,7 @@ import { View, Text, FlatList, Button, TextInput, StyleSheet, Alert, Dimensions 
 import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { UserContext } from '../components/UserContext';
 import { db } from '../config/firebaseConfig';
+import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
@@ -166,6 +167,7 @@ const AddRecs = () => {
   };
 
   return (
+    <FastImage source={require('../assets/galaxy.webp')} style={styles.container}>
     <View style={styles.container}>
       {loading ? (
         <Text>Loading...</Text>
@@ -205,6 +207,7 @@ const AddRecs = () => {
         </>
       )}
     </View>
+    </FastImage>
   );
 };
 

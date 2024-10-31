@@ -6,6 +6,7 @@ import { getFirestore, collection, query, where, getDocs, getDoc, doc } from 'fi
 import auth from '@react-native-firebase/auth';
 import { UserContext } from '../components/UserContext';
 import FastImage from 'react-native-fast-image';
+import RecConvs from './RecConvs';
 
 const firestore = getFirestore(db);
 
@@ -218,14 +219,16 @@ const ViewMessage = ( { navigation } ) => {
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
             />
-            <Text style={styles.title}>Suggested</Text>
+            {/* <Text style={styles.title}>Suggested</Text>
             <FlatList
                 data={newMessages}
                 renderItem={renderItem}
                 //keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={styles.list}
-            />
+            /> */}
+           
         </SafeAreaView>
+        <RecConvs params={navigation}/>
       </FastImage>
     );
 };

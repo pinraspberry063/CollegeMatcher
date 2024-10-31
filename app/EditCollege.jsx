@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Alert, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Dimensions } from 'react-native';
 import { getFirestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import FastImage from 'react-native-fast-image';
 
 const firestore = getFirestore(db);
 const { width, height } = Dimensions.get('window'); // Get device dimensions
@@ -99,6 +100,7 @@ const EditCollege = ({ route, navigation }) => {
   }
 
   return (
+    <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
@@ -127,10 +129,17 @@ const EditCollege = ({ route, navigation }) => {
         <Button title="Save" onPress={handleSave} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </FastImage>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+    width: '100%',
+    height: '100%',
+  },
   container: {
     flex: 1,
     padding: width * 0.04, // Dynamic padding based on screen width

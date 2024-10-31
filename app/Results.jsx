@@ -94,7 +94,11 @@ const Results = ({route, navigation}) => {
   const [collegeImages, setCollegeImages] = useState({});
 
   useEffect(() => {
-    setCollegeList(data.slice(0, loadCount)); // Load initial colleges
+    if(data){
+      setCollegeList(data.slice(0, loadCount));
+    }else{
+      setCollegeList(colleges.slice(0, loadCount));
+    } // Load initial colleges
   }, [ loadCount]);
 
   const loadMoreColleges = () => {

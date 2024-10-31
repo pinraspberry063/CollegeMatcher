@@ -6,6 +6,7 @@ import {
     Button,
     TouchableOpacity,
     Image,
+    LogBox
   } from 'react-native';
   import React, {Suspense, useEffect, useState} from 'react';
   import Constants from 'expo-constants';
@@ -35,6 +36,8 @@ import {
   import Admissions from './Admissions'
   import  Demographics from './Demographics'
   import OverView from './Overview';
+
+  LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
 
   // Lazy load the tabs
 // const Admissions = import('./Admissions');

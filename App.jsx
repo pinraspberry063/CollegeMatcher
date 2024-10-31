@@ -141,9 +141,10 @@ const HomeStackScreen = () => (
 const MessageStack = createNativeStackNavigator();
 const MessageStackScreen = () => (
   <MessageStack.Navigator screenOptions={screenOptions}>
+    
     <MessageStack.Screen name="ViewMessage" component={ViewMessage} />
     <MessageStack.Screen name="RoomateMessage" component={RoomateMessage} />
-    <MessageStack.Screen name="RecConvs" component={RecConvs} />
+    {/* <MessageStack.Screen name="RecConvs" component={RecConvs} /> */}
     <MessageStack.Screen name="Message" component={Message} />
   </MessageStack.Navigator>
 );

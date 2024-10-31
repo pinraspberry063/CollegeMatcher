@@ -26,10 +26,14 @@ const OverView = ({collegeID}) => {
         <Text style= {{color: 'white'}}>
           {urbanLevel[1]} {urbanLevel[0]}
         </Text>
-  
-        <Text style={styles.subTitle}>Admissions Rate</Text>
-        <Text style= {{color: 'white', position: 'absolute', top: 300, right: 40, fontSize: 40}}>{collegeID.adm_rate} %</Text>
-        <Progress.Pie progress={(collegeID.adm_rate/100)} size={150} style={{marginLeft: 20, marginTop: 20}}/>
+        {!(collegeID.adm_rate == 'null') &&
+          <>
+          <Text style={styles.subTitle}>Admissions Rate</Text>
+          <Text style= {{color: 'white', position: 'absolute', top: 300, right: 40, fontSize: 40}}>{collegeID.adm_rate} %</Text>
+          <Progress.Pie progress={(collegeID.adm_rate/100)} size={150} style={{marginLeft: 20, marginTop: 20}}/>
+          </>
+        }
+        
       </View>
       </FastImage>
     );

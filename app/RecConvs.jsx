@@ -165,7 +165,7 @@ const RecConvs = ({ navigation }) => {
   );
 
  return (
-  <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
+  // <FastImage source={require('../assets/galaxy.webp')} style={styles.background}>
     <SafeAreaView style={styles.container}>
       <Text style={[styles.title, { color: '#fff' }]}>
         {isRecruiter ? 'Conversations with Users' : 'Available Recruiters'}
@@ -200,7 +200,7 @@ const RecConvs = ({ navigation }) => {
         )}
       </ScrollView>
     </SafeAreaView>
-    </FastImage>
+    // {/* </FastImage> */}
   );
 };
 

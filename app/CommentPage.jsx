@@ -509,9 +509,11 @@ const resetAddPostForm = () => {
          <TextInput
            style={styles.input}
            placeholder="Write your post here..."
+           placeholderTextColor={'white'}
            value={newPostContent}
            onChangeText={setNewPostContent}
            multiline={true}
+           color={'white'}
          />
          <View style={styles.buttonContainer}>
              <TouchableOpacity  onPress={() => { toggleAddPost(); resetAddPostForm(); }}>
