@@ -55,7 +55,7 @@ const matchColleges = async (studentPreferences, colleges) => {
     // const querySnapshot = await getDocs(collegeDataRef);
     // const colleges = querySnapshot.docs.map(doc => doc.data());
 
-    const maxScore = 165;
+    const maxScore = 150;
   
     const userCoords = await geoCodeAddress(studentPreferences.address);
   
