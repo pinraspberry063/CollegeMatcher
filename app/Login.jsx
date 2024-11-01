@@ -117,15 +117,16 @@ const Login = ({ navigation }) => {
       return;
     }
 
-    if (!password) {
-        Alert.alert('Input Error', 'Please enter your password.');
-        return;
-    }
+
 
     try {
       let userCredential;
       if (isValidEmail(identifier)) {
         // Login with Email
+        if (!password) {
+                Alert.alert('Input Error', 'Please enter your password.');
+                return;
+            }
         userCredential = await auth().signInWithEmailAndPassword(identifier, password);
       } else if (isValidPhoneNumber(identifier)) {
         // Navigate to PhoneVerification screen
@@ -647,13 +648,13 @@ const determineNextScreen = () => {
               <Text style={styles.socialButtonText}>Continue with Facebook</Text>
             </TouchableOpacity>
 
-            {/* === Email Link Login === */}
-            <TouchableOpacity
-              style={[styles.socialButton, { backgroundColor: '#34A853' }]}
-              onPress={() => setIsEmailModalVisible(true)}
-            >
-              <Text style={styles.socialButtonText}>Continue with Email Link</Text>
-            </TouchableOpacity>
+{/*              */}{/* === Email Link Login === */}
+{/*             <TouchableOpacity */}
+{/*               style={[styles.socialButton, { backgroundColor: '#34A853' }]} */}
+{/*               onPress={() => setIsEmailModalVisible(true)} */}
+{/*             > */}
+{/*               <Text style={styles.socialButtonText}>Continue with Email Link</Text> */}
+{/*             </TouchableOpacity> */}
           </>
 
           {/* === Account Creation Button === */}
