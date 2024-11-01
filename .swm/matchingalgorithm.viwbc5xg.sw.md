@@ -77,4 +77,90 @@ const importanceMultiplier = (importance) => {
 
 </SwmSnippet>
 
+<SwmSnippet path="/src/utils/matchingAlgorithm.jsx" line="157">
+
+---
+
+When calculating the matches between a user and colleges, it takes account for each question. This is the snippet for matching user selected majors with the college's available majors to calculate a score based on the colleges that has the major and taking account its importance score the user selected. For each selected major, if the college offers it at a significant level (I chose  greater than 4% enrollment based on my own intuition), 25 points are added. Otherwise, 10 points are added for lower levels (0.1-3.99% which is also based on my own intuition). If no matching major is found, no points are awarded for majors at those colleges. The score is adjusted by the user's major importance preference to reflect its weight in the score.\
+(*This same process is used for each question to generate the points individually*)
+
+&nbsp;
+
+```javascript
+      // Major Offered Matching
+      if (studentPreferences.major.length > 0) {
+          const userSelectedMajors = studentPreferences.major;
+          let majorMatch = false;
+  
+          userSelectedMajors.forEach((major) => {
+              const majorInfo = majorData.find((m) => m.value === major);
+  
+              if (majorInfo && majorInfo.categories && college[majorInfo.categories]) {
+                const majorPercentage = parseFloat(college[majorInfo.categories]);
+  
+                if (majorPercentage > 4) {
+                  score += 25 * studentPreferences.major_importance;
+                  majorMatch = true;
+                }
+                else if (majorPercentage >= 0.1 && majorPercentage <= 3.99) {
+                  score += 10 * studentPreferences.major_importance;
+                  majorMatch = true;
+                }
+              }
+          });
+          if (!majorMatch) {
+              score += 0 * studentPreferences.major_importance;
+          }
+      }
+```
+
+---
+
+</SwmSnippet>
+
+<SwmSnippet path="/src/utils/matchingAlgorithm.jsx" line="379">
+
+---
+
+After all the scores are calculated for the colleges, it sorts the colleges by their matching score in descending order and selects the top 100 scoring colleges. Stores the top 100 colleges in the 'Users' collection in Firestore, associated with the current user's ID and preferences from the quiz. Each entry includes the college's name, score, and ID, with the document (in Firebase) merged if it already exists. Returns the top 50 colleges as a final result for display on the Results page.&nbsp;
+
+```javascript
+    scores.sort((a, b) => b.score - a.score);
+
+    const top100Colleges = scores
+      .map(s => ({
+        name: s.college.shool_name,
+        score: s.score,
+        id: s.college.school_id,
+      }));
+    const resultsRef = collection(firestore, 'Users');
+    const resultDoc = query(
+      resultsRef,
+      where('User_UID', '==', auth().currentUser.uid),
+    );
+    const docID = (await getDocs(resultDoc)).docs[0].ref;
+  
+    try {
+      await setDoc(
+        docID,
+        {
+          userPreferences: studentPreferences,
+          top100Colleges: top100Colleges
+        },
+        {merge: true},
+      );
+  
+      alert('Algo submitted successfully!');
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+    const top100 = top100Colleges.slice(0, 50);
+    return {top100};
+  };
+```
+
+---
+
+</SwmSnippet>
+
 <SwmMeta version="3.0.0" repo-id="Z2l0aHViJTNBJTNBQ29sbGVnZU1hdGNoZXIlM0ElM0FwaW5yYXNwYmVycnkwNjM=" repo-name="CollegeMatcher"><sup>Powered by [Swimm](https://app.swimm.io/)</sup></SwmMeta>
