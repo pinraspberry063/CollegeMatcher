@@ -228,7 +228,7 @@ const ViewMessage = ( { navigation } ) => {
             /> */}
            
         </SafeAreaView>
-        <RecConvs params={navigation}/>
+        <RecConvs navigation={navigation}/>
       </FastImage>
     );
 };

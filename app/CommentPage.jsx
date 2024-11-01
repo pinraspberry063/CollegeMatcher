@@ -513,7 +513,7 @@ const resetAddPostForm = () => {
            value={newPostContent}
            onChangeText={setNewPostContent}
            multiline={true}
-           color='#fff'
+           color={'#fff'}
          />
          <View style={styles.buttonContainer}>
              <TouchableOpacity  onPress={() => { toggleAddPost(); resetAddPostForm(); }}>

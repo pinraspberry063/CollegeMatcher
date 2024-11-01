@@ -94,7 +94,7 @@ const Results = ({route, navigation}) => {
   const [collegeImages, setCollegeImages] = useState({});
 
   useEffect(() => {
-    if(data){
+    if(top100){
       setCollegeList(data.slice(0, loadCount));
     }else{
       setCollegeList(colleges.slice(0, loadCount));
@@ -292,7 +292,7 @@ const renderItem = ({ item }) => {
 
     );
     setData(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})))
-    setCollegeList(data.slice(0, 20));
+    setCollegeList(filtered.map(doc => ({name: doc.shool_name, id: doc.school_id})));
   }
 
   const handleSearch = (searchQuery) => {

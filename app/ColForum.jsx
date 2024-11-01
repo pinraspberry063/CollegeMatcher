@@ -720,6 +720,7 @@ const ColForum = ({route, navigation}) => {
             <TextInput
               style={styles.input}
               placeholder="Write your post..."
+              placeholderTextColor={'white'}
               value={newPostContent[selectedThreadId] || ''}
               onChangeText={(text) => setNewPostContent(prev => ({ ...prev, [selectedThreadId]: text }))}
               color='white'
@@ -746,6 +747,7 @@ const ColForum = ({route, navigation}) => {
           <TextInput
             style={styles.input}
             placeholder="What would you like to say?"
+            placeholderTextColor={'white'}
             value={newThreadTitle}
             onChangeText={setNewThreadTitle}
             multiline={true}
