@@ -1,7 +1,7 @@
 ---
 title: Quiz
 ---
-<SwmSnippet path="/app/Quiz.jsx" line="171">
+<SwmSnippet path="/app/Quiz.jsx" line="174">
 
 ---
 
@@ -36,7 +36,7 @@ The handleSubmit function checks if there are any blank fields on each question 
 
 </SwmSnippet>
 
-<SwmSnippet path="/app/Quiz.jsx" line="249">
+<SwmSnippet path="/app/Quiz.jsx" line="252">
 
 ---
 
@@ -48,7 +48,6 @@ How it works:
 - The document is saved to the `"Users"` collection and using the user's `uid` as the document ID,  which makes sure the data is associated with the correct user.
 
 - It will notify the user if submitted correctly
-
 
 - After the quiz data is saved, the function calls `matchColleges` and sends the user's `answers` and available `colleges`.
 
@@ -71,11 +70,11 @@ How it works:
 
 </SwmSnippet>
 
-<SwmSnippet path="/app/Quiz.jsx" line="260">
+<SwmSnippet path="/app/Quiz.jsx" line="263">
 
 ---
 
-This function renders the first page (same for the others) of the quiz in the form of a React component, allowing the user to select their desired answer and then specify its importance to themselves.&nbsp;
+This function renders the first page (same for the others) of the quiz in the form of a React component. This allows the user to select their desired answer and then specify its importance to themselves by positioning the slider in between Not Important, Neutral, and Very Important. The values increment by 0.1 from 0-1.&nbsp;
 
 ```javascript
     const renderPageOne = () => (
@@ -101,6 +100,92 @@ This function renders the first page (same for the others) of the quiz in the fo
             <Text>Not Important</Text>
             <Text>Neutral</Text>
             <Text>Very Important</Text>
+          </View>
+```
+
+---
+
+</SwmSnippet>
+
+<SwmSnippet path="/app/Quiz.jsx" line="487">
+
+---
+
+On this page, it renders a dropdown for a user to select whether they have taken the ACT, with "Yes" or "No" options. If they select "Yes", input fields appear for entering ACT Composite and section scores. It also ensures the user can only type numbers between 0-36 and N/A. This check is applied on blur to ensure the user's answers are within the valid ACT ranges and/or N/A, displaying alerts if out of range. If they select "No", then all ACT scores are reset to N/A.&nbsp;
+
+*(Same process for SAT except ranges are now from 400-1600 for total score and 200-800 for its subsections*)
+
+```javascript
+          <View>
+            <Text style={[styles.text]}>Did you take the ACT?</Text>
+            <DropdownComponent
+              data={[{ label: 'Yes', value: 'Yes' }, { label: 'No', value: 'No' }]}
+              value={tookACT}
+              onChange={(value) => {
+                setTookACT(value);
+    
+                if (value.includes('No')) {
+                  setActScore('');
+                  setActMath('');
+                  setActEnglish('');
+                  setActReading('');
+                  setActScience('');
+                  setActWriting('');
+                }
+              }}
+            />
+    
+            {tookACT.includes('Yes') && (
+              <>
+                <Text style={[styles.text]}>ACT Composite score?</Text>
+                <TextInput
+                  style={[styles.textInput]}
+                  value={actScore}
+                  onChangeText={(text) => {
+                        const formatted = text.replace(/[^0-9]/g, '');
+                        setActScore(formatted);
+                    }}
+                  onBlur={() => {
+                        const value = parseInt(actScore, 10);
+                        if (value > 36) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (value < 0) {
+                            setActScore('');
+                            Alert.alert('Invalid Input', 'Please enter a valid number between 0-36.');
+                        } else if (isNaN(value)) {
+                            setActScore('N/A');
+                        }
+                    }}
+                  placeholder="Ex: 25..."
+                  keyboardType="numeric"
+                />
+    
+```
+
+---
+
+</SwmSnippet>
+
+<SwmSnippet path="/app/Quiz.jsx" line="744">
+
+---
+
+The last question on the quiz renders an address input field using Google Places Autocomplete, allowing users to search and select their address. The component includes a placeholder and maintains a limited dropdown list view for search results. The Google Places API key and language are specified in the query for autocomplete functionality.
+
+```javascript
+            <Text style={[styles.text]}>What is your address?</Text>
+            <GooglePlacesAutocomplete
+              placeholder="123 Main St..."
+              fetchDetails={true}
+              onPress={(data, details = null) => {
+                setAddress(details?.formatted_address || data.description);
+              }}
+              value={address}
+              textInputProps={{ value: placeSearch, onChangeText: setPlaceSearch }}
+              query={{ key: 'AIzaSyB_0VYgSr15VoeppmqLur_6LeHHxU0q0NI', language: 'en' }}
+              styles={{ listView: { maxHeight: 200 } }}
+            />
           </View>
 ```
 
